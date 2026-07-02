@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/kidverse_app.dart';
 import 'core/services/audio_service.dart';
+import 'core/services/firebase_service.dart';
+import 'core/services/messaging_service.dart';
 import 'features/settings/settings_controller.dart';
 
 Future<void> main() async {
@@ -17,8 +19,10 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  // Firebase.initializeApp() goes here once google-services files are added.
-  // The app is fully functional offline without it, by design.
+  // Bring the cloud layer online if this build has Firebase config. Both calls
+  // no-op safely when it's absent — the app is fully functional offline.
+  await FirebaseService.instance.init();
+  await MessagingService.instance.init();
 
   final prefs = await SharedPreferences.getInstance();
   await AudioService.instance.init();

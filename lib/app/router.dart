@@ -10,6 +10,7 @@ import '../features/home/home_screen.dart';
 import '../features/learning_map/learning_map_screen.dart';
 import '../features/shop/shop_screen.dart';
 import '../features/spin/lucky_spin_screen.dart';
+import '../features/auth/sign_in_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/parent/parent_dashboard_screen.dart';
@@ -35,6 +36,7 @@ class AppRoutes {
   static const settings = '/settings';
   static const parentGate = '/parent-gate';
   static const parentDashboard = '/parent';
+  static const signIn = '/sign-in';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -98,6 +100,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.parentDashboard,
         pageBuilder: (_, s) => _slide(const ParentDashboardScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.signIn,
+        pageBuilder: (_, s) => _slide(const SignInScreen(), s),
       ),
     ],
     redirect: (context, state) {

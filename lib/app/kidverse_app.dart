@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_theme.dart';
+import '../features/auth/auth_controller.dart';
 import '../features/settings/settings_controller.dart';
 import 'router.dart';
 
@@ -14,6 +15,10 @@ class KidVerseApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsControllerProvider);
     final router = ref.watch(routerProvider);
+
+    // Eagerly create the auth session so a returning signed-in parent triggers
+    // a background cloud sync on launch (no-op when offline).
+    ref.watch(authControllerProvider);
 
     return MaterialApp.router(
       title: 'KidVerse',

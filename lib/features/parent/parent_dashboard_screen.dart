@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../ai/adaptive_engine.dart';
+import '../auth/auth_controller.dart';
 import '../curriculum/domain/subject.dart';
 import '../profiles/profiles_controller.dart';
+import '../sync/sync_controller.dart';
 
 /// Parent Dashboard: progress overview, per-subject mastery, weak areas &
 /// strengths (from the adaptive engine), and screen-time/goal controls.
@@ -25,6 +29,8 @@ class ParentDashboardScreen extends ConsumerWidget {
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.md),
               children: [
+                const _AccountCard(),
+                const SizedBox(height: 16),
                 for (final child in children) ...[
                   _ChildHeader(name: child.name, grade: child.grade.label),
                   const SizedBox(height: 12),
@@ -248,6 +254,104 @@ class _InsightCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Account + cloud-sync controls. Sign-in is optional; the card leads with the
+/// current session state and a clear sync status line.
+class _AccountCard extends ConsumerWidget {
+  const _AccountCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authControllerProvider);
+    final sync = ref.watch(syncControllerProvider);
+    final signedIn = auth.status == AuthStatus.signedIn;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  signedIn ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+                  color: signedIn ? AppColors.success : AppColors.info,
+                ),
+                const SizedBox(width: 8),
+                Text('Account & Sync',
+                    style: Theme.of(context).textTheme.titleLarge),
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (signedIn) ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.person_rounded),
+                title: Text(auth.account?.label ?? 'Parent'),
+                subtitle: Text('Signed in with '
+                    '${auth.account?.provider.label ?? 'account'}'),
+              ),
+              Text(_syncLine(sync), style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: sync.status == SyncStatus.syncing
+                          ? null
+                          : () => ref
+                              .read(syncControllerProvider.notifier)
+                              .pushNow(),
+                      icon: const Icon(Icons.sync_rounded),
+                      label: const Text('Sync now'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          ref.read(authControllerProvider.notifier).signOut(),
+                      icon: const Icon(Icons.logout_rounded),
+                      label: const Text('Sign out'),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Text(
+                'Sign in to back up progress to the cloud and sync across '
+                'devices. Optional — everything works offline.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 10),
+              FilledButton.icon(
+                onPressed: () => context.push(AppRoutes.signIn),
+                icon: const Icon(Icons.login_rounded),
+                label: const Text('Sign in / Create account'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _syncLine(SyncState sync) {
+    switch (sync.status) {
+      case SyncStatus.syncing:
+        return 'Syncing…';
+      case SyncStatus.synced:
+        return 'Progress backed up to the cloud ✓';
+      case SyncStatus.offline:
+        return 'Cloud unavailable — saved on this device.';
+      case SyncStatus.error:
+        return sync.message ?? 'Sync issue — data is safe on this device.';
+      case SyncStatus.idle:
+        return 'Ready to sync.';
+    }
   }
 }
 
