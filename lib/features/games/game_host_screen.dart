@@ -6,6 +6,8 @@ import '../../app/router.dart';
 import '../curriculum/domain/lesson.dart';
 import '../gamification/domain/wallet.dart';
 import '../gamification/reward_engine.dart';
+import '../achievements/achievements_controller.dart';
+import '../achievements/domain/achievement.dart';
 import '../ai/adaptive_engine.dart';
 import '../profiles/profiles_controller.dart';
 import '../progress/progress_controller.dart';
@@ -39,6 +41,7 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
   RewardBundle _reward = const RewardBundle();
   bool _leveledUp = false;
   int _newLevel = 1;
+  List<Achievement> _newBadges = const [];
 
   Future<void> _onComplete(LessonResult result) async {
     final profiles = ref.read(profilesControllerProvider.notifier);
@@ -47,7 +50,7 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
 
     final before = child.wallet;
     final reward = _engine.compute(result);
-    final after = await profiles.applyReward(reward);
+    var after = await profiles.applyReward(reward);
 
     await ref
         .read(adaptiveControllerProvider.notifier)
@@ -58,6 +61,21 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         .read(progressControllerProvider.notifier)
         .recordStars(result.lesson.id, result.stars);
 
+    // Evaluate achievements against the fresh state and grant their coins.
+    final progress = ref.read(progressControllerProvider);
+    final newBadges = await ref.read(achievementsControllerProvider.notifier).evaluate(
+          AchievementContext(
+            wallet: after,
+            completedLessons: progress.completedCount(child.id),
+            totalStars: progress.totalStars(child.id),
+            lastResultStars: result.stars,
+          ),
+        );
+    if (newBadges.isNotEmpty) {
+      final bonus = newBadges.fold(0, (sum, b) => sum + b.coinReward);
+      after = await profiles.applyReward(RewardBundle(coins: bonus));
+    }
+
     final check = LevelUpCheck(before, after);
     if (!mounted) return;
     setState(() {
@@ -65,6 +83,7 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
       _reward = reward;
       _leveledUp = check.leveledUp;
       _newLevel = check.newLevel;
+      _newBadges = newBadges;
     });
   }
 
@@ -78,6 +97,7 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         reward: _reward,
         leveledUp: _leveledUp,
         newLevel: _newLevel,
+        newBadges: _newBadges,
         onReplay: _replay,
         onHome: () => context.go(AppRoutes.home),
       );

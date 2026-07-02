@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/curriculum/domain/lesson.dart';
 import '../features/games/game_host_screen.dart';
+import '../features/achievements/achievements_screen.dart';
 import '../features/curriculum/domain/subject.dart';
 import '../features/home/home_screen.dart';
 import '../features/learning_map/learning_map_screen.dart';
@@ -25,6 +26,7 @@ class AppRoutes {
   static const profileCreate = '/profiles/create';
   static const home = '/home';
   static const learningMap = '/learning-map';
+  static const achievements = '/achievements';
   static const game = '/game';
   static const settings = '/settings';
   static const parentGate = '/parent-gate';
@@ -61,6 +63,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final subject = s.extra as Subject;
           return _slide(LearningMapScreen(subject: subject), s);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.achievements,
+        pageBuilder: (_, s) => _slide(const AchievementsScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.game,

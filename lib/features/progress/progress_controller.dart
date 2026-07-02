@@ -29,6 +29,12 @@ class ProgressState {
     }
     return sum;
   }
+
+  /// Number of distinct lessons the child has completed (any star count).
+  int completedCount(String childId) {
+    final prefix = '$childId|';
+    return starsByLesson.keys.where((k) => k.startsWith(prefix)).length;
+  }
 }
 
 class ProgressController extends StateNotifier<ProgressState> {

@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/mascot.dart';
+import '../achievements/domain/achievement.dart';
 import '../gamification/domain/wallet.dart';
 import '../gamification/reward_engine.dart';
 
@@ -21,6 +22,7 @@ class GameResultScreen extends StatefulWidget {
     required this.newLevel,
     required this.onReplay,
     required this.onHome,
+    this.newBadges = const [],
   });
 
   final LessonResult result;
@@ -29,6 +31,7 @@ class GameResultScreen extends StatefulWidget {
   final int newLevel;
   final VoidCallback onReplay;
   final VoidCallback onHome;
+  final List<Achievement> newBadges;
 
   @override
   State<GameResultScreen> createState() => _GameResultScreenState();
@@ -75,6 +78,10 @@ class _GameResultScreenState extends State<GameResultScreen> {
                   _Stars(stars: stars),
                   const SizedBox(height: 24),
                   _RewardRow(reward: widget.reward),
+                  if (widget.newBadges.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    _BadgeBanner(badges: widget.newBadges),
+                  ],
                   const SizedBox(height: 32),
                   BouncyButton(
                     onTap: widget.onReplay,
@@ -190,5 +197,61 @@ class _RewardRow extends StatelessWidget {
         chip(Icons.diamond_rounded, reward.gems, AppColors.gem),
       ],
     ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.4, end: 0);
+  }
+}
+
+/// Celebrates any achievements unlocked by this lesson.
+class _BadgeBanner extends StatelessWidget {
+  const _BadgeBanner({required this.badges});
+  final List<Achievement> badges;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: AppSpacing.cardRadius,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'New Badge!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            children: [
+              for (final b in badges)
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(b.emoji, style: const TextStyle(fontSize: 40)),
+                    Text(
+                      b.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 700.ms).scale(
+          begin: const Offset(0.8, 0.8),
+          end: const Offset(1, 1),
+          curve: Curves.easeOutBack,
+        );
   }
 }

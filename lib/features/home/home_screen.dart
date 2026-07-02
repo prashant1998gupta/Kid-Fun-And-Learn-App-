@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../core/services/audio_service.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
@@ -16,6 +17,8 @@ import '../curriculum/domain/subject.dart';
 import '../profiles/domain/child_profile.dart';
 import '../profiles/profiles_controller.dart';
 import '../profiles/widgets/avatar_view.dart';
+import '../rewards/daily_reward_controller.dart';
+import '../rewards/daily_reward_sheet.dart';
 
 /// The home world: greeting + HUD + daily mission + learning map of subjects.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -61,6 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 SliverToBoxAdapter(child: _TopBar(child: child)),
                 SliverToBoxAdapter(child: _Greeting(child: child)),
                 SliverToBoxAdapter(child: _DailyMission()),
+                const SliverToBoxAdapter(child: _QuickActions()),
                 SliverPadding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   sliver: curriculumAsync.when(
@@ -234,6 +238,96 @@ class _DailyMission extends StatelessWidget {
           end: const Offset(1, 1),
           curve: Curves.easeOutBack,
         );
+  }
+}
+
+/// Quick access to Badges and the Daily Gift.
+class _QuickActions extends ConsumerWidget {
+  const _QuickActions();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canClaim =
+        ref.watch(dailyRewardControllerProvider.notifier).canClaimToday;
+    // Watch state so the badge dot updates after claiming.
+    ref.watch(dailyRewardControllerProvider);
+
+    Widget action({
+      required IconData icon,
+      required String label,
+      required Color color,
+      required VoidCallback onTap,
+      bool showDot = false,
+    }) {
+      return Expanded(
+        child: BouncyButton(
+          borderRadius: AppSpacing.cardRadius,
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: AppSpacing.cardRadius,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(icon, color: color, size: 34),
+                    if (showDot)
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            color: AppColors.error,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(label,
+                    style: Theme.of(context).textTheme.labelMedium),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Row(
+        children: [
+          action(
+            icon: Icons.emoji_events_rounded,
+            label: 'Badges',
+            color: AppColors.star,
+            onTap: () => context.push(AppRoutes.achievements),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          action(
+            icon: Icons.card_giftcard_rounded,
+            label: 'Daily Gift',
+            color: AppColors.secondary,
+            showDot: canClaim,
+            onTap: () => showDailyRewardSheet(context),
+          ),
+        ],
+      ),
+    );
   }
 }
 
