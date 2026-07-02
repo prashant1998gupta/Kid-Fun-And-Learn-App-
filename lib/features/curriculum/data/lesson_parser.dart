@@ -9,11 +9,12 @@ import '../domain/subject.dart';
 /// without code changes.
 class LessonParser {
   static Lesson lessonFromJson(Map<String, dynamic> j) {
+    final grade = GradeLevel.fromId(j['grade'] as String);
     return Lesson(
       id: j['id'] as String,
       title: j['title'] as String,
       subject: Subject.fromId(j['subject'] as String),
-      grade: GradeLevel.fromId(j['grade'] as String),
+      grade: grade,
       gameType: _gameType(j['gameType'] as String),
       emoji: j['emoji'] as String? ?? '⭐',
       instruction: j['instruction'] as String? ?? '',
@@ -23,6 +24,7 @@ class LessonParser {
         ((j['questions'] as List?) ?? const [])
             .map((q) => _question((q as Map).cast<String, dynamic>()))
             .toList(),
+        targetCount: grade.isPreSchool ? 5 : 20,
       ),
     );
   }
@@ -44,12 +46,15 @@ class LessonParser {
     );
   }
 
-  /// Every lesson carries a full 20-question session. Small authored seed
-  /// banks are repeated deterministically, with choice positions rotated so a
-  /// child cannot pass by memorizing where the correct button appears.
-  static List<Question> _expandQuestions(List<Question> seeds) {
-    if (seeds.isEmpty || seeds.length >= 20) return seeds;
-    return List<Question>.generate(20, (index) {
+  /// Expands compact seed banks to the age-appropriate session length: five
+  /// rounds for preschool, twenty for older learners. Choice positions rotate
+  /// so a child cannot pass by memorizing where the correct button appears.
+  static List<Question> _expandQuestions(
+    List<Question> seeds, {
+    required int targetCount,
+  }) {
+    if (seeds.isEmpty || seeds.length >= targetCount) return seeds;
+    return List<Question>.generate(targetCount, (index) {
       final source = seeds[index % seeds.length];
       final cycle = index ~/ seeds.length;
       final options = source.options;

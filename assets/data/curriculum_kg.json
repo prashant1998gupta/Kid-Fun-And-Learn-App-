@@ -1,0 +1,75 @@
+{
+  "units": [
+    {"id":"kg_reading","title":"Sound Safari","subject":"english","grade":"kg","emoji":"🦁","lessonIds":["kg_en_cvc","kg_en_rhyme","kg_en_trace"]},
+    {"id":"kg_math","title":"Number Heroes","subject":"math","grade":"kg","emoji":"🦸","lessonIds":["kg_ma_add","kg_ma_more","kg_ma_order"]},
+    {"id":"kg_logic","title":"Puzzle Playground","subject":"logic","grade":"kg","emoji":"🧩","lessonIds":["kg_lo_pattern","kg_lo_sort","kg_lo_memory"]},
+    {"id":"kg_world","title":"Little Explorers","subject":"evs","grade":"kg","emoji":"🔭","lessonIds":["kg_ev_habitat","kg_ev_safety","kg_ev_growth"]}
+  ],
+  "lessons": [
+    {"id":"kg_en_cvc","title":"Word Sounds","subject":"english","grade":"kg","gameType":"listenAndTap","emoji":"🎧","instruction":"Listen and tap the word.","questions":[
+      {"id":"q1","prompt":"Tap CAT","speak":"Find cat","correctIndex":0,"options":[{"label":"Cat","emoji":"🐱"},{"label":"Sun","emoji":"☀️"},{"label":"Pig","emoji":"🐷"}]},
+      {"id":"q2","prompt":"Tap SUN","speak":"Find sun","correctIndex":1,"options":[{"label":"Hat","emoji":"🎩"},{"label":"Sun","emoji":"☀️"},{"label":"Dog","emoji":"🐶"}]},
+      {"id":"q3","prompt":"Tap DOG","speak":"Find dog","correctIndex":2,"options":[{"label":"Bus","emoji":"🚌"},{"label":"Hen","emoji":"🐔"},{"label":"Dog","emoji":"🐶"}]},
+      {"id":"q4","prompt":"Tap HEN","speak":"Find hen","correctIndex":0,"options":[{"label":"Hen","emoji":"🐔"},{"label":"Fox","emoji":"🦊"},{"label":"Cup","emoji":"🥤"}]},
+      {"id":"q5","prompt":"Tap BUS","speak":"Find bus","correctIndex":1,"options":[{"label":"Bed","emoji":"🛏️"},{"label":"Bus","emoji":"🚌"},{"label":"Map","emoji":"🗺️"}]}
+    ]},
+    {"id":"kg_en_rhyme","title":"Rhyme Parade","subject":"english","grade":"kg","gameType":"listenAndTap","emoji":"🎶","instruction":"Find the rhyming picture.","questions":[
+      {"id":"q1","prompt":"What rhymes with CAT?","speak":"What rhymes with cat?","correctIndex":1,"options":[{"label":"Dog","emoji":"🐶"},{"label":"Hat","emoji":"🎩"},{"label":"Sun","emoji":"☀️"}]},
+      {"id":"q2","prompt":"What rhymes with LOG?","speak":"What rhymes with log?","correctIndex":2,"options":[{"label":"Hen","emoji":"🐔"},{"label":"Car","emoji":"🚗"},{"label":"Dog","emoji":"🐶"}]},
+      {"id":"q3","prompt":"What rhymes with STAR?","speak":"What rhymes with star?","correctIndex":0,"options":[{"label":"Car","emoji":"🚗"},{"label":"Fish","emoji":"🐟"},{"label":"Tree","emoji":"🌳"}]},
+      {"id":"q4","prompt":"What rhymes with FOX?","speak":"What rhymes with fox?","correctIndex":1,"options":[{"label":"Bee","emoji":"🐝"},{"label":"Box","emoji":"📦"},{"label":"Moon","emoji":"🌙"}]},
+      {"id":"q5","prompt":"What rhymes with BEE?","speak":"What rhymes with bee?","correctIndex":2,"options":[{"label":"Book","emoji":"📕"},{"label":"Ball","emoji":"⚽"},{"label":"Tree","emoji":"🌳"}]}
+    ]},
+    {"id":"kg_en_trace","title":"Letter Trail","subject":"english","grade":"kg","gameType":"tracing","emoji":"✏️","instruction":"Trace each letter.","questions":[
+      {"id":"q1","answer":"G","speak":"Trace G"},{"id":"q2","answer":"H","speak":"Trace H"},{"id":"q3","answer":"I","speak":"Trace I"},{"id":"q4","answer":"J","speak":"Trace J"},{"id":"q5","answer":"K","speak":"Trace K"}
+    ]},
+    {"id":"kg_ma_add","title":"Snack Addition","subject":"math","grade":"kg","gameType":"listenAndTap","emoji":"🍪","instruction":"Add the snacks.","questions":[
+      {"id":"q1","prompt":"🍪 + 🍪 = ?","speak":"One cookie plus one cookie","correctIndex":1,"options":[{"label":"1"},{"label":"2"},{"label":"3"}]},
+      {"id":"q2","prompt":"🍎🍎 + 🍎 = ?","speak":"Two apples plus one apple","correctIndex":2,"options":[{"label":"2"},{"label":"4"},{"label":"3"}]},
+      {"id":"q3","prompt":"⭐⭐ + ⭐⭐ = ?","speak":"Two stars plus two stars","correctIndex":0,"options":[{"label":"4"},{"label":"3"},{"label":"5"}]},
+      {"id":"q4","prompt":"🎈🎈🎈 + 🎈 = ?","speak":"Three balloons plus one balloon","correctIndex":1,"options":[{"label":"3"},{"label":"4"},{"label":"5"}]},
+      {"id":"q5","prompt":"🍓🍓 + 🍓🍓🍓 = ?","speak":"Two berries plus three berries","correctIndex":2,"options":[{"label":"4"},{"label":"6"},{"label":"5"}]}
+    ]},
+    {"id":"kg_ma_more","title":"More or Less","subject":"math","grade":"kg","gameType":"listenAndTap","emoji":"⚖️","instruction":"Tap the group with more.","questions":[
+      {"id":"q1","prompt":"Which group has MORE?","speak":"Which group has more?","correctIndex":0,"options":[{"label":"Three","emoji":"🍎🍎🍎"},{"label":"One","emoji":"🍎"}]},
+      {"id":"q2","prompt":"Which group has LESS?","speak":"Which group has less?","correctIndex":1,"options":[{"label":"Four","emoji":"⭐⭐⭐⭐"},{"label":"Two","emoji":"⭐⭐"}]},
+      {"id":"q3","prompt":"Which number is bigger?","speak":"Which number is bigger?","correctIndex":0,"options":[{"label":"8"},{"label":"5"}]},
+      {"id":"q4","prompt":"Which number is smaller?","speak":"Which number is smaller?","correctIndex":1,"options":[{"label":"9"},{"label":"6"}]},
+      {"id":"q5","prompt":"Which group has MORE?","speak":"Which group has more?","correctIndex":0,"options":[{"label":"Five","emoji":"🐟🐟🐟🐟🐟"},{"label":"Three","emoji":"🐟🐟🐟"}]}
+    ]},
+    {"id":"kg_ma_order","title":"Number Train","subject":"math","grade":"kg","gameType":"sequence","emoji":"🚂","instruction":"Tap the train cars in order.","questions":[
+      {"id":"q1","prompt":"Count from 1 to 5","options":[{"label":"1"},{"label":"2"},{"label":"3"},{"label":"4"},{"label":"5"}]},
+      {"id":"q2","prompt":"Count from 6 to 10","options":[{"label":"6"},{"label":"7"},{"label":"8"},{"label":"9"},{"label":"10"}]}
+    ]},
+    {"id":"kg_lo_pattern","title":"Pattern Party","subject":"logic","grade":"kg","gameType":"sequence","emoji":"🎉","instruction":"Put the pattern in order.","questions":[
+      {"id":"q1","prompt":"Red, blue, red, blue","options":[{"label":"Red","emoji":"🔴"},{"label":"Blue","emoji":"🔵"},{"label":"Red","emoji":"🔴"},{"label":"Blue","emoji":"🔵"}]},
+      {"id":"q2","prompt":"Small to big","options":[{"label":"Small","emoji":"•"},{"label":"Medium","emoji":"●"},{"label":"Big","emoji":"⬤"}]}
+    ]},
+    {"id":"kg_lo_sort","title":"Toy Box Sort","subject":"logic","grade":"kg","gameType":"dragDrop","emoji":"🧸","instruction":"Put each toy in its group.","questions":[
+      {"id":"q1","prompt":"Where does the ball go?","promptEmoji":"⚽","correctIndex":0,"options":[{"label":"Round","emoji":"🔵"},{"label":"Not round","emoji":"◼️"}]},
+      {"id":"q2","prompt":"Where does the block go?","promptEmoji":"🧱","correctIndex":1,"options":[{"label":"Round","emoji":"🔵"},{"label":"Not round","emoji":"◼️"}]},
+      {"id":"q3","prompt":"Where does the orange go?","promptEmoji":"🍊","correctIndex":0,"options":[{"label":"Round","emoji":"🔵"},{"label":"Not round","emoji":"◼️"}]}
+    ]},
+    {"id":"kg_lo_memory","title":"Toy Memory","subject":"logic","grade":"kg","gameType":"memoryMatch","emoji":"🧠","instruction":"Find the matching toys.","questions":[
+      {"id":"q1","prompt":"Match the toys","options":[{"label":"Ball","emoji":"⚽"},{"label":"Car","emoji":"🚗"},{"label":"Bear","emoji":"🧸"},{"label":"Kite","emoji":"🪁"}]}
+    ]},
+    {"id":"kg_ev_habitat","title":"Animal Homes","subject":"evs","grade":"kg","gameType":"listenAndTap","emoji":"🏡","instruction":"Find where the animal lives.","questions":[
+      {"id":"q1","prompt":"Where does a fish live?","correctIndex":1,"options":[{"label":"Tree","emoji":"🌳"},{"label":"Water","emoji":"🌊"},{"label":"Nest","emoji":"🪺"}]},
+      {"id":"q2","prompt":"Where does a bird live?","correctIndex":2,"options":[{"label":"Pond","emoji":"🏞️"},{"label":"Cave","emoji":"🕳️"},{"label":"Nest","emoji":"🪺"}]},
+      {"id":"q3","prompt":"Where does a bee live?","correctIndex":0,"options":[{"label":"Hive","emoji":"🍯"},{"label":"Web","emoji":"🕸️"},{"label":"Den","emoji":"🕳️"}]},
+      {"id":"q4","prompt":"Where does a lion live?","correctIndex":1,"options":[{"label":"Nest","emoji":"🪺"},{"label":"Den","emoji":"🕳️"},{"label":"Hive","emoji":"🍯"}]},
+      {"id":"q5","prompt":"Where does a spider live?","correctIndex":2,"options":[{"label":"Pond","emoji":"🏞️"},{"label":"Nest","emoji":"🪺"},{"label":"Web","emoji":"🕸️"}]}
+    ]},
+    {"id":"kg_ev_safety","title":"Safe Choices","subject":"evs","grade":"kg","gameType":"listenAndTap","emoji":"🚦","instruction":"Choose the safe action.","questions":[
+      {"id":"q1","prompt":"Before crossing a road, we...","correctIndex":0,"options":[{"label":"Look both ways","emoji":"👀"},{"label":"Run fast","emoji":"🏃"}]},
+      {"id":"q2","prompt":"In a car, we wear a...","correctIndex":1,"options":[{"label":"Party hat","emoji":"🥳"},{"label":"Seat belt","emoji":"💺"}]},
+      {"id":"q3","prompt":"If something is very hot, we...","correctIndex":0,"options":[{"label":"Ask an adult","emoji":"🧑"},{"label":"Touch it","emoji":"✋"}]},
+      {"id":"q4","prompt":"After playing outside, we...","correctIndex":1,"options":[{"label":"Hide","emoji":"🙈"},{"label":"Wash hands","emoji":"🧼"}]},
+      {"id":"q5","prompt":"A green traffic light means...","correctIndex":0,"options":[{"label":"Go","emoji":"🟢"},{"label":"Stop","emoji":"🔴"}]}
+    ]},
+    {"id":"kg_ev_growth","title":"Seed to Flower","subject":"evs","grade":"kg","gameType":"sequence","emoji":"🌻","instruction":"Tap how a plant grows.","questions":[
+      {"id":"q1","prompt":"Grow a flower","options":[{"label":"Seed","emoji":"🌰"},{"label":"Sprout","emoji":"🌱"},{"label":"Plant","emoji":"🪴"},{"label":"Flower","emoji":"🌻"}]},
+      {"id":"q2","prompt":"Grow a tree","options":[{"label":"Seed","emoji":"🌰"},{"label":"Sprout","emoji":"🌱"},{"label":"Sapling","emoji":"🌿"},{"label":"Tree","emoji":"🌳"}]}
+    ]}
+  ]
+}

@@ -39,7 +39,7 @@
       "title": "Beginning Sounds",
       "subject": "english",
       "grade": "ukg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🎧",
       "instruction": "Which word starts with that sound?",
       "baseCoins": 14,
@@ -73,7 +73,7 @@
       "title": "Rhyme Time",
       "subject": "english",
       "grade": "ukg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🎵",
       "instruction": "Which word rhymes?",
       "questions": [
@@ -112,7 +112,7 @@
       "title": "Adding Fun",
       "subject": "math",
       "grade": "ukg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "➕",
       "instruction": "What is the answer?",
       "baseCoins": 16,
@@ -146,7 +146,7 @@
       "title": "Count to 10",
       "subject": "math",
       "grade": "ukg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🔟",
       "instruction": "How many?",
       "questions": [
@@ -171,7 +171,7 @@
       "title": "Shape Detective",
       "subject": "math",
       "grade": "ukg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "⬛",
       "instruction": "Find the shape!",
       "questions": [
@@ -196,7 +196,7 @@
       "title": "Odd One Out",
       "subject": "logic",
       "grade": "ukg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🔍",
       "instruction": "Which one is different?",
       "questions": [

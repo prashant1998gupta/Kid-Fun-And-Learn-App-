@@ -12,6 +12,7 @@ void main() {
   const authoredGrades = [
     GradeLevel.lkg,
     GradeLevel.ukg,
+    GradeLevel.kg,
     GradeLevel.grade1,
     GradeLevel.grade2,
     GradeLevel.grade3,
@@ -61,6 +62,24 @@ void main() {
         repo.subjectsForGrade(grade).length,
         greaterThanOrEqualTo(4),
         reason: '${grade.name} should span multiple subjects',
+      );
+    }
+  });
+
+  test('preschool grades use short five-round sessions', () async {
+    final repo = CurriculumRepository();
+    await repo.ensureLoaded();
+    for (final grade in [GradeLevel.lkg, GradeLevel.ukg, GradeLevel.kg]) {
+      final lessons = [
+        for (final unit in repo.unitsForGrade(grade))
+          ...repo.lessonsForUnit(unit),
+      ];
+      expect(lessons, isNotEmpty);
+      expect(lessons.every((lesson) => lesson.questions.length <= 5), isTrue);
+      expect(
+        lessons.any((lesson) => lesson.gameType == GameType.listenAndTap),
+        isTrue,
+        reason: '${grade.name} needs voice-first visual play',
       );
     }
   });

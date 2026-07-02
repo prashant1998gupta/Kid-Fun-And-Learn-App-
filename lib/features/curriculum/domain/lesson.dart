@@ -19,6 +19,7 @@ enum GameType {
   spotMatch, // match shadow/pair
   speak, // say the word aloud (speech recognition)
   bossBattle, // multi-question challenge with a visible boss health bar
+  listenAndTap, // voice-first, large visual targets for preschool learners
 }
 
 /// One curriculum unit — a "chapter" grouping many lessons.

@@ -5,6 +5,7 @@ import 'package:kidverse/core/services/audio_service.dart';
 import 'package:kidverse/features/curriculum/domain/lesson.dart';
 import 'package:kidverse/features/curriculum/domain/subject.dart';
 import 'package:kidverse/features/games/engines/boss_battle_game.dart';
+import 'package:kidverse/features/games/engines/listen_and_tap_game.dart';
 import 'package:kidverse/features/games/engines/tap_choice_game.dart';
 import 'package:kidverse/features/gamification/reward_engine.dart';
 import 'package:kidverse/features/profiles/domain/grade_level.dart';
@@ -88,5 +89,26 @@ void main() {
     expect(find.text('Three plus three?'), findsOneWidget);
     expect(result, isNull);
     await tester.pump(const Duration(milliseconds: 500));
+  });
+
+  testWidgets('listen-and-tap advances after a correct picture',
+      (tester) async {
+    const lesson = Lesson(
+      id: 'listen_advance',
+      title: 'Listen Advance',
+      subject: Subject.english,
+      grade: GradeLevel.kg,
+      gameType: GameType.listenAndTap,
+      questions: questions,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: ListenAndTapGame(lesson: lesson, onComplete: (_) {}),
+    ));
+
+    await tester.tap(find.text('4'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 900));
+    expect(find.text('Three plus three?'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 600));
   });
 }

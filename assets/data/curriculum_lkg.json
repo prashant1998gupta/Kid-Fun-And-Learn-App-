@@ -31,7 +31,7 @@
       "title": "Find the Letter A",
       "subject": "english",
       "grade": "lkg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🅰️",
       "instruction": "Tap the letter A!",
       "baseCoins": 10,
@@ -77,7 +77,7 @@
       "title": "Vowel Friends",
       "subject": "english",
       "grade": "lkg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🎵",
       "instruction": "Tap the vowel!",
       "questions": [
@@ -102,7 +102,7 @@
       "title": "Count to 5",
       "subject": "math",
       "grade": "lkg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🖐️",
       "instruction": "How many do you see?",
       "questions": [
@@ -134,7 +134,7 @@
       "title": "Shape Explorer",
       "subject": "math",
       "grade": "lkg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🔺",
       "instruction": "Tap the shape!",
       "questions": [
@@ -159,7 +159,7 @@
       "title": "Animal Sounds",
       "subject": "evs",
       "grade": "lkg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🐾",
       "instruction": "Which animal says that?",
       "questions": [
@@ -184,7 +184,7 @@
       "title": "Color Rainbow",
       "subject": "evs",
       "grade": "lkg",
-      "gameType": "tapChoice",
+      "gameType": "listenAndTap",
       "emoji": "🌈",
       "instruction": "Tap the color!",
       "questions": [
