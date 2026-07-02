@@ -8,7 +8,10 @@ import '../gamification/domain/wallet.dart';
 import '../gamification/reward_engine.dart';
 import '../ai/adaptive_engine.dart';
 import '../profiles/profiles_controller.dart';
+import 'engines/drag_drop_game.dart';
+import 'engines/memory_match_game.dart';
 import 'engines/tap_choice_game.dart';
+import 'engines/tracing_game.dart';
 import 'game_result_screen.dart';
 
 /// Hosts one lesson end-to-end:
@@ -84,9 +87,13 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         // dedicated engines can be swapped in per type without touching hosts.
         return TapChoiceGame(lesson: lesson, onComplete: _onComplete);
       case GameType.memoryMatch:
+        return MemoryMatchGame(lesson: lesson, onComplete: _onComplete);
       case GameType.dragDrop:
-      case GameType.tracing:
       case GameType.sorting:
+        // Sorting is drag-into-basket — same engine, different content.
+        return DragDropGame(lesson: lesson, onComplete: _onComplete);
+      case GameType.tracing:
+        return TracingGame(lesson: lesson, onComplete: _onComplete);
       case GameType.sequence:
       case GameType.wordBuilder:
         // Engines under construction — fall back to tapChoice so every lesson

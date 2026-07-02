@@ -6,7 +6,7 @@
       "subject": "english",
       "grade": "lkg",
       "emoji": "🔤",
-      "lessonIds": ["lkg_en_a", "lkg_en_vowels"]
+      "lessonIds": ["lkg_en_a", "lkg_en_vowels", "lkg_en_trace"]
     },
     {
       "id": "lkg_numbers",
@@ -22,7 +22,7 @@
       "subject": "evs",
       "grade": "lkg",
       "emoji": "🌍",
-      "lessonIds": ["lkg_evs_animals", "lkg_evs_colors"]
+      "lessonIds": ["lkg_evs_animals", "lkg_evs_colors", "lkg_evs_memory", "lkg_evs_sort"]
     }
   ],
   "lessons": [
@@ -201,6 +201,82 @@
           "speak": "Tap the yellow thing!",
           "correctIndex": 0,
           "options": [{"label": "Sun", "emoji": "☀️"}, {"label": "Leaf", "emoji": "🍃"}, {"label": "Berry", "emoji": "🫐"}]
+        }
+      ]
+    },
+    {
+      "id": "lkg_en_trace",
+      "title": "Trace Letters",
+      "subject": "english",
+      "grade": "lkg",
+      "gameType": "tracing",
+      "emoji": "✏️",
+      "instruction": "Trace the letter with your finger!",
+      "baseCoins": 12,
+      "baseXp": 24,
+      "questions": [
+        {"id": "q1", "answer": "A", "speak": "Trace the letter A"},
+        {"id": "q2", "answer": "B", "speak": "Trace the letter B"},
+        {"id": "q3", "answer": "C", "speak": "Trace the letter C"}
+      ]
+    },
+    {
+      "id": "lkg_evs_memory",
+      "title": "Animal Memory",
+      "subject": "evs",
+      "grade": "lkg",
+      "gameType": "memoryMatch",
+      "emoji": "🧠",
+      "instruction": "Find the matching animal pairs!",
+      "baseCoins": 15,
+      "baseXp": 30,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Match the animals",
+          "options": [
+            {"label": "Dog", "emoji": "🐶"},
+            {"label": "Cat", "emoji": "🐱"},
+            {"label": "Cow", "emoji": "🐮"},
+            {"label": "Pig", "emoji": "🐷"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lkg_evs_sort",
+      "title": "Fruit or Veggie?",
+      "subject": "evs",
+      "grade": "lkg",
+      "gameType": "dragDrop",
+      "emoji": "🧺",
+      "instruction": "Drag each food to the right basket!",
+      "baseCoins": 14,
+      "baseXp": 28,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Where does the apple go?",
+          "speak": "Where does the apple go?",
+          "promptEmoji": "🍎",
+          "correctIndex": 0,
+          "options": [{"label": "Fruit", "emoji": "🍓"}, {"label": "Veggie", "emoji": "🥕"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Where does the carrot go?",
+          "speak": "Where does the carrot go?",
+          "promptEmoji": "🥕",
+          "correctIndex": 1,
+          "options": [{"label": "Fruit", "emoji": "🍓"}, {"label": "Veggie", "emoji": "🥕"}]
+        },
+        {
+          "id": "q3",
+          "prompt": "Where does the banana go?",
+          "speak": "Where does the banana go?",
+          "promptEmoji": "🍌",
+          "correctIndex": 0,
+          "options": [{"label": "Fruit", "emoji": "🍓"}, {"label": "Veggie", "emoji": "🥕"}]
         }
       ]
     }

@@ -21,6 +21,7 @@ class CurriculumRepository {
   /// Asset files per grade. As more grades are authored, add them here.
   static const _assetByGrade = {
     GradeLevel.lkg: 'assets/data/curriculum_lkg.json',
+    GradeLevel.ukg: 'assets/data/curriculum_ukg.json',
   };
 
   Future<void> ensureLoaded() async {

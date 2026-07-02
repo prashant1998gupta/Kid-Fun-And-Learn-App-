@@ -1,0 +1,306 @@
+{
+  "units": [
+    {
+      "id": "ukg_phonics",
+      "title": "Phonics Power",
+      "subject": "english",
+      "grade": "ukg",
+      "emoji": "🔠",
+      "lessonIds": ["ukg_en_begins", "ukg_en_rhyme", "ukg_en_trace"]
+    },
+    {
+      "id": "ukg_math",
+      "title": "Math Magic",
+      "subject": "math",
+      "grade": "ukg",
+      "emoji": "➕",
+      "lessonIds": ["ukg_ma_add", "ukg_ma_count10", "ukg_ma_shapes"]
+    },
+    {
+      "id": "ukg_logic",
+      "title": "Brain Games",
+      "subject": "logic",
+      "grade": "ukg",
+      "emoji": "🧩",
+      "lessonIds": ["ukg_lo_odd", "ukg_lo_memory"]
+    },
+    {
+      "id": "ukg_world",
+      "title": "Our World",
+      "subject": "evs",
+      "grade": "ukg",
+      "emoji": "🌎",
+      "lessonIds": ["ukg_evs_sort", "ukg_evs_weather"]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "ukg_en_begins",
+      "title": "Beginning Sounds",
+      "subject": "english",
+      "grade": "ukg",
+      "gameType": "tapChoice",
+      "emoji": "🎧",
+      "instruction": "Which word starts with that sound?",
+      "baseCoins": 14,
+      "baseXp": 26,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Which starts with B?",
+          "speak": "Which word starts with the B sound?",
+          "correctIndex": 1,
+          "options": [{"label": "Sun", "emoji": "☀️"}, {"label": "Ball", "emoji": "⚽"}, {"label": "Tree", "emoji": "🌳"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Which starts with F?",
+          "speak": "Which word starts with the F sound?",
+          "correctIndex": 2,
+          "options": [{"label": "Cat", "emoji": "🐱"}, {"label": "Dog", "emoji": "🐶"}, {"label": "Fish", "emoji": "🐟"}]
+        },
+        {
+          "id": "q3",
+          "prompt": "Which starts with S?",
+          "speak": "Which word starts with the S sound?",
+          "correctIndex": 0,
+          "options": [{"label": "Star", "emoji": "⭐"}, {"label": "Apple", "emoji": "🍎"}, {"label": "Moon", "emoji": "🌙"}]
+        }
+      ]
+    },
+    {
+      "id": "ukg_en_rhyme",
+      "title": "Rhyme Time",
+      "subject": "english",
+      "grade": "ukg",
+      "gameType": "tapChoice",
+      "emoji": "🎵",
+      "instruction": "Which word rhymes?",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "What rhymes with CAT?",
+          "speak": "What rhymes with cat?",
+          "correctIndex": 1,
+          "options": [{"label": "Dog"}, {"label": "Hat"}, {"label": "Sun"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "What rhymes with STAR?",
+          "speak": "What rhymes with star?",
+          "correctIndex": 2,
+          "options": [{"label": "Moon"}, {"label": "Tree"}, {"label": "Car"}]
+        }
+      ]
+    },
+    {
+      "id": "ukg_en_trace",
+      "title": "Trace Words",
+      "subject": "english",
+      "grade": "ukg",
+      "gameType": "tracing",
+      "emoji": "✏️",
+      "instruction": "Trace the letter!",
+      "questions": [
+        {"id": "q1", "answer": "D", "speak": "Trace the letter D"},
+        {"id": "q2", "answer": "E", "speak": "Trace the letter E"},
+        {"id": "q3", "answer": "F", "speak": "Trace the letter F"}
+      ]
+    },
+    {
+      "id": "ukg_ma_add",
+      "title": "Adding Fun",
+      "subject": "math",
+      "grade": "ukg",
+      "gameType": "tapChoice",
+      "emoji": "➕",
+      "instruction": "What is the answer?",
+      "baseCoins": 16,
+      "baseXp": 30,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "1 + 1 = ?",
+          "speak": "What is one plus one?",
+          "correctIndex": 1,
+          "options": [{"label": "1"}, {"label": "2"}, {"label": "3"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "2 + 1 = ?",
+          "speak": "What is two plus one?",
+          "correctIndex": 2,
+          "options": [{"label": "1"}, {"label": "2"}, {"label": "3"}]
+        },
+        {
+          "id": "q3",
+          "prompt": "2 + 2 = ?",
+          "speak": "What is two plus two?",
+          "correctIndex": 0,
+          "options": [{"label": "4"}, {"label": "3"}, {"label": "5"}]
+        }
+      ]
+    },
+    {
+      "id": "ukg_ma_count10",
+      "title": "Count to 10",
+      "subject": "math",
+      "grade": "ukg",
+      "gameType": "tapChoice",
+      "emoji": "🔟",
+      "instruction": "How many?",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "How many fingers? ✋✋",
+          "speak": "How many fingers do you see?",
+          "correctIndex": 2,
+          "options": [{"label": "5"}, {"label": "8"}, {"label": "10"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Count the eggs 🥚🥚🥚🥚🥚🥚",
+          "speak": "How many eggs?",
+          "correctIndex": 1,
+          "options": [{"label": "5"}, {"label": "6"}, {"label": "7"}]
+        }
+      ]
+    },
+    {
+      "id": "ukg_ma_shapes",
+      "title": "Shape Detective",
+      "subject": "math",
+      "grade": "ukg",
+      "gameType": "tapChoice",
+      "emoji": "⬛",
+      "instruction": "Find the shape!",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Which is a rectangle?",
+          "speak": "Which one is a rectangle?",
+          "correctIndex": 1,
+          "options": [{"label": "Circle", "emoji": "🔵"}, {"label": "Rectangle", "emoji": "🟥"}, {"label": "Star", "emoji": "⭐"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Which has 3 sides?",
+          "speak": "Which shape has three sides?",
+          "correctIndex": 2,
+          "options": [{"label": "Square", "emoji": "🟩"}, {"label": "Circle", "emoji": "🔵"}, {"label": "Triangle", "emoji": "🔺"}]
+        }
+      ]
+    },
+    {
+      "id": "ukg_lo_odd",
+      "title": "Odd One Out",
+      "subject": "logic",
+      "grade": "ukg",
+      "gameType": "tapChoice",
+      "emoji": "🔍",
+      "instruction": "Which one is different?",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Which does NOT belong?",
+          "speak": "Which one does not belong?",
+          "correctIndex": 2,
+          "options": [{"label": "Apple", "emoji": "🍎"}, {"label": "Banana", "emoji": "🍌"}, {"label": "Car", "emoji": "🚗"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Which does NOT belong?",
+          "speak": "Which one does not belong?",
+          "correctIndex": 0,
+          "options": [{"label": "Shoe", "emoji": "👟"}, {"label": "Dog", "emoji": "🐶"}, {"label": "Cat", "emoji": "🐱"}]
+        }
+      ]
+    },
+    {
+      "id": "ukg_lo_memory",
+      "title": "Shape Memory",
+      "subject": "logic",
+      "grade": "ukg",
+      "gameType": "memoryMatch",
+      "emoji": "🧠",
+      "instruction": "Match the shape pairs!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Match the shapes",
+          "options": [
+            {"label": "Circle", "emoji": "🔵"},
+            {"label": "Square", "emoji": "🟥"},
+            {"label": "Triangle", "emoji": "🔺"},
+            {"label": "Star", "emoji": "⭐"},
+            {"label": "Heart", "emoji": "❤️"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ukg_evs_sort",
+      "title": "Land or Water?",
+      "subject": "evs",
+      "grade": "ukg",
+      "gameType": "dragDrop",
+      "emoji": "🌊",
+      "instruction": "Drag each animal to where it lives!",
+      "baseCoins": 16,
+      "baseXp": 30,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Where does the fish live?",
+          "speak": "Where does the fish live?",
+          "promptEmoji": "🐟",
+          "correctIndex": 1,
+          "options": [{"label": "Land", "emoji": "🌳"}, {"label": "Water", "emoji": "🌊"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Where does the lion live?",
+          "speak": "Where does the lion live?",
+          "promptEmoji": "🦁",
+          "correctIndex": 0,
+          "options": [{"label": "Land", "emoji": "🌳"}, {"label": "Water", "emoji": "🌊"}]
+        },
+        {
+          "id": "q3",
+          "prompt": "Where does the whale live?",
+          "speak": "Where does the whale live?",
+          "promptEmoji": "🐳",
+          "correctIndex": 1,
+          "options": [{"label": "Land", "emoji": "🌳"}, {"label": "Water", "emoji": "🌊"}]
+        }
+      ]
+    },
+    {
+      "id": "ukg_evs_weather",
+      "title": "Weather Watch",
+      "subject": "evs",
+      "grade": "ukg",
+      "gameType": "tapChoice",
+      "emoji": "🌦️",
+      "instruction": "Pick the right weather!",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "What do we use when it rains?",
+          "speak": "What do we use when it rains?",
+          "correctIndex": 0,
+          "options": [{"label": "Umbrella", "emoji": "☂️"}, {"label": "Sunglasses", "emoji": "🕶️"}, {"label": "Fan", "emoji": "🪭"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Which is hot?",
+          "speak": "Which one is hot?",
+          "correctIndex": 1,
+          "options": [{"label": "Snow", "emoji": "❄️"}, {"label": "Sun", "emoji": "☀️"}, {"label": "Rain", "emoji": "🌧️"}]
+        }
+      ]
+    }
+  ]
+}
