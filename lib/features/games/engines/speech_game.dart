@@ -112,6 +112,7 @@ class _SpeechGameState extends State<SpeechGame> {
     _celebration.celebrate(sound: false);
     AudioService.instance.speak(PraiseLines.nextSuccess());
     await Future<void>.delayed(const Duration(milliseconds: 1100));
+    if (!mounted) return;
     _advance();
   }
 

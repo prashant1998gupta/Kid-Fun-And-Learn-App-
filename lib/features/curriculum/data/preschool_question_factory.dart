@@ -189,20 +189,15 @@ class PreschoolQuestionFactory {
     if (right == left) right = (right % max) + 1;
     final answer = left > right ? left : right;
     final smaller = left > right ? right : left;
-    final wrong = <int>[smaller];
-    for (var candidate = 1; wrong.length < 2 && candidate <= max; candidate++) {
-      if (candidate != answer && !wrong.contains(candidate)) {
-        wrong.add(candidate);
-      }
-    }
+    // The prompt names exactly two numbers, so the choices must be exactly
+    // those two — never a third distractor that could be larger than the
+    // correct answer (which would make the right answer look wrong).
     return _choice(
       id: 'auto_math_$index',
       prompt: 'Which number is bigger: $left or $right?',
       speak: 'Find the bigger number',
       correct: AnswerOption(label: '$answer'),
-      wrong: [
-        for (final value in wrong) AnswerOption(label: '$value'),
-      ],
+      wrong: [AnswerOption(label: '$smaller')],
       shift: index,
     );
   }
