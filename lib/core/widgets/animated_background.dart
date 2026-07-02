@@ -12,15 +12,18 @@ enum WorldTheme {
   ocean(AppColors.gradientOcean, _Decor.bubbles),
   candy(AppColors.gradientCandy, _Decor.sparkles),
   sunrise(AppColors.gradientSunrise, _Decor.clouds),
-  night(AppColors.gradientNight, _Decor.stars);
+  night(AppColors.gradientNight, _Decor.stars),
+  aurora(
+    [Color(0xFF192A56), Color(0xFF6C5CE7), Color(0xFF00CEC9)],
+    _Decor.sparkles,
+  );
 
   const WorldTheme(this.gradient, this._decor);
   final List<Color> gradient;
   final _Decor _decor;
 
-  static WorldTheme fromId(String id) =>
-      WorldTheme.values.firstWhere((t) => t.name == id,
-          orElse: () => WorldTheme.sunrise);
+  static WorldTheme fromId(String id) => WorldTheme.values
+      .firstWhere((t) => t.name == id, orElse: () => WorldTheme.sunrise);
 }
 
 enum _Decor { stars, leaves, bubbles, sparkles, clouds }

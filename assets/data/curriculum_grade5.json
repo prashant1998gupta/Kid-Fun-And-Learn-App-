@@ -1,0 +1,61 @@
+{
+  "units": [
+    {"id":"g5_math","title":"Math Masters","subject":"math","grade":"grade5","emoji":"📈","lessonIds":["g5_ma_decimal","g5_ma_geometry","g5_ma_boss"]},
+    {"id":"g5_english","title":"Author Academy","subject":"english","grade":"grade5","emoji":"✍️","lessonIds":["g5_en_figures","g5_en_sentences"]},
+    {"id":"g5_science","title":"Life & Space","subject":"science","grade":"grade5","emoji":"🔬","lessonIds":["g5_sc_cells","g5_sc_system"]},
+    {"id":"g5_evs","title":"Planet Protectors","subject":"evs","grade":"grade5","emoji":"🌏","lessonIds":["g5_ev_climate","g5_ev_civics"]},
+    {"id":"g5_logic","title":"Strategy Lab","subject":"logic","grade":"grade5","emoji":"♟️","lessonIds":["g5_lo_sequences","g5_lo_deduction"]}
+  ],
+  "lessons": [
+    {"id":"g5_ma_decimal","title":"Decimal Operations","subject":"math","grade":"grade5","gameType":"tapChoice","emoji":"💯","instruction":"Calculate with decimals.","baseCoins":24,"baseXp":46,"questions":[
+      {"id":"q1","prompt":"2.5 + 1.75 = ?","correctIndex":1,"options":[{"label":"3.25"},{"label":"4.25"},{"label":"4.75"}]},
+      {"id":"q2","prompt":"5.0 - 2.35 = ?","correctIndex":2,"options":[{"label":"2.55"},{"label":"3.65"},{"label":"2.65"}]},
+      {"id":"q3","prompt":"0.6 × 10 = ?","correctIndex":0,"options":[{"label":"6"},{"label":"0.06"},{"label":"60"}]}
+    ]},
+    {"id":"g5_ma_geometry","title":"Area & Volume","subject":"math","grade":"grade5","gameType":"tapChoice","emoji":"📐","instruction":"Measure the shapes.","questions":[
+      {"id":"q1","prompt":"Area of a 6 by 4 rectangle?","correctIndex":0,"options":[{"label":"24"},{"label":"20"},{"label":"10"}]},
+      {"id":"q2","prompt":"Volume of a 2 by 3 by 4 box?","correctIndex":2,"options":[{"label":"9"},{"label":"18"},{"label":"24"}]},
+      {"id":"q3","prompt":"A triangle has how many degrees in total?","correctIndex":1,"options":[{"label":"90°"},{"label":"180°"},{"label":"360°"}]}
+    ]},
+    {"id":"g5_ma_boss","title":"Mastermind Boss","subject":"math","grade":"grade5","gameType":"bossBattle","emoji":"🤖","instruction":"Complete the final mixed challenge!","baseCoins":40,"baseXp":70,"questions":[
+      {"id":"q1","prompt":"25% of 80 is...","correctIndex":1,"options":[{"label":"15"},{"label":"20"},{"label":"25"}]},
+      {"id":"q2","prompt":"3.6 + 4.45 = ?","correctIndex":0,"options":[{"label":"8.05"},{"label":"7.95"},{"label":"8.5"}]},
+      {"id":"q3","prompt":"Area of a square with side 9?","correctIndex":2,"options":[{"label":"18"},{"label":"36"},{"label":"81"}]},
+      {"id":"q4","prompt":"Which number is prime?","correctIndex":0,"options":[{"label":"29"},{"label":"39"},{"label":"49"}]},
+      {"id":"q5","prompt":"2/3 + 1/6 = ?","correctIndex":1,"options":[{"label":"3/9"},{"label":"5/6"},{"label":"1/2"}]}
+    ]},
+    {"id":"g5_en_figures","title":"Figurative Language","subject":"english","grade":"grade5","gameType":"tapChoice","emoji":"🎭","instruction":"Name the writing technique.","questions":[
+      {"id":"q1","prompt":"The moon was a silver coin. This is a...","correctIndex":2,"options":[{"label":"fact"},{"label":"simile"},{"label":"metaphor"}]},
+      {"id":"q2","prompt":"As quick as lightning. This is a...","correctIndex":1,"options":[{"label":"metaphor"},{"label":"simile"},{"label":"command"}]},
+      {"id":"q3","prompt":"The wind whispered. This is...","correctIndex":0,"options":[{"label":"personification"},{"label":"alliteration"},{"label":"a question"}]}
+    ]},
+    {"id":"g5_en_sentences","title":"Complex Sentences","subject":"english","grade":"grade5","gameType":"sequence","emoji":"📝","instruction":"Build the sentence in order.","questions":[
+      {"id":"q1","prompt":"Build the sentence","options":[{"label":"Although"},{"label":"it rained,"},{"label":"we"},{"label":"played outside."}]},
+      {"id":"q2","prompt":"Build the sentence","options":[{"label":"I will call"},{"label":"when"},{"label":"I"},{"label":"arrive."}]}
+    ]},
+    {"id":"g5_sc_cells","title":"Cells & Organisms","subject":"science","grade":"grade5","gameType":"tapChoice","emoji":"🦠","instruction":"Explore the building blocks of life.","questions":[
+      {"id":"q1","prompt":"The basic unit of life is the...","correctIndex":1,"options":[{"label":"organ"},{"label":"cell"},{"label":"bone"}]},
+      {"id":"q2","prompt":"Which part controls a cell?","correctIndex":0,"options":[{"label":"nucleus"},{"label":"membrane"},{"label":"wall"}]},
+      {"id":"q3","prompt":"Plant cells contain...","correctIndex":2,"options":[{"label":"fur"},{"label":"lungs"},{"label":"chloroplasts"}]}
+    ]},
+    {"id":"g5_sc_system","title":"Body Systems","subject":"science","grade":"grade5","gameType":"memoryMatch","emoji":"🫀","instruction":"Match each body system.","questions":[
+      {"id":"q1","prompt":"Match the body systems","options":[{"label":"Circulatory"},{"label":"Respiratory"},{"label":"Digestive"},{"label":"Nervous"},{"label":"Skeletal"}]}
+    ]},
+    {"id":"g5_ev_climate","title":"Weather & Climate","subject":"evs","grade":"grade5","gameType":"tapChoice","emoji":"🌦️","instruction":"Understand Earth's climate.","questions":[
+      {"id":"q1","prompt":"Climate describes weather over...","correctIndex":2,"options":[{"label":"one hour"},{"label":"one day"},{"label":"many years"}]},
+      {"id":"q2","prompt":"Which gas traps heat in the atmosphere?","correctIndex":0,"options":[{"label":"carbon dioxide"},{"label":"oxygen"},{"label":"helium"}]}
+    ]},
+    {"id":"g5_ev_civics","title":"Community & Government","subject":"evs","grade":"grade5","gameType":"tapChoice","emoji":"🏛️","instruction":"Learn how communities work.","questions":[
+      {"id":"q1","prompt":"Citizens choose leaders by...","correctIndex":1,"options":[{"label":"guessing"},{"label":"voting"},{"label":"racing"}]},
+      {"id":"q2","prompt":"A law is a rule made for...","correctIndex":2,"options":[{"label":"one game"},{"label":"one person"},{"label":"the community"}]}
+    ]},
+    {"id":"g5_lo_sequences","title":"Advanced Sequences","subject":"logic","grade":"grade5","gameType":"sequence","emoji":"🔢","instruction":"Order the sequence.","questions":[
+      {"id":"q1","prompt":"Square numbers","options":[{"label":"1"},{"label":"4"},{"label":"9"},{"label":"16"},{"label":"25"}]},
+      {"id":"q2","prompt":"Powers of two","options":[{"label":"2"},{"label":"4"},{"label":"8"},{"label":"16"},{"label":"32"}]}
+    ]},
+    {"id":"g5_lo_deduction","title":"Deduction Challenge","subject":"logic","grade":"grade5","gameType":"tapChoice","emoji":"🕵️","instruction":"Use every clue.","questions":[
+      {"id":"q1","prompt":"Ava is taller than Ben. Ben is taller than Cy. Who is shortest?","correctIndex":2,"options":[{"label":"Ava"},{"label":"Ben"},{"label":"Cy"}]},
+      {"id":"q2","prompt":"No reptiles have fur. A snake is a reptile. A snake has...","correctIndex":0,"options":[{"label":"no fur"},{"label":"fur"},{"label":"feathers"}]}
+    ]}
+  ]
+}

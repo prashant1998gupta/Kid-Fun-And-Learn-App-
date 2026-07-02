@@ -18,6 +18,7 @@ enum GameType {
   countCatch, // count moving objects
   spotMatch, // match shadow/pair
   speak, // say the word aloud (speech recognition)
+  bossBattle, // multi-question challenge with a visible boss health bar
 }
 
 /// One curriculum unit — a "chapter" grouping many lessons.

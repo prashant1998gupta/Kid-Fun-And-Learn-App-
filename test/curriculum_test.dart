@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kidverse/features/curriculum/data/curriculum_repository.dart';
+import 'package:kidverse/features/curriculum/domain/lesson.dart';
 import 'package:kidverse/features/profiles/domain/grade_level.dart';
 
 void main() {
@@ -14,6 +15,8 @@ void main() {
     GradeLevel.grade1,
     GradeLevel.grade2,
     GradeLevel.grade3,
+    GradeLevel.grade4,
+    GradeLevel.grade5,
   ];
 
   test('all authored grades load and parse without errors', () async {
@@ -44,19 +47,38 @@ void main() {
     }
   });
 
-  test('grades 1-3 span several subjects each', () async {
+  test('grades 1-5 span several subjects each', () async {
     final repo = CurriculumRepository();
     await repo.ensureLoaded();
     for (final grade in [
       GradeLevel.grade1,
       GradeLevel.grade2,
       GradeLevel.grade3,
+      GradeLevel.grade4,
+      GradeLevel.grade5,
     ]) {
       expect(
         repo.subjectsForGrade(grade).length,
         greaterThanOrEqualTo(4),
         reason: '${grade.name} should span multiple subjects',
       );
+    }
+  });
+
+  test('grades 4-5 finish with a playable boss battle', () async {
+    final repo = CurriculumRepository();
+    await repo.ensureLoaded();
+    for (final grade in [GradeLevel.grade4, GradeLevel.grade5]) {
+      final lessons = [
+        for (final unit in repo.unitsForGrade(grade))
+          ...repo.lessonsForUnit(unit),
+      ];
+      final bosses = lessons.where((l) => l.gameType == GameType.bossBattle);
+      expect(bosses, isNotEmpty, reason: '${grade.name} needs a boss lesson');
+      for (final boss in bosses) {
+        expect(boss.questions.length, greaterThanOrEqualTo(4));
+        expect(boss.questions.every((q) => q.correctIndex != null), isTrue);
+      }
     }
   });
 }

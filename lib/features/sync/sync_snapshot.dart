@@ -45,6 +45,7 @@ class SyncSnapshot {
     'daily_day_',
     'daily_streak_',
     'lucky_spin_day_',
+    'season_xp_',
   ];
 
   /// Derives the child ids from the persisted `child_profiles` blob so we can

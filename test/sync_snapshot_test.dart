@@ -28,6 +28,7 @@ void main() {
         'daily_day_$childId': 20200,
         'daily_streak_$childId': 5,
         'lucky_spin_day_$childId': 20200,
+        'season_xp_$childId': 140,
       };
 
   test('childIdsFrom reads ids out of the profiles blob', () async {
@@ -47,6 +48,7 @@ void main() {
     expect(snap.values['sfx'], false);
     expect(snap.values['daily_streak_$childId'], 5);
     expect(snap.values['lucky_spin_day_$childId'], 20200);
+    expect(snap.values['season_xp_$childId'], 140);
     // Absent keys stay absent (never written as null).
     expect(snap.values.containsKey('haptics'), isFalse);
   });
@@ -57,7 +59,8 @@ void main() {
     final captured = SyncSnapshot.capture(source, 222);
 
     // Round-trip through JSON as it would through Firestore.
-    final json = jsonDecode(jsonEncode(captured.toJson())) as Map<String, dynamic>;
+    final json =
+        jsonDecode(jsonEncode(captured.toJson())) as Map<String, dynamic>;
     final remote = SyncSnapshot.fromJson(json);
 
     // Restore into a *fresh* device.
@@ -72,6 +75,7 @@ void main() {
     expect(target.getBool('colorBlind'), true);
     expect(target.getInt('daily_streak_$childId'), 5);
     expect(target.getInt('lucky_spin_day_$childId'), 20200);
+    expect(target.getInt('season_xp_$childId'), 140);
   });
 
   test('restore never clears keys missing from the snapshot', () async {

@@ -25,6 +25,8 @@ class CurriculumRepository {
     GradeLevel.grade1: 'assets/data/curriculum_grade1.json',
     GradeLevel.grade2: 'assets/data/curriculum_grade2.json',
     GradeLevel.grade3: 'assets/data/curriculum_grade3.json',
+    GradeLevel.grade4: 'assets/data/curriculum_grade4.json',
+    GradeLevel.grade5: 'assets/data/curriculum_grade5.json',
   };
 
   Future<void> ensureLoaded() async {

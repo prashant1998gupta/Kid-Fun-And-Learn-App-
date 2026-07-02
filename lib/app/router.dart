@@ -22,6 +22,7 @@ import '../features/profiles/profile_create_screen.dart';
 import '../features/profiles/profile_picker_screen.dart';
 import '../features/profiles/profiles_controller.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/season/season_pass_screen.dart';
 
 /// Central route table. Uses [go_router] for typed, deep-linkable navigation
 /// with custom kid-friendly transitions.
@@ -43,6 +44,7 @@ class AppRoutes {
   static const signIn = '/sign-in';
   static const leaderboard = '/leaderboard';
   static const certificate = '/certificate';
+  static const season = '/season';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -122,6 +124,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.certificate,
         pageBuilder: (_, s) => _slide(const CertificateScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.season,
+        pageBuilder: (_, s) => _slide(const SeasonPassScreen(), s),
       ),
     ],
     redirect: (context, state) {

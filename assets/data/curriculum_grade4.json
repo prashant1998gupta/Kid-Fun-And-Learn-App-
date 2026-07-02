@@ -1,0 +1,61 @@
+{
+  "units": [
+    {"id":"g4_math","title":"Number Quest","subject":"math","grade":"grade4","emoji":"🧮","lessonIds":["g4_ma_factors","g4_ma_frac","g4_ma_boss"]},
+    {"id":"g4_english","title":"Story Studio","subject":"english","grade":"grade4","emoji":"📖","lessonIds":["g4_en_grammar","g4_en_context"]},
+    {"id":"g4_science","title":"Matter Lab","subject":"science","grade":"grade4","emoji":"⚗️","lessonIds":["g4_sc_matter","g4_sc_force"]},
+    {"id":"g4_evs","title":"Earth Explorers","subject":"evs","grade":"grade4","emoji":"🌍","lessonIds":["g4_ev_maps","g4_ev_resources"]},
+    {"id":"g4_logic","title":"Code Breakers","subject":"logic","grade":"grade4","emoji":"🧩","lessonIds":["g4_lo_patterns","g4_lo_reason"]}
+  ],
+  "lessons": [
+    {"id":"g4_ma_factors","title":"Factors & Multiples","subject":"math","grade":"grade4","gameType":"tapChoice","emoji":"✖️","instruction":"Find the number that fits.","baseCoins":22,"baseXp":42,"questions":[
+      {"id":"q1","prompt":"Which is a factor of 24?","correctIndex":1,"options":[{"label":"5"},{"label":"6"},{"label":"7"}]},
+      {"id":"q2","prompt":"Which is a multiple of 8?","correctIndex":2,"options":[{"label":"18"},{"label":"22"},{"label":"24"}]},
+      {"id":"q3","prompt":"What is the least common multiple of 3 and 4?","correctIndex":0,"options":[{"label":"12"},{"label":"7"},{"label":"24"}]}
+    ]},
+    {"id":"g4_ma_frac","title":"Equivalent Fractions","subject":"math","grade":"grade4","gameType":"tapChoice","emoji":"🍕","instruction":"Match equal fractions.","questions":[
+      {"id":"q1","prompt":"Which equals 1/2?","correctIndex":1,"options":[{"label":"2/3"},{"label":"2/4"},{"label":"3/4"}]},
+      {"id":"q2","prompt":"Which equals 3/4?","correctIndex":0,"options":[{"label":"6/8"},{"label":"4/8"},{"label":"3/8"}]},
+      {"id":"q3","prompt":"1/4 + 2/4 = ?","correctIndex":2,"options":[{"label":"2/8"},{"label":"1/2"},{"label":"3/4"}]}
+    ]},
+    {"id":"g4_ma_boss","title":"Number Guardian","subject":"math","grade":"grade4","gameType":"bossBattle","emoji":"👾","instruction":"Use every skill to defeat the guardian!","baseCoins":35,"baseXp":60,"questions":[
+      {"id":"q1","prompt":"9 × 7 = ?","correctIndex":2,"options":[{"label":"56"},{"label":"72"},{"label":"63"}]},
+      {"id":"q2","prompt":"Which fraction is largest?","correctIndex":0,"options":[{"label":"3/4"},{"label":"1/2"},{"label":"1/4"}]},
+      {"id":"q3","prompt":"144 ÷ 12 = ?","correctIndex":1,"options":[{"label":"10"},{"label":"12"},{"label":"14"}]},
+      {"id":"q4","prompt":"What is the perimeter of a 5 cm square?","correctIndex":2,"options":[{"label":"10 cm"},{"label":"15 cm"},{"label":"20 cm"}]}
+    ]},
+    {"id":"g4_en_grammar","title":"Grammar Detectives","subject":"english","grade":"grade4","gameType":"tapChoice","emoji":"🔎","instruction":"Spot the correct grammar.","questions":[
+      {"id":"q1","prompt":"Choose the adjective: The tiny bird sang.","correctIndex":0,"options":[{"label":"tiny"},{"label":"bird"},{"label":"sang"}]},
+      {"id":"q2","prompt":"Which sentence uses the correct verb?","correctIndex":1,"options":[{"label":"She walk home."},{"label":"She walks home."},{"label":"She walking home."}]},
+      {"id":"q3","prompt":"What is the plural of child?","correctIndex":2,"options":[{"label":"childs"},{"label":"childes"},{"label":"children"}]}
+    ]},
+    {"id":"g4_en_context","title":"Words in Context","subject":"english","grade":"grade4","gameType":"tapChoice","emoji":"💡","instruction":"Use the sentence clue.","questions":[
+      {"id":"q1","prompt":"The desert was arid, with almost no rain. Arid means...","correctIndex":0,"options":[{"label":"very dry"},{"label":"very cold"},{"label":"crowded"}]},
+      {"id":"q2","prompt":"Mira was eager to begin. Eager means...","correctIndex":2,"options":[{"label":"afraid"},{"label":"late"},{"label":"excited"}]}
+    ]},
+    {"id":"g4_sc_matter","title":"States of Matter","subject":"science","grade":"grade4","gameType":"dragDrop","emoji":"🧪","instruction":"Classify each state.","questions":[
+      {"id":"q1","prompt":"Ice is a...","promptEmoji":"🧊","correctIndex":0,"options":[{"label":"Solid"},{"label":"Liquid"},{"label":"Gas"}]},
+      {"id":"q2","prompt":"Steam is a...","promptEmoji":"♨️","correctIndex":2,"options":[{"label":"Solid"},{"label":"Liquid"},{"label":"Gas"}]},
+      {"id":"q3","prompt":"Water in a glass is a...","promptEmoji":"💧","correctIndex":1,"options":[{"label":"Solid"},{"label":"Liquid"},{"label":"Gas"}]}
+    ]},
+    {"id":"g4_sc_force","title":"Force & Motion","subject":"science","grade":"grade4","gameType":"tapChoice","emoji":"🏎️","instruction":"Choose the force fact.","questions":[
+      {"id":"q1","prompt":"A push or pull is called...","correctIndex":1,"options":[{"label":"energy"},{"label":"force"},{"label":"matter"}]},
+      {"id":"q2","prompt":"Which force pulls objects toward Earth?","correctIndex":0,"options":[{"label":"gravity"},{"label":"friction"},{"label":"magnetism"}]}
+    ]},
+    {"id":"g4_ev_maps","title":"Map Skills","subject":"evs","grade":"grade4","gameType":"tapChoice","emoji":"🧭","instruction":"Read the map clues.","questions":[
+      {"id":"q1","prompt":"Which direction is opposite east?","correctIndex":2,"options":[{"label":"north"},{"label":"south"},{"label":"west"}]},
+      {"id":"q2","prompt":"A map key explains...","correctIndex":0,"options":[{"label":"symbols"},{"label":"weather"},{"label":"time"}]}
+    ]},
+    {"id":"g4_ev_resources","title":"Natural Resources","subject":"evs","grade":"grade4","gameType":"tapChoice","emoji":"🌱","instruction":"Protect our resources.","questions":[
+      {"id":"q1","prompt":"Which is renewable?","correctIndex":1,"options":[{"label":"coal"},{"label":"sunlight"},{"label":"oil"}]},
+      {"id":"q2","prompt":"Which action saves water?","correctIndex":2,"options":[{"label":"long showers"},{"label":"running taps"},{"label":"fixing leaks"}]}
+    ]},
+    {"id":"g4_lo_patterns","title":"Pattern Rules","subject":"logic","grade":"grade4","gameType":"sequence","emoji":"🔢","instruction":"Put the pattern in order.","questions":[
+      {"id":"q1","prompt":"Add 4 each time","options":[{"label":"4"},{"label":"8"},{"label":"12"},{"label":"16"}]},
+      {"id":"q2","prompt":"Double each time","options":[{"label":"2"},{"label":"4"},{"label":"8"},{"label":"16"}]}
+    ]},
+    {"id":"g4_lo_reason","title":"Logical Conclusions","subject":"logic","grade":"grade4","gameType":"tapChoice","emoji":"🧠","instruction":"Choose what must be true.","questions":[
+      {"id":"q1","prompt":"All robins are birds. Pip is a robin. Pip is...","correctIndex":0,"options":[{"label":"a bird"},{"label":"a fish"},{"label":"a tree"}]},
+      {"id":"q2","prompt":"If today is Monday, tomorrow is...","correctIndex":1,"options":[{"label":"Sunday"},{"label":"Tuesday"},{"label":"Friday"}]}
+    ]}
+  ]
+}

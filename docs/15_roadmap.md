@@ -49,6 +49,8 @@ for low-end tablets.
   mascot, and celebration animations wired into shared UI.
 - [x] **M13:** Generated localization for English, Spanish, Hindi, and Arabic;
   persisted language picker, localized home/settings subset, and RTL support.
+- [x] **M14:** Grade 4–5 multi-subject curriculum, dedicated boss-battle
+  engine/lessons, and an offline cosmetic season pass with sync coverage.
 
 ## How to extend (contributor quickstart)
 - **New game:** create `features/games/engines/<name>_game.dart` taking

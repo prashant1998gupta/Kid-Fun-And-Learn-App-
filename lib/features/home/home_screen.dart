@@ -306,7 +306,8 @@ class _QuickActions extends ConsumerWidget {
       required VoidCallback onTap,
       bool showDot = false,
     }) {
-      return Expanded(
+      return SizedBox(
+        width: 108,
         child: BouncyButton(
           borderRadius: AppSpacing.cardRadius,
           onTap: onTap,
@@ -355,52 +356,62 @@ class _QuickActions extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Row(
-        children: [
-          action(
-            icon: Icons.emoji_events_rounded,
-            label: 'Badges',
-            color: AppColors.star,
-            onTap: () => context.push(AppRoutes.achievements),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          action(
-            icon: Icons.card_giftcard_rounded,
-            label: 'Daily Gift',
-            color: AppColors.secondary,
-            showDot: canClaim,
-            onTap: () => showDailyRewardSheet(context),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          action(
-            icon: Icons.casino_rounded,
-            label: 'Spin',
-            color: AppColors.gem,
-            showDot: canSpin,
-            onTap: () => context.push(AppRoutes.spin),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          action(
-            icon: Icons.storefront_rounded,
-            label: 'Shop',
-            color: AppColors.mint,
-            onTap: () => context.push(AppRoutes.shop),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          action(
-            icon: Icons.pets_rounded,
-            label: 'Collect',
-            color: AppColors.bubblegum,
-            onTap: () => context.push(AppRoutes.collection),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          action(
-            icon: Icons.leaderboard_rounded,
-            label: 'Friends',
-            color: AppColors.sky,
-            onTap: () => context.push(AppRoutes.leaderboard),
-          ),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            action(
+              icon: Icons.emoji_events_rounded,
+              label: 'Badges',
+              color: AppColors.star,
+              onTap: () => context.push(AppRoutes.achievements),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.card_giftcard_rounded,
+              label: 'Daily Gift',
+              color: AppColors.secondary,
+              showDot: canClaim,
+              onTap: () => showDailyRewardSheet(context),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.casino_rounded,
+              label: 'Spin',
+              color: AppColors.gem,
+              showDot: canSpin,
+              onTap: () => context.push(AppRoutes.spin),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.storefront_rounded,
+              label: 'Shop',
+              color: AppColors.mint,
+              onTap: () => context.push(AppRoutes.shop),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.pets_rounded,
+              label: 'Collect',
+              color: AppColors.bubblegum,
+              onTap: () => context.push(AppRoutes.collection),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.leaderboard_rounded,
+              label: 'Friends',
+              color: AppColors.sky,
+              onTap: () => context.push(AppRoutes.leaderboard),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.auto_awesome_rounded,
+              label: 'Season',
+              color: AppColors.primary,
+              onTap: () => context.push(AppRoutes.season),
+            ),
+          ],
+        ),
       ),
     );
   }

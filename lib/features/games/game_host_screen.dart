@@ -12,7 +12,9 @@ import '../ai/adaptive_engine.dart';
 import '../profiles/profiles_controller.dart';
 import '../progress/activity_log.dart';
 import '../progress/progress_controller.dart';
+import '../season/season_controller.dart';
 import 'engines/bubble_pop_game.dart';
+import 'engines/boss_battle_game.dart';
 import 'engines/drag_drop_game.dart';
 import 'engines/memory_match_game.dart';
 import 'engines/sequence_game.dart';
@@ -68,16 +70,23 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         .read(activityControllerProvider.notifier)
         .record(child.id, stars: result.stars, xp: reward.xp);
 
+    // Season progression is cosmetic-only and follows the same offline-first
+    // persistence path as other child rewards.
+    await ref
+        .read(seasonControllerProvider.notifier)
+        .recordLesson(child.id, result.stars);
+
     // Evaluate achievements against the fresh state and grant their coins.
     final progress = ref.read(progressControllerProvider);
-    final newBadges = await ref.read(achievementsControllerProvider.notifier).evaluate(
-          AchievementContext(
-            wallet: after,
-            completedLessons: progress.completedCount(child.id),
-            totalStars: progress.totalStars(child.id),
-            lastResultStars: result.stars,
-          ),
-        );
+    final newBadges =
+        await ref.read(achievementsControllerProvider.notifier).evaluate(
+              AchievementContext(
+                wallet: after,
+                completedLessons: progress.completedCount(child.id),
+                totalStars: progress.totalStars(child.id),
+                lastResultStars: result.stars,
+              ),
+            );
     if (newBadges.isNotEmpty) {
       final bonus = newBadges.fold(0, (sum, b) => sum + b.coinReward);
       after = await profiles.applyReward(RewardBundle(coins: bonus));
@@ -134,6 +143,8 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         return SequenceGame(lesson: lesson, onComplete: _onComplete);
       case GameType.speak:
         return SpeechGame(lesson: lesson, onComplete: _onComplete);
+      case GameType.bossBattle:
+        return BossBattleGame(lesson: lesson, onComplete: _onComplete);
       case GameType.wordBuilder:
         // Engine under construction — fall back to tapChoice so every lesson
         // is playable. Replace with the real engine as it lands.
