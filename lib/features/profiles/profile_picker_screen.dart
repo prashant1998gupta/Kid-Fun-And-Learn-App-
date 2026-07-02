@@ -10,6 +10,7 @@ import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../achievements/achievements_controller.dart';
 import '../rewards/daily_reward_controller.dart';
+import '../spin/lucky_spin_controller.dart';
 import 'domain/child_profile.dart';
 import 'profiles_controller.dart';
 import 'widgets/avatar_view.dart';
@@ -108,6 +109,7 @@ class _ProfileTile extends StatelessWidget {
         // Reload per-child reward state for the newly selected profile.
         ref.read(achievementsControllerProvider.notifier).refreshForActiveChild();
         ref.read(dailyRewardControllerProvider.notifier).refreshForActiveChild();
+        ref.read(luckySpinControllerProvider.notifier).refreshForActiveChild();
         AudioService.instance.speak('Hi ${child.name}! Ready to play?');
         if (context.mounted) context.go(AppRoutes.home);
       },

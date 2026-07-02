@@ -19,6 +19,7 @@ import '../profiles/profiles_controller.dart';
 import '../profiles/widgets/avatar_view.dart';
 import '../rewards/daily_reward_controller.dart';
 import '../rewards/daily_reward_sheet.dart';
+import '../spin/lucky_spin_controller.dart';
 
 /// The home world: greeting + HUD + daily mission + learning map of subjects.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -57,7 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       controller: _celebration,
       child: Scaffold(
         body: AnimatedBackground(
-          theme: WorldTheme.sunrise,
+          theme: WorldTheme.fromId(child.activeTheme),
           child: SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -249,8 +250,11 @@ class _QuickActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final canClaim =
         ref.watch(dailyRewardControllerProvider.notifier).canClaimToday;
-    // Watch state so the badge dot updates after claiming.
+    final canSpin =
+        ref.watch(luckySpinControllerProvider.notifier).canSpinToday;
+    // Watch state so the dots update after claiming/spinning.
     ref.watch(dailyRewardControllerProvider);
+    ref.watch(luckySpinControllerProvider);
 
     Widget action({
       required IconData icon,
@@ -324,6 +328,21 @@ class _QuickActions extends ConsumerWidget {
             color: AppColors.secondary,
             showDot: canClaim,
             onTap: () => showDailyRewardSheet(context),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          action(
+            icon: Icons.casino_rounded,
+            label: 'Spin',
+            color: AppColors.gem,
+            showDot: canSpin,
+            onTap: () => context.push(AppRoutes.spin),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          action(
+            icon: Icons.storefront_rounded,
+            label: 'Shop',
+            color: AppColors.mint,
+            onTap: () => context.push(AppRoutes.shop),
           ),
         ],
       ),

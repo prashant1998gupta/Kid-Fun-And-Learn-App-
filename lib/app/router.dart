@@ -8,6 +8,8 @@ import '../features/achievements/achievements_screen.dart';
 import '../features/curriculum/domain/subject.dart';
 import '../features/home/home_screen.dart';
 import '../features/learning_map/learning_map_screen.dart';
+import '../features/shop/shop_screen.dart';
+import '../features/spin/lucky_spin_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/parent/parent_dashboard_screen.dart';
@@ -27,6 +29,8 @@ class AppRoutes {
   static const home = '/home';
   static const learningMap = '/learning-map';
   static const achievements = '/achievements';
+  static const shop = '/shop';
+  static const spin = '/spin';
   static const game = '/game';
   static const settings = '/settings';
   static const parentGate = '/parent-gate';
@@ -67,6 +71,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.achievements,
         pageBuilder: (_, s) => _slide(const AchievementsScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.shop,
+        pageBuilder: (_, s) => _slide(const ShopScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.spin,
+        pageBuilder: (_, s) => _slide(const LuckySpinScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.game,

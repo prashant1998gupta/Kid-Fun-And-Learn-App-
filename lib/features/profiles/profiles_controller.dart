@@ -95,6 +95,36 @@ class ProfilesController extends StateNotifier<ProfilesState> {
     return next;
   }
 
+  /// Attempts to spend [cost] coins from the active child. Returns true on
+  /// success, false if they can't afford it (no partial spends).
+  Future<bool> spendCoins(int cost) async {
+    final active = state.active;
+    if (active == null || active.wallet.coins < cost) return false;
+    _replace(active.copyWith(
+      wallet: active.wallet.copyWith(coins: active.wallet.coins - cost),
+    ));
+    await _persist();
+    return true;
+  }
+
+  /// Unlocks a world theme (adds it to the child's unlocked list).
+  Future<void> unlockTheme(String themeId) async {
+    final active = state.active;
+    if (active == null || active.unlockedThemes.contains(themeId)) return;
+    _replace(active.copyWith(
+      unlockedThemes: [...active.unlockedThemes, themeId],
+    ));
+    await _persist();
+  }
+
+  /// Sets the child's active world theme.
+  Future<void> setActiveTheme(String themeId) async {
+    final active = state.active;
+    if (active == null) return;
+    _replace(active.copyWith(activeTheme: themeId));
+    await _persist();
+  }
+
   void _replace(ChildProfile updated) {
     final list = [
       for (final c in state.children)

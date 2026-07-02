@@ -17,6 +17,10 @@ enum WorldTheme {
   const WorldTheme(this.gradient, this._decor);
   final List<Color> gradient;
   final _Decor _decor;
+
+  static WorldTheme fromId(String id) =>
+      WorldTheme.values.firstWhere((t) => t.name == id,
+          orElse: () => WorldTheme.sunrise);
 }
 
 enum _Decor { stars, leaves, bubbles, sparkles, clouds }
