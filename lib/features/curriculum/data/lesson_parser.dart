@@ -1,6 +1,7 @@
 import '../../profiles/domain/grade_level.dart';
 import '../domain/lesson.dart';
 import '../domain/subject.dart';
+import 'preschool_question_factory.dart';
 
 /// Parses the curriculum JSON schema into domain [Lesson]s.
 ///
@@ -10,22 +11,29 @@ import '../domain/subject.dart';
 class LessonParser {
   static Lesson lessonFromJson(Map<String, dynamic> j) {
     final grade = GradeLevel.fromId(j['grade'] as String);
+    final subject = Subject.fromId(j['subject'] as String);
+    final gameType = _gameType(j['gameType'] as String);
+    final seeds = ((j['questions'] as List?) ?? const [])
+        .map((q) => _question((q as Map).cast<String, dynamic>()))
+        .toList();
     return Lesson(
       id: j['id'] as String,
       title: j['title'] as String,
-      subject: Subject.fromId(j['subject'] as String),
+      subject: subject,
       grade: grade,
-      gameType: _gameType(j['gameType'] as String),
+      gameType: gameType,
       emoji: j['emoji'] as String? ?? '⭐',
       instruction: j['instruction'] as String? ?? '',
       baseCoins: (j['baseCoins'] ?? 10) as int,
       baseXp: (j['baseXp'] ?? 20) as int,
-      questions: _expandQuestions(
-        ((j['questions'] as List?) ?? const [])
-            .map((q) => _question((q as Map).cast<String, dynamic>()))
-            .toList(),
-        targetCount: grade.isPreSchool ? 5 : 20,
-      ),
+      questions: grade.isPreSchool
+          ? PreschoolQuestionFactory.expand(
+              seeds,
+              grade: grade,
+              subject: subject,
+              gameType: gameType,
+            )
+          : _expandQuestions(seeds, targetCount: 20),
     );
   }
 
@@ -46,9 +54,9 @@ class LessonParser {
     );
   }
 
-  /// Expands compact seed banks to the age-appropriate session length: five
-  /// rounds for preschool, twenty for older learners. Choice positions rotate
-  /// so a child cannot pass by memorizing where the correct button appears.
+  /// Expands compact seed banks to twenty rounds. Preschool banks are handled
+  /// by [PreschoolQuestionFactory] so added rounds contain varied learning
+  /// prompts rather than simple repetition.
   static List<Question> _expandQuestions(
     List<Question> seeds, {
     required int targetCount,

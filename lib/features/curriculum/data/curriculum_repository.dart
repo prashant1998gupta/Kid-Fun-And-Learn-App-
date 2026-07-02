@@ -35,22 +35,38 @@ class CurriculumRepository {
     for (final entry in _assetByGrade.entries) {
       await _loadAsset(entry.value, entry.key);
     }
-    _expandGradeToFiftyLevels(GradeLevel.grade4);
-    _expandGradeToFiftyLevels(GradeLevel.grade5);
+    for (final grade in [
+      GradeLevel.lkg,
+      GradeLevel.ukg,
+      GradeLevel.kg,
+      GradeLevel.grade4,
+      GradeLevel.grade5,
+    ]) {
+      _expandGradeToFiftyLevels(grade);
+    }
     _loaded = true;
   }
 
-  /// Upper-primary grades ship compact, reviewable seed JSON. At load time we
-  /// build ten progressively numbered lessons per subject unit: five units ×
-  /// ten lessons gives each grade a 50-level learning journey.
+  /// Selected grades ship compact, reviewable seed JSON. At load time the
+  /// levels are distributed evenly across their subject units, producing a
+  /// 50-level learning journey without making asset files unmaintainable.
   void _expandGradeToFiftyLevels(GradeLevel grade) {
-    for (var unitIndex = 0; unitIndex < _units.length; unitIndex++) {
+    final gradeUnitIndices = [
+      for (var index = 0; index < _units.length; index++)
+        if (_units[index].grade == grade) index,
+    ];
+    if (gradeUnitIndices.isEmpty) return;
+    final levelsPerUnit = 50 ~/ gradeUnitIndices.length;
+    final extraLevels = 50 % gradeUnitIndices.length;
+
+    for (var position = 0; position < gradeUnitIndices.length; position++) {
+      final unitIndex = gradeUnitIndices[position];
       final unit = _units[unitIndex];
-      if (unit.grade != grade) continue;
       final seeds = lessonsForUnit(unit);
       if (seeds.isEmpty) continue;
+      final target = levelsPerUnit + (position < extraLevels ? 1 : 0);
       final ids = [...unit.lessonIds];
-      while (ids.length < 10) {
+      while (ids.length < target) {
         final level = ids.length + 1;
         final seed = seeds[(level - 1) % seeds.length];
         final id = '${unit.id}_level_$level';
@@ -73,7 +89,7 @@ class CurriculumRepository {
         title: unit.title,
         subject: unit.subject,
         grade: unit.grade,
-        lessonIds: ids.take(10).toList(),
+        lessonIds: ids.take(target).toList(),
         emoji: unit.emoji,
       );
     }

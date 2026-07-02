@@ -66,7 +66,7 @@ void main() {
     }
   });
 
-  test('preschool grades use short five-round sessions', () async {
+  test('preschool grades provide 50 levels with 20 varied questions', () async {
     final repo = CurriculumRepository();
     await repo.ensureLoaded();
     for (final grade in [GradeLevel.lkg, GradeLevel.ukg, GradeLevel.kg]) {
@@ -74,13 +74,29 @@ void main() {
         for (final unit in repo.unitsForGrade(grade))
           ...repo.lessonsForUnit(unit),
       ];
-      expect(lessons, isNotEmpty);
-      expect(lessons.every((lesson) => lesson.questions.length <= 5), isTrue);
+      expect(lessons.length, 50, reason: '${grade.name} needs 50 levels');
+      expect(lessons.every((lesson) => lesson.questions.length == 20), isTrue);
       expect(
         lessons.any((lesson) => lesson.gameType == GameType.listenAndTap),
         isTrue,
         reason: '${grade.name} needs voice-first visual play',
       );
+      for (final lesson in lessons) {
+        final signatures = lesson.questions
+            .map((q) => '${q.prompt}|${q.answer}|${q.promptEmoji}')
+            .toSet();
+        expect(
+          signatures.length,
+          greaterThanOrEqualTo(10),
+          reason: '${lesson.id} needs varied learning prompts',
+        );
+        for (final question in lesson.questions) {
+          if (question.correctIndex != null) {
+            expect(question.correctIndex,
+                inInclusiveRange(0, question.options.length - 1));
+          }
+        }
+      }
     }
   });
 

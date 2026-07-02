@@ -176,20 +176,24 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               children: [
-                for (var i = 0; i < _total; i++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: Icon(
-                      i < _index
-                          ? Icons.star_rounded
-                          : Icons.star_border_rounded,
-                      color: i < _index ? AppColors.star : Colors.white,
-                      size: 30,
-                    ),
+                LinearProgressIndicator(
+                  value: (_index + 1) / _total,
+                  minHeight: 14,
+                  borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
+                  backgroundColor: Colors.white24,
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(AppColors.star),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${_index + 1} / $_total',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
                   ),
+                ),
               ],
             ),
           ),
