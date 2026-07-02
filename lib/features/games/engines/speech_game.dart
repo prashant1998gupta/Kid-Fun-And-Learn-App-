@@ -110,7 +110,7 @@ class _SpeechGameState extends State<SpeechGame> {
     AudioService.instance.playSfx(Sfx.correct);
     AudioService.instance.successHaptic();
     _celebration.celebrate(sound: false);
-    AudioService.instance.speak((PraiseLines.success..shuffle()).first);
+    AudioService.instance.speak(PraiseLines.nextSuccess());
     await Future<void>.delayed(const Duration(milliseconds: 1100));
     _advance();
   }

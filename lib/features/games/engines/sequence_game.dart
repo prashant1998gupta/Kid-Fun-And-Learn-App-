@@ -51,8 +51,7 @@ class _SequenceGameState extends State<SequenceGame> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _speak());
   }
 
-  void _speak() => AudioService.instance
-      .speak(_q.speak ?? _q.prompt);
+  void _speak() => AudioService.instance.speak(_q.speak ?? _q.prompt);
 
   /// Deterministic scramble (stable, no RNG). Reverses then rotates.
   List<int> _scramble(int n) {
@@ -71,7 +70,7 @@ class _SequenceGameState extends State<SequenceGame> {
       if (_nextExpected >= _q.options.length) {
         AudioService.instance.successHaptic();
         _celebration.celebrate(sound: false);
-        AudioService.instance.speak((PraiseLines.success..shuffle()).first);
+        AudioService.instance.speak(PraiseLines.nextSuccess());
         _correct++;
         if (!_erred) _firstTry++;
         await Future<void>.delayed(const Duration(milliseconds: 900));

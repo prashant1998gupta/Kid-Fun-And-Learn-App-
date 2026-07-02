@@ -44,69 +44,94 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
   LessonResult? _result;
   RewardBundle _reward = const RewardBundle();
   bool _leveledUp = false;
+  bool _completing = false;
   int _newLevel = 1;
   List<Achievement> _newBadges = const [];
 
   Future<void> _onComplete(LessonResult result) async {
+    if (_completing) return;
+    setState(() => _completing = true);
     final profiles = ref.read(profilesControllerProvider.notifier);
     final child = ref.read(activeChildProvider);
-    if (child == null) return;
-
-    final before = child.wallet;
     final reward = _engine.compute(result);
-    var after = await profiles.applyReward(reward);
-
-    await ref
-        .read(adaptiveControllerProvider.notifier)
-        .record(child.id, result);
-
-    // Persist the best-ever star score for the Learning Map / reports.
-    await ref
-        .read(progressControllerProvider.notifier)
-        .recordStars(result.lesson.id, result.stars);
-
-    // Log today's activity for the parent dashboard's over-time graphs.
-    await ref
-        .read(activityControllerProvider.notifier)
-        .record(child.id, stars: result.stars, xp: reward.xp);
-
-    // Season progression is cosmetic-only and follows the same offline-first
-    // persistence path as other child rewards.
-    await ref
-        .read(seasonControllerProvider.notifier)
-        .recordLesson(child.id, result.stars);
-
-    // Evaluate achievements against the fresh state and grant their coins.
-    final progress = ref.read(progressControllerProvider);
-    final newBadges =
-        await ref.read(achievementsControllerProvider.notifier).evaluate(
-              AchievementContext(
-                wallet: after,
-                completedLessons: progress.completedCount(child.id),
-                totalStars: progress.totalStars(child.id),
-                lastResultStars: result.stars,
-              ),
-            );
-    if (newBadges.isNotEmpty) {
-      final bonus = newBadges.fold(0, (sum, b) => sum + b.coinReward);
-      after = await profiles.applyReward(RewardBundle(coins: bonus));
+    if (child == null) {
+      if (mounted) {
+        setState(() {
+          _result = result;
+          _reward = reward;
+          _completing = false;
+        });
+      }
+      return;
     }
 
-    final check = LevelUpCheck(before, after);
-    if (!mounted) return;
-    setState(() {
-      _result = result;
-      _reward = reward;
-      _leveledUp = check.leveledUp;
-      _newLevel = check.newLevel;
-      _newBadges = newBadges;
-    });
+    final before = child.wallet;
+    var after = before;
+    var newBadges = <Achievement>[];
+    try {
+      after = await profiles.applyReward(reward);
+      await ref
+          .read(adaptiveControllerProvider.notifier)
+          .record(child.id, result);
+      await ref
+          .read(progressControllerProvider.notifier)
+          .recordStars(result.lesson.id, result.stars);
+      await ref
+          .read(activityControllerProvider.notifier)
+          .record(child.id, stars: result.stars, xp: reward.xp);
+      await ref
+          .read(seasonControllerProvider.notifier)
+          .recordLesson(child.id, result.stars);
+
+      final progress = ref.read(progressControllerProvider);
+      newBadges =
+          await ref.read(achievementsControllerProvider.notifier).evaluate(
+                AchievementContext(
+                  wallet: after,
+                  completedLessons: progress.completedCount(child.id),
+                  totalStars: progress.totalStars(child.id),
+                  lastResultStars: result.stars,
+                ),
+              );
+      if (newBadges.isNotEmpty) {
+        final bonus = newBadges.fold(0, (sum, b) => sum + b.coinReward);
+        after = await profiles.applyReward(RewardBundle(coins: bonus));
+      }
+    } catch (error, stackTrace) {
+      debugPrint('Lesson completion persistence failed: $error\n$stackTrace');
+    } finally {
+      final check = LevelUpCheck(before, after);
+      if (mounted) {
+        setState(() {
+          _result = result;
+          _reward = reward;
+          _leveledUp = check.leveledUp;
+          _newLevel = check.newLevel;
+          _newBadges = newBadges;
+          _completing = false;
+        });
+      }
+    }
   }
 
   void _replay() => setState(() => _result = null);
 
   @override
   Widget build(BuildContext context) {
+    if (_completing) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Saving your stars…'),
+            ],
+          ),
+        ),
+      );
+    }
     if (_result != null) {
       return GameResultScreen(
         result: _result!,

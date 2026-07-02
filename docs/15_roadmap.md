@@ -51,6 +51,8 @@ for low-end tablets.
   persisted language picker, localized home/settings subset, and RTL support.
 - [x] **M14:** Grade 4–5 multi-subject curriculum, dedicated boss-battle
   engine/lessons, and an offline cosmetic season pass with sync coverage.
+- [x] **M15:** Reliable answer-to-result transition, 50-level Grade 4–5
+  journeys, 20-question lesson sessions, and a 50-tier season track.
 
 ## How to extend (contributor quickstart)
 - **New game:** create `features/games/engines/<name>_game.dart` taking

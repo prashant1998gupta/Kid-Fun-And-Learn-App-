@@ -81,4 +81,21 @@ void main() {
       }
     }
   });
+
+  test('grades 4-5 provide 50 levels with 20 questions each', () async {
+    final repo = CurriculumRepository();
+    await repo.ensureLoaded();
+    for (final grade in [GradeLevel.grade4, GradeLevel.grade5]) {
+      final lessons = [
+        for (final unit in repo.unitsForGrade(grade))
+          ...repo.lessonsForUnit(unit),
+      ];
+      expect(lessons.length, 50, reason: '${grade.name} needs 50 levels');
+      expect(
+        lessons.every((lesson) => lesson.questions.length >= 20),
+        isTrue,
+        reason: '${grade.name} levels need full question sessions',
+      );
+    }
+  });
 }

@@ -70,7 +70,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
       AudioService.instance.playSfx(Sfx.pop);
       AudioService.instance.successHaptic();
       _celebration.celebrate(sound: false);
-      AudioService.instance.speak((PraiseLines.success..shuffle()).first);
+      AudioService.instance.speak(PraiseLines.nextSuccess());
       _correct++;
       if (!_erred) _firstTry++;
       await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -149,8 +149,8 @@ class _BubblePopGameState extends State<BubblePopGame> {
     // Distribute bubbles across the area deterministically.
     final col = i % 3;
     final row = i ~/ 3;
-    final x = (c.maxWidth / 3) * col + (c.maxWidth / 6) - 55 +
-        20 * math.sin(i * 1.3);
+    final x =
+        (c.maxWidth / 3) * col + (c.maxWidth / 6) - 55 + 20 * math.sin(i * 1.3);
     final y = 30.0 + row * 150 + 40 * math.cos(i * 0.7);
     final option = _q.options[i];
     final color = _bubbleColors[i % _bubbleColors.length];
@@ -163,7 +163,10 @@ class _BubblePopGameState extends State<BubblePopGame> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
-            colors: [color.withValues(alpha: 0.95), color.withValues(alpha: 0.6)],
+            colors: [
+              color.withValues(alpha: 0.95),
+              color.withValues(alpha: 0.6)
+            ],
             center: const Alignment(-0.3, -0.3),
           ),
           boxShadow: [

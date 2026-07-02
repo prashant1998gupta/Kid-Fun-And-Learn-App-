@@ -110,20 +110,24 @@ class SeasonPassScreen extends ConsumerWidget {
 
   bool _isEquipped(ChildProfile child, SeasonTier tier) {
     return switch (tier.rewardKind) {
-      SeasonRewardKind.theme => child.activeTheme == tier.rewardId,
-      SeasonRewardKind.pet => child.activePetId == tier.rewardId,
+      SeasonRewardKind.theme => child.activeTheme == tier.rewardId!,
+      SeasonRewardKind.pet => child.activePetId == tier.rewardId!,
       SeasonRewardKind.sticker => false,
+      null => false,
     };
   }
 
   Future<void> _equip(WidgetRef ref, SeasonTier tier) async {
+    if (!tier.hasCosmetic) return;
     final profiles = ref.read(profilesControllerProvider.notifier);
     switch (tier.rewardKind) {
       case SeasonRewardKind.theme:
-        await profiles.setActiveTheme(tier.rewardId);
+        await profiles.setActiveTheme(tier.rewardId!);
       case SeasonRewardKind.pet:
-        await profiles.setActivePet(tier.rewardId);
+        await profiles.setActivePet(tier.rewardId!);
       case SeasonRewardKind.sticker:
+        return;
+      case null:
         return;
     }
     AudioService.instance.playSfx(Sfx.unlock);
@@ -145,7 +149,8 @@ class _TierCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canEquip = tier.rewardKind != SeasonRewardKind.sticker;
+    final canEquip = tier.rewardKind == SeasonRewardKind.theme ||
+        tier.rewardKind == SeasonRewardKind.pet;
     return Container(
       padding: AppSpacing.cardPadding,
       decoration: BoxDecoration(
@@ -189,7 +194,7 @@ class _TierCard extends StatelessWidget {
               onPressed: equipped ? null : onEquip,
               child: Text(equipped ? 'Equipped' : 'Equip'),
             )
-          else
+          else if (tier.hasCosmetic)
             const Icon(Icons.check_circle_rounded, color: AppColors.success),
         ],
       ),

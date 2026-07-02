@@ -59,7 +59,7 @@ class _DragDropGameState extends State<DragDropGame> {
       AudioService.instance.playSfx(Sfx.correct);
       AudioService.instance.successHaptic();
       _celebration.celebrate(sound: false);
-      AudioService.instance.speak((PraiseLines.success..shuffle()).first);
+      AudioService.instance.speak(PraiseLines.nextSuccess());
       _correct++;
       if (!_erred) _firstTryCorrect++;
       await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -318,7 +318,8 @@ class _Basket extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 15,
-                color: (highlight || wrong) ? Colors.white : AppColors.lightText,
+                color:
+                    (highlight || wrong) ? Colors.white : AppColors.lightText,
               ),
             ),
           ),

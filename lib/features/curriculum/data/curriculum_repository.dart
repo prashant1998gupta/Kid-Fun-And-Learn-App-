@@ -34,7 +34,48 @@ class CurriculumRepository {
     for (final entry in _assetByGrade.entries) {
       await _loadAsset(entry.value, entry.key);
     }
+    _expandGradeToFiftyLevels(GradeLevel.grade4);
+    _expandGradeToFiftyLevels(GradeLevel.grade5);
     _loaded = true;
+  }
+
+  /// Upper-primary grades ship compact, reviewable seed JSON. At load time we
+  /// build ten progressively numbered lessons per subject unit: five units ×
+  /// ten lessons gives each grade a 50-level learning journey.
+  void _expandGradeToFiftyLevels(GradeLevel grade) {
+    for (var unitIndex = 0; unitIndex < _units.length; unitIndex++) {
+      final unit = _units[unitIndex];
+      if (unit.grade != grade) continue;
+      final seeds = lessonsForUnit(unit);
+      if (seeds.isEmpty) continue;
+      final ids = [...unit.lessonIds];
+      while (ids.length < 10) {
+        final level = ids.length + 1;
+        final seed = seeds[(level - 1) % seeds.length];
+        final id = '${unit.id}_level_$level';
+        _lessons[id] = Lesson(
+          id: id,
+          title: '${seed.title} · Level $level',
+          subject: seed.subject,
+          grade: seed.grade,
+          gameType: seed.gameType,
+          questions: seed.questions,
+          emoji: seed.emoji,
+          instruction: seed.instruction,
+          baseCoins: seed.baseCoins + level,
+          baseXp: seed.baseXp + level * 2,
+        );
+        ids.add(id);
+      }
+      _units[unitIndex] = Unit(
+        id: unit.id,
+        title: unit.title,
+        subject: unit.subject,
+        grade: unit.grade,
+        lessonIds: ids.take(10).toList(),
+        emoji: unit.emoji,
+      );
+    }
   }
 
   Future<void> _loadAsset(String path, GradeLevel grade) async {

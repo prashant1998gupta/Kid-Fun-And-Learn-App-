@@ -22,7 +22,22 @@
       {"id":"q2","prompt":"3.6 + 4.45 = ?","correctIndex":0,"options":[{"label":"8.05"},{"label":"7.95"},{"label":"8.5"}]},
       {"id":"q3","prompt":"Area of a square with side 9?","correctIndex":2,"options":[{"label":"18"},{"label":"36"},{"label":"81"}]},
       {"id":"q4","prompt":"Which number is prime?","correctIndex":0,"options":[{"label":"29"},{"label":"39"},{"label":"49"}]},
-      {"id":"q5","prompt":"2/3 + 1/6 = ?","correctIndex":1,"options":[{"label":"3/9"},{"label":"5/6"},{"label":"1/2"}]}
+      {"id":"q5","prompt":"2/3 + 1/6 = ?","correctIndex":1,"options":[{"label":"3/9"},{"label":"5/6"},{"label":"1/2"}]},
+      {"id":"q6","prompt":"40% of 50 is...","correctIndex":2,"options":[{"label":"10"},{"label":"25"},{"label":"20"}]},
+      {"id":"q7","prompt":"7.25 - 3.8 = ?","correctIndex":0,"options":[{"label":"3.45"},{"label":"4.45"},{"label":"3.55"}]},
+      {"id":"q8","prompt":"0.75 written as a fraction is...","correctIndex":1,"options":[{"label":"1/2"},{"label":"3/4"},{"label":"2/3"}]},
+      {"id":"q9","prompt":"Volume of a 5 by 2 by 3 box?","correctIndex":2,"options":[{"label":"10"},{"label":"20"},{"label":"30"}]},
+      {"id":"q10","prompt":"The mean of 4, 6, and 8 is...","correctIndex":0,"options":[{"label":"6"},{"label":"5"},{"label":"7"}]},
+      {"id":"q11","prompt":"Which number is divisible by both 3 and 5?","correctIndex":1,"options":[{"label":"12"},{"label":"30"},{"label":"25"}]},
+      {"id":"q12","prompt":"5/8 - 2/8 = ?","correctIndex":2,"options":[{"label":"7/8"},{"label":"3/16"},{"label":"3/8"}]},
+      {"id":"q13","prompt":"1.2 × 5 = ?","correctIndex":0,"options":[{"label":"6"},{"label":"5"},{"label":"60"}]},
+      {"id":"q14","prompt":"A right angle measures...","correctIndex":1,"options":[{"label":"45°"},{"label":"90°"},{"label":"180°"}]},
+      {"id":"q15","prompt":"Which fraction is smallest?","correctIndex":2,"options":[{"label":"3/4"},{"label":"2/3"},{"label":"1/5"}]},
+      {"id":"q16","prompt":"2.4 + 0.86 = ?","correctIndex":0,"options":[{"label":"3.26"},{"label":"2.126"},{"label":"3.16"}]},
+      {"id":"q17","prompt":"15% of 200 is...","correctIndex":1,"options":[{"label":"20"},{"label":"30"},{"label":"40"}]},
+      {"id":"q18","prompt":"Perimeter of a 12 by 5 rectangle?","correctIndex":2,"options":[{"label":"17"},{"label":"60"},{"label":"34"}]},
+      {"id":"q19","prompt":"Which is a composite number?","correctIndex":0,"options":[{"label":"21"},{"label":"19"},{"label":"23"}]},
+      {"id":"q20","prompt":"3² + 4² = ?","correctIndex":1,"options":[{"label":"14"},{"label":"25"},{"label":"49"}]}
     ]},
     {"id":"g5_en_figures","title":"Figurative Language","subject":"english","grade":"grade5","gameType":"tapChoice","emoji":"🎭","instruction":"Name the writing technique.","questions":[
       {"id":"q1","prompt":"The moon was a silver coin. This is a...","correctIndex":2,"options":[{"label":"fact"},{"label":"simile"},{"label":"metaphor"}]},

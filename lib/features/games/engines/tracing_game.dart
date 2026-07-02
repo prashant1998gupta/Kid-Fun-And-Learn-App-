@@ -88,7 +88,7 @@ class _TracingGameState extends State<TracingGame> {
     AudioService.instance.playSfx(Sfx.correct);
     AudioService.instance.successHaptic();
     _celebration.celebrate(sound: false);
-    AudioService.instance.speak((PraiseLines.success..shuffle()).first);
+    AudioService.instance.speak(PraiseLines.nextSuccess());
     await Future<void>.delayed(const Duration(milliseconds: 1000));
     _advance();
   }
@@ -101,7 +101,8 @@ class _TracingGameState extends State<TracingGame> {
           lesson: widget.lesson,
           correct: _total,
           total: _total,
-          firstTryCorrect: _total, // tracing completion = mastery for young kids
+          firstTryCorrect:
+              _total, // tracing completion = mastery for young kids
           durationSeconds: _stopwatch.elapsed.inSeconds,
         ),
       );

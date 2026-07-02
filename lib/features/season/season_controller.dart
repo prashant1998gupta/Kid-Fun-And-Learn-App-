@@ -36,9 +36,11 @@ class SeasonController extends StateNotifier<SeasonState> {
       switch (tier.rewardKind) {
         case SeasonRewardKind.sticker:
         case SeasonRewardKind.pet:
-          await profiles.grantCollectible(tier.rewardId);
+          await profiles.grantCollectible(tier.rewardId!);
         case SeasonRewardKind.theme:
-          await profiles.unlockTheme(tier.rewardId);
+          await profiles.unlockTheme(tier.rewardId!);
+        case null:
+          break;
       }
     }
     return unlocked;

@@ -6,16 +6,18 @@ class SeasonTier {
     required this.requiredXp,
     required this.title,
     required this.emoji,
-    required this.rewardKind,
-    required this.rewardId,
+    this.rewardKind,
+    this.rewardId,
   });
 
   final int level;
   final int requiredXp;
   final String title;
   final String emoji;
-  final SeasonRewardKind rewardKind;
-  final String rewardId;
+  final SeasonRewardKind? rewardKind;
+  final String? rewardId;
+
+  bool get hasCosmetic => rewardKind != null && rewardId != null;
 }
 
 /// Cosmetic-only progression. There is no purchase path and no gameplay
@@ -24,48 +26,28 @@ class SeasonPass {
   const SeasonPass._();
 
   static const title = 'Starlight Season';
-  static const tiers = <SeasonTier>[
-    SeasonTier(
-      level: 1,
-      requiredXp: 30,
-      title: 'Crown Sticker',
-      emoji: '👑',
-      rewardKind: SeasonRewardKind.sticker,
-      rewardId: 'st_crown',
-    ),
-    SeasonTier(
-      level: 2,
-      requiredXp: 70,
-      title: 'Rocket Sticker',
-      emoji: '🚀',
-      rewardKind: SeasonRewardKind.sticker,
-      rewardId: 'st_rocket',
-    ),
-    SeasonTier(
-      level: 3,
-      requiredXp: 130,
-      title: 'Starry Night',
-      emoji: '🌙',
-      rewardKind: SeasonRewardKind.theme,
-      rewardId: 'night',
-    ),
-    SeasonTier(
-      level: 4,
-      requiredXp: 220,
-      title: 'Dragon Friend',
-      emoji: '🐲',
-      rewardKind: SeasonRewardKind.pet,
-      rewardId: 'pet_dragon',
-    ),
-    SeasonTier(
-      level: 5,
-      requiredXp: 350,
-      title: 'Aurora World',
-      emoji: '🌌',
-      rewardKind: SeasonRewardKind.theme,
-      rewardId: 'aurora',
-    ),
-  ];
+  static final List<SeasonTier> tiers = List.unmodifiable(
+    List.generate(50, (index) => _tier(index + 1)),
+  );
+
+  static SeasonTier _tier(int level) {
+    final reward = switch (level) {
+      1 => ('Crown Sticker', '👑', SeasonRewardKind.sticker, 'st_crown'),
+      10 => ('Rocket Sticker', '🚀', SeasonRewardKind.sticker, 'st_rocket'),
+      20 => ('Starry Night', '🌙', SeasonRewardKind.theme, 'night'),
+      35 => ('Dragon Friend', '🐲', SeasonRewardKind.pet, 'pet_dragon'),
+      50 => ('Aurora World', '🌌', SeasonRewardKind.theme, 'aurora'),
+      _ => null,
+    };
+    return SeasonTier(
+      level: level,
+      requiredXp: level * 30,
+      title: reward?.$1 ?? 'Starlight Level $level',
+      emoji: reward?.$2 ?? '⭐',
+      rewardKind: reward?.$3,
+      rewardId: reward?.$4,
+    );
+  }
 
   static int xpForStars(int stars) => stars.clamp(1, 3) * 10;
 

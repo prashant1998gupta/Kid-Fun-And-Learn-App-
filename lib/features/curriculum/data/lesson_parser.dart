@@ -19,9 +19,11 @@ class LessonParser {
       instruction: j['instruction'] as String? ?? '',
       baseCoins: (j['baseCoins'] ?? 10) as int,
       baseXp: (j['baseXp'] ?? 20) as int,
-      questions: ((j['questions'] as List?) ?? const [])
-          .map((q) => _question((q as Map).cast<String, dynamic>()))
-          .toList(),
+      questions: _expandQuestions(
+        ((j['questions'] as List?) ?? const [])
+            .map((q) => _question((q as Map).cast<String, dynamic>()))
+            .toList(),
+      ),
     );
   }
 
@@ -40,6 +42,38 @@ class LessonParser {
           .map((o) => AnswerOption.fromJson((o as Map).cast<String, dynamic>()))
           .toList(),
     );
+  }
+
+  /// Every lesson carries a full 20-question session. Small authored seed
+  /// banks are repeated deterministically, with choice positions rotated so a
+  /// child cannot pass by memorizing where the correct button appears.
+  static List<Question> _expandQuestions(List<Question> seeds) {
+    if (seeds.isEmpty || seeds.length >= 20) return seeds;
+    return List<Question>.generate(20, (index) {
+      final source = seeds[index % seeds.length];
+      final cycle = index ~/ seeds.length;
+      final options = source.options;
+      final canRotate = options.length > 1 && source.correctIndex != null;
+      final shift = canRotate ? cycle % options.length : 0;
+      final rotated = shift == 0
+          ? options
+          : [...options.skip(shift), ...options.take(shift)];
+      final correctIndex = canRotate
+          ? (source.correctIndex! - shift) % options.length
+          : source.correctIndex;
+      return Question(
+        id: '${source.id}_${cycle + 1}',
+        prompt: source.prompt,
+        promptEmoji: source.promptEmoji,
+        promptImage: source.promptImage,
+        options: rotated,
+        correctIndex: correctIndex,
+        correctIndices: source.correctIndices,
+        pairs: source.pairs,
+        answer: source.answer,
+        speak: source.speak,
+      );
+    });
   }
 
   static GameType _gameType(String id) {

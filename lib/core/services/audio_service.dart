@@ -119,6 +119,8 @@ class AudioService {
 class PraiseLines {
   PraiseLines._();
 
+  static int _successCursor = 0;
+
   static const List<String> success = [
     'Excellent!',
     'Awesome!',
@@ -129,6 +131,13 @@ class PraiseLines {
     'Superstar!',
     'Way to go!',
   ];
+
+  /// Returns varied praise without mutating the const [success] catalog.
+  static String nextSuccess() {
+    final line = success[_successCursor % success.length];
+    _successCursor++;
+    return line;
+  }
 
   static const List<String> encourage = [
     'Try again!',

@@ -71,7 +71,7 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
       _correct++;
       if (!_erredThisQuestion) _firstTryCorrect++;
       _celebration.celebrate(sound: false);
-      AudioService.instance.speak((PraiseLines.success..shuffle()).first);
+      AudioService.instance.speak(PraiseLines.nextSuccess());
       await Future<void>.delayed(const Duration(milliseconds: 1100));
       _advance();
     } else {

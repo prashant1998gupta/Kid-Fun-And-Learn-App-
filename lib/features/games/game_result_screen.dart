@@ -45,7 +45,7 @@ class _GameResultScreenState extends State<GameResultScreen> {
       AudioService.instance.playSfx(Sfx.levelUp);
       final line = widget.leveledUp
           ? 'Level up! You reached level ${widget.newLevel}!'
-          : (PraiseLines.success..shuffle()).first;
+          : PraiseLines.nextSuccess();
       AudioService.instance.speak(line);
     });
   }
