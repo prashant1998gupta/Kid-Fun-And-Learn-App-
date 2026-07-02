@@ -11,7 +11,9 @@ import '../features/learning_map/learning_map_screen.dart';
 import '../features/shop/shop_screen.dart';
 import '../features/spin/lucky_spin_screen.dart';
 import '../features/auth/sign_in_screen.dart';
+import '../features/certificates/certificate_screen.dart';
 import '../features/collections/collection_screen.dart';
+import '../features/leaderboard/leaderboard_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/parent/parent_dashboard_screen.dart';
@@ -39,6 +41,8 @@ class AppRoutes {
   static const parentGate = '/parent-gate';
   static const parentDashboard = '/parent';
   static const signIn = '/sign-in';
+  static const leaderboard = '/leaderboard';
+  static const certificate = '/certificate';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -110,6 +114,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.signIn,
         pageBuilder: (_, s) => _slide(const SignInScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.leaderboard,
+        pageBuilder: (_, s) => _slide(const LeaderboardScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.certificate,
+        pageBuilder: (_, s) => _slide(const CertificateScreen(), s),
       ),
     ],
     redirect: (context, state) {

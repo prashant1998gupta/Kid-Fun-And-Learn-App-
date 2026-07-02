@@ -9,7 +9,9 @@ import '../ai/adaptive_engine.dart';
 import '../auth/auth_controller.dart';
 import '../curriculum/domain/subject.dart';
 import '../profiles/profiles_controller.dart';
+import '../progress/activity_log.dart';
 import '../sync/sync_controller.dart';
+import 'widgets/trend_charts.dart';
 
 /// Parent Dashboard: progress overview, per-subject mastery, weak areas &
 /// strengths (from the adaptive engine), and screen-time/goal controls.
@@ -31,6 +33,8 @@ class ParentDashboardScreen extends ConsumerWidget {
               children: [
                 const _AccountCard(),
                 const SizedBox(height: 16),
+                const _SharingCard(),
+                const SizedBox(height: 16),
                 for (final child in children) ...[
                   _ChildHeader(name: child.name, grade: child.grade.label),
                   const SizedBox(height: 12),
@@ -40,6 +44,8 @@ class ParentDashboardScreen extends ConsumerWidget {
                     level: child.wallet.level,
                     streak: child.wallet.streakDays,
                   ),
+                  const SizedBox(height: 16),
+                  _TrendsCard(childId: child.id),
                   const SizedBox(height: 16),
                   _SubjectMastery(childId: child.id, model: model),
                   const SizedBox(height: 16),
@@ -147,6 +153,172 @@ class _StatRow extends StatelessWidget {
           AppColors.energy,
         ),
       ],
+    );
+  }
+}
+
+/// Quick links to the weekly certificate and the friends leaderboard.
+class _SharingCard extends StatelessWidget {
+  const _SharingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.celebration_rounded,
+                    color: AppColors.secondary),
+                const SizedBox(width: 8),
+                Text('Sharing & Friends',
+                    style: Theme.of(context).textTheme.titleLarge),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.push(AppRoutes.certificate),
+                    icon: const Icon(Icons.workspace_premium_rounded),
+                    label: const Text('Certificate'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.push(AppRoutes.leaderboard),
+                    icon: const Icon(Icons.leaderboard_rounded),
+                    label: const Text('Leaderboard'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Over-time trends: this week's totals + a 7-day activity bar chart.
+class _TrendsCard extends ConsumerWidget {
+  const _TrendsCard({required this.childId});
+  final String childId;
+
+  static const _weekdayInitials = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final log = ref.watch(activityControllerProvider);
+    final today = ActivityController.today;
+    final week = log.lastNDays(childId, 7, today);
+    final lessons = [for (final d in week) d.lessons];
+    final labels = [
+      for (final d in week)
+        _weekdayInitials[
+            DateTime.utc(2020).add(Duration(days: d.day)).weekday - 1],
+    ];
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.insights_rounded, color: AppColors.primary),
+                const SizedBox(width: 8),
+                Text('This Week',
+                    style: Theme.of(context).textTheme.titleLarge),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _MiniStat(
+                  label: 'Lessons',
+                  value: '${log.weeklyLessons(childId, today)}',
+                  icon: Icons.school_rounded,
+                  color: AppColors.primary,
+                ),
+                _MiniStat(
+                  label: 'Stars',
+                  value: '${log.weeklyStars(childId, today)}',
+                  icon: Icons.star_rounded,
+                  color: AppColors.star,
+                ),
+                _MiniStat(
+                  label: 'Active days',
+                  value: '${log.activeDays(childId, today)}/7',
+                  icon: Icons.calendar_today_rounded,
+                  color: AppColors.success,
+                ),
+                _MiniStat(
+                  label: 'Streak',
+                  value: '${log.currentStreak(childId, today)}',
+                  icon: Icons.local_fire_department_rounded,
+                  color: AppColors.energy,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text('Lessons per day',
+                style: Theme.of(context).textTheme.labelMedium),
+            const SizedBox(height: 8),
+            if (log.weeklyLessons(childId, today) == 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'No activity yet this week — play a lesson to start the chart! 📈',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              )
+            else
+              WeeklyBarChart(
+                values: lessons,
+                labels: labels,
+                color: AppColors.primary,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 26),
+          const SizedBox(height: 4),
+          Text(value, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+        ],
+      ),
     );
   }
 }

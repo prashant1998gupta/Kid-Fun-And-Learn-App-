@@ -1,0 +1,209 @@
+{
+  "units": [
+    {
+      "id": "g2_math",
+      "title": "Place Value Pros",
+      "subject": "math",
+      "grade": "grade2",
+      "emoji": "🔟",
+      "lessonIds": ["g2_ma_add2", "g2_ma_skip", "g2_ma_mult"]
+    },
+    {
+      "id": "g2_english",
+      "title": "Grammar Garden",
+      "subject": "english",
+      "grade": "grade2",
+      "emoji": "🌷",
+      "lessonIds": ["g2_en_nouns", "g2_en_plural", "g2_en_rhyme"]
+    },
+    {
+      "id": "g2_science",
+      "title": "Matter Matters",
+      "subject": "science",
+      "grade": "grade2",
+      "emoji": "🧪",
+      "lessonIds": ["g2_sc_states", "g2_sc_needs"]
+    },
+    {
+      "id": "g2_evs",
+      "title": "Community Helpers",
+      "subject": "evs",
+      "grade": "grade2",
+      "emoji": "🚑",
+      "lessonIds": ["g2_evs_helpers", "g2_evs_sort"]
+    },
+    {
+      "id": "g2_logic",
+      "title": "Brain Boosters",
+      "subject": "logic",
+      "grade": "grade2",
+      "emoji": "🧩",
+      "lessonIds": ["g2_lo_seq", "g2_lo_sort"]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "g2_ma_add2",
+      "title": "Two-Digit Adding",
+      "subject": "math",
+      "grade": "grade2",
+      "gameType": "tapChoice",
+      "emoji": "➕",
+      "instruction": "Add the two numbers!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {"id": "q1", "prompt": "12 + 5 = ?", "speak": "What is twelve plus five?", "correctIndex": 1, "options": [{"label": "16"}, {"label": "17"}, {"label": "18"}]},
+        {"id": "q2", "prompt": "20 + 13 = ?", "speak": "What is twenty plus thirteen?", "correctIndex": 2, "options": [{"label": "31"}, {"label": "32"}, {"label": "33"}]},
+        {"id": "q3", "prompt": "24 + 24 = ?", "speak": "What is twenty four plus twenty four?", "correctIndex": 0, "options": [{"label": "48"}, {"label": "46"}, {"label": "44"}]}
+      ]
+    },
+    {
+      "id": "g2_ma_skip",
+      "title": "Skip Counting",
+      "subject": "math",
+      "grade": "grade2",
+      "gameType": "sequence",
+      "emoji": "🐇",
+      "instruction": "Count by twos in order!",
+      "questions": [
+        {"id": "q1", "prompt": "Count by 2s", "speak": "Tap them in order counting by twos", "options": [{"label": "2"}, {"label": "4"}, {"label": "6"}, {"label": "8"}, {"label": "10"}]},
+        {"id": "q2", "prompt": "Count by 5s", "speak": "Tap them in order counting by fives", "options": [{"label": "5"}, {"label": "10"}, {"label": "15"}, {"label": "20"}]}
+      ]
+    },
+    {
+      "id": "g2_ma_mult",
+      "title": "Groups of Things",
+      "subject": "math",
+      "grade": "grade2",
+      "gameType": "tapChoice",
+      "emoji": "✖️",
+      "instruction": "How many in all?",
+      "questions": [
+        {"id": "q1", "prompt": "2 groups of 3 = ?", "speak": "Two groups of three is?", "correctIndex": 1, "options": [{"label": "5"}, {"label": "6"}, {"label": "8"}]},
+        {"id": "q2", "prompt": "3 x 2 = ?", "speak": "What is three times two?", "correctIndex": 0, "options": [{"label": "6"}, {"label": "5"}, {"label": "9"}]}
+      ]
+    },
+    {
+      "id": "g2_en_nouns",
+      "title": "Naming Words",
+      "subject": "english",
+      "grade": "grade2",
+      "gameType": "tapChoice",
+      "emoji": "🏷️",
+      "instruction": "Which one is a naming word (noun)?",
+      "questions": [
+        {"id": "q1", "prompt": "Pick the noun", "speak": "Which word names a thing?", "correctIndex": 2, "options": [{"label": "run"}, {"label": "happy"}, {"label": "dog"}]},
+        {"id": "q2", "prompt": "Pick the noun", "speak": "Which word names a place?", "correctIndex": 0, "options": [{"label": "school"}, {"label": "jump"}, {"label": "fast"}]}
+      ]
+    },
+    {
+      "id": "g2_en_plural",
+      "title": "One or Many",
+      "subject": "english",
+      "grade": "grade2",
+      "gameType": "tapChoice",
+      "emoji": "🔢",
+      "instruction": "Pick the plural (more than one)!",
+      "questions": [
+        {"id": "q1", "prompt": "More than one cat", "speak": "What is more than one cat?", "correctIndex": 1, "options": [{"label": "cat"}, {"label": "cats"}, {"label": "catt"}]},
+        {"id": "q2", "prompt": "More than one box", "speak": "What is more than one box?", "correctIndex": 2, "options": [{"label": "boxs"}, {"label": "box"}, {"label": "boxes"}]}
+      ]
+    },
+    {
+      "id": "g2_en_rhyme",
+      "title": "Rhyme Match",
+      "subject": "english",
+      "grade": "grade2",
+      "gameType": "memoryMatch",
+      "emoji": "🎵",
+      "instruction": "Match the rhyming pictures!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {"id": "q1", "prompt": "Match the pairs", "options": [{"label": "Cat", "emoji": "🐱"}, {"label": "Star", "emoji": "⭐"}, {"label": "Sun", "emoji": "☀️"}, {"label": "Tree", "emoji": "🌳"}, {"label": "Bee", "emoji": "🐝"}]}
+      ]
+    },
+    {
+      "id": "g2_sc_states",
+      "title": "Solid, Liquid, Gas",
+      "subject": "science",
+      "grade": "grade2",
+      "gameType": "dragDrop",
+      "emoji": "💧",
+      "instruction": "Sort it into the right state!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {"id": "q1", "prompt": "Water is a...", "promptEmoji": "💧", "speak": "Water is a solid, liquid, or gas?", "correctIndex": 1, "options": [{"label": "Solid", "emoji": "🧊"}, {"label": "Liquid", "emoji": "💧"}]},
+        {"id": "q2", "prompt": "Ice is a...", "promptEmoji": "🧊", "speak": "Ice is a solid or liquid?", "correctIndex": 0, "options": [{"label": "Solid", "emoji": "🧊"}, {"label": "Liquid", "emoji": "💧"}]},
+        {"id": "q3", "prompt": "A rock is a...", "promptEmoji": "🪨", "speak": "A rock is a solid or liquid?", "correctIndex": 0, "options": [{"label": "Solid", "emoji": "🧊"}, {"label": "Liquid", "emoji": "💧"}]}
+      ]
+    },
+    {
+      "id": "g2_sc_needs",
+      "title": "What Plants Need",
+      "subject": "science",
+      "grade": "grade2",
+      "gameType": "tapChoice",
+      "emoji": "🌻",
+      "instruction": "What do living things need?",
+      "questions": [
+        {"id": "q1", "prompt": "Plants need this to grow", "speak": "What do plants need to grow?", "correctIndex": 0, "options": [{"label": "Sunlight", "emoji": "☀️"}, {"label": "Candy", "emoji": "🍬"}, {"label": "Toys", "emoji": "🧸"}]},
+        {"id": "q2", "prompt": "All animals need...", "speak": "What do all animals need?", "correctIndex": 1, "options": [{"label": "Phones", "emoji": "📱"}, {"label": "Water", "emoji": "💧"}, {"label": "Hats", "emoji": "🎩"}]}
+      ]
+    },
+    {
+      "id": "g2_evs_helpers",
+      "title": "Who Helps Us?",
+      "subject": "evs",
+      "grade": "grade2",
+      "gameType": "tapChoice",
+      "emoji": "👩‍⚕️",
+      "instruction": "Who does this job?",
+      "questions": [
+        {"id": "q1", "prompt": "Who helps when we are sick?", "speak": "Who helps us when we are sick?", "correctIndex": 1, "options": [{"label": "Chef", "emoji": "👨‍🍳"}, {"label": "Doctor", "emoji": "👩‍⚕️"}, {"label": "Pilot", "emoji": "👨‍✈️"}]},
+        {"id": "q2", "prompt": "Who puts out fires?", "speak": "Who puts out fires?", "correctIndex": 0, "options": [{"label": "Firefighter", "emoji": "🧑‍🚒"}, {"label": "Farmer", "emoji": "👨‍🌾"}, {"label": "Teacher", "emoji": "👩‍🏫"}]}
+      ]
+    },
+    {
+      "id": "g2_evs_sort",
+      "title": "Helper Tools",
+      "subject": "evs",
+      "grade": "grade2",
+      "gameType": "dragDrop",
+      "emoji": "🧰",
+      "instruction": "Whose tool is it?",
+      "questions": [
+        {"id": "q1", "prompt": "Who uses a stethoscope?", "promptEmoji": "🩺", "speak": "Who uses a stethoscope?", "correctIndex": 0, "options": [{"label": "Doctor", "emoji": "👩‍⚕️"}, {"label": "Chef", "emoji": "👨‍🍳"}]},
+        {"id": "q2", "prompt": "Who uses a pan?", "promptEmoji": "🍳", "speak": "Who uses a frying pan?", "correctIndex": 1, "options": [{"label": "Doctor", "emoji": "👩‍⚕️"}, {"label": "Chef", "emoji": "👨‍🍳"}]}
+      ]
+    },
+    {
+      "id": "g2_lo_seq",
+      "title": "Number Sequence",
+      "subject": "logic",
+      "grade": "grade2",
+      "gameType": "sequence",
+      "emoji": "🔢",
+      "instruction": "Put them in order!",
+      "questions": [
+        {"id": "q1", "prompt": "Order 10 to 50 by tens", "speak": "Order by tens", "options": [{"label": "10"}, {"label": "20"}, {"label": "30"}, {"label": "40"}, {"label": "50"}]},
+        {"id": "q2", "prompt": "Days getting bigger", "speak": "Order the numbers", "options": [{"label": "3"}, {"label": "7"}, {"label": "11"}, {"label": "15"}]}
+      ]
+    },
+    {
+      "id": "g2_lo_sort",
+      "title": "Sort the Shapes",
+      "subject": "logic",
+      "grade": "grade2",
+      "gameType": "dragDrop",
+      "emoji": "🔺",
+      "instruction": "Sort by number of sides!",
+      "questions": [
+        {"id": "q1", "prompt": "A triangle has 3 sides?", "promptEmoji": "🔺", "speak": "Does a triangle have three sides?", "correctIndex": 0, "options": [{"label": "3 sides", "emoji": "🔺"}, {"label": "4 sides", "emoji": "🟥"}]},
+        {"id": "q2", "prompt": "A square has 4 sides?", "promptEmoji": "🟥", "speak": "Does a square have four sides?", "correctIndex": 1, "options": [{"label": "3 sides", "emoji": "🔺"}, {"label": "4 sides", "emoji": "🟥"}]}
+      ]
+    }
+  ]
+}

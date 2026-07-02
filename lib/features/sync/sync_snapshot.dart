@@ -26,6 +26,8 @@ class SyncSnapshot {
     'lesson_progress',
     'unlocked_achievements',
     'skill_model',
+    'activity_log',
+    'friend_group_code',
     'locale',
   ];
   static const _intKeys = <String>['themeMode'];

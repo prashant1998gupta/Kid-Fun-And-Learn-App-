@@ -384,6 +384,13 @@ class _QuickActions extends ConsumerWidget {
             color: AppColors.bubblegum,
             onTap: () => context.push(AppRoutes.collection),
           ),
+          const SizedBox(width: AppSpacing.md),
+          action(
+            icon: Icons.leaderboard_rounded,
+            label: 'Friends',
+            color: AppColors.sky,
+            onTap: () => context.push(AppRoutes.leaderboard),
+          ),
         ],
       ),
     );

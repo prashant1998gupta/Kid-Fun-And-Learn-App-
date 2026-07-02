@@ -1,0 +1,210 @@
+{
+  "units": [
+    {
+      "id": "g3_math",
+      "title": "Times Tables",
+      "subject": "math",
+      "grade": "grade3",
+      "emoji": "✖️",
+      "lessonIds": ["g3_ma_mult", "g3_ma_div", "g3_ma_frac"]
+    },
+    {
+      "id": "g3_english",
+      "title": "Word Wizards",
+      "subject": "english",
+      "grade": "grade3",
+      "emoji": "🪄",
+      "lessonIds": ["g3_en_verbs", "g3_en_syn", "g3_en_sentence"]
+    },
+    {
+      "id": "g3_science",
+      "title": "Solar System",
+      "subject": "science",
+      "grade": "grade3",
+      "emoji": "🪐",
+      "lessonIds": ["g3_sc_planets", "g3_sc_space"]
+    },
+    {
+      "id": "g3_evs",
+      "title": "Earth & Us",
+      "subject": "evs",
+      "grade": "grade3",
+      "emoji": "🌍",
+      "lessonIds": ["g3_evs_recycle", "g3_evs_continents"]
+    },
+    {
+      "id": "g3_logic",
+      "title": "Logic Lab",
+      "subject": "logic",
+      "grade": "grade3",
+      "emoji": "🔬",
+      "lessonIds": ["g3_lo_pattern", "g3_lo_odd"]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "g3_ma_mult",
+      "title": "Multiplication",
+      "subject": "math",
+      "grade": "grade3",
+      "gameType": "tapChoice",
+      "emoji": "✖️",
+      "instruction": "What is the product?",
+      "baseCoins": 20,
+      "baseXp": 38,
+      "questions": [
+        {"id": "q1", "prompt": "4 x 3 = ?", "speak": "What is four times three?", "correctIndex": 1, "options": [{"label": "10"}, {"label": "12"}, {"label": "14"}]},
+        {"id": "q2", "prompt": "6 x 2 = ?", "speak": "What is six times two?", "correctIndex": 0, "options": [{"label": "12"}, {"label": "8"}, {"label": "14"}]},
+        {"id": "q3", "prompt": "5 x 5 = ?", "speak": "What is five times five?", "correctIndex": 2, "options": [{"label": "20"}, {"label": "30"}, {"label": "25"}]}
+      ]
+    },
+    {
+      "id": "g3_ma_div",
+      "title": "Sharing Equally",
+      "subject": "math",
+      "grade": "grade3",
+      "gameType": "tapChoice",
+      "emoji": "➗",
+      "instruction": "Divide it up!",
+      "questions": [
+        {"id": "q1", "prompt": "10 ÷ 2 = ?", "speak": "What is ten divided by two?", "correctIndex": 2, "options": [{"label": "3"}, {"label": "4"}, {"label": "5"}]},
+        {"id": "q2", "prompt": "12 ÷ 3 = ?", "speak": "What is twelve divided by three?", "correctIndex": 0, "options": [{"label": "4"}, {"label": "5"}, {"label": "6"}]}
+      ]
+    },
+    {
+      "id": "g3_ma_frac",
+      "title": "Fun with Fractions",
+      "subject": "math",
+      "grade": "grade3",
+      "gameType": "tapChoice",
+      "emoji": "🍕",
+      "instruction": "Which fraction is shown?",
+      "questions": [
+        {"id": "q1", "prompt": "Half a pizza is...", "speak": "What is half?", "correctIndex": 1, "options": [{"label": "1/3"}, {"label": "1/2"}, {"label": "1/4"}]},
+        {"id": "q2", "prompt": "One of four equal parts", "speak": "One of four equal parts is?", "correctIndex": 0, "options": [{"label": "1/4"}, {"label": "1/2"}, {"label": "4/1"}]}
+      ]
+    },
+    {
+      "id": "g3_en_verbs",
+      "title": "Action Words",
+      "subject": "english",
+      "grade": "grade3",
+      "gameType": "tapChoice",
+      "emoji": "🏃",
+      "instruction": "Pick the action word (verb)!",
+      "questions": [
+        {"id": "q1", "prompt": "Which is a verb?", "speak": "Which word is an action?", "correctIndex": 0, "options": [{"label": "jump"}, {"label": "table"}, {"label": "blue"}]},
+        {"id": "q2", "prompt": "Which is a verb?", "speak": "Which word is an action?", "correctIndex": 2, "options": [{"label": "happy"}, {"label": "cat"}, {"label": "sing"}]}
+      ]
+    },
+    {
+      "id": "g3_en_syn",
+      "title": "Synonym Match",
+      "subject": "english",
+      "grade": "grade3",
+      "gameType": "memoryMatch",
+      "emoji": "🔗",
+      "instruction": "Match words that mean the same!",
+      "baseCoins": 20,
+      "baseXp": 38,
+      "questions": [
+        {"id": "q1", "prompt": "Match the synonyms", "options": [{"label": "Big"}, {"label": "Happy"}, {"label": "Fast"}, {"label": "Cold"}, {"label": "Small"}]}
+      ]
+    },
+    {
+      "id": "g3_en_sentence",
+      "title": "Sentence Builder",
+      "subject": "english",
+      "grade": "grade3",
+      "gameType": "sequence",
+      "emoji": "📝",
+      "instruction": "Put the words in order to make a sentence!",
+      "questions": [
+        {"id": "q1", "prompt": "Make a sentence", "speak": "Put the words in order", "options": [{"label": "The"}, {"label": "cat"}, {"label": "is"}, {"label": "black"}]},
+        {"id": "q2", "prompt": "Make a sentence", "speak": "Put the words in order", "options": [{"label": "I"}, {"label": "like"}, {"label": "to"}, {"label": "read"}]}
+      ]
+    },
+    {
+      "id": "g3_sc_planets",
+      "title": "Planet Order",
+      "subject": "science",
+      "grade": "grade3",
+      "gameType": "sequence",
+      "emoji": "🪐",
+      "instruction": "Order the planets from the Sun!",
+      "baseCoins": 22,
+      "baseXp": 40,
+      "questions": [
+        {"id": "q1", "prompt": "Nearest to farthest", "speak": "Order the planets from the sun", "options": [{"label": "Mercury", "emoji": "☿️"}, {"label": "Venus", "emoji": "♀️"}, {"label": "Earth", "emoji": "🌍"}, {"label": "Mars", "emoji": "♂️"}]}
+      ]
+    },
+    {
+      "id": "g3_sc_space",
+      "title": "Space Facts",
+      "subject": "science",
+      "grade": "grade3",
+      "gameType": "tapChoice",
+      "emoji": "🚀",
+      "instruction": "Pick the right answer!",
+      "questions": [
+        {"id": "q1", "prompt": "Which planet do we live on?", "speak": "Which planet do we live on?", "correctIndex": 1, "options": [{"label": "Mars", "emoji": "♂️"}, {"label": "Earth", "emoji": "🌍"}, {"label": "Jupiter", "emoji": "🪐"}]},
+        {"id": "q2", "prompt": "What lights up our day?", "speak": "What lights up our day?", "correctIndex": 0, "options": [{"label": "Sun", "emoji": "☀️"}, {"label": "Moon", "emoji": "🌙"}, {"label": "Star", "emoji": "⭐"}]}
+      ]
+    },
+    {
+      "id": "g3_evs_recycle",
+      "title": "Reduce & Recycle",
+      "subject": "evs",
+      "grade": "grade3",
+      "gameType": "dragDrop",
+      "emoji": "♻️",
+      "instruction": "Can we recycle it?",
+      "baseCoins": 20,
+      "baseXp": 38,
+      "questions": [
+        {"id": "q1", "prompt": "A paper cup", "promptEmoji": "🥤", "speak": "Can we recycle paper?", "correctIndex": 0, "options": [{"label": "Recycle", "emoji": "♻️"}, {"label": "Trash", "emoji": "🗑️"}]},
+        {"id": "q2", "prompt": "A banana peel", "promptEmoji": "🍌", "speak": "Where does a banana peel go?", "correctIndex": 1, "options": [{"label": "Recycle", "emoji": "♻️"}, {"label": "Compost", "emoji": "🍂"}]},
+        {"id": "q3", "prompt": "A glass bottle", "promptEmoji": "🍾", "speak": "Can we recycle glass?", "correctIndex": 0, "options": [{"label": "Recycle", "emoji": "♻️"}, {"label": "Trash", "emoji": "🗑️"}]}
+      ]
+    },
+    {
+      "id": "g3_evs_continents",
+      "title": "Our Continents",
+      "subject": "evs",
+      "grade": "grade3",
+      "gameType": "tapChoice",
+      "emoji": "🗺️",
+      "instruction": "Answer about our world!",
+      "questions": [
+        {"id": "q1", "prompt": "How many continents are there?", "speak": "How many continents are there?", "correctIndex": 2, "options": [{"label": "5"}, {"label": "6"}, {"label": "7"}]},
+        {"id": "q2", "prompt": "Which is the biggest ocean?", "speak": "Which is the biggest ocean?", "correctIndex": 0, "options": [{"label": "Pacific", "emoji": "🌊"}, {"label": "Lake", "emoji": "🏞️"}, {"label": "Pond", "emoji": "💧"}]}
+      ]
+    },
+    {
+      "id": "g3_lo_pattern",
+      "title": "Pattern Master",
+      "subject": "logic",
+      "grade": "grade3",
+      "gameType": "sequence",
+      "emoji": "🔷",
+      "instruction": "Continue the pattern in order!",
+      "questions": [
+        {"id": "q1", "prompt": "Order by size", "speak": "Order from smallest to biggest", "options": [{"label": "1"}, {"label": "4"}, {"label": "9"}, {"label": "16"}]},
+        {"id": "q2", "prompt": "Odd numbers", "speak": "Order the odd numbers", "options": [{"label": "1"}, {"label": "3"}, {"label": "5"}, {"label": "7"}, {"label": "9"}]}
+      ]
+    },
+    {
+      "id": "g3_lo_odd",
+      "title": "Odd One Out",
+      "subject": "logic",
+      "grade": "grade3",
+      "gameType": "tapChoice",
+      "emoji": "🔍",
+      "instruction": "Which does not belong?",
+      "questions": [
+        {"id": "q1", "prompt": "Which is NOT a planet?", "speak": "Which one is not a planet?", "correctIndex": 1, "options": [{"label": "Mars", "emoji": "♂️"}, {"label": "Moon", "emoji": "🌙"}, {"label": "Venus", "emoji": "♀️"}]},
+        {"id": "q2", "prompt": "Which is NOT even?", "speak": "Which number is not even?", "correctIndex": 2, "options": [{"label": "4"}, {"label": "8"}, {"label": "7"}]}
+      ]
+    }
+  ]
+}

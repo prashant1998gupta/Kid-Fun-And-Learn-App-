@@ -1,0 +1,214 @@
+{
+  "units": [
+    {
+      "id": "g1_math",
+      "title": "Number Town",
+      "subject": "math",
+      "grade": "grade1",
+      "emoji": "🏘️",
+      "lessonIds": ["g1_ma_add10", "g1_ma_sub10", "g1_ma_order"]
+    },
+    {
+      "id": "g1_english",
+      "title": "Reading Rocket",
+      "subject": "english",
+      "grade": "grade1",
+      "emoji": "🚀",
+      "lessonIds": ["g1_en_sight", "g1_en_blend", "g1_en_trace"]
+    },
+    {
+      "id": "g1_evs",
+      "title": "Living World",
+      "subject": "evs",
+      "grade": "grade1",
+      "emoji": "🌿",
+      "lessonIds": ["g1_evs_living", "g1_evs_homes"]
+    },
+    {
+      "id": "g1_science",
+      "title": "Body & Senses",
+      "subject": "science",
+      "grade": "grade1",
+      "emoji": "👀",
+      "lessonIds": ["g1_sc_senses", "g1_sc_bodymatch"]
+    },
+    {
+      "id": "g1_logic",
+      "title": "Pattern Play",
+      "subject": "logic",
+      "grade": "grade1",
+      "emoji": "🔷",
+      "lessonIds": ["g1_lo_pattern", "g1_lo_odd"]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "g1_ma_add10",
+      "title": "Add within 10",
+      "subject": "math",
+      "grade": "grade1",
+      "gameType": "tapChoice",
+      "emoji": "➕",
+      "instruction": "What is the sum?",
+      "baseCoins": 16,
+      "baseXp": 30,
+      "questions": [
+        {"id": "q1", "prompt": "3 + 4 = ?", "speak": "What is three plus four?", "correctIndex": 1, "options": [{"label": "6"}, {"label": "7"}, {"label": "8"}]},
+        {"id": "q2", "prompt": "5 + 2 = ?", "speak": "What is five plus two?", "correctIndex": 2, "options": [{"label": "6"}, {"label": "8"}, {"label": "7"}]},
+        {"id": "q3", "prompt": "4 + 4 = ?", "speak": "What is four plus four?", "correctIndex": 0, "options": [{"label": "8"}, {"label": "9"}, {"label": "7"}]}
+      ]
+    },
+    {
+      "id": "g1_ma_sub10",
+      "title": "Take Away",
+      "subject": "math",
+      "grade": "grade1",
+      "gameType": "tapChoice",
+      "emoji": "➖",
+      "instruction": "What is left?",
+      "questions": [
+        {"id": "q1", "prompt": "7 - 3 = ?", "speak": "What is seven minus three?", "correctIndex": 1, "options": [{"label": "3"}, {"label": "4"}, {"label": "5"}]},
+        {"id": "q2", "prompt": "9 - 5 = ?", "speak": "What is nine minus five?", "correctIndex": 0, "options": [{"label": "4"}, {"label": "5"}, {"label": "3"}]},
+        {"id": "q3", "prompt": "6 - 2 = ?", "speak": "What is six minus two?", "correctIndex": 2, "options": [{"label": "3"}, {"label": "5"}, {"label": "4"}]}
+      ]
+    },
+    {
+      "id": "g1_ma_order",
+      "title": "Number Order",
+      "subject": "math",
+      "grade": "grade1",
+      "gameType": "sequence",
+      "emoji": "🔢",
+      "instruction": "Put the numbers in order!",
+      "baseCoins": 18,
+      "baseXp": 32,
+      "questions": [
+        {"id": "q1", "prompt": "Order 1 to 5", "speak": "Tap the numbers in order", "options": [{"label": "1"}, {"label": "2"}, {"label": "3"}, {"label": "4"}, {"label": "5"}]},
+        {"id": "q2", "prompt": "Order 5 to 9", "speak": "Tap the numbers in order", "options": [{"label": "5"}, {"label": "6"}, {"label": "7"}, {"label": "8"}, {"label": "9"}]}
+      ]
+    },
+    {
+      "id": "g1_en_sight",
+      "title": "Sight Words",
+      "subject": "english",
+      "grade": "grade1",
+      "gameType": "tapChoice",
+      "emoji": "👁️",
+      "instruction": "Pick the correct word!",
+      "questions": [
+        {"id": "q1", "prompt": "Which word is 'the'?", "speak": "Which word is the?", "correctIndex": 0, "options": [{"label": "the"}, {"label": "teh"}, {"label": "hte"}]},
+        {"id": "q2", "prompt": "Which word is 'and'?", "speak": "Which word is and?", "correctIndex": 2, "options": [{"label": "nad"}, {"label": "adn"}, {"label": "and"}]},
+        {"id": "q3", "prompt": "Which word is 'you'?", "speak": "Which word is you?", "correctIndex": 1, "options": [{"label": "yuo"}, {"label": "you"}, {"label": "oyu"}]}
+      ]
+    },
+    {
+      "id": "g1_en_blend",
+      "title": "Word Families",
+      "subject": "english",
+      "grade": "grade1",
+      "gameType": "tapChoice",
+      "emoji": "🔤",
+      "instruction": "Which word fits?",
+      "questions": [
+        {"id": "q1", "prompt": "_at (a hat!)", "speak": "Which letter makes hat?", "correctIndex": 1, "options": [{"label": "b"}, {"label": "h"}, {"label": "m"}]},
+        {"id": "q2", "prompt": "_un (the sun!)", "speak": "Which letter makes sun?", "correctIndex": 0, "options": [{"label": "s"}, {"label": "r"}, {"label": "f"}]}
+      ]
+    },
+    {
+      "id": "g1_en_trace",
+      "title": "Trace Sight Words",
+      "subject": "english",
+      "grade": "grade1",
+      "gameType": "tracing",
+      "emoji": "✏️",
+      "instruction": "Trace the letter!",
+      "questions": [
+        {"id": "q1", "answer": "G", "speak": "Trace the letter G"},
+        {"id": "q2", "answer": "H", "speak": "Trace the letter H"},
+        {"id": "q3", "answer": "I", "speak": "Trace the letter I"}
+      ]
+    },
+    {
+      "id": "g1_evs_living",
+      "title": "Living or Not?",
+      "subject": "evs",
+      "grade": "grade1",
+      "gameType": "dragDrop",
+      "emoji": "🌱",
+      "instruction": "Drag each to the right box!",
+      "baseCoins": 16,
+      "baseXp": 30,
+      "questions": [
+        {"id": "q1", "prompt": "Is a dog living?", "promptEmoji": "🐶", "speak": "Is a dog living or nonliving?", "correctIndex": 0, "options": [{"label": "Living", "emoji": "🌿"}, {"label": "Nonliving", "emoji": "🪨"}]},
+        {"id": "q2", "prompt": "Is a rock living?", "promptEmoji": "🪨", "speak": "Is a rock living or nonliving?", "correctIndex": 1, "options": [{"label": "Living", "emoji": "🌿"}, {"label": "Nonliving", "emoji": "🪨"}]},
+        {"id": "q3", "prompt": "Is a tree living?", "promptEmoji": "🌳", "speak": "Is a tree living or nonliving?", "correctIndex": 0, "options": [{"label": "Living", "emoji": "🌿"}, {"label": "Nonliving", "emoji": "🪨"}]}
+      ]
+    },
+    {
+      "id": "g1_evs_homes",
+      "title": "Animal Homes",
+      "subject": "evs",
+      "grade": "grade1",
+      "gameType": "tapChoice",
+      "emoji": "🏠",
+      "instruction": "Where does it live?",
+      "questions": [
+        {"id": "q1", "prompt": "Where does a bee live?", "speak": "Where does a bee live?", "correctIndex": 1, "options": [{"label": "Nest", "emoji": "🪺"}, {"label": "Hive", "emoji": "🍯"}, {"label": "Web", "emoji": "🕸️"}]},
+        {"id": "q2", "prompt": "Where does a bird live?", "speak": "Where does a bird live?", "correctIndex": 0, "options": [{"label": "Nest", "emoji": "🪺"}, {"label": "Hive", "emoji": "🍯"}, {"label": "Den", "emoji": "🕳️"}]}
+      ]
+    },
+    {
+      "id": "g1_sc_senses",
+      "title": "Five Senses",
+      "subject": "science",
+      "grade": "grade1",
+      "gameType": "tapChoice",
+      "emoji": "👀",
+      "instruction": "Which sense do we use?",
+      "questions": [
+        {"id": "q1", "prompt": "We use eyes to...", "speak": "What do we use our eyes for?", "correctIndex": 0, "options": [{"label": "See", "emoji": "👀"}, {"label": "Hear", "emoji": "👂"}, {"label": "Smell", "emoji": "👃"}]},
+        {"id": "q2", "prompt": "We use a nose to...", "speak": "What do we use our nose for?", "correctIndex": 2, "options": [{"label": "See", "emoji": "👀"}, {"label": "Taste", "emoji": "👅"}, {"label": "Smell", "emoji": "👃"}]}
+      ]
+    },
+    {
+      "id": "g1_sc_bodymatch",
+      "title": "Body Match",
+      "subject": "science",
+      "grade": "grade1",
+      "gameType": "memoryMatch",
+      "emoji": "🧠",
+      "instruction": "Match the pairs!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {"id": "q1", "prompt": "Match the body parts", "options": [{"label": "Eye", "emoji": "👁️"}, {"label": "Ear", "emoji": "👂"}, {"label": "Nose", "emoji": "👃"}, {"label": "Hand", "emoji": "✋"}, {"label": "Foot", "emoji": "🦶"}]}
+      ]
+    },
+    {
+      "id": "g1_lo_pattern",
+      "title": "Finish the Pattern",
+      "subject": "logic",
+      "grade": "grade1",
+      "gameType": "sequence",
+      "emoji": "🔷",
+      "instruction": "Put them in the right order!",
+      "questions": [
+        {"id": "q1", "prompt": "Small to big", "speak": "Order from small to big", "options": [{"label": "Ant", "emoji": "🐜"}, {"label": "Cat", "emoji": "🐱"}, {"label": "Dog", "emoji": "🐶"}, {"label": "Elephant", "emoji": "🐘"}]},
+        {"id": "q2", "prompt": "Seed to tree", "speak": "Order how a plant grows", "options": [{"label": "Seed", "emoji": "🌰"}, {"label": "Sprout", "emoji": "🌱"}, {"label": "Plant", "emoji": "🪴"}, {"label": "Tree", "emoji": "🌳"}]}
+      ]
+    },
+    {
+      "id": "g1_lo_odd",
+      "title": "Odd One Out",
+      "subject": "logic",
+      "grade": "grade1",
+      "gameType": "tapChoice",
+      "emoji": "🔍",
+      "instruction": "Which does not belong?",
+      "questions": [
+        {"id": "q1", "prompt": "Which is NOT a fruit?", "speak": "Which one is not a fruit?", "correctIndex": 2, "options": [{"label": "Apple", "emoji": "🍎"}, {"label": "Grapes", "emoji": "🍇"}, {"label": "Carrot", "emoji": "🥕"}]},
+        {"id": "q2", "prompt": "Which does NOT fly?", "speak": "Which one cannot fly?", "correctIndex": 1, "options": [{"label": "Bird", "emoji": "🐦"}, {"label": "Fish", "emoji": "🐟"}, {"label": "Bee", "emoji": "🐝"}]}
+      ]
+    }
+  ]
+}

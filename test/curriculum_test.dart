@@ -7,29 +7,56 @@ void main() {
   // and the repository indexes it. Uses a widgets binding so rootBundle works.
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('LKG + UKG curriculum load and parse without errors', () async {
+  // Every grade that ships a content file must parse and cross-reference.
+  const authoredGrades = [
+    GradeLevel.lkg,
+    GradeLevel.ukg,
+    GradeLevel.grade1,
+    GradeLevel.grade2,
+    GradeLevel.grade3,
+  ];
+
+  test('all authored grades load and parse without errors', () async {
     final repo = CurriculumRepository();
     await repo.ensureLoaded();
 
-    final lkgUnits = repo.unitsForGrade(GradeLevel.lkg);
-    final ukgUnits = repo.unitsForGrade(GradeLevel.ukg);
+    for (final grade in authoredGrades) {
+      final units = repo.unitsForGrade(grade);
+      expect(units, isNotEmpty, reason: '${grade.name} units should parse');
 
-    expect(lkgUnits, isNotEmpty, reason: 'LKG units should parse');
-    expect(ukgUnits, isNotEmpty, reason: 'UKG units should parse');
-
-    // Every lessonId referenced by a unit must resolve to a real lesson with
-    // at least one question — catches typos between units[] and lessons[].
-    for (final unit in [...lkgUnits, ...ukgUnits]) {
-      final lessons = repo.lessonsForUnit(unit);
-      expect(
-        lessons.length,
-        unit.lessonIds.length,
-        reason: 'All lessonIds in ${unit.id} should resolve',
-      );
-      for (final lesson in lessons) {
-        expect(lesson.questions, isNotEmpty,
-            reason: '${lesson.id} should have questions');
+      // Every lessonId referenced by a unit must resolve to a real lesson with
+      // at least one question — catches typos between units[] and lessons[].
+      for (final unit in units) {
+        final lessons = repo.lessonsForUnit(unit);
+        expect(
+          lessons.length,
+          unit.lessonIds.length,
+          reason: 'All lessonIds in ${unit.id} should resolve',
+        );
+        for (final lesson in lessons) {
+          expect(lesson.questions, isNotEmpty,
+              reason: '${lesson.id} should have questions');
+          // The lesson's grade must match its owning unit.
+          expect(lesson.grade, unit.grade,
+              reason: '${lesson.id} grade should match ${unit.id}');
+        }
       }
+    }
+  });
+
+  test('grades 1-3 span several subjects each', () async {
+    final repo = CurriculumRepository();
+    await repo.ensureLoaded();
+    for (final grade in [
+      GradeLevel.grade1,
+      GradeLevel.grade2,
+      GradeLevel.grade3,
+    ]) {
+      expect(
+        repo.subjectsForGrade(grade).length,
+        greaterThanOrEqualTo(4),
+        reason: '${grade.name} should span multiple subjects',
+      );
     }
   });
 }

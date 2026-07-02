@@ -10,6 +10,7 @@ import '../achievements/achievements_controller.dart';
 import '../achievements/domain/achievement.dart';
 import '../ai/adaptive_engine.dart';
 import '../profiles/profiles_controller.dart';
+import '../progress/activity_log.dart';
 import '../progress/progress_controller.dart';
 import 'engines/bubble_pop_game.dart';
 import 'engines/drag_drop_game.dart';
@@ -60,6 +61,11 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
     await ref
         .read(progressControllerProvider.notifier)
         .recordStars(result.lesson.id, result.stars);
+
+    // Log today's activity for the parent dashboard's over-time graphs.
+    await ref
+        .read(activityControllerProvider.notifier)
+        .record(child.id, stars: result.stars, xp: reward.xp);
 
     // Evaluate achievements against the fresh state and grant their coins.
     final progress = ref.read(progressControllerProvider);
