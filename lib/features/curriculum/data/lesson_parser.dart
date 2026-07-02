@@ -1,7 +1,6 @@
 import '../../profiles/domain/grade_level.dart';
 import '../domain/lesson.dart';
 import '../domain/subject.dart';
-import 'preschool_question_factory.dart';
 
 /// Parses the curriculum JSON schema into domain [Lesson]s.
 ///
@@ -26,18 +25,10 @@ class LessonParser {
       instruction: j['instruction'] as String? ?? '',
       baseCoins: (j['baseCoins'] ?? 10) as int,
       baseXp: (j['baseXp'] ?? 20) as int,
-      // Preschool bands get a broad, *generated* (varied) practice bank.
-      // Older grades use exactly their authored questions — never padded by
-      // repetition, which previously made one lesson show the same question
-      // many times. A short, correct lesson beats a long, repetitive one.
-      questions: grade.isPreSchool
-          ? PreschoolQuestionFactory.expand(
-              seeds,
-              grade: grade,
-              subject: subject,
-              gameType: gameType,
-            )
-          : seeds,
+      // Authored lessons are *seeds*: they define the subject, mini-game types
+      // and artwork. The playable 50-level journeys (with fresh, non-repeating
+      // questions) are generated in CurriculumRepository via QuestionFactory.
+      questions: seeds,
     );
   }
 

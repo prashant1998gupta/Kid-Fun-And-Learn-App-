@@ -52,11 +52,21 @@ class _TextTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact = label.length <= 2;
+    // Show the FULL label. A single letter/number gets the big letter-tile
+    // look; longer answers (words like "cell", decimals like "3.25", phrases
+    // like "many years") scale down and wrap so the whole answer is always
+    // readable — never truncated to its first character.
+    final len = label.length;
+    final fontSize = len <= 2
+        ? size * 0.5
+        : len <= 6
+            ? size * 0.28
+            : size * 0.2;
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
+      padding: EdgeInsets.all(size * 0.1),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFFF1A6), Color(0xFFFFC048)],
@@ -66,13 +76,18 @@ class _TextTile extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(size * 0.24)),
         border: Border.all(color: Colors.white, width: 3),
       ),
-      child: Text(
-        compact ? label : label.characters.first.toUpperCase(),
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: foreground,
-          fontSize: compact ? size * 0.52 : size * 0.42,
-          fontWeight: FontWeight.w900,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          style: TextStyle(
+            color: foreground,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w900,
+            height: 1.05,
+          ),
         ),
       ),
     );

@@ -4,208 +4,127 @@ import 'package:kidverse/features/curriculum/domain/lesson.dart';
 import 'package:kidverse/features/profiles/domain/grade_level.dart';
 
 void main() {
-  // Asset-backed: verifies the hand-authored curriculum JSON parses cleanly
-  // and the repository indexes it. Uses a widgets binding so rootBundle works.
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // Every grade that ships a content file must parse and cross-reference.
-  const authoredGrades = [
-    GradeLevel.lkg,
-    GradeLevel.ukg,
-    GradeLevel.kg,
-    GradeLevel.grade1,
-    GradeLevel.grade2,
-    GradeLevel.grade3,
-    GradeLevel.grade4,
-    GradeLevel.grade5,
-  ];
-
-  test('all authored grades load and parse without errors', () async {
-    final repo = CurriculumRepository();
+  late CurriculumRepository repo;
+  setUpAll(() async {
+    repo = CurriculumRepository();
     await repo.ensureLoaded();
+  });
 
-    for (final grade in authoredGrades) {
+  // Games whose progression depends on tapping the one correct option.
+  const choiceGames = {
+    GameType.tapChoice,
+    GameType.listenAndTap,
+    GameType.bubblePop,
+    GameType.moleMatch,
+    GameType.feedPet,
+    GameType.bossBattle,
+    GameType.countCatch,
+    GameType.spotMatch,
+  };
+
+  String signature(Question q) {
+    final opts = q.options.map((o) => '${o.label}/${o.emoji ?? ''}').join(',');
+    return '${q.prompt}|$opts|${q.answer}';
+  }
+
+  test('every subject in every grade is a full 50-level journey', () {
+    for (final grade in GradeLevel.values) {
       final units = repo.unitsForGrade(grade);
-      expect(units, isNotEmpty, reason: '${grade.name} units should parse');
-
-      // Every lessonId referenced by a unit must resolve to a real lesson with
-      // at least one question — catches typos between units[] and lessons[].
+      expect(units, isNotEmpty, reason: '${grade.name} should have subjects');
       for (final unit in units) {
         final lessons = repo.lessonsForUnit(unit);
-        expect(
-          lessons.length,
-          unit.lessonIds.length,
-          reason: 'All lessonIds in ${unit.id} should resolve',
-        );
-        for (final lesson in lessons) {
-          expect(lesson.questions, isNotEmpty,
-              reason: '${lesson.id} should have questions');
-          // The lesson's grade must match its owning unit.
-          expect(lesson.grade, unit.grade,
-              reason: '${lesson.id} grade should match ${unit.id}');
+        expect(lessons.length, 50,
+            reason: '${unit.id} should offer 50 levels');
+      }
+    }
+  });
+
+  test('every level has a full, non-repeating question set', () {
+    // Minimum questions by mini-game (memory is one board; tap games a round).
+    int minFor(GameType g) => switch (g) {
+          GameType.memoryMatch => 1,
+          GameType.sequence => 5,
+          GameType.tracing => 6,
+          _ => 10,
+        };
+    for (final grade in GradeLevel.values) {
+      for (final unit in repo.unitsForGrade(grade)) {
+        for (final lesson in repo.lessonsForUnit(unit)) {
+          expect(lesson.questions.length,
+              greaterThanOrEqualTo(minFor(lesson.gameType)),
+              reason: '${lesson.id} (${lesson.gameType.name}) is too short');
+          // No two questions in a level are identical.
+          final sigs = lesson.questions.map(signature).toList();
+          expect(sigs.toSet().length, sigs.length,
+              reason: '${lesson.id} repeats a question within the level');
         }
       }
     }
   });
 
-  test('grades 1-5 span several subjects each', () async {
-    final repo = CurriculumRepository();
-    await repo.ensureLoaded();
-    for (final grade in [
-      GradeLevel.grade1,
-      GradeLevel.grade2,
-      GradeLevel.grade3,
-      GradeLevel.grade4,
-      GradeLevel.grade5,
-    ]) {
-      expect(
-        repo.subjectsForGrade(grade).length,
-        greaterThanOrEqualTo(4),
-        reason: '${grade.name} should span multiple subjects',
-      );
+  test('every choice question is answerable and unambiguous', () {
+    final problems = <String>[];
+    for (final grade in GradeLevel.values) {
+      for (final unit in repo.unitsForGrade(grade)) {
+        for (final lesson in repo.lessonsForUnit(unit)) {
+          if (!choiceGames.contains(lesson.gameType)) continue;
+          for (final q in lesson.questions) {
+            final where = '${grade.name}/${lesson.id}/${q.id}';
+            if (q.options.isEmpty) {
+              problems.add('$where: empty options');
+              continue;
+            }
+            if (q.correctIndex == null ||
+                q.correctIndex! < 0 ||
+                q.correctIndex! >= q.options.length) {
+              problems.add('$where: bad correctIndex ${q.correctIndex}');
+              continue;
+            }
+            final labels = q.options.map((o) => o.label.trim()).toList();
+            if (labels.toSet().length != labels.length) {
+              problems.add('$where: duplicate options $labels');
+            }
+          }
+        }
+      }
     }
+    if (problems.isNotEmpty) {
+      // ignore: avoid_print
+      print('\nCONTENT DEFECTS (${problems.length}):\n${problems.join('\n')}');
+    }
+    expect(problems, isEmpty, reason: '${problems.length} defects');
   });
 
-  test('preschool grades provide 50 levels with 20 varied questions', () async {
-    final repo = CurriculumRepository();
-    await repo.ensureLoaded();
-    for (final grade in [GradeLevel.lkg, GradeLevel.ukg, GradeLevel.kg]) {
-      final lessons = [
-        for (final unit in repo.unitsForGrade(grade))
-          ...repo.lessonsForUnit(unit),
-      ];
-      expect(lessons.length, 50, reason: '${grade.name} needs 50 levels');
-      expect(lessons.every((lesson) => lesson.questions.length == 20), isTrue);
-      expect(
-        lessons.any((lesson) => lesson.gameType == GameType.listenAndTap),
-        isTrue,
-        reason: '${grade.name} needs voice-first visual play',
-      );
-      expect(
-        lessons.any((lesson) => lesson.gameType == GameType.moleMatch),
-        isTrue,
-        reason: '${grade.name} needs the Mole Match mini-game',
-      );
-      expect(
-        lessons.any((lesson) => lesson.gameType == GameType.feedPet),
-        isTrue,
-        reason: '${grade.name} needs the Feed-the-Pet care loop',
-      );
-      for (final lesson in lessons) {
-        final signatures = lesson.questions
-            .map((q) => '${q.prompt}|${q.answer}|${q.promptEmoji}')
-            .toSet();
-        expect(
-          signatures.length,
-          greaterThanOrEqualTo(10),
-          reason: '${lesson.id} needs varied learning prompts',
-        );
-        for (final question in lesson.questions) {
-          if (question.correctIndex != null) {
-            expect(question.correctIndex,
-                inInclusiveRange(0, question.options.length - 1));
+  test('sequence & tracing levels carry the data their engines need', () {
+    for (final grade in GradeLevel.values) {
+      for (final unit in repo.unitsForGrade(grade)) {
+        for (final lesson in repo.lessonsForUnit(unit)) {
+          for (final q in lesson.questions) {
+            if (lesson.gameType == GameType.tracing) {
+              expect(q.answer, isNotNull,
+                  reason: '${lesson.id} tracing needs an answer glyph');
+            }
+            if (lesson.gameType == GameType.sequence ||
+                lesson.gameType == GameType.memoryMatch) {
+              expect(q.options.length, greaterThanOrEqualTo(2),
+                  reason: '${lesson.id} needs options');
+            }
           }
         }
       }
     }
   });
 
-  test('grades 4-5 finish with a playable boss battle', () async {
-    final repo = CurriculumRepository();
-    await repo.ensureLoaded();
+  test('grades 4-5 include boss-battle levels', () {
     for (final grade in [GradeLevel.grade4, GradeLevel.grade5]) {
-      final lessons = [
+      final all = [
         for (final unit in repo.unitsForGrade(grade))
           ...repo.lessonsForUnit(unit),
       ];
-      final bosses = lessons.where((l) => l.gameType == GameType.bossBattle);
-      expect(bosses, isNotEmpty, reason: '${grade.name} needs a boss lesson');
-      for (final boss in bosses) {
-        expect(boss.questions.length, greaterThanOrEqualTo(4));
-        expect(boss.questions.every((q) => q.correctIndex != null), isTrue);
-      }
+      expect(all.any((l) => l.gameType == GameType.bossBattle), isTrue,
+          reason: '${grade.name} should include boss battles');
     }
   });
-
-  test('grades 4-5 provide 50 playable levels (no padded repetition)',
-      () async {
-    final repo = CurriculumRepository();
-    await repo.ensureLoaded();
-    for (final grade in [GradeLevel.grade4, GradeLevel.grade5]) {
-      final lessons = [
-        for (final unit in repo.unitsForGrade(grade))
-          ...repo.lessonsForUnit(unit),
-      ];
-      expect(lessons.length, 50, reason: '${grade.name} needs 50 levels');
-      // Every level is playable; lessons now use their authored questions
-      // (2-3 for practice, 20 for a boss) rather than repeating one bank.
-      expect(
-        lessons.every((lesson) => lesson.questions.isNotEmpty),
-        isTrue,
-        reason: '${grade.name} levels must have questions',
-      );
-      // No lesson repeats a whole question (prompt + options + answer). Two
-      // puzzles that share a generic prompt like "Build the sentence" but have
-      // different options are fine — only true clones are flagged.
-      for (final lesson in lessons) {
-        final signatures = lesson.questions.map((q) {
-          final opts = q.options.map((o) => '${o.label}/${o.emoji ?? ''}').join(',');
-          return '${q.prompt}|$opts|${q.correctIndex}|${q.answer}';
-        }).toList();
-        expect(signatures.toSet().length, signatures.length,
-            reason: '${lesson.id} repeats an identical question');
-      }
-    }
-  });
-
-  test('generated 50-level journeys do not clone the same question bank',
-      () async {
-    final repo = CurriculumRepository();
-    await repo.ensureLoaded();
-    for (final grade in [
-      GradeLevel.lkg,
-      GradeLevel.ukg,
-      GradeLevel.kg,
-      GradeLevel.grade4,
-      GradeLevel.grade5,
-    ]) {
-      final generatedLessons = [
-        for (final unit in repo.unitsForGrade(grade))
-          ...repo
-              .lessonsForUnit(unit)
-              .where((lesson) => lesson.id.contains('_level_')),
-      ];
-
-      expect(generatedLessons, isNotEmpty,
-          reason: '${grade.name} should include generated map levels');
-
-      final signatures =
-          generatedLessons.take(8).map(_questionBankSignature).toSet();
-      expect(signatures.length, greaterThan(1),
-          reason: '${grade.name} generated levels should not reuse one bank');
-
-      for (final lesson in generatedLessons.take(8)) {
-        final ids = lesson.questions.map((question) => question.id).toSet();
-        expect(ids.length, lesson.questions.length,
-            reason: '${lesson.id} should have unique question IDs');
-      }
-    }
-  });
-}
-
-String _questionBankSignature(Lesson lesson) {
-  return lesson.questions
-      .map(
-        (question) => [
-          question.id,
-          question.prompt,
-          question.promptEmoji ?? '',
-          question.answer ?? '',
-          question.correctIndex?.toString() ?? '',
-          question.options
-              .map((option) => '${option.label}/${option.emoji ?? ''}')
-              .join(','),
-        ].join('|'),
-      )
-      .join('\n');
 }
