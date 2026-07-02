@@ -6,7 +6,7 @@
       "subject": "english",
       "grade": "lkg",
       "emoji": "🔤",
-      "lessonIds": ["lkg_en_a", "lkg_en_vowels", "lkg_en_trace"]
+      "lessonIds": ["lkg_en_a", "lkg_en_vowels", "lkg_en_bubble", "lkg_en_trace"]
     },
     {
       "id": "lkg_numbers",
@@ -14,7 +14,7 @@
       "subject": "math",
       "grade": "lkg",
       "emoji": "🔢",
-      "lessonIds": ["lkg_ma_count5", "lkg_ma_shapes"]
+      "lessonIds": ["lkg_ma_count5", "lkg_ma_sequence", "lkg_ma_shapes"]
     },
     {
       "id": "lkg_world",
@@ -218,6 +218,58 @@
         {"id": "q1", "answer": "A", "speak": "Trace the letter A"},
         {"id": "q2", "answer": "B", "speak": "Trace the letter B"},
         {"id": "q3", "answer": "C", "speak": "Trace the letter C"}
+      ]
+    },
+    {
+      "id": "lkg_en_bubble",
+      "title": "Pop the Letter",
+      "subject": "english",
+      "grade": "lkg",
+      "gameType": "bubblePop",
+      "emoji": "🫧",
+      "instruction": "Pop the bubble with the right letter!",
+      "baseCoins": 12,
+      "baseXp": 24,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Pop the letter A!",
+          "speak": "Pop the bubble with the letter A!",
+          "correctIndex": 0,
+          "options": [{"label": "A"}, {"label": "M"}, {"label": "S"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Pop the letter O!",
+          "speak": "Pop the bubble with the letter O!",
+          "correctIndex": 2,
+          "options": [{"label": "T"}, {"label": "K"}, {"label": "O"}]
+        }
+      ]
+    },
+    {
+      "id": "lkg_ma_sequence",
+      "title": "Count in Order",
+      "subject": "math",
+      "grade": "lkg",
+      "gameType": "sequence",
+      "emoji": "🔢",
+      "instruction": "Tap the numbers in order!",
+      "baseCoins": 14,
+      "baseXp": 28,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Tap 1, 2, 3 in order!",
+          "speak": "Tap the numbers in order, one, two, three!",
+          "options": [{"label": "1"}, {"label": "2"}, {"label": "3"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Put the numbers in order!",
+          "speak": "Tap the numbers in order!",
+          "options": [{"label": "1"}, {"label": "2"}, {"label": "3"}, {"label": "4"}]
+        }
       ]
     },
     {

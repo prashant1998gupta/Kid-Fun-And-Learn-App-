@@ -265,7 +265,7 @@ class _SubjectGrid extends ConsumerWidget {
         childAspectRatio: 1.0,
       ),
       delegate: SliverChildBuilderDelegate(
-        (context, i) => _SubjectCard(subject: subjects[i], repo: repo)
+        (context, i) => _SubjectCard(subject: subjects[i])
             .animate()
             .fadeIn(delay: (80 * i).ms)
             .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1)),
@@ -275,25 +275,17 @@ class _SubjectGrid extends ConsumerWidget {
   }
 }
 
-class _SubjectCard extends ConsumerWidget {
-  const _SubjectCard({required this.subject, required this.repo});
+class _SubjectCard extends StatelessWidget {
+  const _SubjectCard({required this.subject});
   final Subject subject;
-  final CurriculumRepository repo;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return BouncyButton(
       borderRadius: AppSpacing.cardRadius,
       onTap: () {
-        final child = ref.read(activeChildProvider)!;
-        final units = repo.unitsForGradeSubject(child.grade, subject);
-        final lessons = [
-          for (final u in units) ...repo.lessonsForUnit(u),
-        ];
-        if (lessons.isNotEmpty) {
-          AudioService.instance.speak("Let's learn ${subject.label}!");
-          context.push(AppRoutes.game, extra: lessons.first);
-        }
+        AudioService.instance.speak("Let's explore ${subject.label}!");
+        context.push(AppRoutes.learningMap, extra: subject);
       },
       child: Container(
         decoration: BoxDecoration(

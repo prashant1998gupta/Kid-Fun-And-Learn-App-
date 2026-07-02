@@ -8,8 +8,11 @@ import '../gamification/domain/wallet.dart';
 import '../gamification/reward_engine.dart';
 import '../ai/adaptive_engine.dart';
 import '../profiles/profiles_controller.dart';
+import '../progress/progress_controller.dart';
+import 'engines/bubble_pop_game.dart';
 import 'engines/drag_drop_game.dart';
 import 'engines/memory_match_game.dart';
+import 'engines/sequence_game.dart';
 import 'engines/tap_choice_game.dart';
 import 'engines/tracing_game.dart';
 import 'game_result_screen.dart';
@@ -50,6 +53,11 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         .read(adaptiveControllerProvider.notifier)
         .record(child.id, result);
 
+    // Persist the best-ever star score for the Learning Map / reports.
+    await ref
+        .read(progressControllerProvider.notifier)
+        .recordStars(result.lesson.id, result.stars);
+
     final check = LevelUpCheck(before, after);
     if (!mounted) return;
     setState(() {
@@ -80,12 +88,13 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
   Widget _engineFor(Lesson lesson) {
     switch (lesson.gameType) {
       case GameType.tapChoice:
-      case GameType.bubblePop:
       case GameType.countCatch:
       case GameType.spotMatch:
-        // These all share the "pick the right option" interaction for now;
-        // dedicated engines can be swapped in per type without touching hosts.
+        // Share the "pick the right option" interaction; dedicated engines can
+        // be swapped in per type without touching the host.
         return TapChoiceGame(lesson: lesson, onComplete: _onComplete);
+      case GameType.bubblePop:
+        return BubblePopGame(lesson: lesson, onComplete: _onComplete);
       case GameType.memoryMatch:
         return MemoryMatchGame(lesson: lesson, onComplete: _onComplete);
       case GameType.dragDrop:
@@ -95,8 +104,9 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
       case GameType.tracing:
         return TracingGame(lesson: lesson, onComplete: _onComplete);
       case GameType.sequence:
+        return SequenceGame(lesson: lesson, onComplete: _onComplete);
       case GameType.wordBuilder:
-        // Engines under construction — fall back to tapChoice so every lesson
+        // Engine under construction — fall back to tapChoice so every lesson
         // is playable. Replace with the real engine as it lands.
         return TapChoiceGame(lesson: lesson, onComplete: _onComplete);
     }
