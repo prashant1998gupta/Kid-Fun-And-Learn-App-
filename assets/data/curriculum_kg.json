@@ -2,7 +2,7 @@
   "units": [
     {"id":"kg_reading","title":"Sound Safari","subject":"english","grade":"kg","emoji":"🦁","lessonIds":["kg_en_cvc","kg_en_rhyme","kg_en_trace"]},
     {"id":"kg_math","title":"Number Heroes","subject":"math","grade":"kg","emoji":"🦸","lessonIds":["kg_ma_add","kg_ma_more","kg_ma_order"]},
-    {"id":"kg_logic","title":"Puzzle Playground","subject":"logic","grade":"kg","emoji":"🧩","lessonIds":["kg_lo_pattern","kg_lo_sort","kg_lo_memory"]},
+    {"id":"kg_logic","title":"Puzzle Playground","subject":"logic","grade":"kg","emoji":"🧩","lessonIds":["kg_lo_pattern","kg_lo_sort","kg_lo_memory","kg_lo_mole"]},
     {"id":"kg_world","title":"Little Explorers","subject":"evs","grade":"kg","emoji":"🔭","lessonIds":["kg_ev_habitat","kg_ev_safety","kg_ev_growth"]}
   ],
   "lessons": [
@@ -70,6 +70,13 @@
     {"id":"kg_ev_growth","title":"Seed to Flower","subject":"evs","grade":"kg","gameType":"sequence","emoji":"🌻","instruction":"Tap how a plant grows.","questions":[
       {"id":"q1","prompt":"Grow a flower","options":[{"label":"Seed","emoji":"🌰"},{"label":"Sprout","emoji":"🌱"},{"label":"Plant","emoji":"🪴"},{"label":"Flower","emoji":"🌻"}]},
       {"id":"q2","prompt":"Grow a tree","options":[{"label":"Seed","emoji":"🌰"},{"label":"Sprout","emoji":"🌱"},{"label":"Sapling","emoji":"🌿"},{"label":"Tree","emoji":"🌳"}]}
+    ]},
+    {"id":"kg_lo_mole","title":"Puzzle Mole Match","subject":"logic","grade":"kg","gameType":"moleMatch","emoji":"🐹","instruction":"Tap the mole with the smart answer!","baseCoins":20,"baseXp":38,"questions":[
+      {"id":"q1","prompt":"Which one is different?","correctIndex":2,"options":[{"label":"Apple","emoji":"🍎"},{"label":"Banana","emoji":"🍌"},{"label":"Car","emoji":"🚗"}]},
+      {"id":"q2","prompt":"Which shape has no corners?","correctIndex":0,"options":[{"label":"Circle","emoji":"🔵"},{"label":"Square","emoji":"🟥"},{"label":"Triangle","emoji":"🔺"}]},
+      {"id":"q3","prompt":"Which is the smallest?","correctIndex":1,"options":[{"label":"Dog","emoji":"🐶"},{"label":"Ant","emoji":"🐜"},{"label":"Elephant","emoji":"🐘"}]},
+      {"id":"q4","prompt":"What comes next: red, blue, red...?","correctIndex":2,"options":[{"label":"Green","emoji":"🟢"},{"label":"Red","emoji":"🔴"},{"label":"Blue","emoji":"🔵"}]},
+      {"id":"q5","prompt":"Which one comes at night?","correctIndex":0,"options":[{"label":"Moon","emoji":"🌙"},{"label":"Sun","emoji":"☀️"},{"label":"Rainbow","emoji":"🌈"}]}
     ]}
   ]
 }

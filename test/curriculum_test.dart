@@ -81,6 +81,11 @@ void main() {
         isTrue,
         reason: '${grade.name} needs voice-first visual play',
       );
+      expect(
+        lessons.any((lesson) => lesson.gameType == GameType.moleMatch),
+        isTrue,
+        reason: '${grade.name} needs the Mole Match mini-game',
+      );
       for (final lesson in lessons) {
         final signatures = lesson.questions
             .map((q) => '${q.prompt}|${q.answer}|${q.promptEmoji}')

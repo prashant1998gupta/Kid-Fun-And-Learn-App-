@@ -12,7 +12,8 @@ import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
 
 /// A pre-reader activity with one spoken instruction and large visual targets.
-/// Sessions are intentionally five rounds for a 3–5 minute attention window.
+/// The child can replay the spoken prompt at any time; large targets keep
+/// longer curriculum sessions accessible to developing motor skills.
 class ListenAndTapGame extends StatefulWidget {
   const ListenAndTapGame({
     super.key,

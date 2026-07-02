@@ -6,6 +6,7 @@ import 'package:kidverse/features/curriculum/domain/lesson.dart';
 import 'package:kidverse/features/curriculum/domain/subject.dart';
 import 'package:kidverse/features/games/engines/boss_battle_game.dart';
 import 'package:kidverse/features/games/engines/listen_and_tap_game.dart';
+import 'package:kidverse/features/games/engines/mole_match_game.dart';
 import 'package:kidverse/features/games/engines/tap_choice_game.dart';
 import 'package:kidverse/features/gamification/reward_engine.dart';
 import 'package:kidverse/features/profiles/domain/grade_level.dart';
@@ -110,5 +111,30 @@ void main() {
     await tester.pump(const Duration(milliseconds: 900));
     expect(find.text('Three plus three?'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 600));
+  });
+
+  testWidgets('mole match advances after tapping the correct mole',
+      (tester) async {
+    const lesson = Lesson(
+      id: 'mole_advance',
+      title: 'Mole Advance',
+      subject: Subject.math,
+      grade: GradeLevel.ukg,
+      gameType: GameType.moleMatch,
+      questions: questions,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: MoleMatchGame(lesson: lesson, onComplete: (_) {}),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const ValueKey('0-0-2-1')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(find.text('Three plus three?'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 }

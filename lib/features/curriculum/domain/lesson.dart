@@ -20,6 +20,7 @@ enum GameType {
   speak, // say the word aloud (speech recognition)
   bossBattle, // multi-question challenge with a visible boss health bar
   listenAndTap, // voice-first, large visual targets for preschool learners
+  moleMatch, // animated whack-a-mole-style letter/number/picture matching
 }
 
 /// One curriculum unit — a "chapter" grouping many lessons.

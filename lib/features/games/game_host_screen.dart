@@ -18,6 +18,7 @@ import 'engines/boss_battle_game.dart';
 import 'engines/drag_drop_game.dart';
 import 'engines/memory_match_game.dart';
 import 'engines/listen_and_tap_game.dart';
+import 'engines/mole_match_game.dart';
 import 'engines/sequence_game.dart';
 import 'engines/speech_game.dart';
 import 'engines/tap_choice_game.dart';
@@ -173,6 +174,8 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         return BossBattleGame(lesson: lesson, onComplete: _onComplete);
       case GameType.listenAndTap:
         return ListenAndTapGame(lesson: lesson, onComplete: _onComplete);
+      case GameType.moleMatch:
+        return MoleMatchGame(lesson: lesson, onComplete: _onComplete);
       case GameType.wordBuilder:
         // Engine under construction — fall back to tapChoice so every lesson
         // is playable. Replace with the real engine as it lands.

@@ -14,7 +14,7 @@
       "subject": "math",
       "grade": "ukg",
       "emoji": "➕",
-      "lessonIds": ["ukg_ma_add", "ukg_ma_count10", "ukg_ma_shapes"]
+      "lessonIds": ["ukg_ma_add", "ukg_ma_count10", "ukg_ma_shapes", "ukg_ma_mole"]
     },
     {
       "id": "ukg_logic",
@@ -300,6 +300,24 @@
           "correctIndex": 1,
           "options": [{"label": "Snow", "emoji": "❄️"}, {"label": "Sun", "emoji": "☀️"}, {"label": "Rain", "emoji": "🌧️"}]
         }
+      ]
+    },
+    {
+      "id": "ukg_ma_mole",
+      "title": "Number Mole Match",
+      "subject": "math",
+      "grade": "ukg",
+      "gameType": "moleMatch",
+      "emoji": "🐹",
+      "instruction": "Tap the mole with the right number!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {"id":"q1","prompt":"1 + 2 = ?","correctIndex":1,"options":[{"label":"2"},{"label":"3"},{"label":"4"}]},
+        {"id":"q2","prompt":"Count: ⭐⭐⭐⭐","correctIndex":2,"options":[{"label":"3"},{"label":"5"},{"label":"4"}]},
+        {"id":"q3","prompt":"2 + 3 = ?","correctIndex":0,"options":[{"label":"5"},{"label":"4"},{"label":"6"}]},
+        {"id":"q4","prompt":"What comes after 7?","correctIndex":1,"options":[{"label":"6"},{"label":"8"},{"label":"9"}]},
+        {"id":"q5","prompt":"Which number is bigger?","correctIndex":2,"options":[{"label":"3"},{"label":"5"},{"label":"9"}]}
       ]
     }
   ]

@@ -57,6 +57,8 @@ for low-end tablets.
   Listen & Tap play, and a complete KG phonics/math/logic/world curriculum.
 - [x] **M17:** Full preschool package with 50 levels per LKG/UKG/KG band,
   20-question sessions, and grade-aware generated practice banks.
+- [x] **M18:** Mole Match educational mini-game with moving targets, combos,
+  safe timer lifecycle, and LKG/UKG/KG curriculum integration.
 
 ## How to extend (contributor quickstart)
 - **New game:** create `features/games/engines/<name>_game.dart` taking

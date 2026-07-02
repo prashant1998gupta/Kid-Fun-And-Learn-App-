@@ -6,7 +6,7 @@
       "subject": "english",
       "grade": "lkg",
       "emoji": "🔤",
-      "lessonIds": ["lkg_en_a", "lkg_en_vowels", "lkg_en_bubble", "lkg_en_trace"]
+      "lessonIds": ["lkg_en_a", "lkg_en_vowels", "lkg_en_bubble", "lkg_en_trace", "lkg_en_mole"]
     },
     {
       "id": "lkg_numbers",
@@ -330,6 +330,24 @@
           "correctIndex": 0,
           "options": [{"label": "Fruit", "emoji": "🍓"}, {"label": "Veggie", "emoji": "🥕"}]
         }
+      ]
+    },
+    {
+      "id": "lkg_en_mole",
+      "title": "Alphabet Mole Match",
+      "subject": "english",
+      "grade": "lkg",
+      "gameType": "moleMatch",
+      "emoji": "🐹",
+      "instruction": "Tap the mole holding the right letter!",
+      "baseCoins": 16,
+      "baseXp": 30,
+      "questions": [
+        {"id":"q1","prompt":"Find A","speak":"Tap the mole with A","correctIndex":0,"options":[{"label":"A"},{"label":"B"},{"label":"C"}]},
+        {"id":"q2","prompt":"Find M","speak":"Tap the mole with M","correctIndex":1,"options":[{"label":"N"},{"label":"M"},{"label":"W"}]},
+        {"id":"q3","prompt":"Find S","speak":"Tap the mole with S","correctIndex":2,"options":[{"label":"C"},{"label":"Z"},{"label":"S"}]},
+        {"id":"q4","prompt":"Find O","speak":"Tap the mole with O","correctIndex":0,"options":[{"label":"O"},{"label":"Q"},{"label":"D"}]},
+        {"id":"q5","prompt":"Find T","speak":"Tap the mole with T","correctIndex":1,"options":[{"label":"I"},{"label":"T"},{"label":"F"}]}
       ]
     }
   ]
