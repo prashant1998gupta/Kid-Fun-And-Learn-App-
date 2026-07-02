@@ -120,6 +120,7 @@ class PraiseLines {
   PraiseLines._();
 
   static int _successCursor = 0;
+  static int _reactionCursor = 0;
 
   static const List<String> success = [
     'Excellent!',
@@ -151,4 +152,35 @@ class PraiseLines {
     'Ready for fun?',
     "Let's learn together!",
   ];
+
+  static const List<String> playfulRetry = [
+    'Oops, banana slipped!',
+    "Let's try one more!",
+    'Almost! Pick another one!',
+    'That was silly. Try again!',
+  ];
+
+  static const List<String> rescue = [
+    'You saved the puppy!',
+    'The pet is so happy!',
+    'Yum yum, great feeding!',
+    'Happy pet, happy learner!',
+  ];
+
+  static const List<String> rewardReveal = [
+    'Treasure time!',
+    'You found a surprise!',
+    'A reward popped out!',
+    'Open your prize!',
+  ];
+
+  static String nextRetry() => _next(playfulRetry);
+  static String nextRescue() => _next(rescue);
+  static String nextRewardReveal() => _next(rewardReveal);
+
+  static String _next(List<String> lines) {
+    final line = lines[_reactionCursor % lines.length];
+    _reactionCursor++;
+    return line;
+  }
 }

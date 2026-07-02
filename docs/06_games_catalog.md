@@ -6,9 +6,9 @@ widget**. Engines are generic and content-driven, so **one engine powers many
 lessons/games** across all grades. Adding a game type = 1 engine + 1 `switch`
 case; the reward/XP/celebration/adaptive flow is shared.
 
-Implemented today: **Tap-Choice engine** (serves tapChoice, bubblePop,
-countCatch, spotMatch). Below is the full engine roadmap and the 100+ game
-catalog each engine renders.
+Implemented today: **TapChoice, MemoryMatch, DragDrop, Tracing, Sequence,
+BubblePop, ListenAndTap, MoleMatch, FeedPet, Speech, and BossBattle**. Below is
+the full engine roadmap and the 100+ game catalog each engine renders.
 
 ## Core engines (10) → cover 100+ games
 | Engine | Interaction | Powers these games |
@@ -16,6 +16,7 @@ catalog each engine renders.
 | **TapChoice** ✅ | pick correct option(s) | Letter Hunt, Number Catch, Color Match, Animal Sounds, Odd-One-Out, Quiz Battle, Spelling multiple-choice, Fast Tap, Reaction Time |
 | **MemoryMatch** | flip & pair | Memory Cards, Shadow Matching, Spot Matching, Flash-card pairs |
 | **DragDrop** | drag item→target | Sorting, Feed-the-Monster, Fruit Basket, Word Builder (letter tiles), Fill-the-Blank, Dress-up, Garden/Farm placing |
+| **FeedPet** ✅ | tap the right snack/object to care for a pet | Feed the Puppy, Pet Snack Rescue, Healthy Food, Animal Care, Caretaking choices |
 | **Tracing** | finger-trace path | Letter/Number/Shape tracing, Maze, Join-the-dots, Draw & Color |
 | **Sequence/Order** | order items | Pattern Builder, Story Sequence, Number Line, Before/After, Simon Says |
 | **BubblePop/Catch** | tap/miss moving items | Bubble Pop, Balloon Pop, Fishing, Star Catch, Rocket Dodge, Fruit Slice |

@@ -7,6 +7,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/currency_hud.dart';
+import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
@@ -29,9 +30,10 @@ class MemoryMatchGame extends StatefulWidget {
 }
 
 class _Card {
-  _Card(this.pairId, this.face);
+  _Card(this.pairId, this.label, this.emoji);
   final int pairId;
-  final String face;
+  final String label;
+  final String? emoji;
   bool matched = false;
 }
 
@@ -51,21 +53,28 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
     final q = widget.lesson.questions.isNotEmpty
         ? widget.lesson.questions.first
         : null;
-    final faces = <String>[];
+    final faces = <AnswerOption>[];
     if (q != null) {
       for (final o in q.options) {
-        faces.add(o.emoji ?? o.label);
+        faces.add(o);
       }
     }
-    if (faces.isEmpty) faces.addAll(['🍎', '⭐', '🐼', '🎈']);
+    if (faces.isEmpty) {
+      faces.addAll(const [
+        AnswerOption(label: 'Apple'),
+        AnswerOption(label: 'Star'),
+        AnswerOption(label: 'Panda'),
+        AnswerOption(label: 'Ball'),
+      ]);
+    }
     final chosen = faces.take(6).toList();
     _pairs = chosen.length;
 
     final cards = <_Card>[];
     for (var i = 0; i < chosen.length; i++) {
       cards
-        ..add(_Card(i, chosen[i]))
-        ..add(_Card(i, chosen[i]));
+        ..add(_Card(i, chosen[i].label, chosen[i].emoji))
+        ..add(_Card(i, chosen[i].label, chosen[i].emoji));
     }
     // Deterministic scramble (avoids Math.random, stable across rebuilds).
     for (var i = 0; i < cards.length; i++) {
@@ -178,7 +187,8 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
                       ),
                       itemCount: _cards.length,
                       itemBuilder: (context, i) => _CardTile(
-                        face: _cards[i].face,
+                        label: _cards[i].label,
+                        emoji: _cards[i].emoji,
                         faceUp: _faceUp(i),
                         matched: _cards[i].matched,
                         onTap: () => _onTap(i),
@@ -227,13 +237,15 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
 
 class _CardTile extends StatelessWidget {
   const _CardTile({
-    required this.face,
+    required this.label,
+    required this.emoji,
     required this.faceUp,
     required this.matched,
     required this.onTap,
   });
 
-  final String face;
+  final String label;
+  final String? emoji;
   final bool faceUp;
   final bool matched;
   final VoidCallback onTap;
@@ -257,7 +269,7 @@ class _CardTile extends StatelessWidget {
         ),
         child: Center(
           child: faceUp
-              ? Text(face, style: const TextStyle(fontSize: 40))
+              ? IllustratedObjectView(label: label, emoji: emoji, size: 58)
               : const Icon(
                   Icons.question_mark_rounded,
                   color: Colors.white,

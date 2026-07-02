@@ -10,6 +10,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/currency_hud.dart';
+import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
@@ -82,7 +83,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
         _erred = true;
         _struggled.add(_q.id);
       }
-      AudioService.instance.speak('Not that one, try again!');
+      AudioService.instance.speak(PraiseLines.nextRetry());
     }
   }
 
@@ -182,7 +183,12 @@ class _BubblePopGameState extends State<BubblePopGame> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (option.emoji != null)
-                Text(option.emoji!, style: const TextStyle(fontSize: 34)),
+                IllustratedObjectView(
+                  label: option.label,
+                  emoji: option.emoji,
+                  size: 42,
+                  selected: true,
+                ),
               Text(
                 option.label,
                 textAlign: TextAlign.center,

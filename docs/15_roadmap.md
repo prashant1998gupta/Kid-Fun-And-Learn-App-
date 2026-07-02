@@ -62,6 +62,10 @@ for low-end tablets.
 - [x] **M19:** Anti-repeat generated-level question banks, unique generated
   question IDs for progress tracking, and dark-mode contrast fixes for
   fixed-white game prompt cards.
+- [x] **M20:** Every round now has a concrete reward moment, core preschool
+  cards use code-drawn illustrated objects instead of emoji-only placeholders,
+  mascots have playful retry/rescue/reward voice reactions, and Feed-the-Pet is
+  playable across LKG/UKG/KG.
 
 ## Quality rules for Codex follow-up work
 
@@ -83,6 +87,10 @@ for low-end tablets.
   show the same first 5 prompts in the same order.
 - [ ] Expand authored preschool content pools for animals, sounds, shapes,
   safety, rhymes, and early maths so generated levels feel less formulaic.
+- [ ] Persist reward-moment prizes into room decoration, sticker, and pet-food
+  inventories instead of showing them only as a round-end reveal.
+- [ ] Replace code-drawn fallback objects with commissioned PNG/SVG/Lottie art
+  for the production illustration set.
 
 ## How to extend (contributor quickstart)
 - **New game:** create `features/games/engines/<name>_game.dart` taking

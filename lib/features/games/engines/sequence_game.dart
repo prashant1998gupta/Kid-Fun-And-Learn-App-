@@ -8,6 +8,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/currency_hud.dart';
+import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
@@ -301,7 +302,12 @@ class _Tile extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (option.emoji != null)
-                  Text(option.emoji!, style: const TextStyle(fontSize: 36)),
+                  IllustratedObjectView(
+                    label: option.label,
+                    emoji: option.emoji,
+                    size: 42,
+                    selected: wrong,
+                  ),
                 Text(
                   option.label,
                   style: TextStyle(

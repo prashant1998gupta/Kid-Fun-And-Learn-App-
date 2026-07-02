@@ -86,6 +86,11 @@ void main() {
         isTrue,
         reason: '${grade.name} needs the Mole Match mini-game',
       );
+      expect(
+        lessons.any((lesson) => lesson.gameType == GameType.feedPet),
+        isTrue,
+        reason: '${grade.name} needs the Feed-the-Pet care loop',
+      );
       for (final lesson in lessons) {
         final signatures = lesson.questions
             .map((q) => '${q.prompt}|${q.answer}|${q.promptEmoji}')

@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
+import '../../../core/widgets/illustrated_object.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
 
@@ -83,7 +84,7 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
         _struggled.add(_question.id);
       }
       AudioService.instance.playSfx(Sfx.wrong);
-      AudioService.instance.speak('Oops, find the right one!');
+      AudioService.instance.speak(PraiseLines.nextRetry());
       await Future<void>.delayed(const Duration(milliseconds: 450));
       if (mounted) setState(() => _selected = null);
       return;
@@ -330,16 +331,11 @@ class _MoleHole extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text('🐹', style: TextStyle(fontSize: 38)),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            option!.emoji ?? option!.label,
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w900,
-                              color: foreground,
-                            ),
-                          ),
+                        IllustratedObjectView(
+                          label: option!.label,
+                          emoji: option!.emoji,
+                          size: 42,
+                          selected: selected,
                         ),
                         if (option!.emoji != null)
                           Text(

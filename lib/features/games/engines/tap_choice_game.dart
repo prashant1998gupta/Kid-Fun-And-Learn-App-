@@ -8,6 +8,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/currency_hud.dart';
+import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
@@ -80,7 +81,7 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
         _erredThisQuestion = true;
         _struggled.add(_q.id);
       }
-      AudioService.instance.speak('Try again!');
+      AudioService.instance.speak(PraiseLines.nextRetry());
       await Future<void>.delayed(const Duration(milliseconds: 700));
       if (mounted) setState(() => _selected = null);
     }
@@ -289,17 +290,23 @@ class _OptionCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (option.emoji != null)
-                Text(option.emoji!, style: const TextStyle(fontSize: 64)),
-              if (option.emoji != null) const SizedBox(height: 8),
-              Text(
-                option.label,
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineMedium
-                    ?.copyWith(color: fg),
+              IllustratedObjectView(
+                label: option.label,
+                emoji: option.emoji,
+                size: option.emoji == null ? 58 : 72,
+                selected: state != _OptionState.idle,
               ),
+              if (option.emoji != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  option.label,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium
+                      ?.copyWith(color: fg),
+                ),
+              ],
             ],
           ),
         ),

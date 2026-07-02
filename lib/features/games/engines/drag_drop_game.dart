@@ -8,6 +8,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/currency_hud.dart';
+import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
@@ -70,7 +71,7 @@ class _DragDropGameState extends State<DragDropGame> {
         _erred = true;
         _struggled.add(_q.id);
       }
-      AudioService.instance.speak('Try another basket!');
+      AudioService.instance.speak(PraiseLines.nextRetry());
       setState(() => _wrongBasket = basket);
       await Future<void>.delayed(const Duration(milliseconds: 500));
       if (mounted) setState(() => _wrongBasket = null);
@@ -203,10 +204,10 @@ class _DragDropGameState extends State<DragDropGame> {
       return const Icon(Icons.check_circle_rounded,
           color: AppColors.success, size: 90);
     }
-    final chip = _ItemChip(label: item);
+    final chip = _ItemChip(label: item, artLabel: _q.prompt);
     return Draggable<int>(
       data: 1,
-      feedback: _ItemChip(label: item, dragging: true),
+      feedback: _ItemChip(label: item, artLabel: _q.prompt, dragging: true),
       childWhenDragging: Opacity(opacity: 0.3, child: chip),
       child: chip
           .animate(onPlay: (c) => c.repeat(reverse: true))
@@ -242,8 +243,14 @@ class _DragDropGameState extends State<DragDropGame> {
 }
 
 class _ItemChip extends StatelessWidget {
-  const _ItemChip({required this.label, this.dragging = false});
+  const _ItemChip({
+    required this.label,
+    required this.artLabel,
+    this.dragging = false,
+  });
+
   final String label;
+  final String artLabel;
   final bool dragging;
 
   @override
@@ -265,7 +272,7 @@ class _ItemChip extends StatelessWidget {
           ],
         ),
         alignment: Alignment.center,
-        child: Text(label, style: const TextStyle(fontSize: 48)),
+        child: IllustratedObjectView(label: artLabel, emoji: label, size: 66),
       ),
     );
   }
@@ -312,7 +319,12 @@ class _Basket extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (option.emoji != null)
-            Text(option.emoji!, style: const TextStyle(fontSize: 40)),
+            IllustratedObjectView(
+              label: option.label,
+              emoji: option.emoji,
+              size: 48,
+              selected: highlight || wrong,
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(

@@ -5,6 +5,7 @@ import 'package:kidverse/core/services/audio_service.dart';
 import 'package:kidverse/features/curriculum/domain/lesson.dart';
 import 'package:kidverse/features/curriculum/domain/subject.dart';
 import 'package:kidverse/features/games/engines/boss_battle_game.dart';
+import 'package:kidverse/features/games/engines/feed_pet_game.dart';
 import 'package:kidverse/features/games/engines/listen_and_tap_game.dart';
 import 'package:kidverse/features/games/engines/mole_match_game.dart';
 import 'package:kidverse/features/games/engines/tap_choice_game.dart';
@@ -136,5 +137,25 @@ void main() {
     await tester.pump();
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+  });
+
+  testWidgets('feed-the-pet advances after the correct snack', (tester) async {
+    const lesson = Lesson(
+      id: 'feed_advance',
+      title: 'Feed Advance',
+      subject: Subject.evs,
+      grade: GradeLevel.lkg,
+      gameType: GameType.feedPet,
+      questions: questions,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: FeedPetGame(lesson: lesson, onComplete: (_) {}),
+    ));
+
+    await tester.tap(find.byKey(const ValueKey('feed-1')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1100));
+    expect(find.text('Three plus three?'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 500));
   });
 }

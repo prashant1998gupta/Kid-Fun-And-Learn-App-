@@ -16,6 +16,7 @@ import '../season/season_controller.dart';
 import 'engines/bubble_pop_game.dart';
 import 'engines/boss_battle_game.dart';
 import 'engines/drag_drop_game.dart';
+import 'engines/feed_pet_game.dart';
 import 'engines/memory_match_game.dart';
 import 'engines/listen_and_tap_game.dart';
 import 'engines/mole_match_game.dart';
@@ -176,6 +177,8 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         return ListenAndTapGame(lesson: lesson, onComplete: _onComplete);
       case GameType.moleMatch:
         return MoleMatchGame(lesson: lesson, onComplete: _onComplete);
+      case GameType.feedPet:
+        return FeedPetGame(lesson: lesson, onComplete: _onComplete);
       case GameType.wordBuilder:
         // Engine under construction — fall back to tapChoice so every lesson
         // is playable. Replace with the real engine as it lands.

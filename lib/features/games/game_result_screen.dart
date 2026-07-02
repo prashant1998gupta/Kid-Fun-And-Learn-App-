@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
+import '../../core/widgets/illustrated_object.dart';
 import '../../core/widgets/mascot.dart';
 import '../achievements/domain/achievement.dart';
 import '../gamification/domain/wallet.dart';
@@ -47,6 +48,11 @@ class _GameResultScreenState extends State<GameResultScreen> {
           ? 'Level up! You reached level ${widget.newLevel}!'
           : PraiseLines.nextSuccess();
       AudioService.instance.speak(line);
+      Future<void>.delayed(const Duration(milliseconds: 900), () {
+        if (!mounted) return;
+        AudioService.instance.playSfx(Sfx.reward);
+        AudioService.instance.speak(PraiseLines.nextRewardReveal());
+      });
     });
   }
 
@@ -78,6 +84,10 @@ class _GameResultScreenState extends State<GameResultScreen> {
                   _Stars(stars: stars),
                   const SizedBox(height: 24),
                   _RewardRow(reward: widget.reward),
+                  const SizedBox(height: 18),
+                  _RewardMoment(
+                    prize: _RoundPrize.forResult(widget.result.lesson.id),
+                  ),
                   if (widget.newBadges.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _BadgeBanner(badges: widget.newBadges),
@@ -125,6 +135,124 @@ class _GameResultScreenState extends State<GameResultScreen> {
           ),
         ),
       );
+}
+
+class _RoundPrize {
+  const _RoundPrize({
+    required this.title,
+    required this.subtitle,
+    required this.artLabel,
+    required this.color,
+  });
+
+  final String title;
+  final String subtitle;
+  final String artLabel;
+  final Color color;
+
+  static _RoundPrize forResult(String lessonId) {
+    final index =
+        lessonId.codeUnits.fold<int>(0, (sum, code) => sum + code) % 4;
+    return switch (index) {
+      0 => const _RoundPrize(
+          title: 'Treasure Chest',
+          subtitle: 'A shiny chest for finishing the round.',
+          artLabel: 'Box',
+          color: AppColors.accent,
+        ),
+      1 => const _RoundPrize(
+          title: 'Sticker Found',
+          subtitle: 'Add a bright sticker to your collection.',
+          artLabel: 'Star',
+          color: AppColors.bubblegum,
+        ),
+      2 => const _RoundPrize(
+          title: 'Pet Snack',
+          subtitle: 'A yummy snack for your buddy.',
+          artLabel: 'Apple',
+          color: AppColors.success,
+        ),
+      _ => const _RoundPrize(
+          title: 'Room Item',
+          subtitle: 'A cute decoration for your world.',
+          artLabel: 'Flower',
+          color: AppColors.sky,
+        ),
+    };
+  }
+}
+
+class _RewardMoment extends StatelessWidget {
+  const _RewardMoment({required this.prize});
+
+  final _RoundPrize prize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 420),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: AppSpacing.cardRadius,
+        border: Border.all(color: prize.color, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: prize.color.withValues(alpha: 0.35),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 86,
+            height: 86,
+            decoration: BoxDecoration(
+              color: prize.color.withValues(alpha: 0.16),
+              borderRadius: AppSpacing.cardRadius,
+            ),
+            alignment: Alignment.center,
+            child: IllustratedObjectView(label: prize.artLabel, size: 66),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Reward Moment',
+                  style: TextStyle(
+                    color: AppColors.lightTextSoft,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  prize.title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  prize.subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.lightTextSoft,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 650.ms).scale(
+          begin: const Offset(0.85, 0.85),
+          end: const Offset(1, 1),
+          curve: Curves.easeOutBack,
+        );
+  }
 }
 
 class _Stars extends StatelessWidget {

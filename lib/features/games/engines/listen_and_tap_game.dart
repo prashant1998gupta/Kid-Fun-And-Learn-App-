@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
+import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
@@ -63,7 +64,7 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
         _struggled.add(_question.id);
       }
       AudioService.instance.playSfx(Sfx.wrong);
-      AudioService.instance.speak('Try another picture!');
+      AudioService.instance.speak(PraiseLines.nextRetry());
       await Future<void>.delayed(const Duration(milliseconds: 550));
       if (mounted) setState(() => _selected = null);
       return;
@@ -245,20 +246,11 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: 82,
-                  width: 150,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      option.emoji ?? option.label,
-                      style: TextStyle(
-                        fontSize: option.emoji == null ? 64 : 70,
-                        color: selected ? Colors.white : AppColors.lightText,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
+                IllustratedObjectView(
+                  label: option.label,
+                  emoji: option.emoji,
+                  size: 86,
+                  selected: selected,
                 ),
                 if (option.emoji != null) ...[
                   const SizedBox(height: 6),

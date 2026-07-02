@@ -36,6 +36,15 @@ development. Production illustration set (thousands) organized as:
 `ui/{buttons,badges,frames,stickers,pets,decor}`,
 `rewards/{coin,gem,star,chest,certificate}`.
 
+Current implementation note: `lib/core/widgets/illustrated_object.dart` now
+provides code-drawn child-friendly animals, food, vehicles, shapes, and reward
+objects for game cards. This is the fallback art layer; production PNG/SVG
+assets should replace or extend it without returning to plain emoji-only cards.
+
+Reward moment objects now needed as production assets:
+`treasure_chest`, `sticker_star`, `pet_snack`, `room_flower`, `room_lamp`,
+`room_rug`, `pet_bowl`, `puppy_happy`.
+
 ## Illustration prompt style guide (for generation/commission)
 **Global style:** "flat design with soft 3D shading, thick rounded outlines,
 pastel palette on saturated accents, big friendly eyes, no scary features,

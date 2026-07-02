@@ -22,7 +22,7 @@
       "subject": "evs",
       "grade": "lkg",
       "emoji": "🌍",
-      "lessonIds": ["lkg_evs_animals", "lkg_evs_colors", "lkg_evs_memory", "lkg_evs_sort"]
+      "lessonIds": ["lkg_evs_animals", "lkg_evs_colors", "lkg_evs_memory", "lkg_evs_sort", "lkg_evs_feed_pet"]
     }
   ],
   "lessons": [
@@ -348,6 +348,23 @@
         {"id":"q3","prompt":"Find S","speak":"Tap the mole with S","correctIndex":2,"options":[{"label":"C"},{"label":"Z"},{"label":"S"}]},
         {"id":"q4","prompt":"Find O","speak":"Tap the mole with O","correctIndex":0,"options":[{"label":"O"},{"label":"Q"},{"label":"D"}]},
         {"id":"q5","prompt":"Find T","speak":"Tap the mole with T","correctIndex":1,"options":[{"label":"I"},{"label":"T"},{"label":"F"}]}
+      ]
+    },
+    {
+      "id": "lkg_evs_feed_pet",
+      "title": "Feed the Puppy",
+      "subject": "evs",
+      "grade": "lkg",
+      "gameType": "feedPet",
+      "emoji": "🐶",
+      "instruction": "Feed the puppy the right snack!",
+      "baseCoins": 16,
+      "baseXp": 30,
+      "questions": [
+        {"id":"q1","prompt":"Feed puppy the apple!","speak":"Feed puppy the apple!","correctIndex":0,"options":[{"label":"Apple","emoji":"🍎"},{"label":"Car","emoji":"🚗"},{"label":"Hat","emoji":"🎩"}]},
+        {"id":"q2","prompt":"Feed puppy the banana!","speak":"Feed puppy the banana!","correctIndex":1,"options":[{"label":"Ball","emoji":"⚽"},{"label":"Banana","emoji":"🍌"},{"label":"Book","emoji":"📕"}]},
+        {"id":"q3","prompt":"Which snack is a carrot?","speak":"Find the carrot snack!","correctIndex":2,"options":[{"label":"Cookie","emoji":"🍪"},{"label":"Apple","emoji":"🍎"},{"label":"Carrot","emoji":"🥕"}]},
+        {"id":"q4","prompt":"Feed puppy the cookie!","speak":"Feed puppy the cookie!","correctIndex":1,"options":[{"label":"Tree","emoji":"🌳"},{"label":"Cookie","emoji":"🍪"},{"label":"Bus","emoji":"🚌"}]}
       ]
     }
   ]

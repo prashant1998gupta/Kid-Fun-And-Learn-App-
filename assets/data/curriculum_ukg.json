@@ -30,7 +30,7 @@
       "subject": "evs",
       "grade": "ukg",
       "emoji": "🌎",
-      "lessonIds": ["ukg_evs_sort", "ukg_evs_weather"]
+      "lessonIds": ["ukg_evs_sort", "ukg_evs_weather", "ukg_evs_feed_pet"]
     }
   ],
   "lessons": [
@@ -318,6 +318,23 @@
         {"id":"q3","prompt":"2 + 3 = ?","correctIndex":0,"options":[{"label":"5"},{"label":"4"},{"label":"6"}]},
         {"id":"q4","prompt":"What comes after 7?","correctIndex":1,"options":[{"label":"6"},{"label":"8"},{"label":"9"}]},
         {"id":"q5","prompt":"Which number is bigger?","correctIndex":2,"options":[{"label":"3"},{"label":"5"},{"label":"9"}]}
+      ]
+    },
+    {
+      "id": "ukg_evs_feed_pet",
+      "title": "Pet Snack Rescue",
+      "subject": "evs",
+      "grade": "ukg",
+      "gameType": "feedPet",
+      "emoji": "🐶",
+      "instruction": "Feed the pet the safe snack!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {"id":"q1","prompt":"Which food is a fruit?","speak":"Feed the pet a fruit!","correctIndex":0,"options":[{"label":"Apple","emoji":"🍎"},{"label":"Shoe","emoji":"👟"},{"label":"Car","emoji":"🚗"}]},
+        {"id":"q2","prompt":"Which food is yellow?","speak":"Feed the pet the yellow food!","correctIndex":2,"options":[{"label":"Carrot","emoji":"🥕"},{"label":"Cookie","emoji":"🍪"},{"label":"Banana","emoji":"🍌"}]},
+        {"id":"q3","prompt":"Which one grows in a garden?","speak":"Find the garden snack!","correctIndex":1,"options":[{"label":"Bus","emoji":"🚌"},{"label":"Carrot","emoji":"🥕"},{"label":"Book","emoji":"📕"}]},
+        {"id":"q4","prompt":"Which one is a treat?","speak":"Find the treat!","correctIndex":2,"options":[{"label":"Tree","emoji":"🌳"},{"label":"Hat","emoji":"🎩"},{"label":"Cookie","emoji":"🍪"}]}
       ]
     }
   ]
