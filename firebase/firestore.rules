@@ -1,0 +1,70 @@
+rules_version = '2';
+
+// KidVerse Firestore security rules.
+// Principles:
+// - A parent (authenticated user) owns a document tree; only they can read/write it.
+// - Children have NO independent auth (COPPA): all child data lives UNDER the parent.
+// - Content (curriculum) is world-readable but only writable by admins (custom claim).
+// - Leaderboards expose only non-PII aggregate fields.
+service cloud.firestore {
+  function isSignedIn() {
+    return request.auth != null;
+  }
+  function isOwner(uid) {
+    return isSignedIn() && request.auth.uid == uid;
+  }
+  function isAdmin() {
+    return isSignedIn() && request.auth.token.admin == true;
+  }
+  function isTeacher() {
+    return isSignedIn() && request.auth.token.teacher == true;
+  }
+
+  match /databases/{db}/documents {
+
+    // ---- Parent account root -------------------------------------------
+    match /parents/{uid} {
+      allow read, write: if isOwner(uid);
+
+      // Child profiles under a parent.
+      match /children/{childId} {
+        allow read, write: if isOwner(uid);
+
+        // Progress, wallet history, results — private to the parent.
+        match /{sub=**} {
+          allow read, write: if isOwner(uid);
+        }
+      }
+    }
+
+    // ---- Curriculum content (read-only for clients) --------------------
+    match /content/{doc=**} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- Classrooms (teacher dashboard) --------------------------------
+    match /classrooms/{classId} {
+      allow read: if isTeacher() || isAdmin();
+      allow write: if isAdmin()
+        || (isTeacher() && request.auth.uid == resource.data.teacherId);
+
+      match /rosters/{studentId} {
+        allow read, write: if isTeacher() || isAdmin();
+      }
+    }
+
+    // ---- Leaderboards (friends): only aggregate, non-PII ---------------
+    match /leaderboards/{boardId}/entries/{entryId} {
+      // Public read of display name + score only; writes go through Cloud
+      // Functions (server SDK bypasses rules), never direct from clients.
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ---- Admin-only analytics -----------------------------------------
+    match /admin/{doc=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

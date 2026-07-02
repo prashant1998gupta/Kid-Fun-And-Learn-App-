@@ -1,0 +1,76 @@
+name: kidverse
+description: KidVerse — a world-class, gamified learning universe for children LKG–Grade 5.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  # Color.withValues + CardThemeData require a recent Flutter (3.27+).
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management & DI
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Routing
+  go_router: ^14.2.0
+
+  # Firebase
+  firebase_core: ^3.1.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.0.1
+  firebase_storage: ^12.0.1
+  firebase_messaging: ^15.0.1
+  firebase_analytics: ^11.0.1
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.0
+
+  # Local persistence / offline
+  shared_preferences: ^2.2.3
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # UX / animation / delight
+  lottie: ^3.1.2
+  confetti: ^0.7.0
+  flutter_animate: ^4.5.0
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.10+1
+  shimmer: ^3.0.0
+
+  # Audio & voice
+  just_audio: ^0.9.38
+  audioplayers: ^6.0.0
+  flutter_tts: ^4.0.2
+  speech_to_text: ^6.6.2
+
+  # Utilities
+  intl: ^0.20.2
+  collection: ^1.18.0
+  equatable: ^2.0.5
+  uuid: ^4.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  riverpod_generator: ^2.4.0
+  hive_generator: ^2.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/lottie/
+    - assets/audio/sfx/
+    - assets/audio/music/
+    - assets/data/
+  # Fonts are loaded at runtime via google_fonts (Baloo 2 / Nunito).

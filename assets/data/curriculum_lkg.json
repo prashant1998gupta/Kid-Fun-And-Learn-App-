@@ -1,0 +1,208 @@
+{
+  "units": [
+    {
+      "id": "lkg_alphabet",
+      "title": "Alphabet Fun",
+      "subject": "english",
+      "grade": "lkg",
+      "emoji": "🔤",
+      "lessonIds": ["lkg_en_a", "lkg_en_vowels"]
+    },
+    {
+      "id": "lkg_numbers",
+      "title": "Number Land",
+      "subject": "math",
+      "grade": "lkg",
+      "emoji": "🔢",
+      "lessonIds": ["lkg_ma_count5", "lkg_ma_shapes"]
+    },
+    {
+      "id": "lkg_world",
+      "title": "My World",
+      "subject": "evs",
+      "grade": "lkg",
+      "emoji": "🌍",
+      "lessonIds": ["lkg_evs_animals", "lkg_evs_colors"]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "lkg_en_a",
+      "title": "Find the Letter A",
+      "subject": "english",
+      "grade": "lkg",
+      "gameType": "tapChoice",
+      "emoji": "🅰️",
+      "instruction": "Tap the letter A!",
+      "baseCoins": 10,
+      "baseXp": 20,
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Which one is the letter A?",
+          "speak": "Which one is the letter A?",
+          "correctIndex": 0,
+          "options": [
+            {"label": "A"},
+            {"label": "B"},
+            {"label": "C"}
+          ]
+        },
+        {
+          "id": "q2",
+          "prompt": "Tap the apple that starts with A!",
+          "speak": "Tap the apple that starts with A!",
+          "correctIndex": 1,
+          "options": [
+            {"label": "Ball", "emoji": "⚽"},
+            {"label": "Apple", "emoji": "🍎"},
+            {"label": "Cat", "emoji": "🐱"}
+          ]
+        },
+        {
+          "id": "q3",
+          "prompt": "Which letter comes first?",
+          "speak": "Which letter comes first in the alphabet?",
+          "correctIndex": 2,
+          "options": [
+            {"label": "C"},
+            {"label": "B"},
+            {"label": "A"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lkg_en_vowels",
+      "title": "Vowel Friends",
+      "subject": "english",
+      "grade": "lkg",
+      "gameType": "tapChoice",
+      "emoji": "🎵",
+      "instruction": "Tap the vowel!",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Which one is a vowel?",
+          "speak": "Which one is a vowel?",
+          "correctIndex": 0,
+          "options": [{"label": "E"}, {"label": "T"}, {"label": "R"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Find the vowel O!",
+          "speak": "Find the vowel O!",
+          "correctIndex": 2,
+          "options": [{"label": "M"}, {"label": "N"}, {"label": "O"}]
+        }
+      ]
+    },
+    {
+      "id": "lkg_ma_count5",
+      "title": "Count to 5",
+      "subject": "math",
+      "grade": "lkg",
+      "gameType": "tapChoice",
+      "emoji": "🖐️",
+      "instruction": "How many do you see?",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "How many apples? 🍎🍎🍎",
+          "speak": "How many apples do you see?",
+          "correctIndex": 2,
+          "options": [{"label": "1"}, {"label": "2"}, {"label": "3"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "How many stars? ⭐⭐⭐⭐⭐",
+          "speak": "How many stars do you see?",
+          "correctIndex": 1,
+          "options": [{"label": "4"}, {"label": "5"}, {"label": "6"}]
+        },
+        {
+          "id": "q3",
+          "prompt": "How many balloons? 🎈🎈",
+          "speak": "How many balloons do you see?",
+          "correctIndex": 0,
+          "options": [{"label": "2"}, {"label": "3"}, {"label": "1"}]
+        }
+      ]
+    },
+    {
+      "id": "lkg_ma_shapes",
+      "title": "Shape Explorer",
+      "subject": "math",
+      "grade": "lkg",
+      "gameType": "tapChoice",
+      "emoji": "🔺",
+      "instruction": "Tap the shape!",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Which one is a circle?",
+          "speak": "Which one is a circle?",
+          "correctIndex": 1,
+          "options": [{"label": "Square", "emoji": "🟦"}, {"label": "Circle", "emoji": "🔵"}, {"label": "Triangle", "emoji": "🔺"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Find the triangle!",
+          "speak": "Find the triangle!",
+          "correctIndex": 2,
+          "options": [{"label": "Circle", "emoji": "🔵"}, {"label": "Square", "emoji": "🟩"}, {"label": "Triangle", "emoji": "🔺"}]
+        }
+      ]
+    },
+    {
+      "id": "lkg_evs_animals",
+      "title": "Animal Sounds",
+      "subject": "evs",
+      "grade": "lkg",
+      "gameType": "tapChoice",
+      "emoji": "🐾",
+      "instruction": "Which animal says that?",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Who says Moo?",
+          "speak": "Who says moo?",
+          "correctIndex": 0,
+          "options": [{"label": "Cow", "emoji": "🐄"}, {"label": "Dog", "emoji": "🐶"}, {"label": "Cat", "emoji": "🐱"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Who says Woof?",
+          "speak": "Who says woof?",
+          "correctIndex": 2,
+          "options": [{"label": "Duck", "emoji": "🦆"}, {"label": "Cow", "emoji": "🐄"}, {"label": "Dog", "emoji": "🐶"}]
+        }
+      ]
+    },
+    {
+      "id": "lkg_evs_colors",
+      "title": "Color Rainbow",
+      "subject": "evs",
+      "grade": "lkg",
+      "gameType": "tapChoice",
+      "emoji": "🌈",
+      "instruction": "Tap the color!",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Tap the red fruit!",
+          "speak": "Tap the red fruit!",
+          "correctIndex": 1,
+          "options": [{"label": "Banana", "emoji": "🍌"}, {"label": "Apple", "emoji": "🍎"}, {"label": "Grapes", "emoji": "🍇"}]
+        },
+        {
+          "id": "q2",
+          "prompt": "Tap the yellow thing!",
+          "speak": "Tap the yellow thing!",
+          "correctIndex": 0,
+          "options": [{"label": "Sun", "emoji": "☀️"}, {"label": "Leaf", "emoji": "🍃"}, {"label": "Berry", "emoji": "🫐"}]
+        }
+      ]
+    }
+  ]
+}
