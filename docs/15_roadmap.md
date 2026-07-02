@@ -41,6 +41,15 @@ Reduced-motion + full a11y pass, golden/integration test suite, CI gates,
 A/B on reward pacing, seasonal/festival themes & events, performance hardening
 for low-end tablets.
 
+## Completed milestones
+
+- [x] **M11:** Guarded speech service, pronunciation game/scoring, Android
+  microphone permission, host integration, and Grade 1 pronunciation lesson.
+- [x] **M12:** Lottie wrapper with emoji fallback, repository-owned loading,
+  mascot, and celebration animations wired into shared UI.
+- [x] **M13:** Generated localization for English, Spanish, Hindi, and Arabic;
+  persisted language picker, localized home/settings subset, and RTL support.
+
 ## How to extend (contributor quickstart)
 - **New game:** create `features/games/engines/<name>_game.dart` taking
   `Lesson` + `onComplete(LessonResult)`; add a `GameType` + host case; author a

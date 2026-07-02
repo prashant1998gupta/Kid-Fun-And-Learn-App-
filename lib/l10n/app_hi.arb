@@ -1,0 +1,18 @@
+{
+  "@@locale": "hi",
+  "appTitle": "KidVerse",
+  "settingsTitle": "सेटिंग्स",
+  "language": "भाषा",
+  "greeting": "नमस्ते {name}!",
+  "letsGo": "चलो चलें!",
+  "learnPrompt": "आज हम क्या सीखेंगे?",
+  "soundAndVoice": "ध्वनि और आवाज़",
+  "soundEffects": "ध्वनि प्रभाव",
+  "backgroundMusic": "पृष्ठभूमि संगीत",
+  "voiceGuidance": "आवाज़ मार्गदर्शन",
+  "vibration": "कंपन",
+  "appearance": "दिखावट",
+  "accessibility": "सुलभता",
+  "colorBlindFriendly": "वर्णांध-अनुकूल",
+  "biggerText": "बड़ा पाठ"
+}

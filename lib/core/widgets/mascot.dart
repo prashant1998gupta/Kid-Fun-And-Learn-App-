@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/audio_service.dart';
+import 'lottie_view.dart';
 
 /// The friendly guides of KidVerse. Each has a personality and a signature
 /// color; art is delivered as Lottie (preferred, for lip-sync/blink) with a
@@ -102,7 +103,17 @@ class _MascotViewState extends State<MascotView> with TickerProviderStateMixin {
   }
 
   Widget _art() {
-    // When Lottie assets ship, swap this for Lottie.asset(widget.mascot.lottie).
+    // Renders the mascot's Lottie when present; until the art ships it falls
+    // back to the emoji medallion, so the app looks complete today.
+    return LottieView(
+      asset: widget.mascot.lottie,
+      width: widget.size,
+      height: widget.size,
+      fallback: _fallbackMedallion(),
+    );
+  }
+
+  Widget _fallbackMedallion() {
     return Container(
       width: widget.size,
       height: widget.size,

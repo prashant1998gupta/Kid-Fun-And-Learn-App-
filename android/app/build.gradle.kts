@@ -6,8 +6,8 @@ plugins {
 
 android {
     namespace = "com.kidverse.kidverse"
-    // Pinned to 35 to match the stable AGP 8.7 toolchain (AGP 8.7 max compileSdk).
-    compileSdk = 35
+    // Current Flutter plugins (including speech_to_text) compile against API 36.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

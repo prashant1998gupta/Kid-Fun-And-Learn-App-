@@ -14,7 +14,7 @@
       "subject": "english",
       "grade": "grade1",
       "emoji": "🚀",
-      "lessonIds": ["g1_en_sight", "g1_en_blend", "g1_en_trace"]
+      "lessonIds": ["g1_en_sight", "g1_en_blend", "g1_en_trace", "g1_en_say"]
     },
     {
       "id": "g1_evs",
@@ -126,6 +126,23 @@
         {"id": "q1", "answer": "G", "speak": "Trace the letter G"},
         {"id": "q2", "answer": "H", "speak": "Trace the letter H"},
         {"id": "q3", "answer": "I", "speak": "Trace the letter I"}
+      ]
+    },
+    {
+      "id": "g1_en_say",
+      "title": "Say It Out Loud",
+      "subject": "english",
+      "grade": "grade1",
+      "gameType": "speak",
+      "emoji": "🎤",
+      "instruction": "Tap the mic and say the word!",
+      "baseCoins": 18,
+      "baseXp": 34,
+      "questions": [
+        {"id": "q1", "answer": "cat", "speak": "Say the word cat"},
+        {"id": "q2", "answer": "sun", "speak": "Say the word sun"},
+        {"id": "q3", "answer": "apple", "speak": "Say the word apple"},
+        {"id": "q4", "answer": "ball", "speak": "Say the word ball"}
       ]
     },
     {

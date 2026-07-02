@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_theme.dart';
 import '../features/auth/auth_controller.dart';
 import '../features/settings/settings_controller.dart';
+import '../l10n/app_localizations.dart';
 import 'router.dart';
 
 /// Root widget. Wires theme, routing and the media-query text-scale override
@@ -26,6 +27,9 @@ class KidVerseApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: settings.themeMode,
+      locale: Locale(settings.locale),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       routerConfig: router,
       builder: (context, child) {
         final scale = settings.largeText ? 1.25 : 1.0;

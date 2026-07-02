@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/app_localizations.dart';
 import 'settings_controller.dart';
 
 /// Kid-safe settings: audio toggles + accessibility. Parent-only items
@@ -13,54 +14,57 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(settingsControllerProvider);
     final c = ref.read(settingsControllerProvider.notifier);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
-          _section(context, 'Sound & Voice'),
+          _section(context, l10n.soundAndVoice),
           _toggle(
             context,
-            'Sound Effects',
+            l10n.soundEffects,
             Icons.graphic_eq_rounded,
             s.sfxEnabled,
             c.toggleSfx,
           ),
           _toggle(
             context,
-            'Background Music',
+            l10n.backgroundMusic,
             Icons.music_note_rounded,
             s.musicEnabled,
             c.toggleMusic,
           ),
           _toggle(
             context,
-            'Voice Guidance',
+            l10n.voiceGuidance,
             Icons.record_voice_over_rounded,
             s.voiceEnabled,
             c.toggleVoice,
           ),
           _toggle(
             context,
-            'Vibration',
+            l10n.vibration,
             Icons.vibration_rounded,
             s.hapticsEnabled,
             c.toggleHaptics,
           ),
-          _section(context, 'Appearance'),
+          _section(context, l10n.language),
+          _languageSelector(context, s, c),
+          _section(context, l10n.appearance),
           _themeSelector(context, s, c),
-          _section(context, 'Accessibility'),
+          _section(context, l10n.accessibility),
           _toggle(
             context,
-            'Color-blind friendly',
+            l10n.colorBlindFriendly,
             Icons.palette_rounded,
             s.colorBlindMode,
             c.toggleColorBlind,
           ),
           _toggle(
             context,
-            'Bigger Text',
+            l10n.biggerText,
             Icons.text_fields_rounded,
             s.largeText,
             c.toggleLargeText,
@@ -90,6 +94,38 @@ class SettingsScreen extends ConsumerWidget {
         onChanged: onChanged,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
+      ),
+    );
+  }
+
+  Widget _languageSelector(
+    BuildContext context,
+    SettingsState s,
+    SettingsController c,
+  ) {
+    // (code, native label). Arabic renders right-to-left automatically via the
+    // app's localization delegates.
+    const langs = [
+      ('en', 'English'),
+      ('es', 'Español'),
+      ('hi', 'हिन्दी'),
+      ('ar', 'العربية'),
+    ];
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final (code, label) in langs)
+              ChoiceChip(
+                label: Text(label),
+                selected: s.locale == code,
+                onSelected: (_) => c.setLocale(code),
+              ),
+          ],
+        ),
       ),
     );
   }

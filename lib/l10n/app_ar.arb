@@ -1,0 +1,18 @@
+{
+  "@@locale": "ar",
+  "appTitle": "KidVerse",
+  "settingsTitle": "الإعدادات",
+  "language": "اللغة",
+  "greeting": "مرحبا {name}!",
+  "letsGo": "هيا بنا!",
+  "learnPrompt": "ماذا سنتعلم اليوم؟",
+  "soundAndVoice": "الصوت والإرشاد",
+  "soundEffects": "المؤثرات الصوتية",
+  "backgroundMusic": "موسيقى الخلفية",
+  "voiceGuidance": "الإرشاد الصوتي",
+  "vibration": "الاهتزاز",
+  "appearance": "المظهر",
+  "accessibility": "إمكانية الوصول",
+  "colorBlindFriendly": "ملائم لعمى الألوان",
+  "biggerText": "نص أكبر"
+}

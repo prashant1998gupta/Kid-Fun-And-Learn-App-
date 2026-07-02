@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
+import 'lottie_view.dart';
 
 /// Drives celebration effects on a [CelebrationOverlay]. Create one in your
 /// widget's State, hand it to the overlay, and call [celebrate]/[fireworks]
@@ -48,6 +49,8 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
       ConfettiController(duration: const Duration(seconds: 1));
   final ConfettiController _right =
       ConfettiController(duration: const Duration(seconds: 1));
+  int _lottieBurst = 0;
+  bool _showLottie = false;
 
   static const _colors = [
     AppColors.primary,
@@ -85,6 +88,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
 
   void _celebrate(bool sound) {
     _center.play();
+    _playLottie();
     if (sound) {
       AudioService.instance.playSfx(Sfx.celebration);
       AudioService.instance.successHaptic();
@@ -95,8 +99,22 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
     _left.play();
     _center.play();
     _right.play();
+    _playLottie();
     AudioService.instance.playSfx(Sfx.reward);
     AudioService.instance.successHaptic();
+  }
+
+  void _playLottie() {
+    setState(() {
+      _lottieBurst++;
+      _showLottie = true;
+    });
+    final burst = _lottieBurst;
+    Future<void>.delayed(const Duration(milliseconds: 1400), () {
+      if (mounted && burst == _lottieBurst) {
+        setState(() => _showLottie = false);
+      }
+    });
   }
 
   @override
@@ -104,6 +122,21 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
     return Stack(
       children: [
         widget.child,
+        if (_showLottie)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Center(
+                child: LottieView(
+                  key: ValueKey(_lottieBurst),
+                  asset: 'assets/lottie/celebration_star.json',
+                  width: 240,
+                  height: 240,
+                  repeat: false,
+                  fallback: const Text('⭐', style: TextStyle(fontSize: 96)),
+                ),
+              ),
+            ),
+          ),
         _emitter(_left, -math.pi / 4, Alignment.bottomLeft),
         _emitter(_center, -math.pi / 2, Alignment.topCenter),
         _emitter(_right, -3 * math.pi / 4, Alignment.bottomRight),

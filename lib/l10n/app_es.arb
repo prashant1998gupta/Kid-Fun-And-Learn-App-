@@ -1,0 +1,18 @@
+{
+  "@@locale": "es",
+  "appTitle": "KidVerse",
+  "settingsTitle": "Ajustes",
+  "language": "Idioma",
+  "greeting": "¡Hola {name}!",
+  "letsGo": "¡Vamos!",
+  "learnPrompt": "¿Qué aprendemos hoy?",
+  "soundAndVoice": "Sonido y voz",
+  "soundEffects": "Efectos de sonido",
+  "backgroundMusic": "Música de fondo",
+  "voiceGuidance": "Guía de voz",
+  "vibration": "Vibración",
+  "appearance": "Apariencia",
+  "accessibility": "Accesibilidad",
+  "colorBlindFriendly": "Modo para daltonismo",
+  "biggerText": "Texto más grande"
+}

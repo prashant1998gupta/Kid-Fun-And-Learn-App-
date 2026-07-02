@@ -1,0 +1,24 @@
+{
+  "@@locale": "en",
+  "appTitle": "KidVerse",
+  "settingsTitle": "Settings",
+  "language": "Language",
+  "greeting": "Hi {name}!",
+  "@greeting": {
+    "description": "Home screen greeting with the child's name",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "letsGo": "Let's Go!",
+  "learnPrompt": "What shall we learn today?",
+  "soundAndVoice": "Sound & Voice",
+  "soundEffects": "Sound Effects",
+  "backgroundMusic": "Background Music",
+  "voiceGuidance": "Voice Guidance",
+  "vibration": "Vibration",
+  "appearance": "Appearance",
+  "accessibility": "Accessibility",
+  "colorBlindFriendly": "Color-blind friendly",
+  "biggerText": "Bigger Text"
+}

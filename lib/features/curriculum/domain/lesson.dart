@@ -17,6 +17,7 @@ enum GameType {
   wordBuilder, // build a word from letters
   countCatch, // count moving objects
   spotMatch, // match shadow/pair
+  speak, // say the word aloud (speech recognition)
 }
 
 /// One curriculum unit — a "chapter" grouping many lessons.

@@ -118,6 +118,11 @@ class SettingsController extends StateNotifier<SettingsState> {
     state = state.copyWith(largeText: v);
     await _prefs.setBool('largeText', v);
   }
+
+  Future<void> setLocale(String code) async {
+    state = state.copyWith(locale: code);
+    await _prefs.setString('locale', code);
+  }
 }
 
 /// Overridden in main() once SharedPreferences is available.

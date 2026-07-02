@@ -11,7 +11,9 @@ import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/celebration_overlay.dart';
 import '../../core/widgets/currency_hud.dart';
+import '../../core/widgets/lottie_view.dart';
 import '../../core/widgets/mascot.dart';
+import '../../l10n/app_localizations.dart';
 import '../collections/domain/collectible.dart';
 import '../curriculum/data/curriculum_repository.dart';
 import '../curriculum/domain/subject.dart';
@@ -71,7 +73,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   sliver: curriculumAsync.when(
                     loading: () => const SliverToBoxAdapter(
-                      child: Center(child: CircularProgressIndicator()),
+                      child: Center(
+                        child: LottieView(
+                          asset: 'assets/lottie/loading_star.json',
+                          width: 120,
+                          height: 120,
+                          fallback: CircularProgressIndicator(),
+                        ),
+                      ),
                     ),
                     error: (e, _) => SliverToBoxAdapter(
                       child: Center(child: Text('Oops: $e')),
@@ -171,7 +180,8 @@ class _Greeting extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Text(pet.emoji, style: const TextStyle(fontSize: 26)),
+                    child:
+                        Text(pet.emoji, style: const TextStyle(fontSize: 26)),
                   ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
                         begin: 0,
                         end: -4,
@@ -187,7 +197,7 @@ class _Greeting extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hi ${child.name}!',
+                  AppLocalizations.of(context).greeting(child.name),
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 4),
@@ -335,8 +345,7 @@ class _QuickActions extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(label,
-                    style: Theme.of(context).textTheme.labelMedium),
+                Text(label, style: Theme.of(context).textTheme.labelMedium),
               ],
             ),
           ),
