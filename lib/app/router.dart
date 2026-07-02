@@ -11,6 +11,7 @@ import '../features/learning_map/learning_map_screen.dart';
 import '../features/shop/shop_screen.dart';
 import '../features/spin/lucky_spin_screen.dart';
 import '../features/auth/sign_in_screen.dart';
+import '../features/collections/collection_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/parent/parent_dashboard_screen.dart';
@@ -31,6 +32,7 @@ class AppRoutes {
   static const learningMap = '/learning-map';
   static const achievements = '/achievements';
   static const shop = '/shop';
+  static const collection = '/collection';
   static const spin = '/spin';
   static const game = '/game';
   static const settings = '/settings';
@@ -77,6 +79,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.shop,
         pageBuilder: (_, s) => _slide(const ShopScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.collection,
+        pageBuilder: (_, s) => _slide(const CollectionScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.spin,

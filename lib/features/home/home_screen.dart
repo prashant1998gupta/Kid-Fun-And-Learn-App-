@@ -12,6 +12,7 @@ import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/celebration_overlay.dart';
 import '../../core/widgets/currency_hud.dart';
 import '../../core/widgets/mascot.dart';
+import '../collections/domain/collectible.dart';
 import '../curriculum/data/curriculum_repository.dart';
 import '../curriculum/domain/subject.dart';
 import '../profiles/domain/child_profile.dart';
@@ -137,16 +138,48 @@ class _Greeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = child.wallet;
+    final pet = child.activePetId == null
+        ? null
+        : CollectionCatalog.byId(child.activePetId!);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         children: [
-          MascotView(
-            mascot: Mascot.values.firstWhere(
-              (m) => m.name == child.mascotId,
-              orElse: () => Mascot.panda,
-            ),
-            size: 96,
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              MascotView(
+                mascot: Mascot.values.firstWhere(
+                  (m) => m.name == child.mascotId,
+                  orElse: () => Mascot.panda,
+                ),
+                size: 96,
+              ),
+              if (pet != null)
+                Positioned(
+                  right: -6,
+                  bottom: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 6,
+                        ),
+                      ],
+                    ),
+                    child: Text(pet.emoji, style: const TextStyle(fontSize: 26)),
+                  ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
+                        begin: 0,
+                        end: -4,
+                        duration: 1200.ms,
+                        curve: Curves.easeInOut,
+                      ),
+                ),
+            ],
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -343,6 +376,13 @@ class _QuickActions extends ConsumerWidget {
             label: 'Shop',
             color: AppColors.mint,
             onTap: () => context.push(AppRoutes.shop),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          action(
+            icon: Icons.pets_rounded,
+            label: 'Collect',
+            color: AppColors.bubblegum,
+            onTap: () => context.push(AppRoutes.collection),
           ),
         ],
       ),

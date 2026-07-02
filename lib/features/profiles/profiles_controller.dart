@@ -125,6 +125,27 @@ class ProfilesController extends StateNotifier<ProfilesState> {
     await _persist();
   }
 
+  /// Adds a collectible to the active child. Returns true if it was new, false
+  /// if already owned (so the caller can hand out a duplicate refund).
+  Future<bool> grantCollectible(String id) async {
+    final active = state.active;
+    if (active == null) return false;
+    if (active.ownedCollectibles.contains(id)) return false;
+    _replace(active.copyWith(
+      ownedCollectibles: [...active.ownedCollectibles, id],
+    ));
+    await _persist();
+    return true;
+  }
+
+  /// Equips a pet companion (must already be owned).
+  Future<void> setActivePet(String petId) async {
+    final active = state.active;
+    if (active == null || !active.ownedCollectibles.contains(petId)) return;
+    _replace(active.copyWith(activePetId: petId));
+    await _persist();
+  }
+
   void _replace(ChildProfile updated) {
     final list = [
       for (final c in state.children)

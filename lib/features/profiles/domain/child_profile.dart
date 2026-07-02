@@ -15,6 +15,8 @@ class ChildProfile extends Equatable {
     this.mascotId = 'panda',
     this.unlockedThemes = const ['sunrise'],
     this.activeTheme = 'sunrise',
+    this.ownedCollectibles = const [],
+    this.activePetId,
     this.createdAt,
     this.lastActiveAt,
   });
@@ -27,6 +29,13 @@ class ChildProfile extends Equatable {
   final String mascotId;
   final List<String> unlockedThemes;
   final String activeTheme;
+
+  /// Collected sticker + pet ids (see `CollectionCatalog`). Rides the profile
+  /// blob, so it persists locally and syncs to the cloud for free.
+  final List<String> ownedCollectibles;
+
+  /// The pet companion currently shown beside the child on Home (or null).
+  final String? activePetId;
   final DateTime? createdAt;
   final DateTime? lastActiveAt;
 
@@ -38,6 +47,8 @@ class ChildProfile extends Equatable {
     String? mascotId,
     List<String>? unlockedThemes,
     String? activeTheme,
+    List<String>? ownedCollectibles,
+    String? activePetId,
     DateTime? lastActiveAt,
   }) {
     return ChildProfile(
@@ -49,6 +60,8 @@ class ChildProfile extends Equatable {
       mascotId: mascotId ?? this.mascotId,
       unlockedThemes: unlockedThemes ?? this.unlockedThemes,
       activeTheme: activeTheme ?? this.activeTheme,
+      ownedCollectibles: ownedCollectibles ?? this.ownedCollectibles,
+      activePetId: activePetId ?? this.activePetId,
       createdAt: createdAt,
       lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     );
@@ -63,6 +76,8 @@ class ChildProfile extends Equatable {
         'mascotId': mascotId,
         'unlockedThemes': unlockedThemes,
         'activeTheme': activeTheme,
+        'ownedCollectibles': ownedCollectibles,
+        'activePetId': activePetId,
         'createdAt': createdAt?.toIso8601String(),
         'lastActiveAt': lastActiveAt?.toIso8601String(),
       };
@@ -81,13 +96,25 @@ class ChildProfile extends Equatable {
         unlockedThemes: (map['unlockedThemes'] as List?)?.cast<String>() ??
             const ['sunrise'],
         activeTheme: map['activeTheme'] as String? ?? 'sunrise',
+        ownedCollectibles:
+            (map['ownedCollectibles'] as List?)?.cast<String>() ?? const [],
+        activePetId: map['activePetId'] as String?,
         createdAt: DateTime.tryParse(map['createdAt'] as String? ?? ''),
         lastActiveAt: DateTime.tryParse(map['lastActiveAt'] as String? ?? ''),
       );
 
   @override
-  List<Object?> get props =>
-      [id, name, grade, avatar, wallet, mascotId, activeTheme];
+  List<Object?> get props => [
+        id,
+        name,
+        grade,
+        avatar,
+        wallet,
+        mascotId,
+        activeTheme,
+        ownedCollectibles,
+        activePetId,
+      ];
 }
 
 /// A composable, non-photographic avatar — safe for kids (no real photos).
