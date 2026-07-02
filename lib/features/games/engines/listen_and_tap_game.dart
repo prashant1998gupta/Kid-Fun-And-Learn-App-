@@ -146,7 +146,10 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
                           child: Text(
                             _question.prompt,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(color: AppColors.lightText),
                           ),
                         ),
                       ],

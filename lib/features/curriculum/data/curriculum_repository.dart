@@ -7,6 +7,7 @@ import '../../profiles/domain/grade_level.dart';
 import '../domain/lesson.dart';
 import '../domain/subject.dart';
 import 'lesson_parser.dart';
+import 'preschool_question_factory.dart';
 
 /// Loads curriculum content. Today it reads bundled JSON assets (offline-first);
 /// the same interface can later fetch from Firestore/Storage and cache locally,
@@ -76,7 +77,7 @@ class CurriculumRepository {
           subject: seed.subject,
           grade: seed.grade,
           gameType: seed.gameType,
-          questions: seed.questions,
+          questions: _questionsForGeneratedLevel(seed, level),
           emoji: seed.emoji,
           instruction: seed.instruction,
           baseCoins: seed.baseCoins + level,
@@ -93,6 +94,47 @@ class CurriculumRepository {
         emoji: unit.emoji,
       );
     }
+  }
+
+  List<Question> _questionsForGeneratedLevel(Lesson seed, int level) {
+    if (seed.grade.isPreSchool) {
+      return PreschoolQuestionFactory.sessionForLevel(
+        grade: seed.grade,
+        subject: seed.subject,
+        gameType: seed.gameType,
+        level: level,
+        count: seed.questions.length,
+      );
+    }
+    return _rotateQuestionBank(seed.questions, level);
+  }
+
+  List<Question> _rotateQuestionBank(List<Question> questions, int level) {
+    if (questions.isEmpty) return questions;
+    return List<Question>.generate(questions.length, (index) {
+      final source = questions[(index + level) % questions.length];
+      final options = source.options;
+      final canRotate = options.length > 1 && source.correctIndex != null;
+      final shift = canRotate ? (level + index) % options.length : 0;
+      final rotated = shift == 0
+          ? options
+          : [...options.skip(shift), ...options.take(shift)];
+      final correctIndex = canRotate
+          ? (source.correctIndex! - shift) % options.length
+          : source.correctIndex;
+      return Question(
+        id: '${source.id}_level_$level',
+        prompt: source.prompt,
+        promptEmoji: source.promptEmoji,
+        promptImage: source.promptImage,
+        options: rotated,
+        correctIndex: correctIndex,
+        correctIndices: source.correctIndices,
+        pairs: source.pairs,
+        answer: source.answer,
+        speak: source.speak,
+      );
+    });
   }
 
   Future<void> _loadAsset(String path, GradeLevel grade) async {

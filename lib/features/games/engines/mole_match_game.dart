@@ -162,7 +162,10 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
                           child: Text(
                             _question.prompt,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(color: AppColors.lightText),
                           ),
                         ),
                       ],
@@ -274,6 +277,7 @@ class _MoleHole extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = selected ? Colors.white : AppColors.lightText;
     return Semantics(
       button: option != null,
       enabled: option != null,
@@ -330,9 +334,10 @@ class _MoleHole extends StatelessWidget {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             option!.emoji ?? option!.label,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w900,
+                              color: foreground,
                             ),
                           ),
                         ),
@@ -340,7 +345,10 @@ class _MoleHole extends StatelessWidget {
                           Text(
                             option!.label,
                             maxLines: 1,
-                            style: const TextStyle(fontWeight: FontWeight.w800),
+                            style: TextStyle(
+                              color: foreground,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                       ],
                     ),

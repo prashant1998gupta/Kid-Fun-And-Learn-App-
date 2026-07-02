@@ -245,7 +245,10 @@ class _SequenceGameState extends State<SequenceGame> {
               Expanded(
                 child: Text(
                   _q.prompt,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(color: AppColors.lightText),
                 ),
               ),
               const Icon(Icons.volume_up_rounded,

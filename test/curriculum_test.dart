@@ -138,4 +138,55 @@ void main() {
       );
     }
   });
+
+  test('generated 50-level journeys do not clone the same question bank',
+      () async {
+    final repo = CurriculumRepository();
+    await repo.ensureLoaded();
+    for (final grade in [
+      GradeLevel.lkg,
+      GradeLevel.ukg,
+      GradeLevel.kg,
+      GradeLevel.grade4,
+      GradeLevel.grade5,
+    ]) {
+      final generatedLessons = [
+        for (final unit in repo.unitsForGrade(grade))
+          ...repo
+              .lessonsForUnit(unit)
+              .where((lesson) => lesson.id.contains('_level_')),
+      ];
+
+      expect(generatedLessons, isNotEmpty,
+          reason: '${grade.name} should include generated map levels');
+
+      final signatures =
+          generatedLessons.take(8).map(_questionBankSignature).toSet();
+      expect(signatures.length, greaterThan(1),
+          reason: '${grade.name} generated levels should not reuse one bank');
+
+      for (final lesson in generatedLessons.take(8)) {
+        final ids = lesson.questions.map((question) => question.id).toSet();
+        expect(ids.length, lesson.questions.length,
+            reason: '${lesson.id} should have unique question IDs');
+      }
+    }
+  });
+}
+
+String _questionBankSignature(Lesson lesson) {
+  return lesson.questions
+      .map(
+        (question) => [
+          question.id,
+          question.prompt,
+          question.promptEmoji ?? '',
+          question.answer ?? '',
+          question.correctIndex?.toString() ?? '',
+          question.options
+              .map((option) => '${option.label}/${option.emoji ?? ''}')
+              .join(','),
+        ].join('|'),
+      )
+      .join('\n');
 }

@@ -59,6 +59,30 @@ for low-end tablets.
   20-question sessions, and grade-aware generated practice banks.
 - [x] **M18:** Mole Match educational mini-game with moving targets, combos,
   safe timer lifecycle, and LKG/UKG/KG curriculum integration.
+- [x] **M19:** Anti-repeat generated-level question banks, unique generated
+  question IDs for progress tracking, and dark-mode contrast fixes for
+  fixed-white game prompt cards.
+
+## Quality rules for Codex follow-up work
+
+- **No cloned level banks:** any generated `*_level_*` lesson must create or
+  rotate a fresh question bank. Do not copy `seed.questions` directly into a
+  generated level.
+- **Unique question IDs:** generated sessions must keep per-question IDs unique
+  inside the lesson so struggle tracking and smart revision stay accurate.
+- **Dark-mode foreground rule:** if a widget uses a fixed light surface such as
+  `Colors.white`, its text must explicitly use a dark foreground such as
+  `AppColors.lightText`. If it uses a theme surface, use
+  `colorScheme.onSurface`.
+
+## Next Codex quality queue
+
+- [ ] Add light/dark widget or golden coverage for Home, Settings, Learning Map,
+  and every game prompt card.
+- [ ] Add a duplicate-content audit that checks adjacent generated levels do not
+  show the same first 5 prompts in the same order.
+- [ ] Expand authored preschool content pools for animals, sounds, shapes,
+  safety, rhymes, and early maths so generated levels feel less formulaic.
 
 ## How to extend (contributor quickstart)
 - **New game:** create `features/games/engines/<name>_game.dart` taking

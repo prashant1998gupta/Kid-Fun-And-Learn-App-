@@ -13,12 +13,33 @@ class PreschoolQuestionFactory {
     required Subject subject,
     required GameType gameType,
     int count = 20,
+    int startIndex = 0,
   }) {
     final questions = [...seeds];
     for (var index = questions.length; index < count; index++) {
-      questions.add(_generate(index, grade, subject, gameType));
+      questions.add(_generate(startIndex + index, grade, subject, gameType));
     }
     return questions.take(count).toList();
+  }
+
+  /// Builds a fresh generated session for synthetic map levels. This prevents
+  /// Level 2/3/4 from cloning the exact same generated question bank as Level 1.
+  static List<Question> sessionForLevel({
+    required GradeLevel grade,
+    required Subject subject,
+    required GameType gameType,
+    required int level,
+    int count = 20,
+  }) {
+    final startIndex = level * 37;
+    return expand(
+      const [],
+      grade: grade,
+      subject: subject,
+      gameType: gameType,
+      count: count,
+      startIndex: startIndex,
+    );
   }
 
   static Question _generate(
@@ -133,21 +154,56 @@ class PreschoolQuestionFactory {
   }
 
   static Question _mathChoice(int index, GradeLevel grade) {
-    final max = grade == GradeLevel.lkg ? 5 : 10;
-    if (index.isEven) {
-      final count = (index % max) + 1;
-      return _numberChoice(
-        index,
-        prompt: 'How many stars? ${List.filled(count, '⭐').join()}',
-        answer: count,
-      );
-    }
-    final left = ((index ~/ 2) % (max - 1)) + 1;
-    final right = grade == GradeLevel.lkg ? 1 : (index % 2) + 1;
+    final max = grade == GradeLevel.lkg ? 6 : 12;
+    return switch (index % 4) {
+      0 => _numberChoice(
+          index,
+          prompt:
+              'How many stars? ${List.filled((index % max) + 1, '⭐').join()}',
+          answer: (index % max) + 1,
+        ),
+      1 => _additionChoice(index, grade, max),
+      2 => _numberChoice(
+          index,
+          prompt: 'What comes after ${((index ~/ 2) % (max - 1)) + 1}?',
+          answer: ((index ~/ 2) % (max - 1)) + 2,
+        ),
+      _ => _biggerNumberChoice(index, max),
+    };
+  }
+
+  static Question _additionChoice(int index, GradeLevel grade, int max) {
+    final left = ((index ~/ 2) % (max - 2)) + 1;
+    final right =
+        grade == GradeLevel.lkg ? ((index ~/ 3) % 2) + 1 : (index % 3) + 1;
     return _numberChoice(
       index,
       prompt: '$left + $right = ?',
       answer: left + right,
+    );
+  }
+
+  static Question _biggerNumberChoice(int index, int max) {
+    final left = ((index ~/ 3) % max) + 1;
+    var right = ((left + index ~/ 2) % max) + 1;
+    if (right == left) right = (right % max) + 1;
+    final answer = left > right ? left : right;
+    final smaller = left > right ? right : left;
+    final wrong = <int>[smaller];
+    for (var candidate = 1; wrong.length < 2 && candidate <= max; candidate++) {
+      if (candidate != answer && !wrong.contains(candidate)) {
+        wrong.add(candidate);
+      }
+    }
+    return _choice(
+      id: 'auto_math_$index',
+      prompt: 'Which number is bigger: $left or $right?',
+      speak: 'Find the bigger number',
+      correct: AnswerOption(label: '$answer'),
+      wrong: [
+        for (final value in wrong) AnswerOption(label: '$value'),
+      ],
+      shift: index,
     );
   }
 
