@@ -76,7 +76,7 @@ void main() {
 
   test('restore never clears keys missing from the snapshot', () async {
     // A partial remote (only settings) must not wipe richer local data.
-    final remote = SyncSnapshot(values: const {'themeMode': 1}, updatedAt: 1);
+    const remote = SyncSnapshot(values: {'themeMode': 1}, updatedAt: 1);
     SharedPreferences.setMockInitialValues({
       'child_profiles': profiles,
       'lesson_progress': jsonEncode({'$childId|l1': 2}),
@@ -90,8 +90,8 @@ void main() {
 
   test('num values round-trip back to int (Firestore double coercion)',
       () async {
-    final remote = SyncSnapshot(
-      values: const {'daily_streak_$childId': 7.0},
+    const remote = SyncSnapshot(
+      values: {'daily_streak_$childId': 7.0},
       updatedAt: 1,
     );
     SharedPreferences.setMockInitialValues({});

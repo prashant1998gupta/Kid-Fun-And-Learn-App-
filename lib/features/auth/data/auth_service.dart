@@ -196,7 +196,9 @@ class AuthService {
   // ---- Session ------------------------------------------------------------
   Future<void> signOut() async {
     if (!_firebase.isAvailable) return;
-    await GoogleSignIn().signOut().catchError((_) {});
+    // Google sign-out is best-effort; ignore its failure (return null to
+    // satisfy catchError's GoogleSignInAccount? return type).
+    await GoogleSignIn().signOut().catchError((_) => null);
     await _auth.signOut();
   }
 

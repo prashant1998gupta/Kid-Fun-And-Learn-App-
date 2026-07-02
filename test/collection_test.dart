@@ -62,12 +62,12 @@ void main() {
 
   group('ChildProfile collection persistence', () {
     test('ownedCollectibles + activePetId survive a map round-trip', () {
-      final profile = ChildProfile(
+      const profile = ChildProfile(
         id: 'c1',
         name: 'Mia',
         grade: GradeLevel.ukg,
-        avatar: const AvatarConfig(),
-        ownedCollectibles: const ['pet_fox', 'st_star'],
+        avatar: AvatarConfig(),
+        ownedCollectibles: ['pet_fox', 'st_star'],
         activePetId: 'pet_fox',
       );
       final restored = ChildProfile.fromMap(profile.toMap());
