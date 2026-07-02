@@ -26,6 +26,10 @@ class LessonParser {
       instruction: j['instruction'] as String? ?? '',
       baseCoins: (j['baseCoins'] ?? 10) as int,
       baseXp: (j['baseXp'] ?? 20) as int,
+      // Preschool bands get a broad, *generated* (varied) practice bank.
+      // Older grades use exactly their authored questions — never padded by
+      // repetition, which previously made one lesson show the same question
+      // many times. A short, correct lesson beats a long, repetitive one.
       questions: grade.isPreSchool
           ? PreschoolQuestionFactory.expand(
               seeds,
@@ -33,7 +37,7 @@ class LessonParser {
               subject: subject,
               gameType: gameType,
             )
-          : _expandQuestions(seeds, targetCount: 20),
+          : seeds,
     );
   }
 
@@ -52,41 +56,6 @@ class LessonParser {
           .map((o) => AnswerOption.fromJson((o as Map).cast<String, dynamic>()))
           .toList(),
     );
-  }
-
-  /// Expands compact seed banks to twenty rounds. Preschool banks are handled
-  /// by [PreschoolQuestionFactory] so added rounds contain varied learning
-  /// prompts rather than simple repetition.
-  static List<Question> _expandQuestions(
-    List<Question> seeds, {
-    required int targetCount,
-  }) {
-    if (seeds.isEmpty || seeds.length >= targetCount) return seeds;
-    return List<Question>.generate(targetCount, (index) {
-      final source = seeds[index % seeds.length];
-      final cycle = index ~/ seeds.length;
-      final options = source.options;
-      final canRotate = options.length > 1 && source.correctIndex != null;
-      final shift = canRotate ? cycle % options.length : 0;
-      final rotated = shift == 0
-          ? options
-          : [...options.skip(shift), ...options.take(shift)];
-      final correctIndex = canRotate
-          ? (source.correctIndex! - shift) % options.length
-          : source.correctIndex;
-      return Question(
-        id: '${source.id}_${cycle + 1}',
-        prompt: source.prompt,
-        promptEmoji: source.promptEmoji,
-        promptImage: source.promptImage,
-        options: rotated,
-        correctIndex: correctIndex,
-        correctIndices: source.correctIndices,
-        pairs: source.pairs,
-        answer: source.answer,
-        speak: source.speak,
-      );
-    });
   }
 
   static GameType _gameType(String id) {

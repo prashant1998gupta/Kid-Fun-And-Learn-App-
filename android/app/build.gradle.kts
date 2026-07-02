@@ -8,7 +8,9 @@ android {
     namespace = "com.kidverse.kidverse"
     // Current Flutter plugins (including speech_to_text) compile against API 36.
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    // Pin to the complete local NDK; the Flutter-default 28.2.x is a broken
+    // partial download on this machine. 27.1 is fully installed and works.
+    ndkVersion = "27.1.12297006"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -127,7 +127,8 @@ void main() {
     }
   });
 
-  test('grades 4-5 provide 50 levels with 20 questions each', () async {
+  test('grades 4-5 provide 50 playable levels (no padded repetition)',
+      () async {
     final repo = CurriculumRepository();
     await repo.ensureLoaded();
     for (final grade in [GradeLevel.grade4, GradeLevel.grade5]) {
@@ -136,11 +137,24 @@ void main() {
           ...repo.lessonsForUnit(unit),
       ];
       expect(lessons.length, 50, reason: '${grade.name} needs 50 levels');
+      // Every level is playable; lessons now use their authored questions
+      // (2-3 for practice, 20 for a boss) rather than repeating one bank.
       expect(
-        lessons.every((lesson) => lesson.questions.length >= 20),
+        lessons.every((lesson) => lesson.questions.isNotEmpty),
         isTrue,
-        reason: '${grade.name} levels need full question sessions',
+        reason: '${grade.name} levels must have questions',
       );
+      // No lesson repeats a whole question (prompt + options + answer). Two
+      // puzzles that share a generic prompt like "Build the sentence" but have
+      // different options are fine — only true clones are flagged.
+      for (final lesson in lessons) {
+        final signatures = lesson.questions.map((q) {
+          final opts = q.options.map((o) => '${o.label}/${o.emoji ?? ''}').join(',');
+          return '${q.prompt}|$opts|${q.correctIndex}|${q.answer}';
+        }).toList();
+        expect(signatures.toSet().length, signatures.length,
+            reason: '${lesson.id} repeats an identical question');
+      }
     }
   });
 
