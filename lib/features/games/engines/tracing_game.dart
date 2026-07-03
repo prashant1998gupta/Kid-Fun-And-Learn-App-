@@ -11,10 +11,18 @@ import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
 
-/// Finger-tracing of a glyph ([Question.answer] — a letter, number or shape
-/// character). Coverage is measured over a grid: when the child has drawn over
-/// enough of the glyph area, the stroke "locks in" and we advance. Deliberately
-/// lenient — the goal is joyful motor practice, not handwriting grading.
+/// Finger-tracing of a glyph ([Question.answer] — a letter, number or shape).
+///
+/// Made kid-friendly and smooth:
+///  - **Multi-stroke**: lifting the finger starts a new stroke, so no ugly
+///    connecting line jumps across the letter (needed for A, E, T, 4…).
+///  - **Smooth ink**: strokes are drawn as quadratic-bezier curves through
+///    point midpoints, with a soft glow — no jagged straight segments.
+///  - **Clear guide**: the letter shows as a big dashed-style *outline* with a
+///    green "start here" dot, not a faded fill.
+///  - **Fair completion**: needs a real trace (enough ink covering the glyph
+///    area), not a single dot — but stays lenient; this is motor practice, not
+///    handwriting grading.
 class TracingGame extends StatefulWidget {
   const TracingGame({
     super.key,
@@ -31,13 +39,17 @@ class TracingGame extends StatefulWidget {
 
 class _TracingGameState extends State<TracingGame> {
   final _celebration = CelebrationController();
-  static const int _cols = 6;
-  static const int _rows = 6;
-  static const double _threshold = 0.5; // fraction of central cells to cover
+
+  // Coverage grid over the glyph's central area.
+  static const int _cols = 8;
+  static const int _rows = 8;
+  static const double _threshold = 0.42; // fraction of glyph cells to cover
+  static const int _minInkPoints = 14; // guard against a single tap completing
 
   int _index = 0;
-  final List<Offset> _points = [];
+  final List<List<Offset>> _strokes = []; // each finger-down starts a stroke
   final Set<int> _covered = {};
+  int _inkPoints = 0;
   bool _done = false;
   Size _canvas = Size.zero;
   final _stopwatch = Stopwatch()..start();
@@ -46,7 +58,7 @@ class _TracingGameState extends State<TracingGame> {
   int get _total => widget.lesson.questions.length;
   String get _glyph => _q.answer ?? _q.prompt;
 
-  // Central band of the grid = where the glyph roughly lives.
+  /// Cells that make up the glyph's writing area (central band).
   Set<int> get _targetCells {
     final cells = <int>{};
     for (var r = 1; r < _rows - 1; r++) {
@@ -66,13 +78,20 @@ class _TracingGameState extends State<TracingGame> {
   void _speak() => AudioService.instance
       .speak(_q.speak ?? 'Trace the ${_glyph.toUpperCase()}');
 
-  void _add(Offset local) {
-    if (_done || _canvas == Size.zero) return;
+  void _startStroke(Offset local) {
+    if (_done) return;
+    setState(() => _strokes.add(<Offset>[]));
+    _extend(local);
+  }
+
+  void _extend(Offset local) {
+    if (_done || _canvas == Size.zero || _strokes.isEmpty) return;
     final c = (local.dx / _canvas.width * _cols).floor().clamp(0, _cols - 1);
     final r = (local.dy / _canvas.height * _rows).floor().clamp(0, _rows - 1);
     setState(() {
-      _points.add(local);
+      _strokes.last.add(local);
       _covered.add(r * _cols + c);
+      _inkPoints++;
     });
   }
 
@@ -80,7 +99,9 @@ class _TracingGameState extends State<TracingGame> {
     if (_done) return;
     final target = _targetCells;
     final hit = _covered.where(target.contains).length;
-    if (hit / target.length >= _threshold) _complete();
+    if (_inkPoints >= _minInkPoints && hit / target.length >= _threshold) {
+      _complete();
+    }
   }
 
   Future<void> _complete() async {
@@ -90,8 +111,15 @@ class _TracingGameState extends State<TracingGame> {
     _celebration.celebrate(sound: false);
     AudioService.instance.speak(PraiseLines.nextSuccess());
     await Future<void>.delayed(const Duration(milliseconds: 1000));
+    if (!mounted) return;
     _advance();
   }
+
+  void _clear() => setState(() {
+        _strokes.clear();
+        _covered.clear();
+        _inkPoints = 0;
+      });
 
   void _advance() {
     if (_index + 1 >= _total) {
@@ -101,8 +129,7 @@ class _TracingGameState extends State<TracingGame> {
           lesson: widget.lesson,
           correct: _total,
           total: _total,
-          firstTryCorrect:
-              _total, // tracing completion = mastery for young kids
+          firstTryCorrect: _total,
           durationSeconds: _stopwatch.elapsed.inSeconds,
         ),
       );
@@ -110,8 +137,9 @@ class _TracingGameState extends State<TracingGame> {
     }
     setState(() {
       _index++;
-      _points.clear();
+      _strokes.clear();
       _covered.clear();
+      _inkPoints = 0;
       _done = false;
     });
     _speak();
@@ -128,9 +156,9 @@ class _TracingGameState extends State<TracingGame> {
             child: Column(
               children: [
                 _header(context),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
-                  'Trace it!',
+                  'Trace the ${_glyph.toUpperCase()}',
                   style: Theme.of(context)
                       .textTheme
                       .headlineMedium
@@ -145,18 +173,26 @@ class _TracingGameState extends State<TracingGame> {
                         _canvas =
                             Size(constraints.maxWidth, constraints.maxHeight);
                         return GestureDetector(
-                          onPanStart: (d) => _add(d.localPosition),
-                          onPanUpdate: (d) => _add(d.localPosition),
+                          onPanStart: (d) => _startStroke(d.localPosition),
+                          onPanUpdate: (d) => _extend(d.localPosition),
                           onPanEnd: (_) => _checkComplete(),
-                          child: Container(
+                          child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: Colors.white.withValues(alpha: 0.92),
                               borderRadius: AppSpacing.cardRadius,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
                             ),
                             child: CustomPaint(
                               painter: _TracePainter(
                                 glyph: _glyph,
-                                points: _points,
+                                strokes: _strokes,
+                                revision: _inkPoints,
                                 done: _done,
                               ),
                               child: const SizedBox.expand(),
@@ -170,10 +206,7 @@ class _TracingGameState extends State<TracingGame> {
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: BouncyButton(
-                    onTap: () => setState(() {
-                      _points.clear();
-                      _covered.clear();
-                    }),
+                    onTap: _clear,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -240,25 +273,96 @@ class _TracingGameState extends State<TracingGame> {
 class _TracePainter extends CustomPainter {
   _TracePainter({
     required this.glyph,
-    required this.points,
+    required this.strokes,
+    required this.revision,
     required this.done,
   });
 
   final String glyph;
-  final List<Offset> points;
+  final List<List<Offset>> strokes;
+
+  /// Increments on every added ink point; drives repaints because [strokes] is
+  /// mutated in place (same list reference across builds).
+  final int revision;
   final bool done;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Faded guide glyph behind the trace.
+    final fontSize = size.height * 0.72;
+    final text = glyph.toUpperCase();
+
+    // 1) Faint fill of the glyph (soft target area).
+    _drawGlyph(
+      canvas,
+      size,
+      text,
+      fontSize,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = AppColors.primary.withValues(alpha: 0.08),
+    );
+    // 2) Dashed-look outline the child follows.
+    _drawGlyph(
+      canvas,
+      size,
+      text,
+      fontSize,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..color = (done ? AppColors.success : AppColors.primary)
+            .withValues(alpha: 0.55),
+    );
+
+    // 3) "Start here" green dot (top-left of the glyph box) — only before done.
+    if (!done && strokes.isEmpty) {
+      final start = Offset(size.width * 0.40, size.height * 0.24);
+      canvas.drawCircle(start, 11, Paint()..color = AppColors.success);
+      canvas.drawCircle(
+          start, 11, Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 3
+            ..color = Colors.white);
+    }
+
+    // 4) The child's smooth ink.
+    final glow = Paint()
+      ..color = (done ? AppColors.success : AppColors.secondary)
+          .withValues(alpha: 0.25)
+      ..strokeWidth = 26
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+    final ink = Paint()
+      ..color = done ? AppColors.success : AppColors.secondary
+      ..strokeWidth = 15
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+
+    for (final stroke in strokes) {
+      final path = _smoothPath(stroke);
+      if (path == null) {
+        if (stroke.isNotEmpty) {
+          canvas.drawCircle(stroke.first, 7, ink);
+        }
+        continue;
+      }
+      canvas.drawPath(path, glow);
+      canvas.drawPath(path, ink);
+    }
+  }
+
+  void _drawGlyph(
+      Canvas canvas, Size size, String text, double fontSize, Paint paint) {
     final tp = TextPainter(
       text: TextSpan(
-        text: glyph.toUpperCase(),
+        text: text,
         style: TextStyle(
-          fontSize: size.height * 0.7,
+          fontSize: fontSize,
           fontWeight: FontWeight.w900,
-          color: (done ? AppColors.success : AppColors.primary)
-              .withValues(alpha: 0.22),
+          foreground: paint,
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -267,24 +371,26 @@ class _TracePainter extends CustomPainter {
       canvas,
       Offset((size.width - tp.width) / 2, (size.height - tp.height) / 2),
     );
+  }
 
-    // The child's stroke.
-    if (points.length > 1) {
-      final paint = Paint()
-        ..color = done ? AppColors.success : AppColors.secondary
-        ..strokeWidth = 16
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..style = PaintingStyle.stroke;
-      final path = Path()..moveTo(points.first.dx, points.first.dy);
-      for (final p in points.skip(1)) {
-        path.lineTo(p.dx, p.dy);
-      }
-      canvas.drawPath(path, paint);
+  /// Smooths a stroke into curves through point midpoints.
+  Path? _smoothPath(List<Offset> pts) {
+    if (pts.length < 2) return null;
+    final path = Path()..moveTo(pts.first.dx, pts.first.dy);
+    for (var i = 1; i < pts.length - 1; i++) {
+      final mid = Offset(
+        (pts[i].dx + pts[i + 1].dx) / 2,
+        (pts[i].dy + pts[i + 1].dy) / 2,
+      );
+      path.quadraticBezierTo(pts[i].dx, pts[i].dy, mid.dx, mid.dy);
     }
+    path.lineTo(pts.last.dx, pts.last.dy);
+    return path;
   }
 
   @override
   bool shouldRepaint(_TracePainter old) =>
-      old.points.length != points.length || old.done != done;
+      old.done != done ||
+      old.revision != revision ||
+      old.strokes.length != strokes.length;
 }
