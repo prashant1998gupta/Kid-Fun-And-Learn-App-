@@ -15,6 +15,7 @@ class SettingsState {
     this.hapticsEnabled = true,
     this.colorBlindMode = false,
     this.largeText = false,
+    this.reducedMotion = false,
     this.locale = 'en',
   });
 
@@ -25,6 +26,7 @@ class SettingsState {
   final bool hapticsEnabled;
   final bool colorBlindMode;
   final bool largeText;
+  final bool reducedMotion;
   final String locale;
 
   SettingsState copyWith({
@@ -35,6 +37,7 @@ class SettingsState {
     bool? hapticsEnabled,
     bool? colorBlindMode,
     bool? largeText,
+    bool? reducedMotion,
     String? locale,
   }) {
     return SettingsState(
@@ -45,6 +48,7 @@ class SettingsState {
       hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
       colorBlindMode: colorBlindMode ?? this.colorBlindMode,
       largeText: largeText ?? this.largeText,
+      reducedMotion: reducedMotion ?? this.reducedMotion,
       locale: locale ?? this.locale,
     );
   }
@@ -66,6 +70,7 @@ class SettingsController extends StateNotifier<SettingsState> {
       hapticsEnabled: _prefs.getBool('haptics') ?? true,
       colorBlindMode: _prefs.getBool('colorBlind') ?? false,
       largeText: _prefs.getBool('largeText') ?? false,
+      reducedMotion: _prefs.getBool('reducedMotion') ?? false,
       locale: _prefs.getString('locale') ?? 'en',
     );
     _syncAudio();
@@ -119,6 +124,11 @@ class SettingsController extends StateNotifier<SettingsState> {
     await _prefs.setBool('largeText', v);
   }
 
+  Future<void> toggleReducedMotion(bool v) async {
+    state = state.copyWith(reducedMotion: v);
+    await _prefs.setBool('reducedMotion', v);
+  }
+
   Future<void> setLocale(String code) async {
     state = state.copyWith(locale: code);
     await _prefs.setString('locale', code);
@@ -133,4 +143,10 @@ final sharedPreferencesProvider = Provider<SharedPreferences>(
 final settingsControllerProvider =
     StateNotifierProvider<SettingsController, SettingsState>((ref) {
   return SettingsController(ref.watch(sharedPreferencesProvider));
+});
+
+/// Convenience provider that exposes just the reduced-motion flag so animation
+/// widgets can watch it without pulling in the full settings state.
+final reducedMotionProvider = Provider<bool>((ref) {
+  return ref.watch(settingsControllerProvider).reducedMotion;
 });

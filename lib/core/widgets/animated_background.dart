@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/settings/settings_controller.dart';
 import '../theme/app_colors.dart';
 
 /// The named worlds a background can render. Themes swap the gradient plus the
@@ -31,6 +33,11 @@ enum _Decor { stars, leaves, bubbles, sparkles, clouds }
 /// A full-screen animated gradient with gently drifting decorations
 /// (clouds, stars, bubbles…). Pure CustomPainter — cheap enough to hold 60fps
 /// on low-end tablets. Place it as the bottom of a [Stack].
+///
+/// When the user has enabled reduced motion (via the settings screen) the
+/// particles render statically at t=0. The setting is read from Riverpod when
+/// available; if no [ProviderScope] is in the tree (e.g. widget tests) the
+/// animation runs normally.
 class AnimatedBackground extends StatefulWidget {
   const AnimatedBackground({
     super.key,
@@ -52,9 +59,10 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 20),
-  )..repeat();
+  );
 
   late final List<_Particle> _particles = _seed();
+  bool _reduced = false;
 
   List<_Particle> _seed() {
     final rnd = math.Random(42); // deterministic → stable across rebuilds
@@ -67,6 +75,38 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
         phase: rnd.nextDouble() * math.pi * 2,
       );
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _reduced = _readReducedMotion();
+    if (!_reduced) _controller.repeat();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduced = _readReducedMotion();
+    if (reduced != _reduced) {
+      _reduced = reduced;
+      if (reduced) {
+        _controller.stop();
+      } else if (!_controller.isAnimating) {
+        _controller.repeat();
+      }
+    }
+  }
+
+  /// Reads the reduced-motion flag from Riverpod when a [ProviderScope] exists
+  /// in the widget tree. Returns `false` (full motion) when there is none, so
+  /// widget tests and screens outside the scope still animate normally.
+  bool _readReducedMotion() {
+    try {
+      return ProviderScope.containerOf(context).read(reducedMotionProvider);
+    } catch (_) {
+      return false;
+    }
   }
 
   @override

@@ -71,6 +71,13 @@ class SettingsScreen extends ConsumerWidget {
             s.largeText,
             c.toggleLargeText,
           ),
+          _toggle(
+            context,
+            'Reduced motion',
+            Icons.animation_rounded,
+            s.reducedMotion,
+            c.toggleReducedMotion,
+          ),
           const SizedBox(height: 12),
           Card(
             child: ListTile(
