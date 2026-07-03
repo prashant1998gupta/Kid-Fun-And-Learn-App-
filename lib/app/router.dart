@@ -21,6 +21,7 @@ import '../features/parent/parent_gate.dart';
 import '../features/profiles/profile_create_screen.dart';
 import '../features/profiles/profile_picker_screen.dart';
 import '../features/profiles/profiles_controller.dart';
+import '../features/settings/about_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/season/season_pass_screen.dart';
 
@@ -45,6 +46,7 @@ class AppRoutes {
   static const leaderboard = '/leaderboard';
   static const certificate = '/certificate';
   static const season = '/season';
+  static const about = '/about';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -104,6 +106,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.settings,
         pageBuilder: (_, s) => _slide(const SettingsScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.about,
+        pageBuilder: (_, s) => _slide(const AboutScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.parentGate,

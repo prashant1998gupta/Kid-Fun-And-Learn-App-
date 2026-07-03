@@ -3,7 +3,7 @@
          on-device for the "Say it!" activity. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
-        android:label="kidverse"
+        android:label="KidVerse"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

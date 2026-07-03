@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand violet: launcher adaptive-icon background + splash background. -->
+    <color name="ic_launcher_bg">#6C5CE7</color>
+    <color name="splash_bg">#6C5CE7</color>
+</resources>

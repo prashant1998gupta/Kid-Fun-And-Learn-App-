@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/router.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/app_localizations.dart';
 import 'settings_controller.dart';
@@ -68,6 +70,15 @@ class SettingsScreen extends ConsumerWidget {
             Icons.text_fields_rounded,
             s.largeText,
             c.toggleLargeText,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.info_outline_rounded, size: 28),
+              title: const Text('About & Credits'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(AppRoutes.about),
+            ),
           ),
         ],
       ),
