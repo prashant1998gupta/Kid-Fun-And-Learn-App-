@@ -80,21 +80,56 @@ class QuestionFactory {
   // Flashcards — pure learning cards (no options).
   // ---------------------------------------------------------------------------
   static const List<(String, String, String)> _alphabet = [
-    ('A', 'Apple', '🍎'), ('B', 'Ball', '⚽'), ('C', 'Cat', '🐱'),
-    ('D', 'Dog', '🐶'), ('E', 'Elephant', '🐘'), ('F', 'Fish', '🐟'),
-    ('G', 'Goat', '🐐'), ('H', 'Hat', '🎩'), ('I', 'Igloo', '🛖'),
-    ('J', 'Juice', '🧃'), ('K', 'Kite', '🪁'), ('L', 'Lion', '🦁'),
-    ('M', 'Monkey', '🐵'), ('N', 'Nest', '🪺'), ('O', 'Owl', '🦉'),
-    ('P', 'Pig', '🐷'), ('Q', 'Queen', '👑'), ('R', 'Rainbow', '🌈'),
-    ('S', 'Sun', '☀️'), ('T', 'Tiger', '🐯'), ('U', 'Umbrella', '☂️'),
-    ('V', 'Van', '🚐'), ('W', 'Whale', '🐳'), ('X', 'Fox', '🦊'),
-    ('Y', 'Yak', '🐃'), ('Z', 'Zebra', '🦓'),
+    ('A', 'Apple', '🍎'),
+    ('B', 'Ball', '⚽'),
+    ('C', 'Cat', '🐱'),
+    ('D', 'Dog', '🐶'),
+    ('E', 'Elephant', '🐘'),
+    ('F', 'Fish', '🐟'),
+    ('G', 'Goat', '🐐'),
+    ('H', 'Hat', '🎩'),
+    ('I', 'Igloo', '🛖'),
+    ('J', 'Juice', '🧃'),
+    ('K', 'Kite', '🪁'),
+    ('L', 'Lion', '🦁'),
+    ('M', 'Monkey', '🐵'),
+    ('N', 'Nest', '🪺'),
+    ('O', 'Owl', '🦉'),
+    ('P', 'Pig', '🐷'),
+    ('Q', 'Queen', '👑'),
+    ('R', 'Rainbow', '🌈'),
+    ('S', 'Sun', '☀️'),
+    ('T', 'Tiger', '🐯'),
+    ('U', 'Umbrella', '☂️'),
+    ('V', 'Van', '🚐'),
+    ('W', 'Whale', '🐳'),
+    ('X', 'Fox', '🦊'),
+    ('Y', 'Yak', '🐃'),
+    ('Z', 'Zebra', '🦓'),
   ];
 
   static const List<String> _numberWords = [
-    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
-    'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
-    'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty',
+    'zero',
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+    'ten',
+    'eleven',
+    'twelve',
+    'thirteen',
+    'fourteen',
+    'fifteen',
+    'sixteen',
+    'seventeen',
+    'eighteen',
+    'nineteen',
+    'twenty',
   ];
 
   static String _numberWord(int n) =>
@@ -119,7 +154,8 @@ class QuestionFactory {
         prompt: '$n',
         promptEmoji: '🔢',
         answer: _numberWord(n),
-        speak: 'The number $n. ${n >= _numberWords.length ? '' : _numberWords[n]}.',
+        speak:
+            'The number $n. ${n >= _numberWords.length ? '' : _numberWords[n]}.',
       );
     }
     final e = _alphabet[index % _alphabet.length];
@@ -174,8 +210,8 @@ class QuestionFactory {
     int answer, {
     List<int>? distractors,
   }) {
-    final d = distractors ??
-        [answer + 1, answer <= 1 ? answer + 2 : answer - 1];
+    final d =
+        distractors ?? [answer + 1, answer <= 1 ? answer + 2 : answer - 1];
     final used = <int>{answer};
     final wrong = <AnswerOption>[];
     for (final base in [...d, answer + 2, answer + 3, answer - 2]) {
@@ -196,15 +232,6 @@ class QuestionFactory {
   static AnswerOption _emojiOption(String combined) {
     final parts = combined.split(' ');
     return AnswerOption(label: parts.sublist(1).join(' '), emoji: parts.first);
-  }
-
-  /// Returns a comma-separated list of divisors of [n] for hints.
-  static String _divisors(int n) {
-    final divs = <int>[];
-    for (var i = 1; i <= n; i++) {
-      if (n % i == 0) divs.add(i);
-    }
-    return divs.join(', ');
   }
 
   // ---------------------------------------------------------------------------
@@ -380,16 +407,16 @@ class QuestionFactory {
       switch (mode) {
         case 0: // How many? (1-10)
           final n = index % 10 + 1;
-          return _numMc(index, id, 'How many? ${'⭐' * n}',
-              'How many stars?', n);
+          return _numMc(
+              index, id, 'How many? ${'⭐' * n}', 'How many stars?', n);
         case 1: // Simple addition
           final a = index % 5 + 1;
           final b = (index ~/ 2) % 5 + 1;
           return _numMc(index, id, '$a + $b = ?', 'What is $a + $b?', a + b);
         case 2: // What comes after?
           final n = index % 20 + 1;
-          return _numMc(index, id, 'What comes after $n?',
-              'What comes after $n?', n + 1);
+          return _numMc(
+              index, id, 'What comes after $n?', 'What comes after $n?', n + 1);
         case 3: // Which is bigger?
           final a = index % 10 + 1;
           var b = (index ~/ 3) % 10 + 1;
@@ -411,13 +438,14 @@ class QuestionFactory {
         case 5: // Simple subtraction
           final a = (index % 10 + 2);
           final b = index % 9 + 1;
-          if (b >= a) return _numMc(index, id, '$a + ${b % a + 1} = ?',
-              '', a + (b % a + 1));
+          if (b >= a) {
+            return _numMc(
+                index, id, '$a + ${b % a + 1} = ?', '', a + (b % a + 1));
+          }
           return _numMc(index, id, '$a - $b = ?', 'What is $a - $b?', a - b);
         case 6: // Count objects
           final n = index % 9 + 2;
-          return _numMc(index, id, 'Count: ${'🍎' * n}',
-              'How many apples?', n);
+          return _numMc(index, id, 'Count: ${'🍎' * n}', 'How many apples?', n);
         default: // Smaller number
           final a = index % 10 + 1;
           var b = (index ~/ 3) % 10 + 1;
@@ -445,18 +473,16 @@ class QuestionFactory {
         case 1:
           final a = index % 40 + 20;
           final b = index % 15 + 1;
-          return _numMc(
-              index, id, '$a - $b = ?', 'What is $a - $b?', a - b);
+          return _numMc(index, id, '$a - $b = ?', 'What is $a - $b?', a - b);
         case 2:
           final a = index % 5 + 2;
           final b = index % 5 + 2;
-          return _numMc(
-              index, id, '$a × $b = ?', 'What is $a × $b?', a * b);
+          return _numMc(index, id, '$a × $b = ?', 'What is $a × $b?', a * b);
         case 3:
           final groups = index % 4 + 2;
           final each = index % 4 + 2;
-          return _numMc(index, id, '$groups × $each = ?',
-              'How many in all?', groups * each);
+          return _numMc(index, id, '$groups × $each = ?', 'How many in all?',
+              groups * each);
         default:
           final step = [2, 5, 10, 3, 4][index % 5];
           final n = (index % 8 + 1) * step;
@@ -476,22 +502,34 @@ class QuestionFactory {
       case 1: // Large subtraction
         final a = (index % 500 + 500);
         final b = (index ~/ 3 % 400 + 50);
-        if (b >= a) return _numMc(index, id, '$a + ${(b%50)+10} = ?', null, a + (b%50)+10);
+        if (b >= a) {
+          return _numMc(
+              index, id, '$a + ${(b % 50) + 10} = ?', null, a + (b % 50) + 10);
+        }
         return _numMc(index, id, '$a - $b = ?', null, a - b);
       // -- Fractions & Decimals --
       case 2: // Like fraction addition (same denominator)
-        final denom = [2,3,4,5,6,8,10][index % 7];
-        final an = (index % (denom-1)) + 1;
-        final bn = ((index ~/ 3) % (denom-1)) + 1;
+        final denom = [2, 3, 4, 5, 6, 8, 10][index % 7];
+        final an = (index % (denom - 1)) + 1;
+        final bn = ((index ~/ 3) % (denom - 1)) + 1;
         final sum = an + bn;
-        if (denom <= sum) return _numMc(index, id, '$an/$denom + $bn/$denom = ${sum - denom}/$denom?', null, sum - denom);
+        if (denom <= sum) {
+          return _numMc(
+              index,
+              id,
+              '$an/$denom + $bn/$denom = ${sum - denom}/$denom?',
+              null,
+              sum - denom);
+        }
         return _numMc(index, id, '$an/$denom + $bn/$denom = ?', null, sum);
       case 3: // Compare decimals
         final w = index % 10 + 1;
         final x = (index ~/ 2) % 10 + 1;
         final a = 0.1 * w;
         final b = 0.1 * x;
-        if (a == b) return _numMc(index, id, '0.$w + 0.$x = ?', null, (a+b).round());
+        if (a == b) {
+          return _numMc(index, id, '0.$w + 0.$x = ?', null, (a + b).round());
+        }
         final bigger = a > b ? a : b;
         return _mc(
           id: id,
@@ -499,12 +537,12 @@ class QuestionFactory {
           correct: AnswerOption(label: '$bigger'),
           wrong: [
             AnswerOption(label: '${bigger == a ? b : a}'),
-            AnswerOption(label: '0.0'),
+            const AnswerOption(label: '0.0'),
           ],
           shift: index,
         );
       case 4: // Fraction of a number
-        final n = [2,3,4,5][index % 4];
+        final n = [2, 3, 4, 5][index % 4];
         final v = (index % 10 + 1) * n;
         return _numMc(index, id, '1/$n of $v = ?', null, v ~/ n);
       // -- Measurement & Time --
@@ -514,7 +552,12 @@ class QuestionFactory {
       case 6: // Money word problems
         final r = index % 20 + 1;
         final p = (index ~/ 3) % 100;
-        return _numMc(index, id, '₹$r.${p.toString().padLeft(2,'0')} + ₹${r%5+1}.${(p%50+1).toString().padLeft(2,'0')} = ?', null, r + (r%5+1));
+        return _numMc(
+            index,
+            id,
+            '₹$r.${p.toString().padLeft(2, '0')} + ₹${r % 5 + 1}.${(p % 50 + 1).toString().padLeft(2, '0')} = ?',
+            null,
+            r + (r % 5 + 1));
       // -- Geometry --
       case 7: // Area of rectangle
         final l = index % 12 + 3;
@@ -525,68 +568,176 @@ class QuestionFactory {
           prompt: 'Area of ${l}cm × ${w}cm rectangle?',
           correct: AnswerOption(label: '${area}cm²'),
           wrong: [
-            AnswerOption(label: '${2*(l+w)}cm'),
-            AnswerOption(label: '${area+2}cm²'),
+            AnswerOption(label: '${2 * (l + w)}cm'),
+            AnswerOption(label: '${area + 2}cm²'),
           ],
           shift: index,
         );
       case 8: // Perimeter
         final l = index % 12 + 4;
         final w = index % 8 + 3;
-        return _numMc(index, id, 'Perimeter of ${l}×${w} rectangle?', null, 2*(l+w));
+        return _numMc(
+            index, id, 'Perimeter of $l×$w rectangle?', null, 2 * (l + w));
       // -- Data Handling --
       case 9: // Pictograph interpretation
         final cats = index % 4 + 2;
-        final val = index % 5 + 1;
-        return _numMc(index, id, 'Each 🍎=5. ${cats} apples shown. Total = ?', null, cats * 5);
+        return _numMc(index, id, 'Each 🍎=5. $cats apples shown. Total = ?',
+            null, cats * 5);
       // -- LCM & HCF --
       case 10: // LCM
         final a = index % 6 + 2;
         final b = index % 8 + 3;
-        if (a == b) return _numMc(index, id, '$a × ${index%5+2} = ?', null, a*(index%5+2));
+        if (a == b) {
+          return _numMc(index, id, '$a × ${index % 5 + 2} = ?', null,
+              a * (index % 5 + 2));
+        }
         var lcm = a;
-        while (lcm % b != 0) lcm += a;
+        while (lcm % b != 0) {
+          lcm += a;
+        }
         return _numMc(index, id, 'LCM of $a and $b?', null, lcm);
       default: // HCF
         var a = index % 12 + 6;
         var b = (index ~/ 2) % 10 + 4;
         if (a == b) b += 3;
-        final oa = a; final ob = b;
-        while (b != 0) { final t = b; b = a % b; a = t; }
+        final oa = a;
+        final ob = b;
+        while (b != 0) {
+          final t = b;
+          b = a % b;
+          a = t;
+        }
         return _numMc(index, id, 'HCF of $oa and $ob?', null, a);
     }
   }
 
   // ---- ENGLISH (CBSE-aligned for preschool) ---------------------------------
   static const List<String> _rhymingWords = [
-    'cat', 'hat', 'bat', 'rat', 'mat',
-    'sun', 'fun', 'run', 'bun', 'gun',
-    'dog', 'log', 'frog', 'hog', 'jog',
-    'bed', 'red', 'fed', 'led', 'shed',
-    'pin', 'win', 'tin', 'bin', 'chin',
-    'ball', 'tall', 'fall', 'mall', 'call',
-    'ring', 'sing', 'king', 'wing', 'thing',
-    'cake', 'lake', 'bake', 'take', 'make',
-    'bell', 'well', 'tell', 'sell', 'fell',
-    'hen', 'pen', 'ten', 'men', 'then',
+    'cat',
+    'hat',
+    'bat',
+    'rat',
+    'mat',
+    'sun',
+    'fun',
+    'run',
+    'bun',
+    'gun',
+    'dog',
+    'log',
+    'frog',
+    'hog',
+    'jog',
+    'bed',
+    'red',
+    'fed',
+    'led',
+    'shed',
+    'pin',
+    'win',
+    'tin',
+    'bin',
+    'chin',
+    'ball',
+    'tall',
+    'fall',
+    'mall',
+    'call',
+    'ring',
+    'sing',
+    'king',
+    'wing',
+    'thing',
+    'cake',
+    'lake',
+    'bake',
+    'take',
+    'make',
+    'bell',
+    'well',
+    'tell',
+    'sell',
+    'fell',
+    'hen',
+    'pen',
+    'ten',
+    'men',
+    'then',
   ];
 
   static const List<String> _spellingWords = [
-    'cat', 'dog', 'sun', 'bed', 'pin', 'hat', 'ball', 'fish',
-    'bird', 'book', 'star', 'tree', 'hand', 'bell', 'milk', 'nest',
-    'duck', 'frog', 'drum', 'flag', 'ship', 'shop', 'desk', 'lamp',
-    'ring', 'king', 'wing', 'song', 'door', 'bell', 'kite', 'rain',
+    'cat',
+    'dog',
+    'sun',
+    'bed',
+    'pin',
+    'hat',
+    'ball',
+    'fish',
+    'bird',
+    'book',
+    'star',
+    'tree',
+    'hand',
+    'bell',
+    'milk',
+    'nest',
+    'duck',
+    'frog',
+    'drum',
+    'flag',
+    'ship',
+    'shop',
+    'desk',
+    'lamp',
+    'ring',
+    'king',
+    'wing',
+    'song',
+    'door',
+    'bell',
+    'kite',
+    'rain',
   ];
 
   static const List<String> _threeLetterWords = [
-    'cat', 'bat', 'rat', 'hat', 'mat', 'sat', 'fat', 'pat',
-    'dog', 'log', 'fog', 'hog', 'jog',
-    'pen', 'hen', 'ten', 'den', 'men',
-    'sun', 'fun', 'bun', 'run', 'gun',
-    'big', 'pig', 'dig', 'wig', 'fig',
-    'cup', 'pup', 'up',
-    'bed', 'red', 'fed', 'led',
-    'box', 'fox',
+    'cat',
+    'bat',
+    'rat',
+    'hat',
+    'mat',
+    'sat',
+    'fat',
+    'pat',
+    'dog',
+    'log',
+    'fog',
+    'hog',
+    'jog',
+    'pen',
+    'hen',
+    'ten',
+    'den',
+    'men',
+    'sun',
+    'fun',
+    'bun',
+    'run',
+    'gun',
+    'big',
+    'pig',
+    'dig',
+    'wig',
+    'fig',
+    'cup',
+    'pup',
+    'up',
+    'bed',
+    'red',
+    'fed',
+    'led',
+    'box',
+    'fox',
     'bus',
   ];
 
@@ -600,10 +751,8 @@ class QuestionFactory {
       switch (mode) {
         case 0: // Find the letter (A-Z)
           final t = String.fromCharCode('A'.codeUnitAt(0) + k % 26);
-          final b = String.fromCharCode(
-              'A'.codeUnitAt(0) + (k + 1) % 26);
-          final c = String.fromCharCode(
-              'A'.codeUnitAt(0) + (k + 9) % 26);
+          final b = String.fromCharCode('A'.codeUnitAt(0) + (k + 1) % 26);
+          final c = String.fromCharCode('A'.codeUnitAt(0) + (k + 9) % 26);
           return _mc(
             id: id,
             prompt: 'Tap the letter $t',
@@ -615,10 +764,8 @@ class QuestionFactory {
         case 1: // Capital to small letter match
           final t = String.fromCharCode('A'.codeUnitAt(0) + k % 26);
           final s = String.fromCharCode('a'.codeUnitAt(0) + k % 26);
-          final w1 = String.fromCharCode(
-              'a'.codeUnitAt(0) + (k + 3) % 26);
-          final w2 = String.fromCharCode(
-              'a'.codeUnitAt(0) + (k + 7) % 26);
+          final w1 = String.fromCharCode('a'.codeUnitAt(0) + (k + 3) % 26);
+          final w2 = String.fromCharCode('a'.codeUnitAt(0) + (k + 7) % 26);
           return _mc(
             id: id,
             prompt: 'Small letter for $t?',
@@ -630,10 +777,9 @@ class QuestionFactory {
         case 2: // First letter of word
           final word = _threeLetterWords[k % _threeLetterWords.length];
           final first = word[0].toUpperCase();
-          final w1 = String.fromCharCode(
-              'A'.codeUnitAt(0) + (k % 26 + 5) % 26);
-          final w2 = String.fromCharCode(
-              'A'.codeUnitAt(0) + (k % 26 + 12) % 26);
+          final w1 = String.fromCharCode('A'.codeUnitAt(0) + (k % 26 + 5) % 26);
+          final w2 =
+              String.fromCharCode('A'.codeUnitAt(0) + (k % 26 + 12) % 26);
           return _mc(
             id: id,
             prompt: 'First letter of "$word"?',
@@ -659,8 +805,29 @@ class QuestionFactory {
           );
         case 4: // Vowel identification
           const vowels = ['A', 'E', 'I', 'O', 'U'];
-          const cons = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
-                       'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+          const cons = [
+            'B',
+            'C',
+            'D',
+            'F',
+            'G',
+            'H',
+            'J',
+            'K',
+            'L',
+            'M',
+            'N',
+            'P',
+            'Q',
+            'R',
+            'S',
+            'T',
+            'V',
+            'W',
+            'X',
+            'Y',
+            'Z'
+          ];
           final v = vowels[k % vowels.length];
           final c1 = cons[(k * 3) % cons.length];
           final c2 = cons[(k * 7) % cons.length];
@@ -675,8 +842,7 @@ class QuestionFactory {
         case 5: // Last letter of word
           final word = _threeLetterWords[(k + 3) % _threeLetterWords.length];
           final last = word[word.length - 1].toUpperCase();
-          final w1 = String.fromCharCode(
-              'A'.codeUnitAt(0) + (k % 26 + 5) % 26);
+          final w1 = String.fromCharCode('A'.codeUnitAt(0) + (k % 26 + 5) % 26);
           return _mc(
             id: id,
             prompt: 'Last letter of "$word"?',
@@ -705,10 +871,18 @@ class QuestionFactory {
           );
         default: // Match word pairs
           const pairs = [
-            ('Shoes', '👟'), ('Socks', '🧦'), ('Bread', '🍞'),
-            ('Milk', '🥛'), ('Soap', '🧼'), ('Comb', '🪮'),
-            ('Chair', '🪑'), ('Table', '🪑'), ('Pillow', '🛏️'),
-            ('Blanket', '🛏️'), ('Cup', '🥤'), ('Plate', '🍽️'),
+            ('Shoes', '👟'),
+            ('Socks', '🧦'),
+            ('Bread', '🍞'),
+            ('Milk', '🥛'),
+            ('Soap', '🧼'),
+            ('Comb', '🪮'),
+            ('Chair', '🪑'),
+            ('Table', '🪑'),
+            ('Pillow', '🛏️'),
+            ('Blanket', '🛏️'),
+            ('Cup', '🥤'),
+            ('Plate', '🍽️'),
           ];
           final p = pairs[k % pairs.length];
           final w1 = pairs[(k + 2) % pairs.length];
@@ -732,14 +906,33 @@ class QuestionFactory {
       case 0:
       case 1: // Opposites bank
         const opposites = [
-          ('hot', 'cold'), ('big', 'small'), ('up', 'down'), ('fast', 'slow'),
-          ('day', 'night'), ('happy', 'sad'), ('open', 'shut'), ('wet', 'dry'),
-          ('full', 'empty'), ('hard', 'soft'), ('old', 'new'), ('light', 'dark'),
-          ('loud', 'quiet'), ('high', 'low'), ('push', 'pull'), ('near', 'far'),
-          ('clean', 'dirty'), ('thick', 'thin'), ('wide', 'narrow'),
-          ('begin', 'end'), ('young', 'old'), ('rich', 'poor'),
-          ('kind', 'cruel'), ('bright', 'dim'), ('sharp', 'blunt'),
-          ('heavy', 'light'), ('sweet', 'sour'),
+          ('hot', 'cold'),
+          ('big', 'small'),
+          ('up', 'down'),
+          ('fast', 'slow'),
+          ('day', 'night'),
+          ('happy', 'sad'),
+          ('open', 'shut'),
+          ('wet', 'dry'),
+          ('full', 'empty'),
+          ('hard', 'soft'),
+          ('old', 'new'),
+          ('light', 'dark'),
+          ('loud', 'quiet'),
+          ('high', 'low'),
+          ('push', 'pull'),
+          ('near', 'far'),
+          ('clean', 'dirty'),
+          ('thick', 'thin'),
+          ('wide', 'narrow'),
+          ('begin', 'end'),
+          ('young', 'old'),
+          ('rich', 'poor'),
+          ('kind', 'cruel'),
+          ('bright', 'dim'),
+          ('sharp', 'blunt'),
+          ('heavy', 'light'),
+          ('sweet', 'sour'),
         ];
         final p = opposites[k % opposites.length];
         final w1 = opposites[(k + 3) % opposites.length].$2;
@@ -755,14 +948,42 @@ class QuestionFactory {
       case 2:
       case 3: // Plurals
         const nouns = [
-          'cat', 'dog', 'car', 'book', 'tree', 'star', 'hand', 'bird',
-          'box', 'bus', 'fox', 'dish', 'bench', 'glass', 'pen', 'cup',
-          'ball', 'bat', 'hat', 'bed', 'frog', 'duck', 'ship', 'shop',
-          'ant', 'egg', 'sun', 'ring', 'bell', 'key',
+          'cat',
+          'dog',
+          'car',
+          'book',
+          'tree',
+          'star',
+          'hand',
+          'bird',
+          'box',
+          'bus',
+          'fox',
+          'dish',
+          'bench',
+          'glass',
+          'pen',
+          'cup',
+          'ball',
+          'bat',
+          'hat',
+          'bed',
+          'frog',
+          'duck',
+          'ship',
+          'shop',
+          'ant',
+          'egg',
+          'sun',
+          'ring',
+          'bell',
+          'key',
         ];
         final n = nouns[k % nouns.length];
-        final plural = (n.endsWith('x') || n.endsWith('s') ||
-                n.endsWith('sh') || n.endsWith('ch'))
+        final plural = (n.endsWith('x') ||
+                n.endsWith('s') ||
+                n.endsWith('sh') ||
+                n.endsWith('ch'))
             ? '${n}es'
             : '${n}s';
         return _mc(
@@ -781,11 +1002,11 @@ class QuestionFactory {
         final word = _spellingWords[k % _spellingWords.length];
         final wrong1 = word.substring(0, word.length - 1) +
             String.fromCharCode(word.codeUnitAt(word.length - 1) + 1);
-        final wrong2 = word.replaceRange(0, 1,
-            String.fromCharCode(word.codeUnitAt(0) + 2));
+        final wrong2 = word.replaceRange(
+            0, 1, String.fromCharCode(word.codeUnitAt(0) + 2));
         return _mc(
           id: id,
-          prompt: 'How to spell "${word}"?',
+          prompt: 'How to spell "$word"?',
           speak: 'How do you spell $word?',
           correct: AnswerOption(label: word),
           wrong: [AnswerOption(label: wrong1), AnswerOption(label: wrong2)],
@@ -793,14 +1014,22 @@ class QuestionFactory {
         );
       default: // Fill in the blank
         const sentences = [
-          ('I ___ a boy.', 'am'), ('She ___ a girl.', 'is'),
-          ('They ___ playing.', 'are'), ('He ___ a car.', 'has'),
-          ('We ___ happy.', 'are'), ('It ___ a cat.', 'is'),
-          ('I ___ to school.', 'go'), ('She ___ to sing.', 'likes'),
-          ('He ___ fast.', 'runs'), ('Birds ___ fly.', 'can'),
-          ('Fish ___ in water.', 'live'), ('The sun ___ bright.', 'is'),
-          ('We ___ with our eyes.', 'see'), ('I ___ my teeth.', 'brush'),
-          ('She ___ a book.', 'reads'), ('He ___ a song.', 'sings'),
+          ('I ___ a boy.', 'am'),
+          ('She ___ a girl.', 'is'),
+          ('They ___ playing.', 'are'),
+          ('He ___ a car.', 'has'),
+          ('We ___ happy.', 'are'),
+          ('It ___ a cat.', 'is'),
+          ('I ___ to school.', 'go'),
+          ('She ___ to sing.', 'likes'),
+          ('He ___ fast.', 'runs'),
+          ('Birds ___ fly.', 'can'),
+          ('Fish ___ in water.', 'live'),
+          ('The sun ___ bright.', 'is'),
+          ('We ___ with our eyes.', 'see'),
+          ('I ___ my teeth.', 'brush'),
+          ('She ___ a book.', 'reads'),
+          ('He ___ a song.', 'sings'),
         ];
         final s = sentences[k % sentences.length];
         return _mc(
@@ -810,17 +1039,17 @@ class QuestionFactory {
           correct: AnswerOption(label: s.$2),
           wrong: [
             if (s.$2 == 'am') ...[
-              AnswerOption(label: 'are'),
-              AnswerOption(label: 'is'),
+              const AnswerOption(label: 'are'),
+              const AnswerOption(label: 'is'),
             ] else if (s.$2 == 'is') ...[
-              AnswerOption(label: 'am'),
-              AnswerOption(label: 'are'),
+              const AnswerOption(label: 'am'),
+              const AnswerOption(label: 'are'),
             ] else if (s.$2 == 'are') ...[
-              AnswerOption(label: 'am'),
-              AnswerOption(label: 'is'),
+              const AnswerOption(label: 'am'),
+              const AnswerOption(label: 'is'),
             ] else ...[
-              AnswerOption(label: 'not'),
-              AnswerOption(label: 'do'),
+              const AnswerOption(label: 'not'),
+              const AnswerOption(label: 'do'),
             ],
           ],
           shift: index,
@@ -853,10 +1082,34 @@ class QuestionFactory {
     ('Baby of a sheep?', 'Lamb', '🐑', 'Chick', '🐣', 'Kitten', '🐱'),
     ('Which animal gives milk?', 'Cow', '🐄', 'Hen', '🐔', 'Dog', '🐶'),
     ('Which animal has a trunk?', 'Elephant', '🐘', 'Dog', '🐶', 'Cat', '🐱'),
-    ('Which animal is the king of jungle?', 'Lion', '🦁', 'Tiger', '🐯', 'Bear', '🧸'),
-    ('Which animal has stripes?', 'Tiger', '🐯', 'Lion', '🦁', 'Elephant', '🐘'),
+    (
+      'Which animal is the king of jungle?',
+      'Lion',
+      '🦁',
+      'Tiger',
+      '🐯',
+      'Bear',
+      '🧸'
+    ),
+    (
+      'Which animal has stripes?',
+      'Tiger',
+      '🐯',
+      'Lion',
+      '🦁',
+      'Elephant',
+      '🐘'
+    ),
     ('Which animal has spots?', 'Leopard', '🐆', 'Tiger', '🐯', 'Lion', '🦁'),
-    ('Which animal has a long neck?', 'Giraffe', '🦒', 'Elephant', '🐘', 'Lion', '🦁'),
+    (
+      'Which animal has a long neck?',
+      'Giraffe',
+      '🦒',
+      'Elephant',
+      '🐘',
+      'Lion',
+      '🦁'
+    ),
     ('Which animal lives in a hive?', 'Bee', '🐝', 'Bird', '🐦', 'Ant', '🐜'),
     ('Which animal spins a web?', 'Spider', '🕸️', 'Bee', '🐝', 'Ant', '🐜'),
     ('Which animal lives in a den?', 'Lion', '🦁', 'Fish', '🐟', 'Bird', '🐦'),
@@ -870,7 +1123,15 @@ class QuestionFactory {
     ('Which fruit is round?', 'Orange', '🍊', 'Banana', '🍌', 'Carrot', '🥕'),
     ('Which grows on a vine?', 'Grapes', '🍇', 'Apple', '🍎', 'Mango', '🥭'),
     ('Which grows underground?', 'Potato', '🥔', 'Mango', '🥭', 'Banana', '🍌'),
-    ('Which is a leafy vegetable?', 'Cabbage', '🥬', 'Potato', '🥔', 'Carrot', '🥕'),
+    (
+      'Which is a leafy vegetable?',
+      'Cabbage',
+      '🥬',
+      'Potato',
+      '🥔',
+      'Carrot',
+      '🥕'
+    ),
     ('Which is sour?', 'Lemon', '🍋', 'Banana', '🍌', 'Mango', '🥭'),
     ('Which is sweet?', 'Mango', '🥭', 'Lemon', '🍋', 'Chili', '🌶️'),
     // Body Parts & Senses
@@ -890,49 +1151,233 @@ class QuestionFactory {
     ('What gives us light?', 'Sun', '☀️', 'Moon', '🌙', 'Star', '⭐'),
     ('What makes a rainbow?', 'Rain', '🌧️', 'Snow', '❄️', 'Wind', '💨'),
     ('What comes after sunset?', 'Night', '🌙', 'Morning', '🌅', 'Noon', '☀️'),
-    ('What comes after sunrise?', 'Morning', '🌅', 'Night', '🌙', 'Evening', '🌆'),
+    (
+      'What comes after sunrise?',
+      'Morning',
+      '🌅',
+      'Night',
+      '🌙',
+      'Evening',
+      '🌆'
+    ),
     ('Which season is hot?', 'Summer', '☀️', 'Winter', '❄️', 'Rainy', '🌧️'),
     ('Which season is cold?', 'Winter', '❄️', 'Summer', '☀️', 'Spring', '🌸'),
-    ('Which season brings rain?', 'Monsoon', '🌧️', 'Summer', '☀️', 'Winter', '❄️'),
-    ('What do we see in the sky at night?', 'Stars', '⭐', 'Sun', '☀️', 'Rainbow', '🌈'),
+    (
+      'Which season brings rain?',
+      'Monsoon',
+      '🌧️',
+      'Summer',
+      '☀️',
+      'Winter',
+      '❄️'
+    ),
+    (
+      'What do we see in the sky at night?',
+      'Stars',
+      '⭐',
+      'Sun',
+      '☀️',
+      'Rainbow',
+      '🌈'
+    ),
     ('What is water in the sky?', 'Cloud', '☁️', 'Star', '⭐', 'Moon', '🌙'),
     ('What falls from clouds?', 'Rain', '🌧️', 'Snow', '❄️', 'Hail', '🧊'),
-    ('When do we see a rainbow?', 'After rain', '🌈', 'At night', '🌙', 'At noon', '☀️'),
+    (
+      'When do we see a rainbow?',
+      'After rain',
+      '🌈',
+      'At night',
+      '🌙',
+      'At noon',
+      '☀️'
+    ),
     ('What grows in soil?', 'Plant', '🌱', 'Rock', '🪨', 'Glass', '🪟'),
     // Plants
     ('Which one grows?', 'Tree', '🌳', 'Rock', '🪨', 'Chair', '🪑'),
-    ('What do plants need to grow?', 'Sunlight', '☀️', 'Candy', '🍬', 'Toys', '🧸'),
-    ('What do plants need from soil?', 'Water', '💧', 'Milk', '🥛', 'Juice', '🧃'),
-    ('What part of plant is underground?', 'Root', '🪴', 'Leaf', '🍃', 'Flower', '🌸'),
-    ('What part of plant is green and flat?', 'Leaf', '🍃', 'Root', '🪴', 'Fruit', '🍎'),
-    ('What part of plant is colorful?', 'Flower', '🌸', 'Leaf', '🍃', 'Root', '🪴'),
-    ('What do bees collect from flowers?', 'Nectar', '🍯', 'Pollen', '🌸', 'Leaves', '🍃'),
+    (
+      'What do plants need to grow?',
+      'Sunlight',
+      '☀️',
+      'Candy',
+      '🍬',
+      'Toys',
+      '🧸'
+    ),
+    (
+      'What do plants need from soil?',
+      'Water',
+      '💧',
+      'Milk',
+      '🥛',
+      'Juice',
+      '🧃'
+    ),
+    (
+      'What part of plant is underground?',
+      'Root',
+      '🪴',
+      'Leaf',
+      '🍃',
+      'Flower',
+      '🌸'
+    ),
+    (
+      'What part of plant is green and flat?',
+      'Leaf',
+      '🍃',
+      'Root',
+      '🪴',
+      'Fruit',
+      '🍎'
+    ),
+    (
+      'What part of plant is colorful?',
+      'Flower',
+      '🌸',
+      'Leaf',
+      '🍃',
+      'Root',
+      '🪴'
+    ),
+    (
+      'What do bees collect from flowers?',
+      'Nectar',
+      '🍯',
+      'Pollen',
+      '🌸',
+      'Leaves',
+      '🍃'
+    ),
     ('What grows from a seed?', 'Plant', '🌱', 'Rock', '🪨', 'Toy', '🧸'),
     ('Which gives us shade?', 'Tree', '🌳', 'Flower', '🌸', 'Grass', '🌿'),
     // Food & Health
     ('Which is healthy to eat?', 'Fruit', '🍎', 'Candy', '🍬', 'Chips', '🍟'),
-    ('What do we drink for strong bones?', 'Milk', '🥛', 'Soda', '🥤', 'Juice', '🧃'),
+    (
+      'What do we drink for strong bones?',
+      'Milk',
+      '🥛',
+      'Soda',
+      '🥤',
+      'Juice',
+      '🧃'
+    ),
     ('What keeps us clean?', 'Soap', '🧼', 'Candy', '🍬', 'Toy', '🧸'),
-    ('What do we use to brush teeth?', 'Toothbrush', '🪥', 'Comb', '🪮', 'Soap', '🧼'),
-    ('What do we wear in cold?', 'Sweater', '🧥', 'T-shirt', '👕', 'Shorts', '🩳'),
-    ('What keeps us dry in rain?', 'Umbrella', '☂️', 'Cap', '🧢', 'Shoes', '👟'),
-    ('What do we eat for breakfast?', 'Bread', '🍞', 'Cake', '🎂', 'Ice cream', '🍦'),
+    (
+      'What do we use to brush teeth?',
+      'Toothbrush',
+      '🪥',
+      'Comb',
+      '🪮',
+      'Soap',
+      '🧼'
+    ),
+    (
+      'What do we wear in cold?',
+      'Sweater',
+      '🧥',
+      'T-shirt',
+      '👕',
+      'Shorts',
+      '🩳'
+    ),
+    (
+      'What keeps us dry in rain?',
+      'Umbrella',
+      '☂️',
+      'Cap',
+      '🧢',
+      'Shoes',
+      '👟'
+    ),
+    (
+      'What do we eat for breakfast?',
+      'Bread',
+      '🍞',
+      'Cake',
+      '🎂',
+      'Ice cream',
+      '🍦'
+    ),
     ('Which is good for eyes?', 'Carrot', '🥕', 'Candy', '🍬', 'Chips', '🍟'),
-    ('What do we drink when thirsty?', 'Water', '💧', 'Soap', '🧼', 'Paint', '🎨'),
+    (
+      'What do we drink when thirsty?',
+      'Water',
+      '💧',
+      'Soap',
+      '🧼',
+      'Paint',
+      '🎨'
+    ),
     ('What gives us energy?', 'Food', '🍽️', 'Sleep', '🛏️', 'TV', '📺'),
     // Transport & Community Helpers
     ('Which has wings?', 'Aeroplane', '✈️', 'Car', '🚗', 'Train', '🚂'),
     ('Which runs on tracks?', 'Train', '🚂', 'Car', '🚗', 'Bus', '🚌'),
     ('Which flies in the sky?', 'Helicopter', '🚁', 'Car', '🚗', 'Train', '🚂'),
     ('Which travels in water?', 'Boat', '⛵', 'Car', '🚗', 'Bus', '🚌'),
-    ('Who drives a bus?', 'Driver', '🚌', 'Doctor', '👨‍⚕️', 'Teacher', '👩‍🏫'),
-    ('Who teaches children?', 'Teacher', '👩‍🏫', 'Doctor', '👨‍⚕️', 'Pilot', '👨‍✈️'),
-    ('Who treats sick people?', 'Doctor', '👨‍⚕️', 'Teacher', '👩‍🏫', 'Driver', '🚌'),
-    ('Who brings letters?', 'Postman', '📬', 'Doctor', '👨‍⚕️', 'Teacher', '👩‍🏫'),
-    ('Who catches thieves?', 'Police', '👮‍♂️', 'Doctor', '👨‍⚕️', 'Teacher', '👩‍🏫'),
-    ('Who grows food for us?', 'Farmer', '👨‍🌾', 'Doctor', '👨‍⚕️', 'Police', '👮‍♂️'),
+    (
+      'Who drives a bus?',
+      'Driver',
+      '🚌',
+      'Doctor',
+      '👨‍⚕️',
+      'Teacher',
+      '👩‍🏫'
+    ),
+    (
+      'Who teaches children?',
+      'Teacher',
+      '👩‍🏫',
+      'Doctor',
+      '👨‍⚕️',
+      'Pilot',
+      '👨‍✈️'
+    ),
+    (
+      'Who treats sick people?',
+      'Doctor',
+      '👨‍⚕️',
+      'Teacher',
+      '👩‍🏫',
+      'Driver',
+      '🚌'
+    ),
+    (
+      'Who brings letters?',
+      'Postman',
+      '📬',
+      'Doctor',
+      '👨‍⚕️',
+      'Teacher',
+      '👩‍🏫'
+    ),
+    (
+      'Who catches thieves?',
+      'Police',
+      '👮‍♂️',
+      'Doctor',
+      '👨‍⚕️',
+      'Teacher',
+      '👩‍🏫'
+    ),
+    (
+      'Who grows food for us?',
+      'Farmer',
+      '👨‍🌾',
+      'Doctor',
+      '👨‍⚕️',
+      'Police',
+      '👮‍♂️'
+    ),
     ('Who cooks food?', 'Chef', '👨‍🍳', 'Teacher', '👩‍🏫', 'Driver', '🚌'),
-    ('Who puts out fire?', 'Firefighter', '🧑‍🚒', 'Police', '👮‍♂️', 'Postman', '📬'),
+    (
+      'Who puts out fire?',
+      'Firefighter',
+      '🧑‍🚒',
+      'Police',
+      '👮‍♂️',
+      'Postman',
+      '📬'
+    ),
     ('Three wheels have a?', 'Rickshaw', '🛺', 'Car', '🚗', 'Cycle', '🚲'),
     ('Two wheels have a?', 'Cycle', '🚲', 'Car', '🚗', 'Bus', '🚌'),
     // Home & School
@@ -942,10 +1387,34 @@ class QuestionFactory {
     ('What do we read?', 'Book', '📖', 'Food', '🍽️', 'Toy', '🧸'),
     ('What do we write with?', 'Pencil', '✏️', 'Spoon', '🥄', 'Comb', '🪮'),
     ('What do we use to draw?', 'Crayon', '🖍️', 'Spoon', '🥄', 'Mug', '☕'),
-    ('What do we cut paper with?', 'Scissors', '✂️', 'Pencil', '✏️', 'Brush', '🖌️'),
+    (
+      'What do we cut paper with?',
+      'Scissors',
+      '✂️',
+      'Pencil',
+      '✏️',
+      'Brush',
+      '🖌️'
+    ),
     ('Where do children learn?', 'School', '🏫', 'Park', '🏞️', 'Shop', '🏪'),
-    ('Where do we play?', 'Playground', '🎪', 'Classroom', '🏫', 'Library', '📚'),
-    ('Where do we borrow books?', 'Library', '📚', 'Kitchen', '🍳', 'Bedroom', '🛏️'),
+    (
+      'Where do we play?',
+      'Playground',
+      '🎪',
+      'Classroom',
+      '🏫',
+      'Library',
+      '📚'
+    ),
+    (
+      'Where do we borrow books?',
+      'Library',
+      '📚',
+      'Kitchen',
+      '🍳',
+      'Bedroom',
+      '🛏️'
+    ),
     // Water & Air
     ('What do we breathe?', 'Air', '💨', 'Milk', '🥛', 'Juice', '🧃'),
     ('Where do fish live?', 'Water', '💧', 'Land', '🌳', 'Sky', '☁️'),
@@ -955,40 +1424,200 @@ class QuestionFactory {
     ('What turns water into ice?', 'Cold', '🧊', 'Heat', '🔥', 'Wind', '💨'),
     ('What melts ice?', 'Heat', '🔥', 'Cold', '🧊', 'Wind', '💨'),
     ('Water vapor rises as?', 'Steam', '💨', 'Ice', '🧊', 'Rain', '🌧️'),
-    ('Where do rivers flow?', 'To the sea', '🌊', 'To the sky', '☁️', 'To the mountain', '🏔️'),
-    ('What colour is clean water?', 'Colourless', '💧', 'Blue', '🔵', 'White', '⚪'),
+    (
+      'Where do rivers flow?',
+      'To the sea',
+      '🌊',
+      'To the sky',
+      '☁️',
+      'To the mountain',
+      '🏔️'
+    ),
+    (
+      'What colour is clean water?',
+      'Colourless',
+      '💧',
+      'Blue',
+      '🔵',
+      'White',
+      '⚪'
+    ),
     // Earth & Universe
     ('Shape of the Earth?', 'Round', '🌍', 'Flat', '⬜', 'Square', '🟥'),
     ('What is the Earth?', 'A planet', '🌍', 'A star', '⭐', 'A moon', '🌙'),
     ('What is the Sun?', 'A star', '☀️', 'A planet', '🌍', 'A moon', '🌙'),
     ('What goes around Earth?', 'Moon', '🌙', 'Sun', '☀️', 'Mars', '🪐'),
-    ('How many planets in Solar System?', 'Eight', '🪐', 'Seven', '7️⃣', 'Nine', '9️⃣'),
-    ('Which planet is called Red Planet?', 'Mars', '🪐', 'Venus', '🪐', 'Saturn', '🪐'),
+    (
+      'How many planets in Solar System?',
+      'Eight',
+      '🪐',
+      'Seven',
+      '7️⃣',
+      'Nine',
+      '9️⃣'
+    ),
+    (
+      'Which planet is called Red Planet?',
+      'Mars',
+      '🪐',
+      'Venus',
+      '🪐',
+      'Saturn',
+      '🪐'
+    ),
     ('Which planet has rings?', 'Saturn', '🪐', 'Mars', '🪐', 'Jupiter', '🪐'),
-    ('Which is the biggest planet?', 'Jupiter', '🪐', 'Saturn', '🪐', 'Neptune', '🪐'),
-    ('Which is the smallest planet?', 'Mercury', '🪐', 'Mars', '🪐', 'Earth', '🌍'),
-    ('Which star is nearest to Earth?', 'Sun', '☀️', 'Moon', '🌙', 'Mars', '🪐'),
+    (
+      'Which is the biggest planet?',
+      'Jupiter',
+      '🪐',
+      'Saturn',
+      '🪐',
+      'Neptune',
+      '🪐'
+    ),
+    (
+      'Which is the smallest planet?',
+      'Mercury',
+      '🪐',
+      'Mars',
+      '🪐',
+      'Earth',
+      '🌍'
+    ),
+    (
+      'Which star is nearest to Earth?',
+      'Sun',
+      '☀️',
+      'Moon',
+      '🌙',
+      'Mars',
+      '🪐'
+    ),
     // Safety & Good Habits
-    ('What colour is a danger sign?', 'Red', '🔴', 'Green', '🟢', 'Yellow', '🟡'),
+    (
+      'What colour is a danger sign?',
+      'Red',
+      '🔴',
+      'Green',
+      '🟢',
+      'Yellow',
+      '🟡'
+    ),
     ('What do we wear on road?', 'Helmet', '⛑️', 'Hat', '🎩', 'Crown', '👑'),
-    ('Where do we walk on road?', 'Footpath', '🚶', 'Middle', '🛣️', 'Cycle track', '🚲'),
-    ('What does red traffic light mean?', 'Stop', '🛑', 'Go', '🟢', 'Wait', '🟡'),
-    ('What does green traffic light mean?', 'Go', '🟢', 'Stop', '🛑', 'Slow', '🐢'),
-    ('What should we do before eating?', 'Wash hands', '🧼', 'Run', '🏃', 'Sleep', '🛏️'),
-    ('What should we do after eating?', 'Brush teeth', '🪥', 'Play', '🎮', 'Watch TV', '📺'),
-    ('What keeps us healthy?', 'Exercise', '🏃', 'Sleeping all day', '🛏️', 'Eating candy', '🍬'),
-    ('What should we say when we hurt someone?', 'Sorry', '🙏', 'Thank you', '🙇', 'Hello', '👋'),
-    ('What should we say when someone helps?', 'Thank you', '🙏', 'Sorry', '🙏', 'Please', '🙏'),
+    (
+      'Where do we walk on road?',
+      'Footpath',
+      '🚶',
+      'Middle',
+      '🛣️',
+      'Cycle track',
+      '🚲'
+    ),
+    (
+      'What does red traffic light mean?',
+      'Stop',
+      '🛑',
+      'Go',
+      '🟢',
+      'Wait',
+      '🟡'
+    ),
+    (
+      'What does green traffic light mean?',
+      'Go',
+      '🟢',
+      'Stop',
+      '🛑',
+      'Slow',
+      '🐢'
+    ),
+    (
+      'What should we do before eating?',
+      'Wash hands',
+      '🧼',
+      'Run',
+      '🏃',
+      'Sleep',
+      '🛏️'
+    ),
+    (
+      'What should we do after eating?',
+      'Brush teeth',
+      '🪥',
+      'Play',
+      '🎮',
+      'Watch TV',
+      '📺'
+    ),
+    (
+      'What keeps us healthy?',
+      'Exercise',
+      '🏃',
+      'Sleeping all day',
+      '🛏️',
+      'Eating candy',
+      '🍬'
+    ),
+    (
+      'What should we say when we hurt someone?',
+      'Sorry',
+      '🙏',
+      'Thank you',
+      '🙇',
+      'Hello',
+      '👋'
+    ),
+    (
+      'What should we say when someone helps?',
+      'Thank you',
+      '🙏',
+      'Sorry',
+      '🙏',
+      'Please',
+      '🙏'
+    ),
     // Our Country & Culture
-    ('Colour of our national flag top band?', 'Saffron', '🟠', 'White', '⚪', 'Green', '🟢'),
+    (
+      'Colour of our national flag top band?',
+      'Saffron',
+      '🟠',
+      'White',
+      '⚪',
+      'Green',
+      '🟢'
+    ),
     ('Our national animal?', 'Tiger', '🐯', 'Lion', '🦁', 'Elephant', '🐘'),
     ('Our national bird?', 'Peacock', '🦚', 'Parrot', '🦜', 'Eagle', '🦅'),
     ('Our national flower?', 'Lotus', '🪷', 'Rose', '🌹', 'Sunflower', '🌻'),
     ('Our national tree?', 'Banyan', '🌳', 'Mango', '🥭', 'Neem', '🌿'),
     ('Our national sport?', 'Hockey', '🏑', 'Cricket', '🏏', 'Football', '⚽'),
-    ('Capital of India?', 'New Delhi', '🏛️', 'Mumbai', '🏙️', 'Kolkata', '🏙️'),
-    ('Largest state in India?', 'Rajasthan', '🏜️', 'Goa', '🏖️', 'Kerala', '🌴'),
-    ('National animal of India?', 'Tiger', '🐯', 'Lion', '🦁', 'Elephant', '🐘'),
+    (
+      'Capital of India?',
+      'New Delhi',
+      '🏛️',
+      'Mumbai',
+      '🏙️',
+      'Kolkata',
+      '🏙️'
+    ),
+    (
+      'Largest state in India?',
+      'Rajasthan',
+      '🏜️',
+      'Goa',
+      '🏖️',
+      'Kerala',
+      '🌴'
+    ),
+    (
+      'National animal of India?',
+      'Tiger',
+      '🐯',
+      'Lion',
+      '🦁',
+      'Elephant',
+      '🐘'
+    ),
     ('National bird of India?', 'Peacock', '🦚', 'Crow', '🐦', 'Sparrow', '🐦'),
   ];
 
@@ -1034,13 +1663,37 @@ class QuestionFactory {
           ('Which is different?', 'Bus', '🚌', 'Cat', '🐱', 'Dog', '🐶'),
           ('Which is different?', 'Sun', '☀️', 'Apple', '🍎', 'Pear', '🍐'),
           ('Which is different?', 'Pencil', '✏️', 'Cup', '🥤', 'Plate', '🍽️'),
-          ('Which is different?', 'Table', '🪑', 'Circle', '🔵', 'Square', '🟥'),
+          (
+            'Which is different?',
+            'Table',
+            '🪑',
+            'Circle',
+            '🔵',
+            'Square',
+            '🟥'
+          ),
           ('Which is different?', 'Owl', '🦉', 'Socks', '🧦', 'Shoes', '👟'),
           ('Which is different?', 'Boat', '⛵', 'Train', '🚂', 'Bus', '🚌'),
           ('Which is different?', 'Cake', '🎂', 'Lion', '🦁', 'Tiger', '🐯'),
           ('Which is different?', 'Chair', '🪑', 'Red', '🔴', 'Blue', '🔵'),
-          ('Which is different?', 'Spoon', '🥄', 'Aeroplane', '✈️', 'Helicopter', '🚁'),
-          ('Which is different?', 'Cow', '🐄', 'Circle', '🔵', 'Triangle', '🔺'),
+          (
+            'Which is different?',
+            'Spoon',
+            '🥄',
+            'Aeroplane',
+            '✈️',
+            'Helicopter',
+            '🚁'
+          ),
+          (
+            'Which is different?',
+            'Cow',
+            '🐄',
+            'Circle',
+            '🔵',
+            'Triangle',
+            '🔺'
+          ),
           ('Which is different?', 'Pizza', '🍕', 'Burger', '🍔', 'Pen', '🖊️'),
           ('Which is different?', 'Bread', '🍞', 'Milk', '🥛', 'Hat', '🎩'),
         ];

@@ -14,7 +14,6 @@ import '../../core/widgets/currency_hud.dart';
 import '../../core/widgets/lottie_view.dart';
 import '../../core/widgets/mascot.dart';
 import '../../l10n/app_localizations.dart';
-import '../art_studio/art_studio_screen.dart';
 import '../collections/domain/collectible.dart';
 import '../curriculum/data/curriculum_repository.dart';
 import '../curriculum/domain/subject.dart';
@@ -429,6 +428,13 @@ class _QuickActions extends ConsumerWidget {
               label: 'Art Studio',
               color: AppColors.bubblegum,
               onTap: () => context.push(AppRoutes.artStudio),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.sports_esports_rounded,
+              label: 'Mini Games',
+              color: AppColors.accent,
+              onTap: () => context.push(AppRoutes.miniGames),
             ),
           ],
         ),

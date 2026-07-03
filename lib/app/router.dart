@@ -6,6 +6,11 @@ import '../features/curriculum/domain/lesson.dart';
 import '../features/games/game_host_screen.dart';
 import '../features/achievements/achievements_screen.dart';
 import '../features/art_studio/art_studio_screen.dart';
+import '../features/mini_games/mini_games_screen.dart';
+import '../features/mini_games/games/chicken_tap_game.dart';
+import '../features/mini_games/games/classic_2048_game.dart';
+import '../features/mini_games/games/infinity_loop_game.dart';
+import '../features/mini_games/games/stack_merge_game.dart';
 import '../features/curriculum/domain/subject.dart';
 import '../features/home/home_screen.dart';
 import '../features/learning_map/learning_map_screen.dart';
@@ -49,6 +54,11 @@ class AppRoutes {
   static const season = '/season';
   static const about = '/about';
   static const artStudio = '/art-studio';
+  static const miniGames = '/mini-games';
+  static const infinityLoop = '/mini-games/infinity-loop';
+  static const chickenTap = '/mini-games/368-chickens';
+  static const stackMerge = '/mini-games/stack-merge';
+  static const classic2048 = '/mini-games/2048';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -116,6 +126,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.artStudio,
         pageBuilder: (_, s) => _slide(const ArtStudioScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.miniGames,
+        pageBuilder: (_, s) => _slide(const MiniGamesScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.infinityLoop,
+        pageBuilder: (_, s) => _slide(const InfinityLoopGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.chickenTap,
+        pageBuilder: (_, s) => _slide(const ChickenTapGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.stackMerge,
+        pageBuilder: (_, s) => _slide(const StackMergeGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.classic2048,
+        pageBuilder: (_, s) => _slide(const Classic2048Game(), s),
       ),
       GoRoute(
         path: AppRoutes.parentGate,

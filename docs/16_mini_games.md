@@ -7,6 +7,11 @@ learning curriculum where kids can play fun, casual puzzle/arcade games just
 for enjoyment. No lessons, no grading, no curriculum — pure entertainment
 that keeps kids engaged with the app during breaks.
 
+**Implementation status:** Complete. The catalog, four games, deep-linkable
+routes, reactive local high scores, real OpenMoji card/chicken art, and game
+logic tests are implemented. Mini games remain separate from curriculum and
+do not award coins, XP, stars, or collectibles.
+
 Inspired by: [Infinity Loop Hex](https://poki.com/en/g/infinity-loop-hex),
 [368 Chickens](https://368chickens.com/),
 [Stack Merge](https://lcpckp.github.io/stack-merge/),
@@ -244,11 +249,10 @@ SizedBox(
 
 ---
 
-## 8. Next Steps (when you want to implement)
+## 8. Implemented Routes
 
-1. I build the file structure above
-2. Start with `MiniGamesRepository` + listing screen
-3. Then build one game at a time (easiest first: 368 Chickens)
-4. Wire everything into the router + home screen
-
-**Say "start" when you're ready to implement!**
+- `/mini-games`
+- `/mini-games/infinity-loop`
+- `/mini-games/368-chickens`
+- `/mini-games/stack-merge`
+- `/mini-games/2048`
