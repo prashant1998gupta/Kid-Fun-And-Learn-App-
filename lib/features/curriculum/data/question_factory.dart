@@ -67,9 +67,72 @@ class QuestionFactory {
       case GameType.dragDrop:
       case GameType.sorting:
         return _sorting(index, grade, subject, slot);
+      case GameType.flashcard:
+        return _flashcard(index, grade, subject);
       default:
         return _choiceBySubject(index, grade, subject, slot);
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Flashcards — pure learning cards (no options). prompt = big glyph/fact,
+  // answer = the word, promptEmoji = a friendly picture, speak = what to say.
+  // ---------------------------------------------------------------------------
+  static const List<(String, String, String)> _alphabet = [
+    ('A', 'Apple', '🍎'), ('B', 'Ball', '⚽'), ('C', 'Cat', '🐱'),
+    ('D', 'Dog', '🐶'), ('E', 'Elephant', '🐘'), ('F', 'Fish', '🐟'),
+    ('G', 'Goat', '🐐'), ('H', 'Hat', '🎩'), ('I', 'Igloo', '🛖'),
+    ('J', 'Juice', '🧃'), ('K', 'Kite', '🪁'), ('L', 'Lion', '🦁'),
+    ('M', 'Monkey', '🐵'), ('N', 'Nest', '🪺'), ('O', 'Owl', '🦉'),
+    ('P', 'Pig', '🐷'), ('Q', 'Queen', '👑'), ('R', 'Rainbow', '🌈'),
+    ('S', 'Sun', '☀️'), ('T', 'Tiger', '🐯'), ('U', 'Umbrella', '☂️'),
+    ('V', 'Van', '🚐'), ('W', 'Whale', '🐳'), ('X', 'Fox', '🦊'),
+    ('Y', 'Yak', '🐃'), ('Z', 'Zebra', '🦓'),
+  ];
+
+  static const List<String> _numberWords = [
+    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+    'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
+    'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty',
+  ];
+
+  static String _numberWord(int n) =>
+      n >= 0 && n < _numberWords.length ? _numberWords[n] : '$n';
+
+  static Question _flashcard(int index, GradeLevel grade, Subject subject) {
+    if (subject == Subject.math) {
+      if (grade.difficultyTier >= 4) {
+        // Times tables (2× … 10×) — Grade 2 and up.
+        final table = index % 9 + 2;
+        final by = index ~/ 9 % 10 + 1;
+        final product = table * by;
+        return Question(
+          id: 'gen_fc_tbl_$index',
+          prompt: '$table × $by = $product',
+          answer: '$table times $by is $product',
+          speak: '$table times $by equals $product',
+        );
+      }
+      // Numbers 1..20.
+      final n = index % 20 + 1;
+      return Question(
+        id: 'gen_fc_num_$index',
+        prompt: '$n',
+        promptEmoji: '🔢',
+        answer: _numberWord(n),
+        speak: 'The number $n. ${_numberWord(n)}.',
+      );
+    }
+    // Letters A–Z for everything else (english, rhymes, and as a friendly
+    // default so no subject renders an empty card).
+    final e = _alphabet[index % _alphabet.length];
+    return Question(
+      id: 'gen_fc_ltr_$index',
+      prompt: e.$1,
+      promptEmoji: e.$3,
+      answer: '${e.$1} for ${e.$2}',
+      speak: '${e.$1}. ${e.$1} for ${e.$2}.',
+    );
   }
 
   // ---------------------------------------------------------------------------

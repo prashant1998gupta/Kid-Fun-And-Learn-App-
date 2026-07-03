@@ -22,6 +22,7 @@ enum GameType {
   listenAndTap, // voice-first, large visual targets for preschool learners
   moleMatch, // animated whack-a-mole-style letter/number/picture matching
   feedPet, // feed a friendly pet the correct answer/food/object
+  flashcard, // learn-through cards (A-Z, numbers, times tables) — no wrong answers
 }
 
 /// One curriculum unit — a "chapter" grouping many lessons.

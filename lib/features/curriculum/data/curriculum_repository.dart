@@ -41,6 +41,7 @@ class CurriculumRepository {
       GameType.memoryMatch => 1,
       GameType.tracing => 8,
       GameType.sequence => 6,
+      GameType.flashcard => 13, // a friendly learn-through deck
       _ => 12,
     };
   }
@@ -75,6 +76,19 @@ class CurriculumRepository {
 
       // Rotate through the mini-game types this subject uses, for play variety.
       final gameTypes = seeds.map((s) => s.gameType).toSet().toList();
+
+      // Fold in a "learn" flashcard track so foundational skills — the
+      // alphabet (A–Z), numbers, and times tables — are taught, not just
+      // quizzed. Math learns numbers/tables at every grade; English teaches
+      // A–Z in the preschool bands.
+      final wantsFlashcards = unit.subject == Subject.math ||
+          (grade.isPreSchool &&
+              (unit.subject == Subject.english ||
+                  unit.subject == Subject.rhymes));
+      if (wantsFlashcards && !gameTypes.contains(GameType.flashcard)) {
+        gameTypes.insert(0, GameType.flashcard);
+      }
+
       final ids = <String>[];
 
       for (var level = 1; level <= _levelsPerUnit; level++) {
