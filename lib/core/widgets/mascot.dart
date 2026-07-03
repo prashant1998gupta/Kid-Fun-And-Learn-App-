@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/audio_service.dart';
 import 'lottie_view.dart';
+import 'openmoji_view.dart';
 
 /// The friendly guides of KidVerse. Each has a personality and a signature
 /// color; art is delivered as Lottie (preferred, for lip-sync/blink) with a
@@ -103,13 +104,38 @@ class _MascotViewState extends State<MascotView> with TickerProviderStateMixin {
   }
 
   Widget _art() {
-    // Renders the mascot's Lottie when present; until the art ships it falls
-    // back to the emoji medallion, so the app looks complete today.
+    // Art preference: mascot Lottie -> a real OpenMoji illustration on a soft
+    // color medallion -> the plain emoji medallion. The OpenMoji step avoids
+    // the washed-out "white blob" look of pale emoji glyphs.
+    final emoji = _emoji[widget.mascot] ?? '⭐';
+    final openMoji = OpenMojiView.has(emoji)
+        ? Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: widget.mascot.color.withValues(alpha: 0.16),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.mascot.color.withValues(alpha: 0.3),
+                  blurRadius: 24,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            padding: EdgeInsets.all(widget.size * 0.14),
+            child: OpenMojiView(
+              emoji: emoji,
+              size: widget.size * 0.72,
+              fallback: _fallbackMedallion(),
+            ),
+          )
+        : _fallbackMedallion();
     return LottieView(
       asset: widget.mascot.lottie,
       width: widget.size,
       height: widget.size,
-      fallback: _fallbackMedallion(),
+      fallback: openMoji,
     );
   }
 

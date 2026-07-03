@@ -29,16 +29,32 @@ EXTRA = [
 ]
 
 
+# Matches a single emoji grapheme cluster: a base glyph + optional skin-tone
+# modifiers / variation selectors, plus any ZWJ-joined parts (e.g. 👩‍⚕️).
+# Matching one cluster at a time avoids merging adjacent emoji (e.g. 🥚🥚).
+_BASE = "[\U0001F000-\U0001FAFF☀-➿←-⇿⬀-⯿]"
+_MOD = "[\U0001F3FB-\U0001F3FF️]*"
+EMOJI_RE = re.compile(_BASE + _MOD + "(?:‍" + _BASE + _MOD + ")*")
+
+
+def _scan(path, into):
+    with open(path, encoding="utf-8") as f:
+        txt = f.read()
+    for m in EMOJI_RE.findall(txt):
+        into.add(m)
+
+
 def collect_emoji():
+    """All emoji used anywhere in content — curriculum JSON *and* the Dart
+    question factory / flashcard tables (A-Z animals, etc.)."""
     found = set(EXTRA)
     for path in glob.glob(os.path.join(ROOT, "assets", "data", "*.json")):
-        with open(path, encoding="utf-8") as f:
-            txt = f.read()
-        for m in re.findall(r'"emoji"\s*:\s*"([^"]+)"', txt):
-            found.add(m)
-        for m in re.findall(r'"promptEmoji"\s*:\s*"([^"]+)"', txt):
-            found.add(m)
-    return sorted(found)
+        _scan(path, found)
+    for path in glob.glob(os.path.join(ROOT, "lib", "**", "*.dart"),
+                          recursive=True):
+        _scan(path, found)
+    # Drop anything that isn't a single, sensible cluster (defensive).
+    return sorted(e for e in found if e and len(e) <= 12)
 
 
 def candidates(emoji):
