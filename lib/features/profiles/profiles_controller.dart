@@ -70,6 +70,17 @@ class ProfilesController extends StateNotifier<ProfilesState> {
     await _repo.saveActiveId(id);
   }
 
+  /// Removes a child profile by [id]. If the removed child was the active one,
+  /// the next available child (or none) becomes active.
+  Future<void> removeChild(String id) async {
+    final remaining = state.children.where((c) => c.id != id).toList();
+    final newActive = state.activeId == id
+        ? (remaining.isNotEmpty ? remaining.first.id : null)
+        : state.activeId;
+    state = ProfilesState(children: remaining, activeId: newActive);
+    await _persist();
+  }
+
   Future<void> updateActive(ChildProfile Function(ChildProfile) mutate) async {
     final active = state.active;
     if (active == null) return;

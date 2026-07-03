@@ -20,9 +20,10 @@ import '../../gamification/reward_engine.dart';
 ///    point midpoints, with a soft glow — no jagged straight segments.
 ///  - **Clear guide**: the letter shows as a big dashed-style *outline* with a
 ///    green "start here" dot, not a faded fill.
-///  - **Fair completion**: needs a real trace (enough ink covering the glyph
-///    area), not a single dot — but stays lenient; this is motor practice, not
-///    handwriting grading.
+///  - **Fair completion**: the grid is mapped to the glyph's bounding box
+///    (the central ~60% of the canvas) rather than the whole canvas, so
+///    narrow letters like "I" or "1" complete properly. Threshold is lenient;
+///    this is motor practice, not handwriting grading.
 class TracingGame extends StatefulWidget {
   const TracingGame({
     super.key,
@@ -40,11 +41,11 @@ class TracingGame extends StatefulWidget {
 class _TracingGameState extends State<TracingGame> {
   final _celebration = CelebrationController();
 
-  // Coverage grid over the glyph's central area.
-  static const int _cols = 8;
-  static const int _rows = 8;
-  static const double _threshold = 0.42; // fraction of glyph cells to cover
-  static const int _minInkPoints = 14; // guard against a single tap completing
+  // Coverage grid mapped to the glyph bounding box (central 60% of canvas).
+  static const int _cols = 10;
+  static const int _rows = 10;
+  static const double _threshold = 0.30; // fraction of glyph cells to cover
+  static const int _minInkPoints = 20; // guard against a single tap completing
 
   int _index = 0;
   final List<List<Offset>> _strokes = []; // each finger-down starts a stroke
@@ -52,13 +53,20 @@ class _TracingGameState extends State<TracingGame> {
   int _inkPoints = 0;
   bool _done = false;
   Size _canvas = Size.zero;
+  Rect _glyphRect = Rect.zero; // bounding box of the rendered glyph
   final _stopwatch = Stopwatch()..start();
 
   Question get _q => widget.lesson.questions[_index];
   int get _total => widget.lesson.questions.length;
   String get _glyph => _q.answer ?? _q.prompt;
 
-  /// Cells that make up the glyph's writing area (central band).
+  /// Scale factor from canvas coords to glyph-bounding-box coords.
+  double get _glyphLeft => _glyphRect.left;
+  double get _glyphTop => _glyphRect.top;
+  double get _glyphW => _glyphRect.width;
+  double get _glyphH => _glyphRect.height;
+
+  /// Cells that make up the glyph's writing area — all interior cells.
   Set<int> get _targetCells {
     final cells = <int>{};
     for (var r = 1; r < _rows - 1; r++) {
@@ -67,6 +75,18 @@ class _TracingGameState extends State<TracingGame> {
       }
     }
     return cells;
+  }
+
+  /// Maps a finger position to a grid cell within the glyph bounding box.
+  /// Returns -1 if the position is outside the glyph area entirely.
+  int _cellAt(Offset local) {
+    if (_glyphW <= 0 || _glyphH <= 0) return -1;
+    final dx = (local.dx - _glyphLeft) / _glyphW * _cols;
+    final dy = (local.dy - _glyphTop) / _glyphH * _rows;
+    final c = dx.floor();
+    final r = dy.floor();
+    if (c < 0 || c >= _cols || r < 0 || r >= _rows) return -1;
+    return r * _cols + c;
   }
 
   @override
@@ -86,11 +106,10 @@ class _TracingGameState extends State<TracingGame> {
 
   void _extend(Offset local) {
     if (_done || _canvas == Size.zero || _strokes.isEmpty) return;
-    final c = (local.dx / _canvas.width * _cols).floor().clamp(0, _cols - 1);
-    final r = (local.dy / _canvas.height * _rows).floor().clamp(0, _rows - 1);
+    final cell = _cellAt(local);
     setState(() {
       _strokes.last.add(local);
-      _covered.add(r * _cols + c);
+      if (cell >= 0) _covered.add(cell);
       _inkPoints++;
     });
   }
@@ -172,6 +191,23 @@ class _TracingGameState extends State<TracingGame> {
                       builder: (context, constraints) {
                         _canvas =
                             Size(constraints.maxWidth, constraints.maxHeight);
+                        // Compute the glyph bounding box for hit-testing.
+                        final tp = TextPainter(
+                          text: TextSpan(
+                            text: _glyph.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: _canvas.height * 0.72,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          textDirection: TextDirection.ltr,
+                        )..layout();
+                        _glyphRect = Rect.fromLTWH(
+                          (_canvas.width - tp.width) / 2,
+                          (_canvas.height - tp.height) / 2,
+                          tp.width,
+                          tp.height,
+                        );
                         return GestureDetector(
                           onPanStart: (d) => _startStroke(d.localPosition),
                           onPanUpdate: (d) => _extend(d.localPosition),

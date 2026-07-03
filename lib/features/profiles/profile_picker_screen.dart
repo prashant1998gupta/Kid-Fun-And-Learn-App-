@@ -98,40 +98,75 @@ class _ProfileTile extends StatelessWidget {
   final ChildProfile child;
   final WidgetRef ref;
 
-  @override
-  Widget build(BuildContext context) {
-    return BouncyButton(
-      borderRadius: AppSpacing.cardRadius,
-      onTap: () async {
-        await ref
-            .read(profilesControllerProvider.notifier)
-            .selectChild(child.id);
-        // Reload per-child reward state for the newly selected profile.
-        ref.read(achievementsControllerProvider.notifier).refreshForActiveChild();
-        ref.read(dailyRewardControllerProvider.notifier).refreshForActiveChild();
-        ref.read(luckySpinControllerProvider.notifier).refreshForActiveChild();
-        AudioService.instance.speak('Hi ${child.name}! Ready to play?');
-        if (context.mounted) context.go(AppRoutes.home);
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AvatarView(config: child.avatar, size: 110),
-          const SizedBox(height: 12),
-          Text(
-            child.name,
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(color: Colors.white),
+  void _select(BuildContext context) async {
+    await ref
+        .read(profilesControllerProvider.notifier)
+        .selectChild(child.id);
+    ref.read(achievementsControllerProvider.notifier).refreshForActiveChild();
+    ref.read(dailyRewardControllerProvider.notifier).refreshForActiveChild();
+    ref.read(luckySpinControllerProvider.notifier).refreshForActiveChild();
+    AudioService.instance.speak('Hi ${child.name}! Ready to play?');
+    if (context.mounted) context.go(AppRoutes.home);
+  }
+
+  Future<bool> _confirmDelete(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove profile?'),
+        content: Text(
+          'All progress for "${child.name}" will be permanently deleted.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
           ),
-          Text(
-            child.grade.label,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Remove'),
           ),
         ],
       ),
-    ).animate().scale(curve: Curves.easeOutBack, duration: 400.ms);
+    );
+    return result ?? false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: () async {
+        final confirmed = await _confirmDelete(context);
+        if (confirmed && context.mounted) {
+          ref
+              .read(profilesControllerProvider.notifier)
+              .removeChild(child.id);
+        }
+      },
+      child: BouncyButton(
+        borderRadius: AppSpacing.cardRadius,
+        onTap: () => _select(context),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AvatarView(config: child.avatar, size: 110),
+            const SizedBox(height: 12),
+            Text(
+              child.name,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: Colors.white),
+            ),
+            Text(
+              child.grade.label,
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
+        ),
+      ).animate().scale(curve: Curves.easeOutBack, duration: 400.ms),
+    );
   }
 }
 

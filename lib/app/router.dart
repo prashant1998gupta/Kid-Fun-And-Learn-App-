@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../features/curriculum/domain/lesson.dart';
 import '../features/games/game_host_screen.dart';
 import '../features/achievements/achievements_screen.dart';
+import '../features/art_studio/art_studio_screen.dart';
 import '../features/curriculum/domain/subject.dart';
 import '../features/home/home_screen.dart';
 import '../features/learning_map/learning_map_screen.dart';
@@ -47,6 +48,7 @@ class AppRoutes {
   static const certificate = '/certificate';
   static const season = '/season';
   static const about = '/about';
+  static const artStudio = '/art-studio';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -110,6 +112,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.about,
         pageBuilder: (_, s) => _slide(const AboutScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.artStudio,
+        pageBuilder: (_, s) => _slide(const ArtStudioScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.parentGate,
