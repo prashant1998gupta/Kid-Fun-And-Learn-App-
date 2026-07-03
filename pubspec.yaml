@@ -74,4 +74,5 @@ flutter:
     - assets/audio/sfx/
     - assets/audio/music/
     - assets/data/
+    - assets/openmoji/ # CC BY-SA 4.0 illustrations (see tool/fetch_openmoji.py)
   # Fonts are loaded at runtime via google_fonts (Baloo 2 / Nunito).

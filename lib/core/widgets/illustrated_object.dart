@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import 'openmoji_view.dart';
 
-/// Small code-drawn preschool illustrations used while production art assets
-/// are being commissioned. This removes the "just emoji" look from core games
-/// without adding network/image dependencies.
+/// Renders the illustration for a question answer/object. Preference order:
+/// 1. A bundled OpenMoji image (consistent, kid-friendly real art) when the
+///    answer's emoji is in our subset;
+/// 2. a code-drawn preschool illustration for known objects;
+/// 3. a big letter/number tile for short text answers.
+/// This keeps the "just emoji" look out of core games while staying offline.
 class IllustratedObjectView extends StatelessWidget {
   const IllustratedObjectView({
     super.key,
@@ -26,16 +30,20 @@ class IllustratedObjectView extends StatelessWidget {
   Widget build(BuildContext context) {
     final kind = _kindFor(label, emoji);
     final fg = selected ? Colors.white : AppColors.lightText;
-    if (kind == _IllustrationKind.text) {
-      return _TextTile(label: label, size: size, foreground: fg);
+    final drawn = kind == _IllustrationKind.text
+        ? _TextTile(label: label, size: size, foreground: fg)
+        : SizedBox(
+            width: size,
+            height: size,
+            child: CustomPaint(
+              painter: _ObjectPainter(kind: kind, selected: selected),
+            ),
+          );
+    // Real OpenMoji art wins for objects; letters/numbers keep their tile.
+    if (kind != _IllustrationKind.text && OpenMojiView.has(emoji)) {
+      return OpenMojiView(emoji: emoji!, size: size, fallback: drawn);
     }
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _ObjectPainter(kind: kind, selected: selected),
-      ),
-    );
+    return drawn;
   }
 }
 
