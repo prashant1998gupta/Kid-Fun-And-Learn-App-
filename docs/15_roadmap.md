@@ -66,6 +66,9 @@ for low-end tablets.
   cards use code-drawn illustrated objects instead of emoji-only placeholders,
   mascots have playful retry/rescue/reward voice reactions, and Feed-the-Pet is
   playable across LKG/UKG/KG.
+- [x] **M21:** Mini Games engagement pass with three difficulty modes, daily
+  challenges, seven local badges, tutorials, mascot feedback, richer Chicken
+  targets, generated Infinity boards, Stack Merge chains, and expanded 2048.
 
 ## Quality rules for Codex follow-up work
 

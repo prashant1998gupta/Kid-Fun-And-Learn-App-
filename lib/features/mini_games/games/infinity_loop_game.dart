@@ -3,13 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
-import '../../../core/widgets/bouncy_button.dart';
+import '../../../core/widgets/celebration_overlay.dart';
 import '../mini_games_controller.dart';
+import '../widgets/mini_game_widgets.dart';
 
-/// Infinity Loop Hex — rotate hex tiles to form a closed loop.
 class InfinityLoopGame extends ConsumerStatefulWidget {
   const InfinityLoopGame({super.key});
 
@@ -18,11 +19,16 @@ class InfinityLoopGame extends ConsumerStatefulWidget {
 }
 
 class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
-  static const _gridSize = 4;
   late List<List<_HexTile>> _grid;
+  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
   bool _won = false;
+  bool _usedHint = false;
   int _moves = 0;
-  final _rnd = math.Random();
+  int _level = 1;
+  int _optimalMoves = 0;
+  String _message = 'Rotate every path until the loop glows!';
+  final _random = math.Random();
+  final _celebration = CelebrationController();
 
   static const _directions = [
     (row: 0, col: 1),
@@ -33,51 +39,64 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     (row: -1, col: 1),
   ];
 
+  int get _gridSize => switch (_difficulty) {
+        MiniGameDifficulty.easy => 4,
+        MiniGameDifficulty.normal => 6,
+        MiniGameDifficulty.challenge => 8,
+      };
+
   @override
   void initState() {
     super.initState();
     _initGrid();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _initGrid() {
-    final masks = List.generate(_gridSize, (_) => List.filled(_gridSize, 0));
-    const loop = [
-      (row: 0, col: 0),
-      (row: 0, col: 1),
-      (row: 0, col: 2),
-      (row: 0, col: 3),
-      (row: 1, col: 3),
-      (row: 2, col: 3),
-      (row: 3, col: 3),
-      (row: 3, col: 2),
-      (row: 3, col: 1),
-      (row: 3, col: 0),
-      (row: 2, col: 0),
-      (row: 1, col: 0),
+    final size = _gridSize;
+    final solved = List.generate(size, (_) => List.filled(size, 0));
+    final loop = <({int row, int col})>[
+      for (var col = 0; col < size; col++) (row: 0, col: col),
+      for (var row = 1; row < size; row++) (row: row, col: size - 1),
+      for (var col = size - 2; col >= 0; col--) (row: size - 1, col: col),
+      for (var row = size - 2; row > 0; row--) (row: row, col: 0),
     ];
     for (var i = 0; i < loop.length; i++) {
       final from = loop[i];
       final to = loop[(i + 1) % loop.length];
       final direction = _directionBetween(from, to);
-      masks[from.row][from.col] |= 1 << direction;
-      masks[to.row][to.col] |= 1 << ((direction + 3) % 6);
+      solved[from.row][from.col] |= 1 << direction;
+      solved[to.row][to.col] |= 1 << ((direction + 3) % 6);
     }
-    _grid = List.generate(_gridSize, (row) {
-      return List.generate(_gridSize, (col) {
-        var mask = masks[row][col];
+
+    _optimalMoves = 0;
+    _grid = List.generate(size, (row) {
+      return List.generate(size, (col) {
+        final solution = solved[row][col];
+        var mask = solution;
+        var turns = 0;
         if (mask != 0) {
-          final turns = _rnd.nextInt(6);
+          turns = 1 + _random.nextInt(5);
           for (var i = 0; i < turns; i++) {
             mask = _rotateMask(mask);
           }
+          _optimalMoves += (6 - turns) % 6;
         }
-        return _HexTile(mask: mask);
+        return _HexTile(mask: mask, solution: solution);
       });
     });
     _won = false;
+    _usedHint = false;
     _moves = 0;
+    _message = 'Level $_level: connect the glowing loop!';
     if (_isSolved()) {
-      _grid[0][0].mask = _rotateMask(_grid[0][0].mask);
+      final tile = _grid.first.first;
+      tile.mask = _rotateMask(tile.mask);
+      _optimalMoves++;
     }
   }
 
@@ -93,7 +112,38 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
 
   int _rotateMask(int mask) => ((mask << 1) & 0x3f) | ((mask >> 5) & 1);
 
-  void _newGame() => setState(_initGrid);
+  void _newGame({bool nextLevel = false}) {
+    setState(() {
+      if (nextLevel) _level++;
+      _initGrid();
+    });
+  }
+
+  void _changeDifficulty(MiniGameDifficulty value) {
+    setState(() {
+      _difficulty = value;
+      _level = 1;
+      _initGrid();
+    });
+  }
+
+  void _hint() {
+    if (_won) return;
+    for (final row in _grid) {
+      for (final tile in row) {
+        if (tile.mask != tile.solution) {
+          setState(() {
+            tile.mask = tile.solution;
+            _usedHint = true;
+            _message = 'Pip fixed one tile. Finish the rest!';
+          });
+          AudioService.instance.playSfx(Sfx.magic);
+          if (_isSolved()) _complete();
+          return;
+        }
+      }
+    }
+  }
 
   bool _isSolved() {
     final connected = <(int, int)>[];
@@ -146,34 +196,64 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     return count;
   }
 
-  void _tapTile(int r, int c) {
+  void _tapTile(int row, int col) {
     if (_won) return;
+    final tile = _grid[row][col];
+    if (tile.mask == 0) return;
     setState(() {
-      final tile = _grid[r][c];
-      if (tile.mask == 0) return;
       tile.mask = _rotateMask(tile.mask);
       _moves++;
-      if (_isSolved()) {
-        _won = true;
-        ref.read(miniGamesControllerProvider.notifier).recordScore(
-              'infinity-loop',
-              1,
-            );
-      }
+      _message = tile.mask == tile.solution
+          ? 'Click! That tile is connected.'
+          : 'Keep turning — watch both ends.';
     });
+    AudioService.instance.playSfx(
+      tile.mask == tile.solution ? Sfx.correct : Sfx.tap,
+    );
+    if (_isSolved()) _complete();
+  }
+
+  void _complete() {
+    final stars = _starCount;
+    setState(() {
+      _won = true;
+      _message = stars == 3 ? 'Perfect loop! Three stars!' : 'Loop complete!';
+    });
+    _celebration.fireworks();
+    AudioService.instance.speak('Perfect loop! You earned $stars stars.');
+    ref.read(miniGamesControllerProvider.notifier).recordResult(
+      gameId: 'infinity-loop',
+      score: (_gridSize * 250) - (_moves * 5).clamp(0, _gridSize * 100),
+      dailyProgress: 1,
+      achievements: [
+        if (!_usedHint) 'loop_no_hint',
+      ],
+    );
+  }
+
+  int get _starCount {
+    if (_usedHint) return 1;
+    if (_moves <= _optimalMoves + 2) return 3;
+    if (_moves <= _optimalMoves + _gridSize) return 2;
+    return 1;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBackground(
-        theme: WorldTheme.space,
-        child: SafeArea(
-          child: Column(
-            children: [
-              _topBar(),
-              if (_won) _winScreen() else _gridArea(),
-            ],
+      body: CelebrationOverlay(
+        controller: _celebration,
+        child: AnimatedBackground(
+          theme: WorldTheme.space,
+          child: SafeArea(
+            child: Column(
+              children: [
+                _topBar(),
+                MascotMessage(message: _message),
+                const SizedBox(height: 6),
+                if (_won) _winScreen() else _gridArea(),
+              ],
+            ),
           ),
         ),
       ),
@@ -185,35 +265,43 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
       padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
-          BouncyButton(
-              onTap: () => Navigator.of(context).maybePop(),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.close_rounded,
-                    color: AppColors.primary, size: 22),
-              )),
+          GameCircleButton(
+            icon: Icons.close_rounded,
+            tooltip: 'Close game',
+            onTap: () => Navigator.of(context).maybePop(),
+          ),
           const SizedBox(width: 8),
           const Expanded(
             child: Text(
               '🔷 Infinity Loop',
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18),
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+              ),
             ),
           ),
-          BouncyButton(
-              onTap: _newGame,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.refresh_rounded,
-                    color: AppColors.primary, size: 22),
-              )),
+          GameCircleButton(
+            icon: Icons.lightbulb_rounded,
+            tooltip: 'Hint',
+            onTap: _hint,
+          ),
+          const SizedBox(width: 5),
+          GameCircleButton(
+            icon: Icons.help_outline_rounded,
+            tooltip: 'How to play',
+            onTap: () => showMiniGameHelp(
+              context,
+              title: 'How to play Infinity Loop',
+              steps: const [
+                'Tap a hexagon to rotate its path.',
+                'Every path end must meet another path end.',
+                'The whole board must form one closed loop.',
+                'Use a hint if you are stuck, or solve alone for 3 stars.',
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -221,48 +309,71 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
 
   Widget _gridArea() {
     return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Tap each tile to rotate',
-                style: TextStyle(color: Colors.white70, fontSize: 14)),
-            Text('Moves: $_moves',
-                style: const TextStyle(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableWidth = constraints.maxWidth - 20;
+          final tileSize = math.min(
+            54.0,
+            availableWidth / (_gridSize * 1.5 - 0.5),
+          );
+          final boardWidth = tileSize * (_gridSize * 1.5 - 0.5);
+          final boardHeight = tileSize * (1 + ((_gridSize - 1) * 0.86));
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                DifficultyPicker(
+                  value: _difficulty,
+                  onChanged: _changeDifficulty,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Level $_level  •  Moves $_moves  •  Best path $_optimalMoves',
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: 266,
-              height: 178,
-              child: Stack(
-                children: [
-                  for (var row = 0; row < _gridSize; row++)
-                    for (var col = 0; col < _gridSize; col++)
-                      Positioned(
-                        left: col * 48 + row * 24,
-                        top: row * 42,
-                        child: _hexTile(row, col),
-                      ),
-                ],
-              ),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: boardWidth,
+                  height: boardHeight,
+                  child: Stack(
+                    children: [
+                      for (var row = 0; row < _gridSize; row++)
+                        for (var col = 0; col < _gridSize; col++)
+                          Positioned(
+                            left: col * tileSize + row * tileSize * 0.5,
+                            top: row * tileSize * 0.86,
+                            child: _hexTile(row, col, tileSize),
+                          ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _hexTile(int r, int c) {
-    final tile = _grid[r][c];
-    return GestureDetector(
-      onTap: () => _tapTile(r, c),
-      child: SizedBox(
-        width: 50,
-        height: 50,
-        child: CustomPaint(
-          painter: _HexPipePainter(tile.mask, AppColors.primary),
+  Widget _hexTile(int row, int col, double size) {
+    final tile = _grid[row][col];
+    final aligned = tile.mask == tile.solution && tile.mask != 0;
+    return Semantics(
+      button: tile.mask != 0,
+      label: aligned ? 'Connected path tile' : 'Path tile to rotate',
+      child: GestureDetector(
+        onTap: () => _tapTile(row, col),
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: CustomPaint(
+            painter: _HexPipePainter(
+              tile.mask,
+              aligned ? const Color(0xFF00B894) : AppColors.primary,
+            ),
+          ),
         ),
       ),
     );
@@ -271,33 +382,38 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
   Widget _winScreen() {
     return Expanded(
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🎉', style: TextStyle(fontSize: 64)),
-            const Text('Perfect Loop!',
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('⭐' * _starCount, style: const TextStyle(fontSize: 48)),
+              const Text(
+                'Perfect Loop!',
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900)),
-            Text('Completed in $_moves moves',
-                style: const TextStyle(color: Colors.white70, fontSize: 16)),
-            const SizedBox(height: 24),
-            BouncyButton(
-                onTap: _newGame,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: const Text('🔄 New Game',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.primary)),
-                )),
-          ],
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                'Level $_level completed in $_moves moves',
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () => _newGame(nextLevel: true),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: const Text('Next loop'),
+              ),
+              TextButton(
+                onPressed: _newGame,
+                child: const Text(
+                  'Replay level',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -305,8 +421,9 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
 }
 
 class _HexTile {
-  _HexTile({required this.mask});
+  _HexTile({required this.mask, required this.solution});
   int mask;
+  final int solution;
 }
 
 class _HexPipePainter extends CustomPainter {
@@ -329,17 +446,17 @@ class _HexPipePainter extends CustomPainter {
       }
     }
     hex.close();
-    canvas.drawPath(hex, Paint()..color = Colors.white.withValues(alpha: 0.92));
+    canvas.drawPath(hex, Paint()..color = Colors.white.withValues(alpha: 0.94));
     canvas.drawPath(
       hex,
       Paint()
-        ..color = color.withValues(alpha: 0.25)
+        ..color = color.withValues(alpha: 0.3)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 6
+      ..strokeWidth = math.max(3, size.width * 0.11)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     for (var direction = 0; direction < 6; direction++) {
@@ -348,10 +465,13 @@ class _HexPipePainter extends CustomPainter {
       final end = center + Offset(math.cos(angle), math.sin(angle)) * radius;
       canvas.drawLine(center, end, paint);
     }
-    if (mask != 0) canvas.drawCircle(center, 4, Paint()..color = color);
+    if (mask != 0) {
+      canvas.drawCircle(
+          center, math.max(2, size.width * 0.07), Paint()..color = color);
+    }
   }
 
   @override
-  bool shouldRepaint(_HexPipePainter old) =>
-      old.mask != mask || old.color != color;
+  bool shouldRepaint(_HexPipePainter oldDelegate) =>
+      oldDelegate.mask != mask || oldDelegate.color != color;
 }

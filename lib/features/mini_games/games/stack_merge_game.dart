@@ -1,16 +1,20 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
+import '../../../core/widgets/celebration_overlay.dart';
+import '../../settings/settings_controller.dart';
 import '../logic/stack_merge_engine.dart';
 import '../mini_games_controller.dart';
+import '../widgets/mini_game_widgets.dart';
 
-/// Stack Merge — drop numbers to merge them bigger.
 class StackMergeGame extends ConsumerStatefulWidget {
   const StackMergeGame({super.key});
 
@@ -19,72 +23,16 @@ class StackMergeGame extends ConsumerStatefulWidget {
 }
 
 class _StackMergeGameState extends ConsumerState<StackMergeGame> {
-  static const _cols = 5;
-  late final StackMergeEngine _engine;
-  int? _fallingValue;
+  static const _columns = 5;
+  late StackMergeEngine _engine;
+  MiniGameDifficulty _difficulty = MiniGameDifficulty.normal;
+  int _activeValue = 2;
   int _dropColumn = 2;
-  int _nextValue = 2;
-  final _rnd = math.Random();
-
-  @override
-  void initState() {
-    super.initState();
-    _engine = StackMergeEngine(columnCount: _cols);
-    _restart();
-  }
-
-  void _startDrop() {
-    if (_engine.gameOver || _fallingValue != null) return;
-    setState(() {
-      _fallingValue = _nextValue;
-      _nextValue = _rnd.nextBool() ? 2 : 4;
-    });
-  }
-
-  void _dropNow() {
-    final value = _fallingValue;
-    if (value == null || _engine.gameOver) return;
-    setState(() {
-      _engine.drop(_dropColumn, value);
-      _fallingValue = null;
-    });
-    if (_engine.gameOver) {
-      _endGame();
-    }
-  }
-
-  void _moveLeft() {
-    if (_fallingValue == null) return;
-    setState(() {
-      _dropColumn = (_dropColumn - 1).clamp(0, _cols - 1);
-    });
-  }
-
-  void _moveRight() {
-    if (_fallingValue == null) return;
-    setState(() {
-      _dropColumn = (_dropColumn + 1).clamp(0, _cols - 1);
-    });
-  }
-
-  void _endGame() {
-    ref.read(miniGamesControllerProvider.notifier).recordScore(
-          'stack-merge',
-          _engine.score,
-        );
-  }
-
-  void _restart() {
-    setState(() {
-      _engine.reset();
-      _fallingValue = null;
-      _dropColumn = 2;
-      _nextValue = _rnd.nextBool() ? 2 : 4;
-      for (var i = 0; i < 3; i++) {
-        _engine.drop(_rnd.nextInt(_cols), _rnd.nextBool() ? 2 : 4);
-      }
-    });
-  }
+  List<int> _preview = const [2, 4];
+  bool _dropping = false;
+  String _message = 'Match equal blocks to start a chain!';
+  final _random = math.Random();
+  final _celebration = CelebrationController();
 
   static const _valueColors = {
     2: Color(0xFFE74C3C),
@@ -101,17 +49,123 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _engine = StackMergeEngine(columnCount: _columns);
+    _restart();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  int get _maxRows => switch (_difficulty) {
+        MiniGameDifficulty.easy => 9,
+        MiniGameDifficulty.normal => 8,
+        MiniGameDifficulty.challenge => 7,
+      };
+
+  int _nextRandomValue() {
+    if (_random.nextInt(20) == 0) return StackMergeEngine.rainbow;
+    if (_difficulty == MiniGameDifficulty.challenge &&
+        _random.nextInt(5) == 0) {
+      return 8;
+    }
+    return _random.nextBool() ? 2 : 4;
+  }
+
+  void _restart() {
+    setState(() {
+      _engine = StackMergeEngine(columnCount: _columns, maxRows: _maxRows);
+      _activeValue = _nextRandomValue();
+      _preview = [_nextRandomValue(), _nextRandomValue()];
+      _dropColumn = 2;
+      _dropping = false;
+      _message = 'Aim, drop, and build a giant merge!';
+      for (var i = 0; i < 3; i++) {
+        _engine.drop(_random.nextInt(_columns), _random.nextBool() ? 2 : 4);
+      }
+    });
+  }
+
+  void _changeDifficulty(MiniGameDifficulty value) {
+    _difficulty = value;
+    _restart();
+  }
+
+  void _move(int delta) {
+    if (_dropping || _engine.gameOver) return;
+    setState(() {
+      _dropColumn = (_dropColumn + delta).clamp(0, _columns - 1);
+    });
+  }
+
+  Future<void> _drop() async {
+    if (_dropping || _engine.gameOver) return;
+    setState(() => _dropping = true);
+    final reducedMotion = ref.read(reducedMotionProvider);
+    if (!reducedMotion) {
+      await Future<void>.delayed(const Duration(milliseconds: 220));
+      if (!mounted) return;
+    }
+
+    final result = _engine.dropWithResult(_dropColumn, _activeValue);
+    setState(() {
+      _activeValue = _preview.first;
+      _preview = [_preview.last, _nextRandomValue()];
+      _dropping = false;
+      if (result.mergeCount >= 2) {
+        _message = 'Chain x${result.mergeCount}! Huge merge!';
+      } else if (result.mergeCount == 1) {
+        _message = 'Pop! You made ${result.value}.';
+      } else {
+        _message = 'Set up two matching blocks.';
+      }
+    });
+
+    if (result.mergeCount > 0) {
+      AudioService.instance.playSfx(
+        result.mergeCount >= 2 ? Sfx.celebration : Sfx.correct,
+      );
+      AudioService.instance.successHaptic();
+      if (result.mergeCount >= 2) _celebration.celebrate(sound: false);
+    } else {
+      AudioService.instance.playSfx(Sfx.tap);
+    }
+    if (_engine.gameOver) _endGame();
+  }
+
+  void _endGame() {
+    AudioService.instance
+        .speak('Great stacking! Your score is ${_engine.score}.');
+    ref.read(miniGamesControllerProvider.notifier).recordResult(
+      gameId: 'stack-merge',
+      score: _engine.score,
+      achievements: [
+        if (_engine.highestTile >= 128) 'stack_128',
+      ],
+    );
+    setState(() => _message = 'The tower is full. Great stacking!');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBackground(
-        theme: WorldTheme.candy,
-        child: SafeArea(
-          child: Column(
-            children: [
-              _topBar(),
-              Expanded(child: _gameArea()),
-              _controls(),
-            ],
+      body: CelebrationOverlay(
+        controller: _celebration,
+        child: AnimatedBackground(
+          theme: WorldTheme.candy,
+          child: SafeArea(
+            child: Column(
+              children: [
+                _topBar(),
+                MascotMessage(message: _message, icon: '🤖'),
+                const SizedBox(height: 5),
+                Expanded(child: _gameArea()),
+                _controls(),
+              ],
+            ),
           ),
         ),
       ),
@@ -123,178 +177,224 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
-          BouncyButton(
-              onTap: () => Navigator.of(context).maybePop(),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.close_rounded,
-                    color: AppColors.primary, size: 22),
-              )),
+          GameCircleButton(
+            icon: Icons.close_rounded,
+            tooltip: 'Close game',
+            onTap: () => Navigator.of(context).maybePop(),
+          ),
           const SizedBox(width: 8),
           const Expanded(
             child: Text(
               '🔢 Stack Merge',
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18),
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+              ),
             ),
           ),
-          Text('⭐ ${_engine.score}',
-              style: const TextStyle(
-                  color: Colors.yellow,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18)),
-          const SizedBox(width: 12),
-          if (_engine.gameOver)
-            BouncyButton(
-                onTap: _restart,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                      color: Colors.white, shape: BoxShape.circle),
-                  child: const Icon(Icons.refresh_rounded,
-                      color: AppColors.primary, size: 22),
-                )),
+          Text(
+            '⭐ ${_engine.score}',
+            style: const TextStyle(
+              color: Colors.yellow,
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(width: 6),
+          GameCircleButton(
+            icon: Icons.help_outline_rounded,
+            tooltip: 'How to play',
+            onTap: () => showMiniGameHelp(
+              context,
+              title: 'How to play Stack Merge',
+              steps: const [
+                'Move the falling block above a column.',
+                'Drop equal numbers together to merge them.',
+                'Chain merges give bigger scores and celebrations.',
+                'A rainbow block doubles the top block in its column.',
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _gameArea() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (_fallingValue == null && !_engine.gameOver)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: BouncyButton(
-              onTap: _startDrop,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24)),
-                child: Text('Drop $_nextValue',
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primary)),
-              ),
-            ),
-          ),
-        if (_engine.gameOver)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Column(
-              children: [
-                const Text('Game Over!',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900)),
-                Text('⭐ ${_engine.score}',
-                    style: const TextStyle(
-                        color: Colors.yellow,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800)),
-              ],
-            ),
-          ),
-        Container(
-          width: 250,
-          height: 350,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-          ),
-          child: Stack(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final boardHeight = (constraints.maxHeight - 110).clamp(260.0, 430.0);
+        final cellHeight = (boardHeight - 8) / _maxRows;
+        return SingleChildScrollView(
+          child: Column(
             children: [
-              for (var col = 0; col < _engine.columns.length; col++)
-                for (var row = 0; row < _engine.columns[col].length; row++)
-                  Positioned(
-                    left: col * 50.0 + 4,
-                    bottom: row * 44.0 + 4,
-                    child: _tileWidget(_engine.columns[col][row]),
+              DifficultyPicker(
+                value: _difficulty,
+                onChanged: _changeDifficulty,
+              ),
+              const SizedBox(height: 7),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Next:',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-              if (_fallingValue != null)
-                Positioned(
-                  left: _dropColumn * 50.0 + 4,
-                  top: 8,
-                  child: _tileWidget(_fallingValue!),
+                  for (final value in _preview)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 7),
+                      child: _tile(value, size: 34),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 7),
+              if (_engine.gameOver)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: FilledButton.icon(
+                    onPressed: _restart,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Play again'),
+                  ),
                 ),
+              Container(
+                width: 260,
+                height: boardHeight,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(18),
+                  border:
+                      Border.all(color: Colors.white.withValues(alpha: 0.35)),
+                ),
+                child: Stack(
+                  children: [
+                    for (var column = 0;
+                        column < _engine.columns.length;
+                        column++)
+                      for (var row = 0;
+                          row < _engine.columns[column].length;
+                          row++)
+                        AnimatedPositioned(
+                          duration: const Duration(milliseconds: 180),
+                          left: column * 52.0 + 5,
+                          bottom: row * cellHeight + 4,
+                          child: _tile(
+                            _engine.columns[column][row],
+                            size: math.min(44, cellHeight - 3),
+                          ),
+                        ),
+                    AnimatedPositioned(
+                      duration: Duration(
+                        milliseconds: _dropping ? 220 : 120,
+                      ),
+                      curve: Curves.easeIn,
+                      left: _dropColumn * 52.0 + 5,
+                      top: _dropping
+                          ? boardHeight -
+                              ((_engine.columns[_dropColumn].length + 1) *
+                                  cellHeight)
+                          : 7,
+                      child: _tile(
+                        _activeValue,
+                        size: math.min(44, cellHeight - 3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 
-  Widget _tileWidget(int value) {
+  Widget _tile(int value, {required double size}) {
+    final rainbow = value == StackMergeEngine.rainbow;
     return Container(
-      width: 42,
-      height: 40,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
-        color: _valueColors[value] ?? Colors.purple,
-        borderRadius: BorderRadius.circular(8),
+        gradient: rainbow
+            ? const LinearGradient(
+                colors: [
+                  Colors.red,
+                  Colors.orange,
+                  Colors.yellow,
+                  Colors.green,
+                  Colors.blue,
+                  Colors.purple,
+                ],
+              )
+            : null,
+        color: rainbow ? null : (_valueColors[value] ?? Colors.purple),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Center(
-        child: Text('$value',
-            style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-                fontSize: 16)),
+        child: Text(
+          rainbow ? '★' : '$value',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+            fontSize: size * 0.37,
+            shadows: const [Shadow(color: Colors.black45, blurRadius: 2)],
+          ),
+        ),
       ),
     );
   }
 
   Widget _controls() {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          BouncyButton(
-            onTap: _moveLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(20)),
-              child: const Icon(Icons.arrow_back_rounded,
-                  color: AppColors.primary, size: 28),
-            ),
-          ),
-          const SizedBox(width: 24),
-          BouncyButton(
-            onTap: _dropNow,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(20)),
-              child: const Icon(Icons.arrow_downward_rounded,
-                  color: AppColors.primary, size: 28),
-            ),
-          ),
-          const SizedBox(width: 24),
-          BouncyButton(
-            onTap: _moveRight,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(20)),
-              child: const Icon(Icons.arrow_forward_rounded,
-                  color: AppColors.primary, size: 28),
-            ),
+          _control(Icons.arrow_back_rounded, () => _move(-1)),
+          const SizedBox(width: 20),
+          _control(Icons.arrow_downward_rounded, _drop, emphasized: true),
+          const SizedBox(width: 20),
+          _control(Icons.arrow_forward_rounded, () => _move(1)),
+          const SizedBox(width: 10),
+          GameCircleButton(
+            icon: Icons.refresh_rounded,
+            tooltip: 'Restart',
+            onTap: _restart,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _control(
+    IconData icon,
+    VoidCallback onTap, {
+    bool emphasized = false,
+  }) {
+    return BouncyButton(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: emphasized ? 28 : 22,
+          vertical: 13,
+        ),
+        decoration: BoxDecoration(
+          color: emphasized ? const Color(0xFFFFD93D) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Icon(icon, color: AppColors.primary, size: 28),
       ),
     );
   }

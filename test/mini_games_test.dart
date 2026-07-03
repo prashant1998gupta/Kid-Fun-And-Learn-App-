@@ -8,6 +8,7 @@ import 'package:kidverse/features/mini_games/games/chicken_tap_game.dart';
 import 'package:kidverse/features/mini_games/games/classic_2048_game.dart';
 import 'package:kidverse/features/mini_games/games/infinity_loop_game.dart';
 import 'package:kidverse/features/mini_games/games/stack_merge_game.dart';
+import 'package:kidverse/features/mini_games/logic/chicken_tap_rules.dart';
 import 'package:kidverse/features/mini_games/logic/classic_2048_engine.dart';
 import 'package:kidverse/features/mini_games/logic/stack_merge_engine.dart';
 import 'package:kidverse/features/mini_games/mini_games_controller.dart';
@@ -35,7 +36,43 @@ void main() {
 
       await controller.recordScore('368-chickens', 25);
 
-      expect(controller.state['368-chickens'], 25);
+      expect(controller.state.highScores['368-chickens'], 25);
+    });
+
+    test('daily challenge progress resets on a new date', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+      final dayOne = DateTime(2026, 7, 3);
+      final challenge = repository.dailyChallenge(dayOne);
+
+      await repository.recordDailyProgress(
+        challenge.gameId,
+        challenge.target,
+        dayOne,
+      );
+
+      expect(repository.dailyChallenge(dayOne).completed, isTrue);
+      expect(
+          repository
+              .dailyChallenge(dayOne.add(const Duration(days: 1)))
+              .progress,
+          0);
+    });
+
+    test('result unlocks local badges without curriculum rewards', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final controller = MiniGamesController(MiniGamesRepository(preferences));
+
+      final unlocked = await controller.recordResult(
+        gameId: '368-chickens',
+        score: 50,
+        achievements: const ['chicken_combo_10'],
+      );
+
+      expect(unlocked, containsAll(['first_game', 'chicken_combo_10']));
+      expect(controller.state.playedGames, contains('368-chickens'));
     });
   });
 
@@ -67,6 +104,22 @@ void main() {
       expect(engine.hasMoves, isFalse);
       expect(engine.gameOver, isTrue);
     });
+
+    test('supports variable board sizes and one-step undo', () {
+      final engine = Classic2048Engine(size: 3, random: math.Random(2));
+      engine.grid = [
+        [2, 2, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
+
+      expect(engine.move(SwipeDirection.left, addTile: false), isTrue);
+      expect(engine.grid.first, [4, 0, 0]);
+      expect(engine.canUndo, isTrue);
+      expect(engine.undo(), isTrue);
+      expect(engine.grid.first, [2, 2, 0]);
+      expect(engine.score, 0);
+    });
   });
 
   group('StackMergeEngine', () {
@@ -89,6 +142,26 @@ void main() {
       engine.drop(0, 2);
 
       expect(engine.gameOver, isTrue);
+    });
+
+    test('rainbow doubles the top tile and can trigger a chain', () {
+      final engine = StackMergeEngine();
+      engine.columns[0].addAll([16, 8]);
+
+      final result = engine.dropWithResult(0, StackMergeEngine.rainbow);
+
+      expect(result.value, 32);
+      expect(result.mergeCount, 2);
+      expect(engine.columns[0], [32]);
+    });
+  });
+
+  group('ChickenTapRules', () {
+    test('special targets have distinct scores and miss behavior', () {
+      expect(ChickenTapRules.points(ChickenTargetType.golden, 1), 5);
+      expect(ChickenTapRules.points(ChickenTargetType.bomb, 10), -5);
+      expect(ChickenTapRules.countsAsMiss(ChickenTargetType.bomb), isFalse);
+      expect(ChickenTapRules.countsAsMiss(ChickenTargetType.chicken), isTrue);
     });
   });
 
@@ -116,8 +189,24 @@ void main() {
 
     await render(const MiniGamesScreen());
     await render(const InfinityLoopGame());
+    await tester.tap(find.text('Challenge'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
     await render(const ChickenTapGame());
+    await tester.tap(find.text('▶ START'));
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
     await render(const StackMergeGame());
+    await tester.tap(find.byIcon(Icons.arrow_downward_rounded));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
+
     await render(const Classic2048Game());
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }

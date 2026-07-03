@@ -16,7 +16,7 @@ class MiniGamesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final highScores = ref.watch(miniGamesControllerProvider);
+    final gameState = ref.watch(miniGamesControllerProvider);
 
     return Scaffold(
       body: AnimatedBackground(
@@ -25,6 +25,8 @@ class MiniGamesScreen extends ConsumerWidget {
           child: Column(
             children: [
               _topBar(context),
+              const SizedBox(height: 8),
+              _DailyChallengeCard(challenge: gameState.dailyChallenge),
               const SizedBox(height: 8),
               Expanded(
                 child: Padding(
@@ -42,13 +44,14 @@ class MiniGamesScreen extends ConsumerWidget {
                       final game = kMiniGames[index];
                       return _GameCard(
                         game: game,
-                        highScore: highScores[game.id] ?? 0,
+                        highScore: gameState.highScores[game.id] ?? 0,
                         onTap: () => _openGame(context, game.id),
                       );
                     },
                   ),
                 ),
               ),
+              _AchievementStrip(unlocked: gameState.achievements),
             ],
           ),
         ),
@@ -94,6 +97,114 @@ class MiniGamesScreen extends ConsumerWidget {
       _ => AppRoutes.miniGames,
     };
     context.push(route);
+  }
+}
+
+class _DailyChallengeCard extends StatelessWidget {
+  const _DailyChallengeCard({required this.challenge});
+
+  final DailyMiniGameChallenge challenge;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = (challenge.progress / challenge.target).clamp(0.0, 1.0);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Text(challenge.completed ? '🏆' : '⭐',
+              style: const TextStyle(fontSize: 30)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  challenge.completed
+                      ? 'Daily challenge complete!'
+                      : challenge.title,
+                  style: const TextStyle(
+                    color: Color(0xFF2D3436),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 7,
+                  borderRadius: BorderRadius.circular(8),
+                  backgroundColor: const Color(0xFFE8E5FF),
+                  color: const Color(0xFF6C5CE7),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${challenge.progress.clamp(0, challenge.target)}/'
+            '${challenge.target}',
+            style: const TextStyle(
+              color: Color(0xFF6C5CE7),
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AchievementStrip extends StatelessWidget {
+  const _AchievementStrip({required this.unlocked});
+
+  final Set<String> unlocked;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 58,
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+        scrollDirection: Axis.horizontal,
+        itemCount: kMiniGameAchievements.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final badge = kMiniGameAchievements[index];
+          final earned = unlocked.contains(badge.id);
+          return Tooltip(
+            message: '${badge.title}: ${badge.description}',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: earned
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.32),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Text(earned ? badge.icon : '🔒'),
+                  const SizedBox(width: 5),
+                  Text(
+                    badge.title,
+                    style: TextStyle(
+                      color: earned ? const Color(0xFF2D3436) : Colors.white70,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 

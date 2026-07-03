@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
+import '../../../core/widgets/celebration_overlay.dart';
+import '../../../core/widgets/openmoji_view.dart';
 import '../logic/classic_2048_engine.dart';
 import '../mini_games_controller.dart';
+import '../widgets/mini_game_widgets.dart';
 
-/// Classic 2048 — swipe tiles to merge and reach 2048!
 class Classic2048Game extends ConsumerStatefulWidget {
   const Classic2048Game({super.key});
 
@@ -17,7 +20,11 @@ class Classic2048Game extends ConsumerStatefulWidget {
 }
 
 class _Classic2048GameState extends ConsumerState<Classic2048Game> {
-  late final Classic2048Engine _engine;
+  late Classic2048Engine _engine;
+  MiniGameDifficulty _difficulty = MiniGameDifficulty.normal;
+  bool _animalMode = false;
+  String _message = 'Join matching tiles to make bigger ones!';
+  final _celebration = CelebrationController();
 
   static const _tileColors = {
     2: Color(0xFFE8F5E9),
@@ -29,22 +36,22 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     128: Color(0xFFFF7043),
     256: Color(0xFFF4511E),
     512: Color(0xFFD32F2F),
-    1024: Color(0xFFC62828),
-    2048: Color(0xFFB71C1C),
+    1024: Color(0xFF8E44AD),
+    2048: Color(0xFF6C5CE7),
   };
 
-  static const _textColors = {
-    2: Color(0xFF1B5E20),
-    4: Color(0xFF1B5E20),
-    8: Colors.white,
-    16: Colors.white,
-    32: Colors.white,
-    64: Colors.white,
-    128: Colors.white,
-    256: Colors.white,
-    512: Colors.white,
-    1024: Colors.white,
-    2048: Colors.white,
+  static const _animals = {
+    2: '🐣',
+    4: '🐰',
+    8: '🐶',
+    16: '🐱',
+    32: '🦊',
+    64: '🐼',
+    128: '🦁',
+    256: '🦄',
+    512: '🐉',
+    1024: '🐋',
+    2048: '👑',
   };
 
   @override
@@ -53,21 +60,71 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     _engine = Classic2048Engine();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  int get _boardSize => switch (_difficulty) {
+        MiniGameDifficulty.easy => 3,
+        MiniGameDifficulty.normal => 4,
+        MiniGameDifficulty.challenge => 5,
+      };
+
   void _reset() {
-    setState(_engine.reset);
+    setState(() {
+      _engine = Classic2048Engine(size: _boardSize);
+      _message = 'New board — plan your next move!';
+    });
+  }
+
+  void _changeDifficulty(MiniGameDifficulty value) {
+    _difficulty = value;
+    _reset();
+  }
+
+  void _undo() {
+    if (_engine.undo()) {
+      AudioService.instance.playSfx(Sfx.whoosh);
+      setState(() => _message = 'Move undone. Try another direction!');
+    }
   }
 
   void _swipe(SwipeDirection direction) {
-    if (_engine.gameOver || _engine.won) return;
-    setState(() {
-      _engine.move(direction);
-    });
-    if (_engine.won || _engine.gameOver) {
-      ref.read(miniGamesControllerProvider.notifier).recordScore(
-            '2048',
-            _engine.score,
-          );
+    if (_engine.gameOver || (_engine.won && !_engine.keepPlaying)) return;
+    final oldHighest = _engine.highestTile;
+    final wasWon = _engine.won;
+    final moved = _engine.move(direction);
+    if (!moved) {
+      setState(() => _message = 'That side is blocked.');
+      return;
     }
+
+    final madeNewTile = _engine.highestTile > oldHighest;
+    setState(() {
+      _message = madeNewTile
+          ? 'Great merge! You made ${_engine.highestTile}.'
+          : 'Keep matching equal tiles!';
+    });
+    AudioService.instance.playSfx(madeNewTile ? Sfx.correct : Sfx.tap);
+    if (madeNewTile) AudioService.instance.lightHaptic();
+
+    final newlyWon = !wasWon && _engine.won;
+    if (newlyWon) {
+      _celebration.fireworks();
+      AudioService.instance.speak('Amazing! You reached 2048!');
+    }
+    if (newlyWon || _engine.gameOver) _recordResult();
+  }
+
+  void _recordResult() {
+    ref.read(miniGamesControllerProvider.notifier).recordResult(
+      gameId: '2048',
+      score: _engine.score,
+      achievements: [
+        if (_engine.highestTile >= 256) '2048_256',
+      ],
+    );
   }
 
   void _handleSwipe(DragEndDetails details) {
@@ -83,15 +140,20 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBackground(
-        theme: WorldTheme.aurora,
-        child: SafeArea(
-          child: Column(
-            children: [
-              _topBar(),
-              _gameBoard(),
-              _controls(),
-            ],
+      body: CelebrationOverlay(
+        controller: _celebration,
+        child: AnimatedBackground(
+          theme: WorldTheme.aurora,
+          child: SafeArea(
+            child: Column(
+              children: [
+                _topBar(),
+                MascotMessage(message: _message, icon: '🦉'),
+                const SizedBox(height: 6),
+                Expanded(child: _gameBoard()),
+                _controls(),
+              ],
+            ),
           ),
         ),
       ),
@@ -103,184 +165,253 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
       padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
-          BouncyButton(
-              onTap: () => Navigator.of(context).maybePop(),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.close_rounded,
-                    color: AppColors.primary, size: 22),
-              )),
+          GameCircleButton(
+            icon: Icons.close_rounded,
+            tooltip: 'Close game',
+            onTap: () => Navigator.of(context).maybePop(),
+          ),
           const SizedBox(width: 8),
-          const Text('2048',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22)),
+          const Text(
+            '2048',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              fontSize: 22,
+            ),
+          ),
           const Spacer(),
-          Text('⭐ ${_engine.score}',
-              style: const TextStyle(
-                  color: Colors.yellow,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20)),
-          const SizedBox(width: 8),
-          BouncyButton(
-              onTap: _reset,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.refresh_rounded,
-                    color: AppColors.primary, size: 22),
-              )),
+          Text(
+            '⭐ ${_engine.score}',
+            style: const TextStyle(
+              color: Colors.yellow,
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(width: 6),
+          GameCircleButton(
+            icon: Icons.undo_rounded,
+            tooltip: 'Undo',
+            onTap: _undo,
+          ),
+          const SizedBox(width: 5),
+          GameCircleButton(
+            icon: Icons.help_outline_rounded,
+            tooltip: 'How to play',
+            onTap: () => showMiniGameHelp(
+              context,
+              title: 'How to play 2048',
+              steps: const [
+                'Swipe or use the arrows to move every tile.',
+                'Two equal tiles join into the next number.',
+                'Use Undo if a move traps your board.',
+                'Reach 2048, then continue for a bigger high score.',
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _gameBoard() {
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onPanEnd: _handleSwipe,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_engine.won)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Text('🎉 You reached 2048!',
-                      style: TextStyle(
-                          color: Colors.yellow,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final boardWidth = (constraints.maxWidth - 24).clamp(220.0, 390.0);
+        final tileSize = (boardWidth - 12 - (_engine.size * 6)) / _engine.size;
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onPanEnd: _handleSwipe,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                DifficultyPicker(
+                  value: _difficulty,
+                  onChanged: _changeDifficulty,
                 ),
-              if (_engine.gameOver)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Text('😵 No more moves!',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900)),
-                ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    for (var r = 0; r < Classic2048Engine.size; r++)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          for (var c = 0; c < Classic2048Engine.size; c++)
-                            _tile(r, c),
-                        ],
-                      ),
+                const SizedBox(height: 8),
+                SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(value: false, label: Text('123 Numbers')),
+                    ButtonSegment(value: true, label: Text('🐾 Animals')),
                   ],
+                  selected: {_animalMode},
+                  onSelectionChanged: (value) =>
+                      setState(() => _animalMode = value.first),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.22),
+                    ),
+                    foregroundColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? AppColors.primary
+                          : Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                if (_engine.won && !_engine.keepPlaying)
+                  _statusCard(
+                    '🎉 You reached 2048!',
+                    'Keep playing',
+                    () => setState(_engine.continueAfterWin),
+                  ),
+                if (_engine.gameOver)
+                  _statusCard('No more moves', 'New board', _reset),
+                Container(
+                  width: boardWidth,
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      for (var r = 0; r < _engine.size; r++)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (var c = 0; c < _engine.size; c++)
+                              _tile(r, c, tileSize),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _statusCard(String title, String action, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: BouncyButton(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            '$title  •  $action',
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _tile(int r, int c) {
-    final val = _engine.grid[r][c];
-    return Container(
-      width: 60,
-      height: 60,
+  Widget _tile(int row, int col, double size) {
+    final value = _engine.grid[row][col];
+    final animal = _animals[value];
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      width: size,
+      height: size,
       margin: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: val == 0
-            ? Colors.white.withValues(alpha: 0.2)
-            : (_tileColors[val] ?? Colors.white),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: val > 0
+        color: value == 0
+            ? Colors.white.withValues(alpha: 0.18)
+            : (_tileColors[value] ?? const Color(0xFF6C5CE7)),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: value > 0
             ? [
                 BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
               ]
             : null,
       ),
-      child: Center(
-        child: Text(
-          val == 0 ? '' : '$val',
-          style: TextStyle(
-            fontSize: val >= 100 ? 18 : 24,
-            fontWeight: FontWeight.w900,
-            color: _textColors[val] ?? Colors.white,
-          ),
-        ),
-      ),
+      child: value == 0
+          ? null
+          : Center(
+              child: _animalMode && animal != null
+                  ? Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        OpenMojiView(
+                          emoji: animal,
+                          size: size * 0.58,
+                          fallback: Text(
+                            animal,
+                            style: TextStyle(fontSize: size * 0.42),
+                          ),
+                        ),
+                        Text(
+                          '$value',
+                          style: TextStyle(
+                            fontSize: size * 0.18,
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF2D3436),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      '$value',
+                      style: TextStyle(
+                        fontSize: value >= 1000 ? size * 0.28 : size * 0.38,
+                        fontWeight: FontWeight.w900,
+                        color:
+                            value <= 4 ? const Color(0xFF1B5E20) : Colors.white,
+                      ),
+                    ),
+            ),
     );
   }
 
   Widget _controls() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Column(
+      padding: const EdgeInsets.only(bottom: 14, top: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Swipe area
-          GestureDetector(
-            onPanEnd: _handleSwipe,
-            child: Container(
-              width: 200,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Center(
-                child: Text('👆 Swipe to move',
-                    style: TextStyle(color: Colors.white70, fontSize: 14)),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Arrow buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          _arrowButton(Icons.arrow_back_rounded, SwipeDirection.left),
+          const SizedBox(width: 8),
+          Column(
             children: [
-              BouncyButton(
-                  onTap: () => _swipe(SwipeDirection.left),
-                  child: _arrowBtn(Icons.arrow_back_rounded)),
-              const SizedBox(width: 8),
-              Column(
-                children: [
-                  BouncyButton(
-                      onTap: () => _swipe(SwipeDirection.up),
-                      child: _arrowBtn(Icons.arrow_upward_rounded)),
-                  const SizedBox(height: 4),
-                  BouncyButton(
-                      onTap: () => _swipe(SwipeDirection.down),
-                      child: _arrowBtn(Icons.arrow_downward_rounded)),
-                ],
-              ),
-              const SizedBox(width: 8),
-              BouncyButton(
-                  onTap: () => _swipe(SwipeDirection.right),
-                  child: _arrowBtn(Icons.arrow_forward_rounded)),
+              _arrowButton(Icons.arrow_upward_rounded, SwipeDirection.up),
+              const SizedBox(height: 4),
+              _arrowButton(Icons.arrow_downward_rounded, SwipeDirection.down),
             ],
+          ),
+          const SizedBox(width: 8),
+          _arrowButton(Icons.arrow_forward_rounded, SwipeDirection.right),
+          const SizedBox(width: 10),
+          GameCircleButton(
+            icon: Icons.refresh_rounded,
+            tooltip: 'New board',
+            onTap: _reset,
           ),
         ],
       ),
     );
   }
 
-  Widget _arrowBtn(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(12)),
-      child: Icon(icon, color: AppColors.primary, size: 24),
+  Widget _arrowButton(IconData icon, SwipeDirection direction) {
+    return BouncyButton(
+      onTap: () => _swipe(direction),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Icon(icon, color: AppColors.primary, size: 24),
+      ),
     );
   }
 }

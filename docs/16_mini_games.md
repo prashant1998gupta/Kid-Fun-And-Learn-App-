@@ -7,10 +7,31 @@ learning curriculum where kids can play fun, casual puzzle/arcade games just
 for enjoyment. No lessons, no grading, no curriculum — pure entertainment
 that keeps kids engaged with the app during breaks.
 
-**Implementation status:** Complete. The catalog, four games, deep-linkable
-routes, reactive local high scores, real OpenMoji card/chicken art, and game
-logic tests are implemented. Mini games remain separate from curriculum and
-do not award coins, XP, stars, or collectibles.
+**Implementation status:** Engagement pass complete. The catalog, four games,
+deep-linkable routes, reactive local high scores, OpenMoji art, difficulty
+modes, tutorials, mascot reactions, daily challenges, local badges, and
+testable game rules are implemented. Mini games remain separate from the
+curriculum and do not award coins, XP, curriculum stars, or collectibles.
+
+### Engagement features now implemented
+
+- Shared Easy / Normal / Challenge modes across all four games.
+- Sound, haptics, animated feedback, confetti, and short mascot reactions.
+- Help/tutorial dialog on every game and pause support in the timed game.
+- Reduced-motion support for moving chickens and falling Stack Merge blocks.
+- One rotating local daily challenge with persistent progress.
+- Seven local mini-game badges. These are milestones only and do not affect
+  the curriculum economy.
+- Local high scores and play history persist through `SharedPreferences`.
+
+### Game-specific upgrades
+
+| Game | Implemented engagement loop |
+|------|-----------------------------|
+| Infinity Loop | Randomized 4×4, 6×6, and 8×8 boards; level progression; hints; move target; 1–3 star result |
+| Chicken Tap | Moving targets; golden chickens; eggs that add time; bombs; three-hit boss; combos; particles; pause |
+| Stack Merge | Animated drops; two-block preview; chain-combo feedback; rainbow wildcard blocks; difficulty-based tower height |
+| 2048 | 3×3, 4×4, and 5×5 boards; one-step undo; continue after 2048; number/animal display modes |
 
 Inspired by: [Infinity Loop Hex](https://poki.com/en/g/infinity-loop-hex),
 [368 Chickens](https://368chickens.com/),
@@ -41,10 +62,11 @@ Each is a **self-contained stateful widget** with no dependency on `Lesson`,
 
 **Type:** Puzzle / Relaxation
 **Concept:** Tap hexagonal tiles to rotate pipe segments until all pipes
-connect in a closed loop. No timer, no score — just satisfying completion.
+connect in a closed loop. There is no timer; moves and stars encourage replay
+without pressuring the child.
 **Controls:** Tap a hex tile → rotates 60° clockwise.
 **Win condition:** All pipes form a single continuous closed loop.
-**Grid:** 4×4 or 5×5 hexagonal grid.
+**Grid:** 4×4, 6×6, or 8×8 based on difficulty.
 **Visual:** Hex tiles drawn with `CustomPainter` (bezier curves for pipes).
 **Difficulty:** Randomly generated boards → varying complexity.
 
@@ -58,7 +80,7 @@ Tap each chicken before it disappears. Miss 3 = game over.
 taps without missing.
 **Visual:** Animated chicken sprites (OpenMoji 🐔 or code-drawn). Eggs,
 feathers on miss.
-**Duration:** 30-second rounds (endless mode optional).
+**Duration:** 30–35 second rounds, with eggs able to add time.
 
 ### Game 3: Stack Merge (Number Merge)
 
@@ -75,7 +97,7 @@ Goal: reach the highest number possible.
 ### Game 4: 2048 (Classic)
 
 **Type:** Puzzle / Strategy
-**Concept:** Classic 2048. Swipe tiles on a 4×4 grid. Equal numbers merge.
+**Concept:** Classic 2048 on a 3×3, 4×4, or 5×5 board. Equal numbers merge.
 **Controls:** Swipe up/down/left/right (or arrow buttons for kids).
 **Scoring:** Points from merged tiles.
 **Win condition:** Reach 2048 tile.
@@ -90,28 +112,27 @@ Goal: reach the highest number possible.
 ```
 lib/features/mini_games/
 ├── mini_games_screen.dart        # Grid listing all mini games
-├── mini_games_controller.dart    # State: high scores, unlocks
+├── mini_games_controller.dart    # Scores, plays, badges, daily goal
 ├── data/
-│   └── mini_games_repository.dart # Save high scores via SharedPreferences
+│   └── mini_games_repository.dart # Persist mini-game progress
 ├── games/
 │   ├── infinity_loop_hex_game.dart
 │   ├── chicken_tap_game.dart
 │   ├── stack_merge_game.dart
 │   └── classic_2048_game.dart
 └── widgets/
-    ├── game_card.dart            # Reusable game card widget
-    └── score_display.dart        # Score + high score widget
+    └── mini_game_widgets.dart    # Difficulty, help, toolbar, mascot feedback
 ```
 
 ### Key Design Decisions
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Game state management | `StatefulWidget` per game | Each game is self-contained, no Riverpod needed |
+| Game state management | `StatefulWidget` per game + Riverpod progress controller | Rules stay local; shared persistence stays reactive |
 | High score persistence | `SharedPreferences` via `MiniGamesRepository` | Same pattern as profiles, works offline |
 | Screen navigation | New route `/mini-games` + sub-routes | Uses existing go_router setup |
-| No rewards system | Mini games give **no coins/XP/stars** | Pure fun — prevents grinding for rewards |
-| No adaptive engine | All kids play the same game | Skill-based games, not curriculum |
+| No curriculum rewards | No coins, XP, curriculum stars, or collectibles | Prevents grinding the learning economy |
+| Difficulty | Easy, Normal, Challenge | Lets younger children play without removing depth |
 
 ### Game Widget Interface
 
@@ -175,7 +196,7 @@ typedef OnGameOver = void Function(int score);
 Each game screen has:
 - **Top bar:** Game name, score, high score, back button
 - **Game area:** Full remaining space
-- **Bottom:** Brief instruction (first time only) + restart button
+- **Bottom:** Large controls where needed, plus restart/continue actions
 - **Background:** Uses `AnimatedBackground` with a fun theme
 
 ### Game Card Widget (`_GameCard`)
@@ -242,7 +263,7 @@ SizedBox(
 
 | Reference | KidVerse version | Key changes |
 |-----------|-----------------|-------------|
-| Infinity Loop Hex | Same mechanic | Simpler grid (4×4), rounder graphics, kid colors |
+| Infinity Loop Hex | Same mechanic | 4×4–8×8 difficulty, hints, stars, kid colors |
 | 368 Chickens | Same tap-to-catch | Chickens instead of generic circles, fun sounds, combo system |
 | Stack Merge | Like 2048 + Suika | Merge by dropping, auto-stack, no complex gestures |
 | 2048 Classic | Same rules | Bigger number text, kid-friendly colors, swipe + button controls |
