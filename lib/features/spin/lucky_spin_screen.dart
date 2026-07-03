@@ -111,8 +111,7 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen>
   Widget build(BuildContext context) {
     final child = ref.watch(activeChildProvider);
     ref.watch(luckySpinControllerProvider); // rebuild when spun state changes
-    final canSpin =
-        ref.read(luckySpinControllerProvider.notifier).canSpinToday;
+    final canSpin = ref.read(luckySpinControllerProvider.notifier).canSpinToday;
 
     return CelebrationOverlay(
       controller: _celebration,
@@ -134,7 +133,11 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen>
                             color: Colors.white,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, size: 26),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: AppColors.primary,
+                            size: 26,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -222,7 +225,8 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen>
   Widget _wonOrPrompt(BuildContext context, bool canSpin) {
     if (_won != null) {
       final r = _won!.reward;
-      final text = r.gems > 0 ? 'You won ${r.gems} 💎!' : 'You won ${r.coins} 🪙!';
+      final text =
+          r.gems > 0 ? 'You won ${r.gems} 💎!' : 'You won ${r.coins} 🪙!';
       return Text(
         text,
         style: Theme.of(context)

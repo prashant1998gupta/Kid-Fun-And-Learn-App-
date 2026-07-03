@@ -38,7 +38,11 @@ class AchievementsScreen extends ConsumerWidget {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.arrow_back_rounded, size: 26),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: AppColors.primary,
+                          size: 26,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -108,9 +112,7 @@ class _BadgeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: unlocked
-            ? Colors.white
-            : Colors.white.withValues(alpha: 0.35),
+        color: unlocked ? Colors.white : Colors.white.withValues(alpha: 0.35),
         borderRadius: AppSpacing.cardRadius,
         boxShadow: unlocked
             ? [

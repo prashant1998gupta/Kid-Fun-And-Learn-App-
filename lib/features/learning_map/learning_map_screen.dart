@@ -38,8 +38,7 @@ class LearningMapScreen extends ConsumerWidget {
         theme: _themeFor(subject),
         child: SafeArea(
           child: repoAsync.when(
-            loading: () =>
-                const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('Oops: $e')),
             data: (repo) {
               if (child == null) return const SizedBox.shrink();
@@ -101,7 +100,11 @@ class _TopBar extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
                   color: Colors.white, shape: BoxShape.circle),
-              child: const Icon(Icons.arrow_back_rounded, size: 26),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.primary,
+                size: 26,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -246,8 +249,8 @@ class _Node extends StatelessWidget {
                       colors: [Color(0xFF9E9E9E), Color(0xFF757575)]),
               boxShadow: [
                 BoxShadow(
-                  color: (unlocked ? color : Colors.black)
-                      .withValues(alpha: 0.4),
+                  color:
+                      (unlocked ? color : Colors.black).withValues(alpha: 0.4),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -280,9 +283,7 @@ class _Node extends StatelessWidget {
 
     // The current available (not-yet-done) node gently pulses to invite a tap.
     if (unlocked && !done) {
-      return node
-          .animate(onPlay: (c) => c.repeat(reverse: true))
-          .scale(
+      return node.animate(onPlay: (c) => c.repeat(reverse: true)).scale(
             begin: const Offset(1, 1),
             end: const Offset(1.08, 1.08),
             duration: 900.ms,

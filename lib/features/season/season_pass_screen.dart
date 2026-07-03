@@ -36,7 +36,10 @@ class SeasonPassScreen extends ConsumerWidget {
                       onTap: () => Navigator.of(context).maybePop(),
                       child: const CircleAvatar(
                         backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back_rounded),
+                        child: Icon(
+                          Icons.arrow_back_rounded,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),

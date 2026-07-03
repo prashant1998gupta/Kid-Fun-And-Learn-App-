@@ -99,7 +99,11 @@ class _Header extends ConsumerWidget {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back_rounded, size: 26),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.primary,
+                size: 26,
+              ),
             ),
           ),
           const SizedBox(width: 12),

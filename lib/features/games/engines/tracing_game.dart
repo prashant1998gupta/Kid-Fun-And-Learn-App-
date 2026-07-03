@@ -252,7 +252,11 @@ class _TracingGameState extends State<TracingGame> {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close_rounded, size: 26),
+              child: const Icon(
+                Icons.close_rounded,
+                color: AppColors.primary,
+                size: 26,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -320,7 +324,9 @@ class _TracePainter extends CustomPainter {
       final start = Offset(size.width * 0.40, size.height * 0.24);
       canvas.drawCircle(start, 11, Paint()..color = AppColors.success);
       canvas.drawCircle(
-          start, 11, Paint()
+          start,
+          11,
+          Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 3
             ..color = Colors.white);

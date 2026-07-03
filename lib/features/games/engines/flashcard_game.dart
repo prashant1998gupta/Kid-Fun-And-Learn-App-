@@ -197,7 +197,11 @@ class _FlashcardGameState extends State<FlashcardGame> {
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
                   color: Colors.white, shape: BoxShape.circle),
-              child: const Icon(Icons.close_rounded, size: 26),
+              child: const Icon(
+                Icons.close_rounded,
+                color: AppColors.primary,
+                size: 26,
+              ),
             ),
           ),
           const SizedBox(width: 12),

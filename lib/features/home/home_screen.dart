@@ -150,6 +150,9 @@ class _Greeting extends StatelessWidget {
     final pet = child.activePetId == null
         ? null
         : CollectionCatalog.byId(child.activePetId!);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final worldText = isDark ? Colors.white : AppColors.lightText;
+    final worldTextSoft = isDark ? Colors.white : AppColors.lightTextSoft;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
@@ -198,19 +201,28 @@ class _Greeting extends StatelessWidget {
               children: [
                 Text(
                   AppLocalizations.of(context).greeting(child.name),
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium
+                      ?.copyWith(color: worldText),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Text(
                       'Level ${w.level}',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(color: worldText),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '🔥 ${w.streakDays} day streak',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: worldTextSoft),
                     ),
                   ],
                 ),

@@ -51,7 +51,8 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                   total: total,
                 ),
               ),
-              _SectionHeader(title: '🐾 Pets', owned: owned, kind: CollectibleKind.pet),
+              _SectionHeader(
+                  title: '🐾 Pets', owned: owned, kind: CollectibleKind.pet),
               _CollectibleGrid(
                 items: CollectionCatalog.pets,
                 owned: owned,
@@ -60,7 +61,10 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
                     .read(profilesControllerProvider.notifier)
                     .setActivePet(id),
               ),
-              _SectionHeader(title: '✨ Stickers', owned: owned, kind: CollectibleKind.sticker),
+              _SectionHeader(
+                  title: '✨ Stickers',
+                  owned: owned,
+                  kind: CollectibleKind.sticker),
               _CollectibleGrid(
                 items: CollectionCatalog.stickers,
                 owned: owned,
@@ -97,10 +101,14 @@ class _CollectionScreenState extends ConsumerState<CollectionScreen> {
 
   Future<void> _showReveal(EggResult result) async {
     AudioService.instance.playSfx(
-      result.collectible.rarity == Rarity.legendary ? Sfx.celebration : Sfx.reward,
+      result.collectible.rarity == Rarity.legendary
+          ? Sfx.celebration
+          : Sfx.reward,
     );
     AudioService.instance.speak(
-      result.isNew ? 'Wow! You got a ${result.collectible.name}!' : 'A duplicate — here are some coins back!',
+      result.isNew
+          ? 'Wow! You got a ${result.collectible.name}!'
+          : 'A duplicate — here are some coins back!',
     );
     if (!mounted) return;
     await showDialog<void>(
@@ -129,7 +137,11 @@ class _Header extends StatelessWidget {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back_rounded, size: 26),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.primary,
+                size: 26,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -222,7 +234,9 @@ class _EggCard extends StatelessWidget {
                             const BorderRadius.all(AppSpacing.radiusPill),
                       ),
                       child: Text(
-                        opening ? 'Opening…' : 'Open  🪙 ${CollectionCatalog.eggCost}',
+                        opening
+                            ? 'Opening…'
+                            : 'Open  🪙 ${CollectionCatalog.eggCost}',
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w800,
@@ -321,7 +335,8 @@ class _CollectibleGrid extends StatelessWidget {
                   ? () {
                       onEquipPet!(item.id);
                       AudioService.instance.playSfx(Sfx.tap);
-                      AudioService.instance.speak('${item.name} is your buddy!');
+                      AudioService.instance
+                          .speak('${item.name} is your buddy!');
                     }
                   : null,
             ).animate().fadeIn(delay: (40 * i).ms);
@@ -350,9 +365,7 @@ class _CollectibleTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final tile = Container(
       decoration: BoxDecoration(
-        color: owned
-            ? Colors.white
-            : Colors.white.withValues(alpha: 0.35),
+        color: owned ? Colors.white : Colors.white.withValues(alpha: 0.35),
         borderRadius: AppSpacing.cardRadius,
         border: Border.all(
           color: activePet ? AppColors.success : item.rarity.color,
@@ -454,9 +467,7 @@ class _RevealDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text(c.emoji, style: const TextStyle(fontSize: 96))
-                .animate()
-                .scale(
+            Text(c.emoji, style: const TextStyle(fontSize: 96)).animate().scale(
                   begin: const Offset(0.3, 0.3),
                   end: const Offset(1, 1),
                   duration: 500.ms,

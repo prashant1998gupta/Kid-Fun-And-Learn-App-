@@ -39,7 +39,11 @@ class ShopScreen extends ConsumerWidget {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.arrow_back_rounded, size: 26),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: AppColors.primary,
+                          size: 26,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -111,7 +115,8 @@ class ShopScreen extends ConsumerWidget {
     if (!bought) {
       AudioService.instance.playSfx(Sfx.wrong);
       messenger.showSnackBar(
-        const SnackBar(content: Text('Not enough coins yet — keep playing! 🪙')),
+        const SnackBar(
+            content: Text('Not enough coins yet — keep playing! 🪙')),
       );
       return;
     }
@@ -183,8 +188,11 @@ class _ThemeCard extends StatelessWidget {
         ? ('In Use', Colors.white, AppColors.primary)
         : owned
             ? ('Use', Colors.white, AppColors.success)
-            : ('🪙 ${item.cost}', Colors.black.withValues(alpha: 0.35),
-                Colors.white);
+            : (
+                '🪙 ${item.cost}',
+                Colors.black.withValues(alpha: 0.35),
+                Colors.white
+              );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(

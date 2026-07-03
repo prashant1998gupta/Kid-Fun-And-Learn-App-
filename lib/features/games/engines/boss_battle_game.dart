@@ -155,7 +155,7 @@ class _BossBattleGameState extends State<BossBattleGame> {
             onTap: () => Navigator.of(context).maybePop(),
             child: const CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(Icons.close_rounded),
+              child: Icon(Icons.close_rounded, color: AppColors.primary),
             ),
           ),
           const SizedBox(width: 12),
