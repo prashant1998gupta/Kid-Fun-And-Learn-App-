@@ -42,7 +42,7 @@ class CurriculumRepository {
       GameType.tracing => 8,
       GameType.sequence => 6,
       GameType.flashcard => 13, // a friendly learn-through deck
-      _ => 12,
+      _ => 20, // 20 questions per level for CBSE-standard sessions
     };
   }
 

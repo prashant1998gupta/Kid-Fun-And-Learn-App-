@@ -92,6 +92,7 @@ class Question extends Equatable {
     this.pairs = const [],
     this.answer,
     this.speak,
+    this.formulaTip,
   });
 
   final String id;
@@ -115,8 +116,12 @@ class Question extends Equatable {
   /// Optional voice line to speak when the question appears.
   final String? speak;
 
+  /// Optional formula/rule hint shown as a tooltip for CBSE formula-based
+  /// questions (Area, Perimeter, LCM, HCF, Fractions, Decimals, etc.).
+  final String? formulaTip;
+
   @override
-  List<Object?> get props => [id, prompt, correctIndex];
+  List<Object?> get props => [id, prompt, correctIndex, formulaTip];
 }
 
 class AnswerOption extends Equatable {
