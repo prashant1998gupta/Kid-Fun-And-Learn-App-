@@ -54,31 +54,31 @@ class DailyMiniGameChallenge {
 const List<MiniGameDef> kMiniGames = [
   MiniGameDef(
     id: 'infinity-loop',
-    name: 'Infinity Loop',
-    icon: '🔷',
+    name: 'Flower Flow',
+    icon: '🌸',
     color: 0xFF6C5CE7,
-    description: 'Rotate hex tiles to form a loop!',
+    description: 'Bring water to the thirsty flowers!',
   ),
   MiniGameDef(
     id: '368-chickens',
-    name: 'Chicken Tap',
+    name: 'Egg Rescue',
     icon: '🐔',
     color: 0xFFFF7675,
-    description: 'Tap the chickens before they run away!',
+    description: 'Help Mama Chicken collect her eggs!',
   ),
   MiniGameDef(
     id: 'stack-merge',
-    name: 'Stack Merge',
-    icon: '🔢',
+    name: 'Rainbow Rescue',
+    icon: '🌈',
     color: 0xFFFFC048,
-    description: 'Drop numbers, merge them bigger!',
+    description: 'Build a rainbow tower to the moon!',
   ),
   MiniGameDef(
     id: '2048',
-    name: '2048',
-    icon: '🧩',
+    name: 'Animal Family',
+    icon: '🐣',
     color: 0xFF55EFC4,
-    description: 'Swipe tiles to reach 2048!',
+    description: 'Grow the baby animals into a dragon!',
   ),
 ];
 

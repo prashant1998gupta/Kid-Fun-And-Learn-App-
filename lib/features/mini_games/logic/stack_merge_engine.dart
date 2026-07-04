@@ -66,4 +66,16 @@ class StackMergeEngine {
     }
     score = 0;
   }
+
+  /// Makes room while preserving the tower. Used by kid and creative modes so
+  /// a full column becomes a cheerful rescue moment instead of game over.
+  int rescueTallest({int remove = 2}) {
+    var tallest = 0;
+    for (var i = 1; i < columns.length; i++) {
+      if (columns[i].length > columns[tallest].length) tallest = i;
+    }
+    final count = math.min(remove, columns[tallest].length);
+    if (count > 0) columns[tallest].removeRange(0, count);
+    return count;
+  }
 }

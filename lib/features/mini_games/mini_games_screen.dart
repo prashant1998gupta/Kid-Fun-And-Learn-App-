@@ -129,8 +129,11 @@ class _PetCard extends StatelessWidget {
       child: Row(
         children: [
           Semantics(
-            label: pet.name,
-            child: Text(pet.emoji, style: const TextStyle(fontSize: 42)),
+            label: '${pet.name} wearing ${pet.accessory}',
+            child: Text(
+              '${pet.emoji}${pet.accessory}',
+              style: const TextStyle(fontSize: 38),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -157,7 +160,8 @@ class _PetCard extends StatelessWidget {
                 Text(
                   pet.isMax
                       ? 'Your pet is fully grown! ✨'
-                      : '${pet.xpToNext} stars until your pet grows',
+                      : '${pet.xpToNext} stars to grow • '
+                          '${pet.unlockedAccessories.join(' ')}',
                   style: const TextStyle(
                     color: Color(0xFF725B7A),
                     fontSize: 11,

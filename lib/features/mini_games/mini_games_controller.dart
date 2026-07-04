@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../gamification/domain/wallet.dart';
+import '../profiles/profiles_controller.dart';
 import 'data/mini_games_repository.dart';
 import 'data/mini_pet.dart';
 
@@ -39,8 +41,11 @@ class MiniGamesState {
 
 /// Keeps scores, daily goals, and local badges reactive.
 class MiniGamesController extends StateNotifier<MiniGamesState> {
-  MiniGamesController(this._repository)
-      : super(
+  MiniGamesController(
+    this._repository, {
+    Future<void> Function(RewardBundle reward)? rewardPlayer,
+  })  : _rewardPlayer = rewardPlayer,
+        super(
           MiniGamesState(
             highScores: {
               for (final game in kMiniGames)
@@ -54,6 +59,7 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
         );
 
   final MiniGamesRepository _repository;
+  final Future<void> Function(RewardBundle reward)? _rewardPlayer;
 
   Future<bool> recordScore(String gameId, int score) async {
     final saved = await _repository.saveHighScore(gameId, score);
@@ -88,6 +94,14 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
     // Feed the pet — every game a child plays helps it grow.
     final newPetXp = await _repository.addPetXp(MiniPet.xpForScore(score));
 
+    // Mini games participate in the same visible economy as learning games.
+    // Rewards are intentionally modest and always positive.
+    final reward = RewardBundle(
+      coins: 3 + (score ~/ 100).clamp(0, 7),
+      xp: 5 + (score ~/ 50).clamp(0, 15),
+    );
+    await _rewardPlayer?.call(reward);
+
     state = state.copyWith(
       playedGames: played,
       achievements: {...state.achievements, ...newlyUnlocked},
@@ -106,5 +120,10 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
 
 final miniGamesControllerProvider =
     StateNotifierProvider<MiniGamesController, MiniGamesState>((ref) {
-  return MiniGamesController(ref.watch(miniGamesRepositoryProvider));
+  return MiniGamesController(
+    ref.watch(miniGamesRepositoryProvider),
+    rewardPlayer: (reward) async {
+      await ref.read(profilesControllerProvider.notifier).applyReward(reward);
+    },
+  );
 });

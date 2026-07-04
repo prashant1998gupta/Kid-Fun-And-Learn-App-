@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
@@ -8,6 +12,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/openmoji_view.dart';
+import '../../settings/settings_controller.dart';
 import '../logic/classic_2048_engine.dart';
 import '../mini_games_controller.dart';
 import '../widgets/game_tutorial.dart';
@@ -23,7 +28,13 @@ class Classic2048Game extends ConsumerStatefulWidget {
 class _Classic2048GameState extends ConsumerState<Classic2048Game> {
   late Classic2048Engine _engine;
   // Default to Easy so young children win quickly and often.
-  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  final MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  MiniGamePlayMode _playMode = MiniGamePlayMode.solo;
+  int _currentPlayer = 1;
+  bool _resultRecorded = false;
+  bool _tiltEnabled = false;
+  StreamSubscription<AccelerometerEvent>? _tiltSubscription;
+  DateTime _lastTilt = DateTime.fromMillisecondsSinceEpoch(0);
   bool _animalMode = true; // animals read friendlier than raw numbers
   String _message = 'Join two the same to make it bigger!';
   final _celebration = CelebrationController();
@@ -70,6 +81,20 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     2048: 'King',
   };
 
+  static const _animalSounds = {
+    2: 'peep peep',
+    4: 'boing boing',
+    8: 'woof woof',
+    16: 'meow',
+    32: 'yip yip',
+    64: 'munch munch',
+    128: 'roar',
+    256: 'sparkle sparkle',
+    512: 'rawr',
+    1024: 'whoosh',
+    2048: 'ta da',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -89,6 +114,7 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
 
   @override
   void dispose() {
+    _tiltSubscription?.cancel();
     super.dispose();
   }
 
@@ -110,12 +136,9 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     setState(() {
       _engine = Classic2048Engine(size: _boardSize, targetTile: _targetTile);
       _message = 'New board — plan your next move!';
+      _currentPlayer = 1;
+      _resultRecorded = false;
     });
-  }
-
-  void _changeDifficulty(MiniGameDifficulty value) {
-    _difficulty = value;
-    _reset();
   }
 
   void _undo() {
@@ -149,9 +172,18 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
       AudioService.instance.lightHaptic();
       // Celebrate reaching a brand-new animal — the real goal for a child.
       if (_animalMode && newAnimal != null) {
-        AudioService.instance.speak('You made a $newAnimal!');
+        AudioService.instance.speak(
+          'You made a $newAnimal! ${_animalSounds[_engine.highestTile]}!',
+        );
         _celebration.celebrate(sound: false);
       }
+    }
+
+    if (_playMode == MiniGamePlayMode.together) {
+      setState(() {
+        _currentPlayer = _currentPlayer == 1 ? 2 : 1;
+        _message = 'Great move! Player $_currentPlayer, your turn!';
+      });
     }
 
     final newlyWon = !wasWon && _engine.won;
@@ -159,10 +191,25 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
       _celebration.fireworks();
       AudioService.instance.speak('Amazing! You reached $_targetTile!');
     }
-    if (newlyWon || _engine.gameOver) _recordResult();
+    if (newlyWon) _recordResult();
+    if (_engine.gameOver) _friendlyRescue();
+  }
+
+  void _friendlyRescue() {
+    if (!_resultRecorded) _recordResult();
+    final cleared = _engine.rescue(count: 3);
+    setState(() {
+      _message = 'Puff! The dragon made $cleared spaces. Keep growing!';
+    });
+    _celebration.celebrate(sound: false);
+    AudioService.instance.playSfx(Sfx.magic);
+    AudioService.instance.speak("Let's keep playing! I made some room.");
   }
 
   void _recordResult() {
+    if (_resultRecorded) return;
+    _resultRecorded = true;
+    showMiniGameReward(context, _engine.score);
     ref.read(miniGamesControllerProvider.notifier).recordResult(
       gameId: '2048',
       score: _engine.score,
@@ -182,6 +229,48 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     }
   }
 
+  void _toggleTilt() {
+    if (_tiltEnabled) {
+      _tiltSubscription?.cancel();
+      setState(() => _tiltEnabled = false);
+      return;
+    }
+    setState(() {
+      _tiltEnabled = true;
+      _message = 'Tilt the device to roll the animal family!';
+    });
+    AudioService.instance.speak('Tilt the device left, right, up, or down!');
+    _tiltSubscription = accelerometerEventStream(
+      samplingPeriod: const Duration(milliseconds: 180),
+    ).listen(
+      (event) {
+        if (!mounted || !_tiltEnabled) return;
+        final now = DateTime.now();
+        if (now.difference(_lastTilt) < const Duration(milliseconds: 650)) {
+          return;
+        }
+        SwipeDirection? direction;
+        if (event.x.abs() > 4.2 && event.x.abs() > event.y.abs()) {
+          direction = event.x > 0 ? SwipeDirection.left : SwipeDirection.right;
+        } else if (event.y.abs() > 4.2) {
+          direction = event.y > 0 ? SwipeDirection.down : SwipeDirection.up;
+        }
+        if (direction != null) {
+          _lastTilt = now;
+          _swipe(direction);
+        }
+      },
+      onError: (_) {
+        if (mounted) {
+          setState(() {
+            _tiltEnabled = false;
+            _message = 'Tilt is not available here—swiping still works!';
+          });
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,6 +283,11 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
               children: [
                 _topBar(),
                 MascotMessage(message: _message, icon: '🦉'),
+                StoryGoalCard(
+                  emoji: '🐣➡️🐉',
+                  goal: 'Grow the baby dragon family!',
+                  progress: (_engine.highestTile / _targetTile).clamp(0, 1),
+                ),
                 const SizedBox(height: 6),
                 Expanded(child: _gameBoard()),
                 _controls(),
@@ -216,15 +310,17 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
             onTap: () => Navigator.of(context).maybePop(),
           ),
           const SizedBox(width: 8),
-          const Text(
-            '2048',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              fontSize: 22,
+          const Expanded(
+            child: Text(
+              '🐉 Animal Family',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 17,
+              ),
             ),
           ),
-          const Spacer(),
           Text(
             '⭐ ${_engine.score}',
             style: const TextStyle(
@@ -238,6 +334,14 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
             icon: Icons.undo_rounded,
             tooltip: 'Undo',
             onTap: _undo,
+          ),
+          const SizedBox(width: 5),
+          GameCircleButton(
+            icon: _tiltEnabled
+                ? Icons.screen_rotation_alt_rounded
+                : Icons.screen_rotation_rounded,
+            tooltip: _tiltEnabled ? 'Turn tilt off' : 'Play by tilting',
+            onTap: _toggleTilt,
           ),
           const SizedBox(width: 5),
           GameCircleButton(
@@ -271,10 +375,17 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                DifficultyPicker(
-                  value: _difficulty,
-                  onChanged: _changeDifficulty,
+                PlayModePicker(
+                  value: _playMode,
+                  onChanged: (value) => setState(() {
+                    _playMode = value;
+                    _currentPlayer = 1;
+                  }),
                 ),
+                if (_playMode == MiniGamePlayMode.together) ...[
+                  const SizedBox(height: 6),
+                  PlayerTurnBadge(player: _currentPlayer),
+                ],
                 const SizedBox(height: 8),
                 SegmentedButton<bool>(
                   segments: const [
@@ -304,8 +415,6 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
                     'Keep playing',
                     () => setState(_engine.continueAfterWin),
                   ),
-                if (_engine.gameOver)
-                  _statusCard('No more moves', 'New board', _reset),
                 Container(
                   width: boardWidth,
                   padding: const EdgeInsets.all(6),
@@ -360,6 +469,11 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
   Widget _tile(int row, int col, double size) {
     final value = _engine.grid[row][col];
     final animal = _animals[value];
+    final colorBlind = ref.watch(settingsControllerProvider).colorBlindMode;
+    const shapes = ['●', '■', '▲', '◆', '⬟', '✚', '✦'];
+    final shape = value > 0
+        ? shapes[((math.log(value) / math.ln2).round() - 1) % shapes.length]
+        : '';
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       width: size,
@@ -387,12 +501,22 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
                   ? Stack(
                       alignment: Alignment.bottomCenter,
                       children: [
-                        OpenMojiView(
-                          emoji: animal,
-                          size: size * 0.58,
-                          fallback: Text(
-                            animal,
-                            style: TextStyle(fontSize: size * 0.42),
+                        TweenAnimationBuilder<double>(
+                          key: ValueKey('$row-$col-$value'),
+                          tween: Tween(begin: 0.72, end: 1),
+                          duration: ref.watch(reducedMotionProvider)
+                              ? Duration.zero
+                              : const Duration(milliseconds: 260),
+                          curve: Curves.elasticOut,
+                          builder: (context, scale, child) =>
+                              Transform.scale(scale: scale, child: child),
+                          child: OpenMojiView(
+                            emoji: animal,
+                            size: size * 0.58,
+                            fallback: Text(
+                              animal,
+                              style: TextStyle(fontSize: size * 0.42),
+                            ),
                           ),
                         ),
                         Text(
@@ -406,7 +530,8 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
                       ],
                     )
                   : Text(
-                      '$value',
+                      colorBlind ? '$shape\n$value' : '$value',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: value >= 1000 ? size * 0.28 : size * 0.38,
                         fontWeight: FontWeight.w900,

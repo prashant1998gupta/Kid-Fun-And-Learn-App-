@@ -26,7 +26,11 @@ class StackMergeGame extends ConsumerStatefulWidget {
 class _StackMergeGameState extends ConsumerState<StackMergeGame> {
   static const _columns = 5;
   late StackMergeEngine _engine;
-  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  final MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  MiniGamePlayMode _playMode = MiniGamePlayMode.solo;
+  int _currentPlayer = 1;
+  bool _resultRecorded = false;
+  double _assistLevel = 0;
   int _activeValue = 2;
   int _dropColumn = 2;
   List<int> _preview = const [2, 4];
@@ -78,7 +82,29 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
         MiniGameDifficulty.challenge => 7,
       };
 
+  int get _bestColumn {
+    if (_activeValue != StackMergeEngine.rainbow) {
+      for (var i = 0; i < _engine.columns.length; i++) {
+        final column = _engine.columns[i];
+        if (column.isNotEmpty && column.last == _activeValue) return i;
+      }
+    }
+    var best = 0;
+    for (var i = 1; i < _engine.columns.length; i++) {
+      if (_engine.columns[i].length < _engine.columns[best].length) best = i;
+    }
+    return best;
+  }
+
   int _nextRandomValue() {
+    if (_assistLevel >= 0.55) {
+      final helpful = _engine.columns
+          .where((column) => column.isNotEmpty)
+          .map((column) => column.last)
+          .where((value) => value > 0)
+          .toList();
+      if (helpful.isNotEmpty) return helpful[_random.nextInt(helpful.length)];
+    }
     // Rainbow helper appears more often on Easy (it's a rescue, not a puzzle).
     final rainbowChance = _difficulty == MiniGameDifficulty.easy ? 12 : 22;
     if (_random.nextInt(rainbowChance) == 0) return StackMergeEngine.rainbow;
@@ -97,6 +123,9 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       _dropColumn = 2;
       _dropping = false;
       _message = 'Tap a column to drop your block!';
+      _currentPlayer = 1;
+      _resultRecorded = false;
+      _assistLevel = 0;
       // Start with a clean board on Easy so kids aren't handed a mess; a small
       // head start on harder modes keeps them interesting.
       if (_difficulty != MiniGameDifficulty.easy) {
@@ -107,13 +136,8 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     });
   }
 
-  void _changeDifficulty(MiniGameDifficulty value) {
-    _difficulty = value;
-    _restart();
-  }
-
   void _move(int delta) {
-    if (_dropping || _engine.gameOver) return;
+    if (_dropping) return;
     setState(() {
       _dropColumn = (_dropColumn + delta).clamp(0, _columns - 1);
     });
@@ -122,13 +146,14 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
   /// Tap a column to aim there and drop in one gesture — the most natural
   /// control for a young child (no cursor-nudging required).
   Future<void> _dropAt(int column) async {
-    if (_dropping || _engine.gameOver) return;
+    if (_dropping) return;
     setState(() => _dropColumn = column.clamp(0, _columns - 1));
     await _drop();
   }
 
   Future<void> _drop() async {
-    if (_dropping || _engine.gameOver) return;
+    if (_dropping) return;
+    if (_engine.gameOver) _rescueTower();
     setState(() => _dropping = true);
     final reducedMotion = ref.read(reducedMotionProvider);
     if (!reducedMotion) {
@@ -142,12 +167,17 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       _preview = [_preview.last, _nextRandomValue()];
       _dropping = false;
       if (result.mergeCount >= 2) {
-        _message = 'Chain x${result.mergeCount}! Huge merge!';
+        _message = result.mergeCount >= 3
+            ? 'Firework chain x${result.mergeCount}! The rainbow is free!'
+            : 'Rainbow puff! Chain x${result.mergeCount}!';
       } else if (result.mergeCount == 1) {
         _message = 'Pop! You made ${result.value}.';
       } else {
         _message = 'Set up two matching blocks.';
       }
+      _assistLevel = result.mergeCount == 0
+          ? (_assistLevel + 0.18).clamp(0, 1)
+          : (_assistLevel - 0.3).clamp(0, 1);
     });
 
     if (result.mergeCount > 0) {
@@ -155,16 +185,25 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
         result.mergeCount >= 2 ? Sfx.celebration : Sfx.correct,
       );
       AudioService.instance.successHaptic();
-      if (result.mergeCount >= 2) _celebration.celebrate(sound: false);
+      if (result.mergeCount >= 3) {
+        _celebration.fireworks();
+      } else {
+        _celebration.celebrate(sound: false);
+      }
     } else {
       AudioService.instance.playSfx(Sfx.tap);
     }
-    if (_engine.gameOver) _endGame();
+    if (_playMode == MiniGamePlayMode.together) {
+      setState(() => _currentPlayer = _currentPlayer == 1 ? 2 : 1);
+    }
+    if (_engine.gameOver) _rescueTower();
+    if (!_resultRecorded && _engine.highestTile >= 128) _recordResult();
   }
 
-  void _endGame() {
-    AudioService.instance
-        .speak('Great stacking! Your score is ${_engine.score}.');
+  void _recordResult() {
+    if (_resultRecorded) return;
+    _resultRecorded = true;
+    showMiniGameReward(context, _engine.score);
     ref.read(miniGamesControllerProvider.notifier).recordResult(
       gameId: 'stack-merge',
       score: _engine.score,
@@ -172,7 +211,20 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
         if (_engine.highestTile >= 128) 'stack_128',
       ],
     );
-    setState(() => _message = 'The tower is full. Great stacking!');
+  }
+
+  void _rescueTower() {
+    _recordResult();
+    final cleared = _engine.rescueTallest(remove: 3);
+    setState(() {
+      _dropping = false;
+      _message = _playMode == MiniGamePlayMode.creative
+          ? 'Whoosh! More room to create!'
+          : 'Rainbow rescue cleared $cleared blocks. Keep building!';
+    });
+    _celebration.celebrate(sound: false);
+    AudioService.instance.playSfx(Sfx.magic);
+    AudioService.instance.speak("Let's keep building to the moon!");
   }
 
   @override
@@ -187,6 +239,14 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
               children: [
                 _topBar(),
                 MascotMessage(message: _message, icon: '🤖'),
+                StoryGoalCard(
+                  emoji: '🏗️🚀🌙',
+                  goal: _playMode == MiniGamePlayMode.creative
+                      ? 'Build anything—nothing can fail!'
+                      : 'Free the rainbow and reach the moon!',
+                  progress: (_engine.highestTile / 512).clamp(0, 1),
+                  progressColor: const Color(0xFF00CEC9),
+                ),
                 const SizedBox(height: 5),
                 Expanded(child: _gameArea()),
                 _controls(),
@@ -211,7 +271,7 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
           const SizedBox(width: 8),
           const Expanded(
             child: Text(
-              '🔢 Stack Merge',
+              '🌈 Rainbow Rescue',
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.white,
@@ -256,10 +316,18 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
         return SingleChildScrollView(
           child: Column(
             children: [
-              DifficultyPicker(
-                value: _difficulty,
-                onChanged: _changeDifficulty,
+              PlayModePicker(
+                value: _playMode,
+                showCreative: true,
+                onChanged: (value) => setState(() {
+                  _playMode = value;
+                  _currentPlayer = 1;
+                }),
               ),
+              if (_playMode == MiniGamePlayMode.together) ...[
+                const SizedBox(height: 5),
+                PlayerTurnBadge(player: _currentPlayer),
+              ],
               const SizedBox(height: 7),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -279,15 +347,6 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                 ],
               ),
               const SizedBox(height: 7),
-              if (_engine.gameOver)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: FilledButton.icon(
-                    onPressed: _restart,
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Play again'),
-                  ),
-                ),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (d) => _dropAt((d.localPosition.dx / 52).floor()),
@@ -333,6 +392,19 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                           size: math.min(44, cellHeight - 3),
                         ),
                       ),
+                      Positioned(
+                        left: _bestColumn * 52.0 + 14,
+                        top: 50,
+                        child: IgnorePointer(
+                          child: Text(
+                            '👇',
+                            style: TextStyle(
+                              fontSize: 25,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -346,6 +418,11 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
 
   Widget _tile(int value, {required double size}) {
     final rainbow = value == StackMergeEngine.rainbow;
+    final colorBlind = ref.watch(settingsControllerProvider).colorBlindMode;
+    const shapes = ['●', '■', '▲', '◆', '⬟', '✚', '✦'];
+    final shape = value > 0
+        ? shapes[((math.log(value) / math.ln2).round() - 1) % shapes.length]
+        : '★';
     return Container(
       width: size,
       height: size,
@@ -374,7 +451,8 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       ),
       child: Center(
         child: Text(
-          rainbow ? '★' : '$value',
+          rainbow ? '★' : (colorBlind ? '$shape\n$value' : '$value'),
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w900,

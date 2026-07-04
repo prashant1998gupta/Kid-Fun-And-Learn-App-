@@ -27,7 +27,11 @@ Future<void> showFirstPlayTutorial(
     context: context,
     barrierDismissible: true,
     barrierColor: Colors.black54,
-    builder: (_) => _TutorialDialog(instruction: instruction, emoji: emoji),
+    builder: (_) => _TutorialDialog(
+      instruction: instruction,
+      emoji: emoji,
+      reducedMotion: ref.read(reducedMotionProvider),
+    ),
   );
   await prefs.setBool(key, true);
 }
@@ -42,14 +46,23 @@ Future<void> showTutorialAgain(
   return showDialog<void>(
     context: context,
     barrierColor: Colors.black54,
-    builder: (_) => _TutorialDialog(instruction: instruction, emoji: emoji),
+    builder: (_) => _TutorialDialog(
+      instruction: instruction,
+      emoji: emoji,
+      reducedMotion: MediaQuery.disableAnimationsOf(context),
+    ),
   );
 }
 
 class _TutorialDialog extends StatefulWidget {
-  const _TutorialDialog({required this.instruction, required this.emoji});
+  const _TutorialDialog({
+    required this.instruction,
+    required this.emoji,
+    required this.reducedMotion,
+  });
   final String instruction;
   final String emoji;
+  final bool reducedMotion;
 
   @override
   State<_TutorialDialog> createState() => _TutorialDialogState();
@@ -57,10 +70,21 @@ class _TutorialDialog extends StatefulWidget {
 
 class _TutorialDialogState extends State<_TutorialDialog>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat(reverse: true);
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    if (widget.reducedMotion) {
+      _c.value = 0.5;
+    } else {
+      _c.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -73,53 +97,57 @@ class _TutorialDialogState extends State<_TutorialDialog>
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(28),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // The animated tapping finger / gesture hint.
-            AnimatedBuilder(
-              animation: _c,
-              builder: (context, child) {
-                final t = Curves.easeInOut.transform(_c.value);
-                return Transform.translate(
-                  offset: Offset(0, -10 * t),
-                  child:
-                      Transform.scale(scale: 1 + 0.12 * (1 - t), child: child),
-                );
-              },
-              child: Text(widget.emoji, style: const TextStyle(fontSize: 72)),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              widget.instruction,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF2D3436),
-                fontWeight: FontWeight.w800,
-                fontSize: 20,
-                height: 1.25,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // The animated tapping finger / gesture hint.
+              AnimatedBuilder(
+                animation: _c,
+                builder: (context, child) {
+                  final t = Curves.easeInOut.transform(_c.value);
+                  return Transform.translate(
+                    offset: Offset(0, -10 * t),
+                    child: Transform.scale(
+                        scale: 1 + 0.12 * (1 - t), child: child),
+                  );
+                },
+                child: Text(widget.emoji, style: const TextStyle(fontSize: 72)),
               ),
-            ),
-            const SizedBox(height: 18),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.success,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              const SizedBox(height: 10),
+              Text(
+                widget.instruction,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF2D3436),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                  height: 1.25,
+                ),
               ),
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                "Let's Play! 🎉",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+              const SizedBox(height: 18),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  "Let's Play! 🎉",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

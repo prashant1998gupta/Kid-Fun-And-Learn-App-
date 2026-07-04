@@ -91,6 +91,26 @@ void main() {
       expect(repository.petXp(), controller.state.petXp);
       expect(MiniPet.forXp(repository.petXp()).emoji, '🐣');
     });
+
+    test('mini-game results grant coins and XP through the shared wallet hook',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      var coins = 0;
+      var xp = 0;
+      final controller = MiniGamesController(
+        MiniGamesRepository(preferences),
+        rewardPlayer: (reward) async {
+          coins += reward.coins;
+          xp += reward.xp;
+        },
+      );
+
+      await controller.recordResult(gameId: '2048', score: 250);
+
+      expect(coins, 5);
+      expect(xp, 10);
+    });
   });
 
   group('Classic2048Engine', () {
@@ -137,6 +157,20 @@ void main() {
       expect(engine.grid.first, [2, 2, 0]);
       expect(engine.score, 0);
     });
+
+    test('friendly rescue makes room without wiping progress', () {
+      final engine = Classic2048Engine(random: math.Random(1));
+      engine.grid = [
+        [2, 4, 2, 4],
+        [4, 2, 4, 2],
+        [2, 4, 2, 4],
+        [4, 2, 4, 2],
+      ];
+
+      expect(engine.rescue(count: 3), 3);
+      expect(engine.hasMoves, isTrue);
+      expect(engine.grid.expand((row) => row).where((v) => v == 0), isNotEmpty);
+    });
   });
 
   group('StackMergeEngine', () {
@@ -170,6 +204,16 @@ void main() {
       expect(result.value, 32);
       expect(result.mergeCount, 2);
       expect(engine.columns[0], [32]);
+    });
+
+    test('rainbow rescue clears the bottom of the tallest tower', () {
+      final engine = StackMergeEngine(columnCount: 2, maxRows: 3);
+      engine.columns[0].addAll([2, 4, 8]);
+      engine.columns[1].add(2);
+
+      expect(engine.rescueTallest(remove: 2), 2);
+      expect(engine.columns[0], [8]);
+      expect(engine.gameOver, isFalse);
     });
   });
 
@@ -211,8 +255,9 @@ void main() {
 
     await render(const MiniGamesScreen());
     await render(const InfinityLoopGame());
-    await tester.tap(find.text('Challenge'));
+    await tester.tap(find.text('Together'));
     await tester.pump();
+    expect(find.textContaining('Player 1'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await render(const ChickenTapGame());
@@ -223,7 +268,7 @@ void main() {
 
     await render(const StackMergeGame());
     await tester.tap(find.byIcon(Icons.arrow_downward_rounded));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 1600));
     expect(tester.takeException(), isNull);
 
     await render(const Classic2048Game());

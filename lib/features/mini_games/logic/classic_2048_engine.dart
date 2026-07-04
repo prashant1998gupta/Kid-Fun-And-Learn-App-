@@ -106,6 +106,25 @@ class Classic2048Engine {
     grid[cell.row][cell.col] = _random.nextDouble() < 0.9 ? 2 : 4;
   }
 
+  /// Friendly no-loss rescue: clears a few of the smallest tiles to make room
+  /// without throwing away the child's board or score.
+  int rescue({int count = 3}) {
+    final tiles = <({int row, int col, int value})>[];
+    for (var row = 0; row < size; row++) {
+      for (var col = 0; col < size; col++) {
+        final value = grid[row][col];
+        if (value > 0) tiles.add((row: row, col: col, value: value));
+      }
+    }
+    tiles.sort((a, b) => a.value.compareTo(b.value));
+    final cleared = math.min(count, tiles.length);
+    for (var i = 0; i < cleared; i++) {
+      grid[tiles[i].row][tiles[i].col] = 0;
+    }
+    if (cleared > 0) addRandomTile();
+    return cleared;
+  }
+
   List<int> _readLine(int index, SwipeDirection direction) {
     return switch (direction) {
       SwipeDirection.left => List.of(grid[index]),

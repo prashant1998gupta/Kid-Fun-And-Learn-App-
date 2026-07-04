@@ -26,6 +26,12 @@ class MiniPet {
   bool get isMax => stageEnd >= _maxSentinel;
   int get xpToNext => isMax ? 0 : (stageEnd - xp).clamp(0, stageEnd);
 
+  /// A new dress-up surprise arrives at each evolution stage.
+  String get accessory => const ['✨', '🎀', '🧢', '🕶️', '👑', '🌈'][stage];
+
+  List<String> get unlockedAccessories =>
+      const ['✨', '🎀', '🧢', '🕶️', '👑', '🌈'].take(stage + 1).toList();
+
   static const _maxSentinel = 1 << 30;
 
   // (xpThreshold, emoji, name) — ordered.

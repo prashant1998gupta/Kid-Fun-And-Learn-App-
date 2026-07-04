@@ -13,6 +13,143 @@ enum MiniGameDifficulty {
   final String icon;
 }
 
+/// Child-friendly play choices. Difficulty is intentionally absent: games
+/// adapt quietly so children never have to judge their own ability.
+enum MiniGamePlayMode {
+  solo('Just me', '🌟'),
+  together('Together', '👫'),
+  creative('Create', '🎨');
+
+  const MiniGamePlayMode(this.label, this.icon);
+  final String label;
+  final String icon;
+}
+
+class PlayModePicker extends StatelessWidget {
+  const PlayModePicker({
+    required this.value,
+    required this.onChanged,
+    this.showCreative = false,
+    super.key,
+  });
+
+  final MiniGamePlayMode value;
+  final ValueChanged<MiniGamePlayMode> onChanged;
+  final bool showCreative;
+
+  @override
+  Widget build(BuildContext context) {
+    final modes = [
+      MiniGamePlayMode.solo,
+      MiniGamePlayMode.together,
+      if (showCreative) MiniGamePlayMode.creative,
+    ];
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      children: [
+        for (final mode in modes)
+          ChoiceChip(
+            selected: value == mode,
+            onSelected: (_) => onChanged(mode),
+            avatar: Text(mode.icon),
+            label: Text(mode.label),
+            selectedColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.24),
+            labelStyle: TextStyle(
+              color: value == mode ? AppColors.primary : Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
+          ),
+      ],
+    );
+  }
+}
+
+class StoryGoalCard extends StatelessWidget {
+  const StoryGoalCard({
+    required this.emoji,
+    required this.goal,
+    this.progress,
+    this.progressColor = const Color(0xFFFFC048),
+    super.key,
+  });
+
+  final String emoji;
+  final String goal;
+  final double? progress;
+  final Color progressColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: goal,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 25)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    goal,
+                    style: const TextStyle(
+                      color: Color(0xFF2D3436),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  if (progress != null) ...[
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(
+                      value: progress!.clamp(0, 1),
+                      minHeight: 6,
+                      borderRadius: BorderRadius.circular(8),
+                      backgroundColor: const Color(0xFFE9E6F7),
+                      color: progressColor,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PlayerTurnBadge extends StatelessWidget {
+  const PlayerTurnBadge({required this.player, super.key});
+  final int player;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: player == 1 ? const Color(0xFFFFE66D) : const Color(0xFF74B9FF),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        'Player $player ${player == 1 ? '🧒' : '👧'}',
+        style: const TextStyle(
+          color: Color(0xFF2D3436),
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
 class DifficultyPicker extends StatelessWidget {
   const DifficultyPicker({
     required this.value,
@@ -157,4 +294,34 @@ Future<void> showMiniGameHelp(
       ],
     ),
   );
+}
+
+void showMiniGameReward(BuildContext context, int score) {
+  final coins = 3 + (score ~/ 100).clamp(0, 7);
+  final xp = 5 + (score ~/ 50).clamp(0, 15);
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  messenger
+    ?..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF6C5CE7),
+        duration: const Duration(seconds: 3),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🎉', style: TextStyle(fontSize: 24)),
+            const SizedBox(width: 10),
+            Text(
+              '+$coins 🪙   +$xp ⚡   Pet fed! 💖',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
 }

@@ -21,7 +21,10 @@ class InfinityLoopGame extends ConsumerStatefulWidget {
 
 class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
   late List<List<_HexTile>> _grid;
-  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  int _adaptiveTier = 0;
+  bool _strongFinish = false;
+  MiniGamePlayMode _playMode = MiniGamePlayMode.solo;
+  int _currentPlayer = 1;
   bool _won = false;
   bool _usedHint = false;
   int _moves = 0;
@@ -43,18 +46,26 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     (row: -1, col: 1),
   ];
 
-  int get _gridSize => switch (_difficulty) {
-        MiniGameDifficulty.easy => 3,
-        MiniGameDifficulty.normal => 5,
-        MiniGameDifficulty.challenge => 7,
+  int get _gridSize => switch (_adaptiveTier) {
+        0 => 3,
+        1 => 4,
+        _ => 5,
       };
+
+  int get _pathTileCount =>
+      _grid.expand((row) => row).where((tile) => tile.solution != 0).length;
+
+  int get _alignedCount => _grid
+      .expand((row) => row)
+      .where((tile) => tile.solution != 0 && tile.mask == tile.solution)
+      .length;
 
   // How far tiles are scrambled from the solution. Fewer turns = a puzzle a
   // young child can finish in a handful of taps.
-  int get _maxScramble => switch (_difficulty) {
-        MiniGameDifficulty.easy => 2,
-        MiniGameDifficulty.normal => 3,
-        MiniGameDifficulty.challenge => 5,
+  int get _maxScramble => switch (_adaptiveTier) {
+        0 => 2,
+        1 => 3,
+        _ => 4,
       };
 
   @override
@@ -118,6 +129,7 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     _moves = 0;
     _autoHelpThreshold = _optimalMoves * 2 + 8;
     _message = 'Level $_level: connect the glowing loop!';
+    _currentPlayer = 1;
     if (_isSolved()) {
       final tile = _grid.first.first;
       tile.mask = _rotateMask(tile.mask);
@@ -139,16 +151,16 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
 
   void _newGame({bool nextLevel = false}) {
     setState(() {
-      if (nextLevel) _level++;
+      if (nextLevel) {
+        _level++;
+        if (_strongFinish) {
+          _adaptiveTier = math.min(2, _adaptiveTier + 1);
+        } else if (_usedHint) {
+          _adaptiveTier = math.max(0, _adaptiveTier - 1);
+        }
+      }
       _initGrid();
-    });
-  }
-
-  void _changeDifficulty(MiniGameDifficulty value) {
-    setState(() {
-      _difficulty = value;
-      _level = 1;
-      _initGrid();
+      _strongFinish = false;
     });
   }
 
@@ -233,8 +245,17 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
           : 'Keep turning — watch both ends.';
     });
     AudioService.instance.playSfx(
-      tile.mask == tile.solution ? Sfx.correct : Sfx.tap,
+      tile.mask == tile.solution
+          ? ((row + col).isEven ? Sfx.correct : Sfx.star)
+          : Sfx.tap,
     );
+    if (tile.mask == tile.solution) AudioService.instance.lightHaptic();
+    if (_playMode == MiniGamePlayMode.together) {
+      setState(() {
+        _currentPlayer = _currentPlayer == 1 ? 2 : 1;
+        _message = 'The water glows! Player $_currentPlayer, your turn.';
+      });
+    }
     if (_isSolved()) {
       _complete();
       return;
@@ -268,10 +289,16 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     final stars = _starCount;
     setState(() {
       _won = true;
-      _message = stars == 3 ? 'Perfect loop! Three stars!' : 'Loop complete!';
+      _strongFinish = stars == 3 && _moves <= _optimalMoves + 2;
+      _message = stars == 3
+          ? 'Water flows! Every flower is blooming!'
+          : 'The thirsty flowers are blooming!';
     });
     _celebration.fireworks();
-    AudioService.instance.speak('Perfect loop! You earned $stars stars.');
+    AudioService.instance.speak(
+      'Splish splash! The flowers bloom. La la la! You earned $stars stars.',
+    );
+    showMiniGameReward(context, (_gridSize * 250) - (_moves * 5));
     ref.read(miniGamesControllerProvider.notifier).recordResult(
       gameId: 'infinity-loop',
       score: (_gridSize * 250) - (_moves * 5).clamp(0, _gridSize * 100),
@@ -301,6 +328,13 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
               children: [
                 _topBar(),
                 MascotMessage(message: _message),
+                StoryGoalCard(
+                  emoji: '💧🌸',
+                  goal: 'Fix the water path so the flowers bloom!',
+                  progress:
+                      _pathTileCount == 0 ? 0 : _alignedCount / _pathTileCount,
+                  progressColor: const Color(0xFF00CEC9),
+                ),
                 const SizedBox(height: 6),
                 if (_won) _winScreen() else _gridArea(),
               ],
@@ -324,7 +358,7 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
           const SizedBox(width: 8),
           const Expanded(
             child: Text(
-              '🔷 Infinity Loop',
+              '🌸 Flower Flow',
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.white,
@@ -372,10 +406,17 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
           return SingleChildScrollView(
             child: Column(
               children: [
-                DifficultyPicker(
-                  value: _difficulty,
-                  onChanged: _changeDifficulty,
+                PlayModePicker(
+                  value: _playMode,
+                  onChanged: (value) => setState(() {
+                    _playMode = value;
+                    _currentPlayer = 1;
+                  }),
                 ),
+                if (_playMode == MiniGamePlayMode.together) ...[
+                  const SizedBox(height: 6),
+                  PlayerTurnBadge(player: _currentPlayer),
+                ],
                 const SizedBox(height: 8),
                 Text(
                   'Level $_level  •  Moves $_moves  •  Best path $_optimalMoves',
@@ -416,14 +457,26 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
       label: aligned ? 'Connected path tile' : 'Path tile to rotate',
       child: GestureDetector(
         onTap: () => _tapTile(row, col),
+        onPanEnd: (_) => _tapTile(row, col),
         child: SizedBox(
           width: size,
           height: size,
-          child: CustomPaint(
-            painter: _HexPipePainter(
-              tile.mask,
-              aligned ? const Color(0xFF00B894) : AppColors.primary,
-            ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _HexPipePainter(
+                    tile.mask,
+                    aligned ? const Color(0xFF00B894) : AppColors.primary,
+                  ),
+                ),
+              ),
+              if (aligned)
+                const Align(
+                  alignment: Alignment.topRight,
+                  child: Text('🌸', style: TextStyle(fontSize: 14)),
+                ),
+            ],
           ),
         ),
       ),

@@ -30,6 +30,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
   int _combo = 0;
   int _bestCombo = 0;
   int _bonusSeconds = 0;
+  int _eggsCollected = 0;
+  final List<int> _playerScores = [0, 0];
   int _timeLeft = 30;
   // Dynamic difficulty: rises when the child misses (game slows + chickens live
   // longer) and falls when they catch (game tightens up). Self-balancing.
@@ -38,7 +40,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
   bool _started = false;
   bool _paused = false;
   bool _bossSpawned = false;
-  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  final MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  MiniGamePlayMode _playMode = MiniGamePlayMode.solo;
   String _message = 'Tap the chickens! Just have fun!';
   final List<_ChickenTarget> _targets = [];
   final List<_TapBurst> _bursts = [];
@@ -62,7 +65,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
 
   /// On Easy the round is purely time-based — a child can never "lose"; they
   /// just play the clock out and collect a happy score. (Hearts are hidden.)
-  bool get _noFail => _difficulty == MiniGameDifficulty.easy;
+  bool get _noFail => true;
 
   @override
   void initState() {
@@ -96,6 +99,10 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       _combo = 0;
       _bestCombo = 0;
       _bonusSeconds = 0;
+      _eggsCollected = 0;
+      _playerScores
+        ..[0] = 0
+        ..[1] = 0;
       _gameOver = false;
       _paused = false;
       _bossSpawned = false;
@@ -138,10 +145,10 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     setState(() {
       _timeLeft =
           (totalSeconds - elapsed.inMilliseconds / 1000).ceil().clamp(0, 99);
-      if (!_bossSpawned && progress >= 0.55) {
+      if (!_bossSpawned && progress >= 0.72) {
         _bossSpawned = true;
         _spawnTarget(elapsed, forcedType: ChickenTargetType.boss);
-        _message = 'Boss chicken! Tap it three times!';
+        _message = 'Giant golden chicken! Tap it three times!';
       } else if (elapsed >= _nextSpawn) {
         _spawnTarget(elapsed);
       }
@@ -164,8 +171,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
         (burst) =>
             elapsed - burst.createdAt > const Duration(milliseconds: 650),
       );
-      shouldEnd = (!_noFail && _missed >= _maxMisses) ||
-          elapsed >= Duration(seconds: totalSeconds);
+      shouldEnd = elapsed >= Duration(seconds: totalSeconds);
     });
     if (shouldEnd) _endGame();
   }
@@ -267,15 +273,22 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       _combo++;
       _bestCombo = math.max(_bestCombo, _combo);
       _score += ChickenTapRules.points(target.type, _combo);
+      final points = ChickenTapRules.points(target.type, _combo);
+      if (_playMode == MiniGamePlayMode.together) {
+        final player = target.currentX(_clock.elapsed) < 0.5 ? 0 : 1;
+        _playerScores[player] += points;
+      }
       _struggleBoost = (_struggleBoost - 0.15).clamp(0.0, 1.0);
       if (target.type == ChickenTargetType.egg) {
+        _eggsCollected++;
         _bonusSeconds += 3;
         _message = 'Egg power! +3 seconds!';
       } else if (target.type == ChickenTargetType.golden) {
         _message = 'Golden chicken! Five bonus points!';
       } else if (target.type == ChickenTargetType.boss) {
-        _message = 'You caught the boss chicken!';
-        _celebration.celebrate(sound: false);
+        _eggsCollected += 5;
+        _message = 'Golden egg rain! Five eggs!';
+        _celebration.fireworks();
       } else if (_combo > 0 && _combo % 5 == 0) {
         _message = 'Hot streak! Combo x$_combo!';
       } else {
@@ -294,7 +307,13 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     _ticker?.cancel();
     _clock.stop();
     _celebration.fireworks();
-    AudioService.instance.speak('Great catching! You scored $_score points.');
+    final count = _countingLine(_eggsCollected);
+    AudioService.instance.speak(
+      _eggsCollected == 0
+          ? 'Great catching! Let us find an egg next time!'
+          : 'You got $count. $_eggsCollected eggs! Amazing!',
+    );
+    showMiniGameReward(context, _score);
     ref.read(miniGamesControllerProvider.notifier).recordResult(
       gameId: '368-chickens',
       score: _score,
@@ -305,6 +324,11 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     if (mounted) {
       setState(() => _message = 'Great round! Can you beat your score?');
     }
+  }
+
+  String _countingLine(int total) {
+    final spoken = math.min(total, 10);
+    return [for (var i = 1; i <= spoken; i++) '$i'].join(', ');
   }
 
   @override
@@ -319,6 +343,14 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
               children: [
                 _topBar(),
                 MascotMessage(message: _message, icon: '🦁'),
+                StoryGoalCard(
+                  emoji: '🐔🥚',
+                  goal: 'Help Mama Chicken collect the eggs!',
+                  progress: _started
+                      ? 1 - (_timeLeft / (_roundSeconds + _bonusSeconds))
+                      : 0,
+                  progressColor: const Color(0xFFFFD93D),
+                ),
                 const SizedBox(height: 5),
                 if (_gameOver)
                   _gameOverScreen()
@@ -422,9 +454,9 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
                 ),
               ),
               const SizedBox(height: 12),
-              DifficultyPicker(
-                value: _difficulty,
-                onChanged: (value) => setState(() => _difficulty = value),
+              PlayModePicker(
+                value: _playMode,
+                onChanged: (value) => setState(() => _playMode = value),
               ),
               const SizedBox(height: 22),
               BouncyButton(
@@ -465,6 +497,47 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       builder: (context, constraints) {
         return Stack(
           children: [
+            if (_playMode == MiniGamePlayMode.together) ...[
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ColoredBox(
+                          color: const Color(0x18FFE66D),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Text(
+                              'P1 ⭐ ${_playerScores[0]}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(width: 3, color: Colors.white54),
+                      Expanded(
+                        child: ColoredBox(
+                          color: const Color(0x1874B9FF),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Text(
+                              'P2 ⭐ ${_playerScores[1]}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             for (final target in _targets)
               Positioned(
                 left: target.currentX(_clock.elapsed) *
@@ -558,7 +631,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       ChickenTargetType.golden => (emoji: '🐔', color: const Color(0xFFFFE66D)),
       ChickenTargetType.egg => (emoji: '🥚', color: const Color(0xFFDFF9FB)),
       ChickenTargetType.bomb => (emoji: '💣', color: const Color(0xFF2D3436)),
-      ChickenTargetType.boss => (emoji: '🐔', color: const Color(0xFFFF9FF3)),
+      ChickenTargetType.boss => (emoji: '🐔', color: const Color(0xFFFFD700)),
     };
     final life = target.life(_clock.elapsed);
     return Semantics(
@@ -624,7 +697,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('🏆', style: TextStyle(fontSize: 64)),
+              const Text('🐔👑', style: TextStyle(fontSize: 72)),
               const Text(
                 'Round complete!',
                 style: TextStyle(
@@ -634,12 +707,17 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
                 ),
               ),
               Text(
-                '⭐ $_score  •  🔥 Best combo $_bestCombo',
+                '🥚 $_eggsCollected eggs  •  ⭐ $_score  •  🔥 $_bestCombo',
                 style: const TextStyle(
                   color: Colors.yellow,
                   fontSize: 19,
                   fontWeight: FontWeight.w900,
                 ),
+              ),
+              const Text(
+                '🥚  🥚  🥚\n  🥚  🥚  🥚  🥚',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 24),
               ),
               const SizedBox(height: 22),
               FilledButton.icon(
