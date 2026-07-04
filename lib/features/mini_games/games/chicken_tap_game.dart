@@ -809,7 +809,7 @@ class _ChickenTarget {
     final t = (now - spawnedAt).inMilliseconds / 1000;
     const span = _hi - _lo;
     // Triangle-wave reflection keeps the runner patrolling inside the field.
-    final period = 2 * span;
+    const period = 2 * span;
     var p = (((baseX - _lo) + vx * t) % period + period) % period;
     if (p > span) p = period - p;
     return (_lo + p + math.sin(t * 4 + phase) * amplitude).clamp(_lo, _hi);

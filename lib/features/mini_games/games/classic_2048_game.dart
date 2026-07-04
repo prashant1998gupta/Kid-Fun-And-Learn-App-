@@ -496,50 +496,67 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
       ),
       child: value == 0
           ? null
-          : Center(
-              child: _animalMode && animal != null
-                  ? Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        TweenAnimationBuilder<double>(
-                          key: ValueKey('$row-$col-$value'),
-                          tween: Tween(begin: 0.72, end: 1),
-                          duration: ref.watch(reducedMotionProvider)
-                              ? Duration.zero
-                              : const Duration(milliseconds: 260),
-                          curve: Curves.elasticOut,
-                          builder: (context, scale, child) =>
-                              Transform.scale(scale: scale, child: child),
-                          child: OpenMojiView(
-                            emoji: animal,
-                            size: size * 0.58,
-                            fallback: Text(
-                              animal,
-                              style: TextStyle(fontSize: size * 0.42),
-                            ),
+          : _animalMode && animal != null
+              ? Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Center(
+                      child: TweenAnimationBuilder<double>(
+                        key: ValueKey('$row-$col-$value'),
+                        tween: Tween(begin: 0.72, end: 1),
+                        duration: ref.watch(reducedMotionProvider)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 260),
+                        curve: Curves.elasticOut,
+                        builder: (context, scale, child) =>
+                            Transform.scale(scale: scale, child: child),
+                        child: OpenMojiView(
+                          emoji: animal,
+                          size: size * 0.62,
+                          fallback: Text(
+                            animal,
+                            style: TextStyle(fontSize: size * 0.46),
                           ),
                         ),
-                        Text(
-                          '$value',
-                          style: TextStyle(
-                            fontSize: size * 0.18,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF2D3436),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Text(
-                      colorBlind ? '$shape\n$value' : '$value',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: value >= 1000 ? size * 0.28 : size * 0.38,
-                        fontWeight: FontWeight.w900,
-                        color:
-                            value <= 4 ? const Color(0xFF1B5E20) : Colors.white,
                       ),
                     ),
-            ),
+                    // A high-contrast corner badge keeps the number crisp and
+                    // readable no matter what animal art sits behind it.
+                    Positioned(
+                      top: 3,
+                      left: 3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.62),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Text(
+                          '$value',
+                          style: TextStyle(
+                            fontSize: size * 0.2,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Center(
+                  child: Text(
+                    colorBlind ? '$shape\n$value' : '$value',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: value >= 1000 ? size * 0.28 : size * 0.38,
+                      fontWeight: FontWeight.w900,
+                      color:
+                          value <= 4 ? const Color(0xFF1B5E20) : Colors.white,
+                    ),
+                  ),
+                ),
     );
   }
 
