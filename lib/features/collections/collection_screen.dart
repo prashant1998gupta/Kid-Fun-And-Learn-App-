@@ -8,6 +8,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/currency_hud.dart';
+import '../../core/widgets/openmoji_view.dart';
 import '../profiles/profiles_controller.dart';
 import 'collection_controller.dart';
 import 'domain/collectible.dart';
@@ -363,25 +364,58 @@ class _CollectibleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rarity = item.rarity.color;
+    // Locked tiles become exciting rarity-tinted "mystery" cards (not sad grey
+    // blanks); owned tiles are bright white so the real OpenMoji art pops.
     final tile = Container(
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: owned ? Colors.white : Colors.white.withValues(alpha: 0.35),
+        gradient: owned
+            ? null
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [rarity, Color.lerp(rarity, Colors.black, 0.28)!],
+              ),
+        color: owned ? Colors.white : null,
         borderRadius: AppSpacing.cardRadius,
         border: Border.all(
-          color: activePet ? AppColors.success : item.rarity.color,
+          color: activePet ? AppColors.success : rarity,
           width: activePet ? 4 : 2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: rarity.withValues(alpha: owned ? 0.22 : 0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            owned ? item.emoji : '❓',
-            style: TextStyle(
-              fontSize: 40,
-              color: owned ? null : Colors.white,
+          if (owned)
+            OpenMojiView(
+              emoji: item.emoji,
+              size: 46,
+              fallback: Text(item.emoji, style: const TextStyle(fontSize: 40)),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.25),
+                shape: BoxShape.circle,
+              ),
+              child: const Text(
+                '?',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+              ),
             ),
-          ),
           const SizedBox(height: 4),
           Text(
             owned ? item.name : '???',
@@ -389,7 +423,7 @@ class _CollectibleTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
               fontSize: 12,
               color: owned ? Colors.black87 : Colors.white,
             ),
@@ -414,16 +448,18 @@ class _CollectibleTile extends StatelessWidget {
         : owned && item.isPet
             ? ('Tap to equip', item.rarity.color)
             : (item.rarity.label, item.rarity.color);
+    // Owned: filled rarity chip. Locked: crisp white chip so the label stays
+    // readable on the colored mystery gradient.
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: owned ? 1 : 0.6),
+        color: owned ? color : Colors.white,
         borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: owned ? Colors.white : color,
           fontWeight: FontWeight.w800,
           fontSize: 10,
         ),
