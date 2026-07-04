@@ -27,12 +27,30 @@ Every layer the rest of the app reuses is in place: design system, animated
 core widgets, state management, offline persistence, adaptive-learning engine,
 reward economy, curriculum data pipeline, routing, and security rules.
 
+### Kid World mini games
+
+The four mini games are now one story-driven, pre-reader-friendly play world:
+
+- **🌸 Flower Flow:** rotate or trace glowing water paths to bloom flowers.
+- **🐔 Egg Rescue:** catch chickens, count eggs aloud, and meet the giant
+  golden chicken finale.
+- **🌈 Rainbow Rescue:** merge a tower toward the moon, follow adaptive helper
+  hints, or build forever in the no-fail creative sandbox.
+- **🐣 Animal Family:** merge dancing, speaking animals into a dragon using
+  swipes, buttons, or optional device tilt.
+
+Every game includes first-play voice guidance, invisible adaptive difficulty,
+local two-player play, no-loss rescue behavior, haptics/SFX/celebrations, and
+real coin/XP and pet-growth rewards. Color-blind-safe symbols, reduced-motion
+behavior, semantic labels, and one-hand controls are built in. See
+[`docs/16_mini_games.md`](docs/16_mini_games.md) for the complete specification.
+
 ### Run it
 
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # unit tests for wallet + reward engine
+flutter test         # full unit + widget suite (82 tests at last verification)
 flutter analyze      # lints
 ```
 

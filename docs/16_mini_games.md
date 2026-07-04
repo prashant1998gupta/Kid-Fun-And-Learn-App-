@@ -2,36 +2,43 @@
 
 ## Overview
 
-Add a **"Mini Games" tab** to the Home screen — a separate section from the
-learning curriculum where kids can play fun, casual puzzle/arcade games just
-for enjoyment. No lessons, no grading, no curriculum — pure entertainment
-that keeps kids engaged with the app during breaks.
+The **Mini Games** area is a connected, story-driven **Kid World** for playful
+breaks from the curriculum. It contains no grading or wrong-answer pressure,
+but it does share the child's wallet and growing pet so every play session has
+an emotionally meaningful reward.
 
-**Implementation status:** Engagement pass complete. The catalog, four games,
-deep-linkable routes, reactive local high scores, OpenMoji art, difficulty
-modes, tutorials, mascot reactions, daily challenges, local badges, and
-testable game rules are implemented. Mini games remain separate from the
-curriculum and do not award coins, XP, curriculum stars, or collectibles.
+**Implementation status:** Complete. The catalog, four games, deep-linkable
+routes, reactive high scores, OpenMoji art, voice tutorials, invisible adaptive
+difficulty, story goals, local co-op, no-loss play, creative mode, wallet/pet
+rewards, daily challenges, badges, physical controls, accessibility behavior,
+and framework-independent rule tests are implemented.
 
 ### Engagement features now implemented
 
-- Shared Easy / Normal / Challenge modes across all four games.
-- Sound, haptics, animated feedback, confetti, and short mascot reactions.
-- Help/tutorial dialog on every game and pause support in the timed game.
-- Reduced-motion support for moving chickens and falling Stack Merge blocks.
+- Difficulty adapts invisibly. Children never need to label themselves Easy,
+  Normal, or Hard; stalled play gets help and strong play gently scales up.
+- First-play animated gesture guidance speaks every instruction aloud and is
+  remembered locally after dismissal.
+- Solo and local **Together** modes are available across all four games.
+- Sound, haptics, squish/pop feedback, confetti, mascot reactions, and a clear
+  coin/XP/pet reward moment are shared across the games.
+- Reduced motion, color-blind-safe shapes, semantic labels, and reachable
+  bottom controls are accessibility defaults.
+- Optional tilt control in Animal Family and trace gestures in Flower Flow add
+  physical, memorable play.
 - One rotating local daily challenge with persistent progress.
-- Seven local mini-game badges. These are milestones only and do not affect
-  the curriculum economy.
+- Seven local mini-game badges plus persistent coin, XP, high-score, play, and
+  pet-growth progress.
 - Local high scores and play history persist through `SharedPreferences`.
 
 ### Game-specific upgrades
 
 | Game | Implemented engagement loop |
 |------|-----------------------------|
-| Infinity Loop | Randomized 4×4, 6×6, and 8×8 boards; level progression; hints; move target; 1–3 star result |
-| Chicken Tap | Moving targets; golden chickens; eggs that add time; bombs; three-hit boss; combos; particles; pause |
-| Stack Merge | Animated drops; two-block preview; chain-combo feedback; rainbow wildcard blocks; difficulty-based tower height |
-| 2048 | 3×3, 4×4, and 5×5 boards; one-step undo; continue after 2048; number/animal display modes |
+| Flower Flow | Fix water paths for thirsty flowers; per-tile glow/notes; trace input; adaptive boards/hints; musical bloom finale; co-op turns |
+| Egg Rescue | No-fail timed catching; split-screen sibling scores; spoken egg counting; golden chickens; eggs, bombs, combos, particles, pause, and giant golden finale |
+| Rainbow Rescue | Tower-to-the-moon story; adaptive helper hand; color puffs; three-chain fireworks; rainbow wildcards; co-op turns; automatic full-tower rescue; endless creative sandbox |
+| Animal Family | Animals replace abstract targets; every new animal speaks and dances; co-op turns; swipe/button/tilt control; one-step undo; automatic full-board rescue |
 
 Inspired by: [Infinity Loop Hex](https://poki.com/en/g/infinity-loop-hex),
 [368 Chickens](https://368chickens.com/),
@@ -58,50 +65,59 @@ Home Screen Quick Actions:
 Each is a **self-contained stateful widget** with no dependency on `Lesson`,
 `Question`, or curriculum data. They are pure Flutter games.
 
-### Game 1: Infinity Loop Hex
+### Game 1: Flower Flow
 
 **Type:** Puzzle / Relaxation
-**Concept:** Tap hexagonal tiles to rotate pipe segments until all pipes
-connect in a closed loop. There is no timer; moves and stars encourage replay
-without pressuring the child.
-**Controls:** Tap a hex tile → rotates 60° clockwise.
+**Concept:** Help thirsty flowers by rotating water paths into one glowing
+loop. Correctly aligned tiles glow, bloom, and play a positive note immediately.
+**Controls:** Tap or trace across a hex tile to rotate it 60° clockwise.
 **Win condition:** All pipes form a single continuous closed loop.
-**Grid:** 4×4, 6×6, or 8×8 based on difficulty.
+**Grid:** Starts at 3×3 and quietly grows after strong finishes; stalls trigger
+an automatic single-tile assist.
 **Visual:** Hex tiles drawn with `CustomPainter` (bezier curves for pipes).
-**Difficulty:** Randomly generated boards → varying complexity.
+**Completion:** Water-flow celebration, flower bloom, short tune, 1–3 stars,
+coins, XP, and pet food.
 
-### Game 2: 368 Chickens (Simple Tap Counter)
+### Game 2: Egg Rescue
 
 **Type:** Arcade / Reaction
-**Concept:** Chickens appear on screen one by one in rapid succession.
-Tap each chicken before it disappears. Miss 3 = game over.
+**Concept:** Help Mama Chicken collect eggs. The round is time-based and cannot
+be lost; misses only make targets slower and longer-lived.
 **Controls:** Tap chickens → they pop with an animation + sound.
-**Scoring:** 1 point per chicken tapped. Combo multiplier for consecutive
-taps without missing.
+**Scoring:** Target and combo points. Together mode divides the screen into
+Player 1 and Player 2 halves with independent scores.
 **Visual:** Animated chicken sprites (OpenMoji 🐔 or code-drawn). Eggs,
 feathers on miss.
-**Duration:** 30–35 second rounds, with eggs able to add time.
+**Duration:** 35-second rounds, with eggs adding time. The finale introduces a
+giant golden chicken, egg rain, and spoken counting from 1 to the egg total.
 
-### Game 3: Stack Merge (Number Merge)
+### Game 3: Rainbow Rescue
 
 **Type:** Puzzle / Strategy (like 2048/Suika)
 **Concept:** Numbers/balls fall from the top. Drop them onto a stack.
 When two of the same number touch, they merge into the next number.
-Goal: reach the highest number possible.
+Goal: free rainbow color and build a tower toward the moon.
 **Controls:** Tap left/right to move, tap to drop.
 **Scoring:** Value of merged numbers.
 **Visual:** Colorful numbered circles (2=red, 4=orange, 8=yellow, 16=green,
 32=blue, 64=purple, 128=gold, 256=rainbow).
-**Difficulty:** Stack gets taller over time.
+**Adaptive play:** A helper hand highlights the best column. Dry streaks make
+matching blocks more likely; strong chains restore the full challenge.
+**No loss:** A full tower triggers a rainbow rescue that clears space without
+discarding the score. Creative mode is an endless, failure-free sandbox.
 
-### Game 4: 2048 (Classic)
+### Game 4: Animal Family
 
 **Type:** Puzzle / Strategy
-**Concept:** Classic 2048 on a 3×3, 4×4, or 5×5 board. Equal numbers merge.
-**Controls:** Swipe up/down/left/right (or arrow buttons for kids).
+**Concept:** Equal animals merge into the next family member. New animals say
+their name/sound and perform a small reduced-motion-aware dance.
+**Controls:** Swipe, large arrow buttons, or optional accelerometer tilt.
 **Scoring:** Points from merged tiles.
-**Win condition:** Reach 2048 tile.
-**Visual:** Colored number tiles with the KidVerse palette.
+**Win condition:** Grow the family from chick to dragon and beyond.
+**No loss:** A full board triggers a friendly dragon puff that clears the
+smallest tiles and keeps the same board and score alive.
+**Visual:** OpenMoji animals plus values; number mode includes shape cues when
+color-blind mode is enabled.
 
 ---
 
@@ -112,16 +128,18 @@ Goal: reach the highest number possible.
 ```
 lib/features/mini_games/
 ├── mini_games_screen.dart        # Grid listing all mini games
-├── mini_games_controller.dart    # Scores, plays, badges, daily goal
+├── mini_games_controller.dart    # Scores, wallet rewards, pet, badges, daily goal
 ├── data/
-│   └── mini_games_repository.dart # Persist mini-game progress
+│   ├── mini_games_repository.dart # Persist mini-game progress
+│   └── mini_pet.dart              # Pet stages, XP, accessories
 ├── games/
 │   ├── infinity_loop_hex_game.dart
 │   ├── chicken_tap_game.dart
 │   ├── stack_merge_game.dart
 │   └── classic_2048_game.dart
 └── widgets/
-    └── mini_game_widgets.dart    # Difficulty, help, toolbar, mascot feedback
+    ├── game_tutorial.dart        # First-play animated voice tutorial
+    └── mini_game_widgets.dart    # Story, play modes, rewards, toolbar, mascot
 ```
 
 ### Key Design Decisions
@@ -131,8 +149,11 @@ lib/features/mini_games/
 | Game state management | `StatefulWidget` per game + Riverpod progress controller | Rules stay local; shared persistence stays reactive |
 | High score persistence | `SharedPreferences` via `MiniGamesRepository` | Same pattern as profiles, works offline |
 | Screen navigation | New route `/mini-games` + sub-routes | Uses existing go_router setup |
-| No curriculum rewards | No coins, XP, curriculum stars, or collectibles | Prevents grinding the learning economy |
-| Difficulty | Easy, Normal, Challenge | Lets younger children play without removing depth |
+| Rewards | Modest coins + XP plus pet XP | Makes play meaningful without overpowering learning rewards |
+| Difficulty | Invisible and performance-adaptive | A pre-reader never has to self-assess or choose “Hard” |
+| Failure | Rescue and continuation | Protects experimentation and emotional safety for under-6s |
+| Co-op | Same-device Together mode | Enables siblings and parents to play without accounts/controllers |
+| Creative play | Endless Stack sandbox | Supports making and experimentation, not only solving |
 
 ### Game Widget Interface
 
@@ -150,8 +171,8 @@ abstract class MiniGameWidget extends StatefulWidget {
   String get gameIcon;
 }
 
-/// Each game reports back via this callback when it ends.
-typedef OnGameOver = void Function(int score);
+/// Conceptual result reported by each game at a milestone or round completion.
+typedef OnGameResult = void Function(int score);
 ```
 
 ### Route Structure
@@ -175,15 +196,15 @@ typedef OnGameOver = void Function(int score);
 │  ← Back    🎮 Mini Games     │
 │                              │
 │  ┌────────┐  ┌────────┐     │
-│  │  🔷    │  │  🐔    │     │
-│  │Infinity│  │ 368    │     │
-│  │Loop Hex│  │Chickens│     │
+│  │  🌸    │  │  🐔    │     │
+│  │ Flower │  │  Egg   │     │
+│  │  Flow  │  │ Rescue │     │
 │  │HS: 3/5 │  │HS: 42  │     │
 │  └────────┘  └────────┘     │
 │  ┌────────┐  ┌────────┐     │
-│  │  🔢    │  │  2048  │     │
-│  │ Stack  │  │  2048  │     │
-│  │ Merge  │  │Classic │     │
+│  │  🌈    │  │  🐣    │     │
+│  │Rainbow │  │ Animal │     │
+│  │ Rescue │  │ Family │     │
 │  │HS: 256 │  │HS: 512 │     │
 │  └────────┘  └────────┘     │
 │                              │
@@ -227,7 +248,7 @@ SizedBox(
 
 ---
 
-## 5. Implementation Order
+## 5. Completed Implementation Sequence
 
 | Step | Task | Effort | Dependencies |
 |------|------|--------|-------------|
@@ -236,12 +257,12 @@ SizedBox(
 | 3 | Create `mini_games_screen.dart` with grid layout | Medium | Step 2 |
 | 4 | Add `/mini-games` route to `router.dart` | Small | Step 3 |
 | 5 | Add "Mini Games" quick action to Home screen | Small | Step 4 |
-| 6 | Build **Infinity Loop Hex** game | Large | None |
-| 7 | Build **368 Chickens** game | Medium | None |
-| 8 | Build **Stack Merge** game | Large | None |
-| 9 | Build **Classic 2048** game | Medium | None |
+| 6 | Build **Flower Flow** game | Large | None |
+| 7 | Build **Egg Rescue** game | Medium | None |
+| 8 | Build **Rainbow Rescue** game | Large | None |
+| 9 | Build **Animal Family** game | Medium | None |
 | 10 | Add game routes `/mini-games/{id}` | Small | Steps 6-9 |
-| 11 | Wire high score saving on game over | Small | Steps 1, 6-9 |
+| 11 | Wire result persistence, wallet rewards, and pet growth | Small | Steps 1, 6-9 |
 
 ---
 
@@ -263,10 +284,36 @@ SizedBox(
 
 | Reference | KidVerse version | Key changes |
 |-----------|-----------------|-------------|
-| Infinity Loop Hex | Same mechanic | 4×4–8×8 difficulty, hints, stars, kid colors |
-| 368 Chickens | Same tap-to-catch | Chickens instead of generic circles, fun sounds, combo system |
-| Stack Merge | Like 2048 + Suika | Merge by dropping, auto-stack, no complex gestures |
-| 2048 Classic | Same rules | Bigger number text, kid-friendly colors, swipe + button controls |
+| Infinity Loop Hex | Flower Flow | Water-and-flower story, instant glow/note feedback, adaptive help, trace and co-op |
+| 368 Chickens | Egg Rescue | No-loss play, egg counting, split-screen co-op, golden finale |
+| Stack Merge | Rainbow Rescue | Moon story, helper hand, rescue clearing, co-op, endless creative mode |
+| 2048 Classic | Animal Family | Speaking/dancing animals, tilt, co-op, friendly full-board rescue |
+
+---
+
+## 9. Rewards and Accessibility
+
+Every completed result flows through `MiniGamesController.recordResult` and:
+
+1. saves the high score, play history, daily progress, and badges;
+2. grants a score-scaled but modest coin and XP bundle to the active profile;
+3. feeds persistent pet XP, evolving the pet and unlocking accessories; and
+4. shows a visible reward banner alongside the game's celebration.
+
+The new behavior respects `reducedMotionProvider`, the existing voice/SFX and
+haptic preferences, and color-blind mode. Number tiles gain unique shape cues,
+moving Chicken targets stop oscillating under reduced motion, Stack skips its
+drop delay, and tutorial gestures become static. All primary actions retain
+semantic labels and large one-hand-reachable touch targets.
+
+## 10. Verification
+
+- `flutter analyze`: zero issues.
+- `flutter test`: all 82 tests passing at the last implementation verification.
+- Mini-game tests cover score persistence, wallet reward delivery, pet growth,
+  daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
+  Chicken target rules, and phone-viewport rendering for the catalog and all
+  four game screens.
 
 ---
 

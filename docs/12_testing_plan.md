@@ -19,6 +19,9 @@
   force (answer > 1 digit, resets on error).
 - A11y: large-text scaling doesn't overflow cards; color-blind palette applied;
   semantics labels present.
+- Mini games: first-play tutorial dismissal; phone layout for all four games;
+  persistent high scores/pet XP; wallet reward hook; no-loss 2048 and Stack
+  rescues; merge/undo/rainbow rules; Together-mode controls.
 
 ## Performance budget
 - 60fps on a 2019-class Android tablet during confetti + background particles.
