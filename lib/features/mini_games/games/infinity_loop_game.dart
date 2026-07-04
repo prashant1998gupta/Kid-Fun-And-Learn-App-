@@ -40,9 +40,17 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
   ];
 
   int get _gridSize => switch (_difficulty) {
-        MiniGameDifficulty.easy => 4,
-        MiniGameDifficulty.normal => 6,
-        MiniGameDifficulty.challenge => 8,
+        MiniGameDifficulty.easy => 3,
+        MiniGameDifficulty.normal => 5,
+        MiniGameDifficulty.challenge => 7,
+      };
+
+  // How far tiles are scrambled from the solution. Fewer turns = a puzzle a
+  // young child can finish in a handful of taps.
+  int get _maxScramble => switch (_difficulty) {
+        MiniGameDifficulty.easy => 2,
+        MiniGameDifficulty.normal => 3,
+        MiniGameDifficulty.challenge => 5,
       };
 
   @override
@@ -80,7 +88,7 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
         var mask = solution;
         var turns = 0;
         if (mask != 0) {
-          turns = 1 + _random.nextInt(5);
+          turns = 1 + _random.nextInt(_maxScramble);
           for (var i = 0; i < turns; i++) {
             mask = _rotateMask(mask);
           }

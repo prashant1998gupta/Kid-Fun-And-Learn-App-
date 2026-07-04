@@ -6,6 +6,7 @@ enum SwipeDirection { up, down, left, right }
 class Classic2048Engine {
   Classic2048Engine({
     this.size = defaultSize,
+    this.targetTile = 2048,
     math.Random? random,
   })  : assert(size >= 3 && size <= 5),
         _random = random ?? math.Random() {
@@ -14,6 +15,10 @@ class Classic2048Engine {
 
   static const defaultSize = 4;
   final int size;
+
+  /// Tile value that counts as a win. Lowered for young children so they reach
+  /// the celebration often (e.g. 64) instead of the near-impossible 2048.
+  final int targetTile;
   final math.Random _random;
   late List<List<int>> grid;
   int score = 0;
@@ -48,7 +53,7 @@ class Classic2048Engine {
       final result = _mergeLine(original);
       if (!_sameLine(original, result.values)) moved = true;
       score += result.points;
-      if (result.values.contains(2048)) won = true;
+      if (result.values.any((v) => v >= targetTile)) won = true;
       _writeLine(index, direction, result.values);
     }
     if (!moved) {

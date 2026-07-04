@@ -25,7 +25,7 @@ class StackMergeGame extends ConsumerStatefulWidget {
 class _StackMergeGameState extends ConsumerState<StackMergeGame> {
   static const _columns = 5;
   late StackMergeEngine _engine;
-  MiniGameDifficulty _difficulty = MiniGameDifficulty.normal;
+  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
   int _activeValue = 2;
   int _dropColumn = 2;
   List<int> _preview = const [2, 4];
@@ -67,7 +67,9 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       };
 
   int _nextRandomValue() {
-    if (_random.nextInt(20) == 0) return StackMergeEngine.rainbow;
+    // Rainbow helper appears more often on Easy (it's a rescue, not a puzzle).
+    final rainbowChance = _difficulty == MiniGameDifficulty.easy ? 12 : 22;
+    if (_random.nextInt(rainbowChance) == 0) return StackMergeEngine.rainbow;
     if (_difficulty == MiniGameDifficulty.challenge &&
         _random.nextInt(5) == 0) {
       return 8;
@@ -82,9 +84,13 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       _preview = [_nextRandomValue(), _nextRandomValue()];
       _dropColumn = 2;
       _dropping = false;
-      _message = 'Aim, drop, and build a giant merge!';
-      for (var i = 0; i < 3; i++) {
-        _engine.drop(_random.nextInt(_columns), _random.nextBool() ? 2 : 4);
+      _message = 'Tap a column to drop your block!';
+      // Start with a clean board on Easy so kids aren't handed a mess; a small
+      // head start on harder modes keeps them interesting.
+      if (_difficulty != MiniGameDifficulty.easy) {
+        for (var i = 0; i < 3; i++) {
+          _engine.drop(_random.nextInt(_columns), _random.nextBool() ? 2 : 4);
+        }
       }
     });
   }
@@ -99,6 +105,14 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     setState(() {
       _dropColumn = (_dropColumn + delta).clamp(0, _columns - 1);
     });
+  }
+
+  /// Tap a column to aim there and drop in one gesture — the most natural
+  /// control for a young child (no cursor-nudging required).
+  Future<void> _dropAt(int column) async {
+    if (_dropping || _engine.gameOver) return;
+    setState(() => _dropColumn = column.clamp(0, _columns - 1));
+    await _drop();
   }
 
   Future<void> _drop() async {
@@ -210,10 +224,10 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
               context,
               title: 'How to play Stack Merge',
               steps: const [
-                'Move the falling block above a column.',
-                'Drop equal numbers together to merge them.',
-                'Chain merges give bigger scores and celebrations.',
-                'A rainbow block doubles the top block in its column.',
+                'Tap a column to drop your block there.',
+                'Drop two of the same to join them into a bigger one!',
+                'Long chains give bigger scores and celebrations.',
+                'A rainbow ★ block doubles the top block in its column.',
               ],
             ),
           ),
@@ -262,7 +276,10 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                     label: const Text('Play again'),
                   ),
                 ),
-              Container(
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (d) => _dropAt((d.localPosition.dx / 52).floor()),
+                child: Container(
                 width: 260,
                 height: boardHeight,
                 decoration: BoxDecoration(
@@ -306,6 +323,7 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                     ),
                   ],
                 ),
+              ),
               ),
             ],
           ),

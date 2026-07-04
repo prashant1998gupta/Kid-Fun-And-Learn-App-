@@ -21,9 +21,10 @@ class Classic2048Game extends ConsumerStatefulWidget {
 
 class _Classic2048GameState extends ConsumerState<Classic2048Game> {
   late Classic2048Engine _engine;
-  MiniGameDifficulty _difficulty = MiniGameDifficulty.normal;
-  bool _animalMode = false;
-  String _message = 'Join matching tiles to make bigger ones!';
+  // Default to Easy so young children win quickly and often.
+  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  bool _animalMode = true; // animals read friendlier than raw numbers
+  String _message = 'Join two the same to make it bigger!';
   final _celebration = CelebrationController();
 
   static const _tileColors = {
@@ -57,7 +58,7 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
   @override
   void initState() {
     super.initState();
-    _engine = Classic2048Engine();
+    _engine = Classic2048Engine(size: _boardSize, targetTile: _targetTile);
   }
 
   @override
@@ -65,15 +66,23 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     super.dispose();
   }
 
+  // Easy uses a roomy 4x4 with a low goal; harder modes raise the goal, not the
+  // survival pressure, so it never feels punishing for a child.
   int get _boardSize => switch (_difficulty) {
-        MiniGameDifficulty.easy => 3,
+        MiniGameDifficulty.easy => 4,
         MiniGameDifficulty.normal => 4,
         MiniGameDifficulty.challenge => 5,
       };
 
+  int get _targetTile => switch (_difficulty) {
+        MiniGameDifficulty.easy => 64,
+        MiniGameDifficulty.normal => 256,
+        MiniGameDifficulty.challenge => 1024,
+      };
+
   void _reset() {
     setState(() {
-      _engine = Classic2048Engine(size: _boardSize);
+      _engine = Classic2048Engine(size: _boardSize, targetTile: _targetTile);
       _message = 'New board — plan your next move!';
     });
   }
@@ -112,7 +121,7 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     final newlyWon = !wasWon && _engine.won;
     if (newlyWon) {
       _celebration.fireworks();
-      AudioService.instance.speak('Amazing! You reached 2048!');
+      AudioService.instance.speak('Amazing! You reached $_targetTile!');
     }
     if (newlyWon || _engine.gameOver) _recordResult();
   }
@@ -201,11 +210,11 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
             onTap: () => showMiniGameHelp(
               context,
               title: 'How to play 2048',
-              steps: const [
-                'Swipe or use the arrows to move every tile.',
-                'Two equal tiles join into the next number.',
-                'Use Undo if a move traps your board.',
-                'Reach 2048, then continue for a bigger high score.',
+              steps: [
+                'Swipe or tap the arrows to slide every tile.',
+                'Two of the same join into a bigger one!',
+                'Tap Undo if a move gets you stuck.',
+                'Reach the $_targetTile tile to win — then keep going!',
               ],
             ),
           ),
@@ -255,7 +264,7 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
                 const SizedBox(height: 10),
                 if (_engine.won && !_engine.keepPlaying)
                   _statusCard(
-                    '🎉 You reached 2048!',
+                    '🎉 You reached $_targetTile!',
                     'Keep playing',
                     () => setState(_engine.continueAfterWin),
                   ),

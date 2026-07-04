@@ -34,8 +34,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
   bool _started = false;
   bool _paused = false;
   bool _bossSpawned = false;
-  MiniGameDifficulty _difficulty = MiniGameDifficulty.normal;
-  String _message = 'Tap chickens, collect eggs, avoid bombs!';
+  MiniGameDifficulty _difficulty = MiniGameDifficulty.easy;
+  String _message = 'Tap the chickens! Just have fun!';
   final List<_ChickenTarget> _targets = [];
   final List<_TapBurst> _bursts = [];
   final math.Random _random = math.Random();
@@ -52,9 +52,13 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       };
   int get _maxMisses => switch (_difficulty) {
         MiniGameDifficulty.easy => 5,
-        MiniGameDifficulty.normal => 3,
-        MiniGameDifficulty.challenge => 2,
+        MiniGameDifficulty.normal => 5,
+        MiniGameDifficulty.challenge => 3,
       };
+
+  /// On Easy the round is purely time-based — a child can never "lose"; they
+  /// just play the clock out and collect a happy score. (Hearts are hidden.)
+  bool get _noFail => _difficulty == MiniGameDifficulty.easy;
 
   @override
   void dispose() {
@@ -137,8 +141,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
         (burst) =>
             elapsed - burst.createdAt > const Duration(milliseconds: 650),
       );
-      shouldEnd =
-          _missed >= _maxMisses || elapsed >= Duration(seconds: totalSeconds);
+      shouldEnd = (!_noFail && _missed >= _maxMisses) ||
+          elapsed >= Duration(seconds: totalSeconds);
     });
     if (shouldEnd) _endGame();
   }
@@ -151,13 +155,15 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     final progress =
         (elapsed.inMilliseconds / (_roundSeconds * 1000)).clamp(0.0, 1.0);
     final baseLifetime = switch (_difficulty) {
-      MiniGameDifficulty.easy => 2200,
-      MiniGameDifficulty.normal => 1800,
+      MiniGameDifficulty.easy => 3000,
+      MiniGameDifficulty.normal => 1900,
       MiniGameDifficulty.challenge => 1450,
     };
+    // Easy stays calm the whole round; harder modes speed up over time.
+    final shrink = _difficulty == MiniGameDifficulty.easy ? 250 : 650;
     final lifetime = type == ChickenTargetType.boss
-        ? 4200
-        : (baseLifetime - (650 * progress)).round();
+        ? 4600
+        : (baseLifetime - (shrink * progress)).round();
     _targets.add(
       _ChickenTarget(
         id: _nextId++,
@@ -177,19 +183,22 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       ),
     );
     final baseSpawn = switch (_difficulty) {
-      MiniGameDifficulty.easy => 1150,
+      MiniGameDifficulty.easy => 1250,
       MiniGameDifficulty.normal => 900,
       MiniGameDifficulty.challenge => 700,
     };
-    _nextSpawn =
-        elapsed + Duration(milliseconds: (baseSpawn - 260 * progress).round());
+    final spawnSpeedup = _difficulty == MiniGameDifficulty.easy ? 120 : 260;
+    _nextSpawn = elapsed +
+        Duration(milliseconds: (baseSpawn - spawnSpeedup * progress).round());
   }
 
   ChickenTargetType _randomType() {
     final roll = _random.nextInt(100);
-    if (roll < 7) return ChickenTargetType.bomb;
-    if (roll < 14) return ChickenTargetType.egg;
-    if (roll < 23) return ChickenTargetType.golden;
+    // Fewer bombs on Easy — they're a "don't tap" surprise, not a trap.
+    final bombCap = _difficulty == MiniGameDifficulty.easy ? 3 : 7;
+    if (roll < bombCap) return ChickenTargetType.bomb;
+    if (roll < bombCap + 8) return ChickenTargetType.egg;
+    if (roll < bombCap + 18) return ChickenTargetType.golden;
     return ChickenTargetType.chicken;
   }
 
@@ -466,22 +475,32 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
                         fontSize: 20,
                       ),
                     ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var i = 0; i < _maxMisses; i++)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 3),
-                          child: Icon(
-                            i < _missed
-                                ? Icons.close_rounded
-                                : Icons.favorite_rounded,
-                            color: i < _missed ? Colors.white54 : Colors.red,
-                            size: 27,
+                  if (_noFail)
+                    const Text(
+                      '😊 Just for fun!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    )
+                  else
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var i = 0; i < _maxMisses; i++)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: Icon(
+                              i < _missed
+                                  ? Icons.close_rounded
+                                  : Icons.favorite_rounded,
+                              color: i < _missed ? Colors.white54 : Colors.red,
+                              size: 27,
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ],
               ),
             ),
