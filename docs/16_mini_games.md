@@ -22,6 +22,10 @@ and framework-independent rule tests are implemented.
 - Solo and local **Together** modes are available across all four games.
 - Sound, haptics, squish/pop feedback, confetti, mascot reactions, and a clear
   coin/XP/pet reward moment are shared across the games.
+- Second-pass game juice keeps pieces inside their play boxes and adds physical
+  feedback: Rainbow Rescue has a clipped board, drop-preview glow, landing
+  shadow, landing bounce, and merge burst; Flower Flow has bloom rings; Animal
+  Family has board squish/shake and a new-friend pop.
 - Reduced motion, color-blind-safe shapes, semantic labels, and reachable
   bottom controls are accessibility defaults.
 - Optional tilt control in Animal Family and trace gestures in Flower Flow add

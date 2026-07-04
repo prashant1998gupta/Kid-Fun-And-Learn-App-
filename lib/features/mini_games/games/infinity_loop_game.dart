@@ -171,6 +171,7 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
         if (tile.mask != tile.solution) {
           setState(() {
             tile.mask = tile.solution;
+            tile.bloomPulse++;
             _usedHint = true;
             _message = 'Pip fixed one tile. Finish the rest!';
           });
@@ -239,6 +240,7 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     if (tile.mask == 0) return;
     setState(() {
       tile.mask = _rotateMask(tile.mask);
+      if (tile.mask == tile.solution) tile.bloomPulse++;
       _moves++;
       _message = tile.mask == tile.solution
           ? 'Click! That tile is connected.'
@@ -273,6 +275,7 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
         if (tile.mask != tile.solution) {
           setState(() {
             tile.mask = tile.solution;
+            tile.bloomPulse++;
             _usedHint = true;
             _message = 'Here is a little help! 💫';
           });
@@ -472,6 +475,31 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
                 ),
               ),
               if (aligned)
+                Positioned.fill(
+                  child: TweenAnimationBuilder<double>(
+                    key: ValueKey(tile.bloomPulse),
+                    tween: Tween(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 520),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, t, child) => Opacity(
+                      opacity: (1 - t).clamp(0, 1),
+                      child: Transform.scale(
+                        scale: 0.7 + t * 0.9,
+                        child: child,
+                      ),
+                    ),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF00CEC9),
+                          width: 3,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (aligned)
                 const Align(
                   alignment: Alignment.topRight,
                   child: Text('🌸', style: TextStyle(fontSize: 14)),
@@ -528,6 +556,7 @@ class _HexTile {
   _HexTile({required this.mask, required this.solution});
   int mask;
   final int solution;
+  int bloomPulse = 0;
 }
 
 class _HexPipePainter extends CustomPainter {

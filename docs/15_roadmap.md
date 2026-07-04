@@ -69,6 +69,10 @@ for low-end tablets.
 - [x] **M21:** Mini Games engagement pass with three difficulty modes, daily
   challenges, seven local badges, tutorials, mascot feedback, richer Chicken
   targets, generated Infinity boards, Stack Merge chains, and expanded 2048.
+- [x] **M22:** Mini Games juice pass: Rainbow Rescue pieces are clipped inside
+  the board with drop-preview shadow, landing bounce, and merge burst; Flower
+  Flow has bloom pulses; Animal Family has board squish/shake and new-friend
+  pop feedback.
 
 ## Quality rules for Codex follow-up work
 

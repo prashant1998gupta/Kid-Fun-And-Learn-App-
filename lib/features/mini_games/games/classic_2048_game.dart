@@ -36,6 +36,10 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
   StreamSubscription<AccelerometerEvent>? _tiltSubscription;
   DateTime _lastTilt = DateTime.fromMillisecondsSinceEpoch(0);
   bool _animalMode = true; // animals read friendlier than raw numbers
+  bool _lastMoveBlocked = false;
+  int _boardPulse = 0;
+  int _friendPulse = 0;
+  int _newFriendValue = 0;
   String _message = 'Join two the same to make it bigger!';
   final _celebration = CelebrationController();
 
@@ -138,6 +142,10 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
       _message = 'New board — plan your next move!';
       _currentPlayer = 1;
       _resultRecorded = false;
+      _lastMoveBlocked = false;
+      _boardPulse = 0;
+      _friendPulse = 0;
+      _newFriendValue = 0;
     });
   }
 
@@ -154,18 +162,29 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     final wasWon = _engine.won;
     final moved = _engine.move(direction);
     if (!moved) {
-      setState(() => _message = 'That side is blocked.');
+      setState(() {
+        _message = 'That side is blocked.';
+        _lastMoveBlocked = true;
+        _boardPulse++;
+      });
+      AudioService.instance.playSfx(Sfx.pop);
       return;
     }
 
     final madeNewTile = _engine.highestTile > oldHighest;
     final newAnimal = _animalNames[_engine.highestTile];
     setState(() {
+      _lastMoveBlocked = false;
+      _boardPulse++;
       _message = madeNewTile
           ? (_animalMode && newAnimal != null
               ? 'You made a $newAnimal! ${_animals[_engine.highestTile]}'
               : 'Great merge! You made ${_engine.highestTile}.')
           : 'Keep matching to grow!';
+      if (madeNewTile) {
+        _newFriendValue = _engine.highestTile;
+        _friendPulse++;
+      }
     });
     AudioService.instance.playSfx(madeNewTile ? Sfx.correct : Sfx.tap);
     if (madeNewTile) {
@@ -415,31 +434,99 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
                     'Keep playing',
                     () => setState(_engine.continueAfterWin),
                   ),
-                Container(
-                  width: boardWidth,
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.22),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-                      for (var r = 0; r < _engine.size; r++)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            for (var c = 0; c < _engine.size; c++)
-                              _tile(r, c, tileSize),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
+                _animatedBoard(boardWidth, tileSize),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _animatedBoard(double boardWidth, double tileSize) {
+    final newAnimal = _animals[_newFriendValue];
+    return TweenAnimationBuilder<double>(
+      key: ValueKey('board-$_boardPulse-$_lastMoveBlocked'),
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, child) {
+        if (_lastMoveBlocked) {
+          final shake = math.sin(t * math.pi * 6) * (1 - t) * 8;
+          return Transform.translate(offset: Offset(shake, 0), child: child);
+        }
+        final scale = 1 + math.sin(t * math.pi) * 0.025;
+        return Transform.scale(scale: scale, child: child);
+      },
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: boardWidth,
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                for (var r = 0; r < _engine.size; r++)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var c = 0; c < _engine.size; c++)
+                        _tile(r, c, tileSize),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+          if (_friendPulse > 0 && newAnimal != null)
+            Positioned(
+              key: ValueKey('friend-$_friendPulse'),
+              top: 10,
+              right: 10,
+              child: IgnorePointer(
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 780),
+                  curve: Curves.easeOutBack,
+                  builder: (context, t, child) => Opacity(
+                    opacity: (1 - t).clamp(0, 1),
+                    child: Transform.translate(
+                      offset: Offset(0, -28 * t),
+                      child: Transform.scale(
+                        scale: 0.6 + t * 0.8,
+                        child: child,
+                      ),
+                    ),
+                  ),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.18),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      '$newAnimal New friend!',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

@@ -35,6 +35,11 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
   int _dropColumn = 2;
   List<int> _preview = const [2, 4];
   bool _dropping = false;
+  int _dropPulse = 0;
+  int _mergePulse = 0;
+  int _lastDropColumn = 2;
+  int _lastDropRow = 0;
+  int _lastMergeCount = 0;
   String _message = 'Match equal blocks to start a chain!';
   final _random = math.Random();
   final _celebration = CelebrationController();
@@ -122,6 +127,11 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       _preview = [_nextRandomValue(), _nextRandomValue()];
       _dropColumn = 2;
       _dropping = false;
+      _dropPulse = 0;
+      _mergePulse = 0;
+      _lastDropColumn = 2;
+      _lastDropRow = 0;
+      _lastMergeCount = 0;
       _message = 'Tap a column to drop your block!';
       _currentPlayer = 1;
       _resultRecorded = false;
@@ -161,8 +171,14 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       if (!mounted) return;
     }
 
-    final result = _engine.dropWithResult(_dropColumn, _activeValue);
+    final droppedColumn = _dropColumn;
+    final result = _engine.dropWithResult(droppedColumn, _activeValue);
     setState(() {
+      _lastDropColumn = droppedColumn;
+      _lastDropRow = math.max(0, _engine.columns[droppedColumn].length - 1);
+      _lastMergeCount = result.mergeCount;
+      _dropPulse++;
+      if (result.mergeCount > 0) _mergePulse++;
       _activeValue = _preview.first;
       _preview = [_preview.last, _nextRandomValue()];
       _dropping = false;
@@ -359,53 +375,63 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                     border:
                         Border.all(color: Colors.white.withValues(alpha: 0.35)),
                   ),
-                  child: Stack(
-                    children: [
-                      for (var column = 0;
-                          column < _engine.columns.length;
-                          column++)
-                        for (var row = 0;
-                            row < _engine.columns[column].length;
-                            row++)
-                          AnimatedPositioned(
-                            duration: const Duration(milliseconds: 180),
-                            left: column * 52.0 + 5,
-                            bottom: row * cellHeight + 4,
-                            child: _tile(
-                              _engine.columns[column][row],
-                              size: math.min(44, cellHeight - 3),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(17),
+                    child: Stack(
+                      clipBehavior: Clip.hardEdge,
+                      children: [
+                        _columnGlow(),
+                        _landingShadow(cellHeight),
+                        for (var column = 0;
+                            column < _engine.columns.length;
+                            column++)
+                          for (var row = 0;
+                              row < _engine.columns[column].length;
+                              row++)
+                            AnimatedPositioned(
+                              duration: const Duration(milliseconds: 180),
+                              left: column * 52.0 + 5,
+                              bottom: row * cellHeight + 4,
+                              child: _tile(
+                                _engine.columns[column][row],
+                                size: math.min(44, cellHeight - 3),
+                                bounceKey: column == _lastDropColumn &&
+                                        row == _lastDropRow
+                                    ? _dropPulse
+                                    : null,
+                              ),
                             ),
+                        _mergeBurst(cellHeight),
+                        AnimatedPositioned(
+                          duration: Duration(
+                            milliseconds: _dropping ? 260 : 140,
                           ),
-                      AnimatedPositioned(
-                        duration: Duration(
-                          milliseconds: _dropping ? 220 : 120,
-                        ),
-                        curve: Curves.easeIn,
-                        left: _dropColumn * 52.0 + 5,
-                        top: _dropping
-                            ? boardHeight -
-                                ((_engine.columns[_dropColumn].length + 1) *
-                                    cellHeight)
-                            : 7,
-                        child: _tile(
-                          _activeValue,
-                          size: math.min(44, cellHeight - 3),
-                        ),
-                      ),
-                      Positioned(
-                        left: _bestColumn * 52.0 + 14,
-                        top: 50,
-                        child: IgnorePointer(
-                          child: Text(
-                            '👇',
-                            style: TextStyle(
-                              fontSize: 25,
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
+                          curve: _dropping
+                              ? Curves.easeInCubic
+                              : Curves.easeOutBack,
+                          left: _dropColumn * 52.0 + 5,
+                          top: _activeTop(boardHeight, cellHeight),
+                          child: _tile(
+                            _activeValue,
+                            size: math.min(44, cellHeight - 3),
+                            floating: true,
                           ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          left: _bestColumn * 52.0 + 14,
+                          top: 50,
+                          child: IgnorePointer(
+                            child: Text(
+                              '👇',
+                              style: TextStyle(
+                                fontSize: 25,
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -416,14 +442,135 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     );
   }
 
-  Widget _tile(int value, {required double size}) {
+  double _activeTop(double boardHeight, double cellHeight) {
+    if (!_dropping) return 7;
+    final tileSize = math.min(44.0, cellHeight - 3);
+    final targetTop =
+        boardHeight - ((_engine.columns[_dropColumn].length + 1) * cellHeight);
+    return targetTop.clamp(7.0, boardHeight - tileSize - 4);
+  }
+
+  Widget _columnGlow() {
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 150),
+      left: _dropColumn * 52.0 + 2,
+      top: 0,
+      bottom: 0,
+      width: 48,
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withValues(alpha: 0.22),
+                const Color(0xFFFFD93D).withValues(alpha: 0.18),
+                Colors.white.withValues(alpha: 0.04),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _landingShadow(double cellHeight) {
+    final stackHeight = _engine.columns[_dropColumn].length;
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 160),
+      left: _dropColumn * 52.0 + 13,
+      bottom: stackHeight * cellHeight + 5,
+      child: IgnorePointer(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          width: _dropping ? 31 : 26,
+          height: _dropping ? 10 : 7,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: _dropping ? 0.24 : 0.14),
+            borderRadius: BorderRadius.circular(99),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _mergeBurst(double cellHeight) {
+    if (_lastMergeCount == 0) return const SizedBox.shrink();
+    final tileSize = math.min(44.0, cellHeight - 3);
+    return Positioned(
+      key: ValueKey(_mergePulse),
+      left: _lastDropColumn * 52.0 + 5 + tileSize / 2 - 42,
+      bottom: _lastDropRow * cellHeight + 4 + tileSize / 2 - 42,
+      child: IgnorePointer(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 620),
+          curve: Curves.easeOutCubic,
+          builder: (context, t, child) {
+            return Opacity(
+              opacity: (1 - t).clamp(0, 1),
+              child: Transform.scale(
+                scale: 0.45 + t * 1.3,
+                child: child,
+              ),
+            );
+          },
+          child: SizedBox(
+            width: 84,
+            height: 84,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFFFD93D),
+                      width: 4,
+                    ),
+                  ),
+                ),
+                for (var i = 0; i < 8; i++)
+                  Transform.translate(
+                    offset: Offset(
+                      math.cos(i * math.pi / 4) * 30,
+                      math.sin(i * math.pi / 4) * 30,
+                    ),
+                    child: const Text('✨', style: TextStyle(fontSize: 14)),
+                  ),
+                Text(
+                  _lastMergeCount >= 2 ? 'x$_lastMergeCount' : 'POP',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _tile(
+    int value, {
+    required double size,
+    int? bounceKey,
+    bool floating = false,
+  }) {
     final rainbow = value == StackMergeEngine.rainbow;
     final colorBlind = ref.watch(settingsControllerProvider).colorBlindMode;
     const shapes = ['●', '■', '▲', '◆', '⬟', '✚', '✦'];
     final shape = value > 0
         ? shapes[((math.log(value) / math.ln2).round() - 1) % shapes.length]
         : '★';
-    return Container(
+    final tile = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
@@ -441,11 +588,14 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
             : null,
         color: rainbow ? null : (_valueColors[value] ?? Colors.purple),
         borderRadius: BorderRadius.circular(10),
+        border: floating
+            ? Border.all(color: Colors.white.withValues(alpha: 0.85), width: 2)
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: floating ? 0.32 : 0.2),
+            blurRadius: floating ? 10 : 4,
+            offset: Offset(0, floating ? 5 : 2),
           ),
         ],
       ),
@@ -461,6 +611,16 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
           ),
         ),
       ),
+    );
+    if (bounceKey == null) return tile;
+    return TweenAnimationBuilder<double>(
+      key: ValueKey('stack-bounce-$bounceKey-$value'),
+      tween: Tween(begin: 1.18, end: 1),
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.elasticOut,
+      builder: (context, scale, child) =>
+          Transform.scale(scale: scale, child: child),
+      child: tile,
     );
   }
 
