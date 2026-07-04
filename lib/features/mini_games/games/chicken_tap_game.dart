@@ -14,6 +14,7 @@ import '../../../core/widgets/openmoji_view.dart';
 import '../../settings/settings_controller.dart';
 import '../logic/chicken_tap_rules.dart';
 import '../mini_games_controller.dart';
+import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
 
 class ChickenTapGame extends ConsumerStatefulWidget {
@@ -30,6 +31,9 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
   int _bestCombo = 0;
   int _bonusSeconds = 0;
   int _timeLeft = 30;
+  // Dynamic difficulty: rises when the child misses (game slows + chickens live
+  // longer) and falls when they catch (game tightens up). Self-balancing.
+  double _struggleBoost = 0;
   bool _gameOver = false;
   bool _started = false;
   bool _paused = false;
@@ -61,6 +65,23 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
   bool get _noFail => _difficulty == MiniGameDifficulty.easy;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        showFirstPlayTutorial(
+          context,
+          ref,
+          gameId: '368-chickens',
+          instruction: 'Tap the chickens before they run away. '
+              'Grab eggs, skip the bombs!',
+          emoji: '🐔',
+        );
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _ticker?.cancel();
     _clock.stop();
@@ -78,6 +99,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       _gameOver = false;
       _paused = false;
       _bossSpawned = false;
+      _struggleBoost = 0;
       _timeLeft = _roundSeconds;
       _targets.clear();
       _bursts.clear();
@@ -131,6 +153,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
           if (ChickenTapRules.countsAsMiss(target.type)) {
             _missed++;
             _combo = 0;
+            _struggleBoost = (_struggleBoost + 0.34).clamp(0.0, 1.0);
             _message = target.type == ChickenTargetType.boss
                 ? 'The boss escaped!'
                 : 'Oops, a chicken slipped away!';
@@ -159,11 +182,12 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       MiniGameDifficulty.normal => 1900,
       MiniGameDifficulty.challenge => 1450,
     };
-    // Easy stays calm the whole round; harder modes speed up over time.
+    // Easy stays calm the whole round; harder modes speed up over time. The
+    // struggle boost lengthens lifetimes when the child is having a hard time.
     final shrink = _difficulty == MiniGameDifficulty.easy ? 250 : 650;
     final lifetime = type == ChickenTargetType.boss
         ? 4600
-        : (baseLifetime - (shrink * progress)).round();
+        : (baseLifetime - (shrink * progress) + _struggleBoost * 900).round();
     _targets.add(
       _ChickenTarget(
         id: _nextId++,
@@ -189,7 +213,11 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     };
     final spawnSpeedup = _difficulty == MiniGameDifficulty.easy ? 120 : 260;
     _nextSpawn = elapsed +
-        Duration(milliseconds: (baseSpawn - spawnSpeedup * progress).round());
+        Duration(
+          milliseconds:
+              (baseSpawn - spawnSpeedup * progress + _struggleBoost * 350)
+                  .round(),
+        );
   }
 
   ChickenTargetType _randomType() {
@@ -239,6 +267,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       _combo++;
       _bestCombo = math.max(_bestCombo, _combo);
       _score += ChickenTapRules.points(target.type, _combo);
+      _struggleBoost = (_struggleBoost - 0.15).clamp(0.0, 1.0);
       if (target.type == ChickenTargetType.egg) {
         _bonusSeconds += 3;
         _message = 'Egg power! +3 seconds!';

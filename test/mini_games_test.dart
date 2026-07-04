@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kidverse/features/mini_games/data/mini_games_repository.dart';
+import 'package:kidverse/features/mini_games/data/mini_pet.dart';
 import 'package:kidverse/features/mini_games/games/chicken_tap_game.dart';
 import 'package:kidverse/features/mini_games/games/classic_2048_game.dart';
 import 'package:kidverse/features/mini_games/games/infinity_loop_game.dart';
@@ -73,6 +74,22 @@ void main() {
 
       expect(unlocked, containsAll(['first_game', 'chicken_combo_10']));
       expect(controller.state.playedGames, contains('368-chickens'));
+      expect(controller.state.petXp, greaterThan(0));
+    });
+
+    test('pet XP persists and evolves through play', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+      final controller = MiniGamesController(repository);
+
+      for (var i = 0; i < 5; i++) {
+        await controller.recordResult(gameId: '2048', score: 25);
+      }
+
+      expect(controller.state.pet.stage, greaterThan(0));
+      expect(repository.petXp(), controller.state.petXp);
+      expect(MiniPet.forXp(repository.petXp()).emoji, '🐣');
     });
   });
 
@@ -184,6 +201,11 @@ void main() {
         ),
       );
       await tester.pump();
+      final tutorialButton = find.text("Let's Play! 🎉");
+      if (tutorialButton.evaluate().isNotEmpty) {
+        await tester.tap(tutorialButton);
+        await tester.pump(const Duration(milliseconds: 300));
+      }
       expect(tester.takeException(), isNull);
     }
 
@@ -205,7 +227,7 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await render(const Classic2048Game());
-    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.tap(find.byIcon(Icons.close_rounded));
     await tester.pump();
     expect(tester.takeException(), isNull);
   });

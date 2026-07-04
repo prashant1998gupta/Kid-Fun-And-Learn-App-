@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/openmoji_view.dart';
+import 'data/mini_pet.dart';
 import 'data/mini_games_repository.dart';
 import 'mini_games_controller.dart';
 
@@ -25,6 +26,8 @@ class MiniGamesScreen extends ConsumerWidget {
           child: Column(
             children: [
               _topBar(context),
+              const SizedBox(height: 8),
+              _PetCard(pet: gameState.pet),
               const SizedBox(height: 8),
               _DailyChallengeCard(challenge: gameState.dailyChallenge),
               const SizedBox(height: 8),
@@ -97,6 +100,76 @@ class MiniGamesScreen extends ConsumerWidget {
       _ => AppRoutes.miniGames,
     };
     context.push(route);
+  }
+}
+
+class _PetCard extends StatelessWidget {
+  const _PetCard({required this.pet});
+
+  final MiniPet pet;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF7D6), Color(0xFFFFE4F2)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Semantics(
+            label: pet.name,
+            child: Text(pet.emoji, style: const TextStyle(fontSize: 42)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${pet.name} • ${pet.xp} pet stars',
+                  style: const TextStyle(
+                    color: Color(0xFF4A3B52),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: pet.isMax ? 1 : pet.progress,
+                  minHeight: 9,
+                  borderRadius: BorderRadius.circular(10),
+                  backgroundColor: Colors.white,
+                  color: const Color(0xFFFF8AB3),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  pet.isMax
+                      ? 'Your pet is fully grown! ✨'
+                      : '${pet.xpToNext} stars until your pet grows',
+                  style: const TextStyle(
+                    color: Color(0xFF725B7A),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -13,6 +13,7 @@ import '../../../core/widgets/celebration_overlay.dart';
 import '../../settings/settings_controller.dart';
 import '../logic/stack_merge_engine.dart';
 import '../mini_games_controller.dart';
+import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
 
 class StackMergeGame extends ConsumerStatefulWidget {
@@ -53,6 +54,17 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     super.initState();
     _engine = StackMergeEngine(columnCount: _columns);
     _restart();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        showFirstPlayTutorial(
+          context,
+          ref,
+          gameId: 'stack-merge',
+          instruction: 'Tap a column to drop your block. Drop two of the same '
+              'to join them!',
+        );
+      }
+    });
   }
 
   @override
@@ -280,50 +292,50 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (d) => _dropAt((d.localPosition.dx / 52).floor()),
                 child: Container(
-                width: 260,
-                height: boardHeight,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(18),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.35)),
-                ),
-                child: Stack(
-                  children: [
-                    for (var column = 0;
-                        column < _engine.columns.length;
-                        column++)
-                      for (var row = 0;
-                          row < _engine.columns[column].length;
-                          row++)
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 180),
-                          left: column * 52.0 + 5,
-                          bottom: row * cellHeight + 4,
-                          child: _tile(
-                            _engine.columns[column][row],
-                            size: math.min(44, cellHeight - 3),
+                  width: 260,
+                  height: boardHeight,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(18),
+                    border:
+                        Border.all(color: Colors.white.withValues(alpha: 0.35)),
+                  ),
+                  child: Stack(
+                    children: [
+                      for (var column = 0;
+                          column < _engine.columns.length;
+                          column++)
+                        for (var row = 0;
+                            row < _engine.columns[column].length;
+                            row++)
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 180),
+                            left: column * 52.0 + 5,
+                            bottom: row * cellHeight + 4,
+                            child: _tile(
+                              _engine.columns[column][row],
+                              size: math.min(44, cellHeight - 3),
+                            ),
                           ),
+                      AnimatedPositioned(
+                        duration: Duration(
+                          milliseconds: _dropping ? 220 : 120,
                         ),
-                    AnimatedPositioned(
-                      duration: Duration(
-                        milliseconds: _dropping ? 220 : 120,
+                        curve: Curves.easeIn,
+                        left: _dropColumn * 52.0 + 5,
+                        top: _dropping
+                            ? boardHeight -
+                                ((_engine.columns[_dropColumn].length + 1) *
+                                    cellHeight)
+                            : 7,
+                        child: _tile(
+                          _activeValue,
+                          size: math.min(44, cellHeight - 3),
+                        ),
                       ),
-                      curve: Curves.easeIn,
-                      left: _dropColumn * 52.0 + 5,
-                      top: _dropping
-                          ? boardHeight -
-                              ((_engine.columns[_dropColumn].length + 1) *
-                                  cellHeight)
-                          : 7,
-                      child: _tile(
-                        _activeValue,
-                        size: math.min(44, cellHeight - 3),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
               ),
             ],
           ),

@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../mini_games_controller.dart';
+import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
 
 class InfinityLoopGame extends ConsumerStatefulWidget {
@@ -26,6 +27,9 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
   int _moves = 0;
   int _level = 1;
   int _optimalMoves = 0;
+  // Dynamic difficulty: once a child taps well past the ideal count without
+  // solving it, the game quietly fixes a tile so they never get stuck.
+  int _autoHelpThreshold = 9999;
   String _message = 'Rotate every path until the loop glows!';
   final _random = math.Random();
   final _celebration = CelebrationController();
@@ -57,6 +61,18 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
   void initState() {
     super.initState();
     _initGrid();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        showFirstPlayTutorial(
+          context,
+          ref,
+          gameId: 'infinity-loop',
+          instruction: 'Tap the pieces to spin them. Connect them all so the '
+              'loop lights up!',
+          emoji: '🔄',
+        );
+      }
+    });
   }
 
   @override
@@ -100,6 +116,7 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     _won = false;
     _usedHint = false;
     _moves = 0;
+    _autoHelpThreshold = _optimalMoves * 2 + 8;
     _message = 'Level $_level: connect the glowing loop!';
     if (_isSolved()) {
       final tile = _grid.first.first;
@@ -218,7 +235,33 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     AudioService.instance.playSfx(
       tile.mask == tile.solution ? Sfx.correct : Sfx.tap,
     );
-    if (_isSolved()) _complete();
+    if (_isSolved()) {
+      _complete();
+      return;
+    }
+    // Struggling? Quietly lend a hand so a child never hits a wall.
+    if (_moves >= _autoHelpThreshold) {
+      _autoHelpThreshold = _moves + 10;
+      _autoHelp();
+    }
+  }
+
+  void _autoHelp() {
+    for (final row in _grid) {
+      for (final tile in row) {
+        if (tile.mask != tile.solution) {
+          setState(() {
+            tile.mask = tile.solution;
+            _usedHint = true;
+            _message = 'Here is a little help! 💫';
+          });
+          AudioService.instance.playSfx(Sfx.magic);
+          AudioService.instance.speak('Here is a little help!');
+          if (_isSolved()) _complete();
+          return;
+        }
+      }
+    }
   }
 
   void _complete() {

@@ -10,6 +10,7 @@ import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/openmoji_view.dart';
 import '../logic/classic_2048_engine.dart';
 import '../mini_games_controller.dart';
+import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
 
 class Classic2048Game extends ConsumerStatefulWidget {
@@ -55,10 +56,35 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     2048: '👑',
   };
 
+  static const _animalNames = {
+    2: 'Chick',
+    4: 'Bunny',
+    8: 'Puppy',
+    16: 'Kitty',
+    32: 'Fox',
+    64: 'Panda',
+    128: 'Lion',
+    256: 'Unicorn',
+    512: 'Dragon',
+    1024: 'Whale',
+    2048: 'King',
+  };
+
   @override
   void initState() {
     super.initState();
     _engine = Classic2048Engine(size: _boardSize, targetTile: _targetTile);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        showFirstPlayTutorial(
+          context,
+          ref,
+          gameId: '2048',
+          instruction: 'Swipe to slide the animals. Join two of the same to '
+              'grow a bigger one!',
+        );
+      }
+    });
   }
 
   @override
@@ -110,13 +136,23 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     }
 
     final madeNewTile = _engine.highestTile > oldHighest;
+    final newAnimal = _animalNames[_engine.highestTile];
     setState(() {
       _message = madeNewTile
-          ? 'Great merge! You made ${_engine.highestTile}.'
-          : 'Keep matching equal tiles!';
+          ? (_animalMode && newAnimal != null
+              ? 'You made a $newAnimal! ${_animals[_engine.highestTile]}'
+              : 'Great merge! You made ${_engine.highestTile}.')
+          : 'Keep matching to grow!';
     });
     AudioService.instance.playSfx(madeNewTile ? Sfx.correct : Sfx.tap);
-    if (madeNewTile) AudioService.instance.lightHaptic();
+    if (madeNewTile) {
+      AudioService.instance.lightHaptic();
+      // Celebrate reaching a brand-new animal — the real goal for a child.
+      if (_animalMode && newAnimal != null) {
+        AudioService.instance.speak('You made a $newAnimal!');
+        _celebration.celebrate(sound: false);
+      }
+    }
 
     final newlyWon = !wasWon && _engine.won;
     if (newlyWon) {

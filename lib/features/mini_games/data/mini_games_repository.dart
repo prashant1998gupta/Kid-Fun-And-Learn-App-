@@ -137,6 +137,16 @@ class MiniGamesRepository {
   static const _achievementsKey = 'mg_achievements';
   static const _dailyDateKey = 'mg_daily_date';
   static const _dailyProgressKey = 'mg_daily_progress';
+  static const _petXpKey = 'mg_pet_xp';
+
+  int petXp() => _prefs.getInt(_petXpKey) ?? 0;
+
+  /// Feeds the pet and returns its new total XP.
+  Future<int> addPetXp(int amount) async {
+    final next = petXp() + amount;
+    await _prefs.setInt(_petXpKey, next);
+    return next;
+  }
 
   int highScore(String gameId) => _prefs.getInt('$_prefix$gameId') ?? 0;
 
