@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -47,6 +48,7 @@ class MiniGamesScreen extends ConsumerWidget {
                       final game = kMiniGames[index];
                       return _GameCard(
                         game: game,
+                        index: index,
                         highScore: gameState.highScores[game.id] ?? 0,
                         onTap: () => _openGame(context, game.id),
                       );
@@ -288,73 +290,121 @@ class _AchievementStrip extends StatelessWidget {
 class _GameCard extends StatelessWidget {
   const _GameCard({
     required this.game,
+    required this.index,
     required this.highScore,
     required this.onTap,
   });
 
   final MiniGameDef game;
+  final int index;
   final int highScore;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final base = Color(game.color);
+    // A darker sibling of the game's own hue gives each tile depth + identity,
+    // so cards pop off the pastel background instead of washing out.
+    final deep = Color.lerp(base, Colors.black, 0.22)!;
+    final solved = highScore > 0;
+    final status = solved
+        ? (game.id == 'infinity-loop' ? '✓ Solved' : '🏆 $highScore')
+        : 'Play!';
+
     return BouncyButton(
       borderRadius: AppSpacing.cardRadius,
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [base, deep],
+          ),
           borderRadius: AppSpacing.cardRadius,
           boxShadow: [
             BoxShadow(
-              color: Color(game.color).withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              color: base.withValues(alpha: 0.5),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            OpenMojiView(
-              emoji: game.icon,
-              size: 56,
-              fallback: Text(game.icon, style: const TextStyle(fontSize: 48)),
-            ),
-            const SizedBox(height: 8),
+            // Icon nestled in a soft glossy bubble so the illustration pops.
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.92),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: OpenMojiView(
+                emoji: game.icon,
+                size: 46,
+                fallback:
+                    Text(game.icon, style: const TextStyle(fontSize: 40)),
+              ),
+            )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .moveY(begin: 0, end: -5, duration: 1600.ms, curve: Curves.easeInOut),
+            const SizedBox(height: 10),
             Text(
               game.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF2C3E50),
+                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               game.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12,
-                color: Color(game.color).withValues(alpha: 0.8),
+                fontSize: 11.5,
+                height: 1.15,
+                color: Colors.white.withValues(alpha: 0.9),
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            Text(
-              highScore > 0
-                  ? game.id == 'infinity-loop'
-                      ? '✓ Solved'
-                      : '🏆 Best: $highScore'
-                  : 'Play!',
-              style: const TextStyle(
+            const SizedBox(height: 10),
+            // Status pill: bright when solved, soft "Play!" otherwise.
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                status,
+                style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF6C5CE7)),
+                  fontWeight: FontWeight.w900,
+                  color: deep,
+                ),
+              ),
             ),
           ],
         ),
       ),
-    );
+    )
+        .animate()
+        .fadeIn(delay: (60 * index).ms, duration: 300.ms)
+        .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1));
   }
 }
