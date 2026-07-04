@@ -184,7 +184,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     final progress =
         (elapsed.inMilliseconds / (_roundSeconds * 1000)).clamp(0.0, 1.0);
     final baseLifetime = switch (_difficulty) {
-      MiniGameDifficulty.easy => 3000,
+      MiniGameDifficulty.easy => 3400,
       MiniGameDifficulty.normal => 1900,
       MiniGameDifficulty.challenge => 1450,
     };
@@ -194,28 +194,41 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     final lifetime = type == ChickenTargetType.boss
         ? 4600
         : (baseLifetime - (shrink * progress) + _struggleBoost * 900).round();
+    final reduced = ref.read(reducedMotionProvider);
+    // Runners walk across the field and hop; bombs & the boss move slower so
+    // they're easy to read. Speed grows a little as the round heats up.
+    final dir = _random.nextBool() ? 1.0 : -1.0;
+    final baseSpeed = 0.11 + _random.nextDouble() * 0.13 + progress * 0.10;
+    final typeScale = switch (type) {
+      ChickenTargetType.bomb => 0.5,
+      ChickenTargetType.boss => 0.35,
+      ChickenTargetType.egg => 0.7,
+      _ => 1.0,
+    };
     _targets.add(
       _ChickenTarget(
         id: _nextId++,
         type: type,
         baseX: _random.nextDouble() * 0.72 + 0.08,
-        y: _random.nextDouble() * 0.62 + 0.04,
+        y: _random.nextDouble() * 0.6 + 0.06,
         size: type == ChickenTargetType.boss
             ? 82
             : 48 + _random.nextDouble() * 18,
         phase: _random.nextDouble() * math.pi * 2,
-        amplitude: ref.read(reducedMotionProvider)
+        amplitude: reduced ? 0 : (0.015 + _random.nextDouble() * 0.03),
+        vx: reduced ? 0 : dir * baseSpeed * typeScale,
+        hop: (reduced || type == ChickenTargetType.egg)
             ? 0
-            : (0.025 + _random.nextDouble() * 0.055),
+            : 0.05 + _random.nextDouble() * 0.05,
         spawnedAt: elapsed,
         expiresAt: elapsed + Duration(milliseconds: lifetime),
         hitsRemaining: type == ChickenTargetType.boss ? 3 : 1,
       ),
     );
     final baseSpawn = switch (_difficulty) {
-      MiniGameDifficulty.easy => 1250,
-      MiniGameDifficulty.normal => 900,
-      MiniGameDifficulty.challenge => 700,
+      MiniGameDifficulty.easy => 750,
+      MiniGameDifficulty.normal => 620,
+      MiniGameDifficulty.challenge => 520,
     };
     final spawnSpeedup = _difficulty == MiniGameDifficulty.easy ? 120 : 260;
     _nextSpawn = elapsed +
@@ -241,17 +254,12 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     final index = _targets.indexWhere((target) => target.id == id);
     if (index < 0) return;
     final target = _targets[index];
+    final bx = target.currentX(_clock.elapsed);
+    final by = target.currentY(_clock.elapsed);
     setState(() {
-      _bursts.add(
-        _TapBurst(
-          x: target.currentX(_clock.elapsed),
-          y: target.y,
-          createdAt: _clock.elapsed,
-          icon: target.type == ChickenTargetType.bomb ? '💥' : '✨',
-        ),
-      );
-
       if (target.type == ChickenTargetType.bomb) {
+        _bursts.add(_TapBurst(
+            x: bx, y: by, createdAt: _clock.elapsed, icon: '💥'));
         _targets.removeAt(index);
         _score = math.max(0, _score + ChickenTapRules.points(target.type, 0));
         _missed++;
@@ -264,6 +272,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
 
       if (target.type == ChickenTargetType.boss && target.hitsRemaining > 1) {
         target.hitsRemaining--;
+        _bursts.add(_TapBurst(
+            x: bx, y: by, createdAt: _clock.elapsed, icon: '💪'));
         _message = '${target.hitsRemaining} more taps on the boss!';
         AudioService.instance.playSfx(Sfx.pop);
         return;
@@ -272,8 +282,11 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       _targets.removeAt(index);
       _combo++;
       _bestCombo = math.max(_bestCombo, _combo);
-      _score += ChickenTapRules.points(target.type, _combo);
       final points = ChickenTapRules.points(target.type, _combo);
+      _score += points;
+      // Floating "+N" so every catch feels rewarding.
+      _bursts.add(_TapBurst(
+          x: bx, y: by, createdAt: _clock.elapsed, icon: '+$points'));
       if (_playMode == MiniGamePlayMode.together) {
         final player = target.currentX(_clock.elapsed) < 0.5 ? 0 : 1;
         _playerScores[player] += points;
@@ -542,7 +555,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
               Positioned(
                 left: target.currentX(_clock.elapsed) *
                     (constraints.maxWidth - target.size),
-                top: target.y * (constraints.maxHeight - target.size - 55),
+                top: target.currentY(_clock.elapsed) *
+                    (constraints.maxHeight - target.size - 55),
                 child: _targetWidget(target),
               ),
             for (final burst in _bursts)
@@ -550,16 +564,30 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
                 left: burst.x * (constraints.maxWidth - 45),
                 top: burst.y * (constraints.maxHeight - 80),
                 child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.5, end: 1.5),
-                  duration: const Duration(milliseconds: 600),
+                  tween: Tween(begin: 0.5, end: 1.6),
+                  duration: const Duration(milliseconds: 620),
+                  curve: Curves.easeOut,
                   builder: (context, scale, child) => Opacity(
-                    opacity: (1.5 - scale).clamp(0, 1),
-                    child: Transform.scale(scale: scale, child: child),
+                    opacity: (1.6 - scale).clamp(0, 1),
+                    // Score pops rise as they fade for a satisfying "juice".
+                    child: Transform.translate(
+                      offset: Offset(0, -22 * (scale - 0.5)),
+                      child: Transform.scale(scale: scale, child: child),
+                    ),
                   ),
-                  child: Text(
-                    burst.icon,
-                    style: const TextStyle(fontSize: 34),
-                  ),
+                  child: burst.isScore
+                      ? Text(
+                          burst.icon,
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFFFE066),
+                            shadows: [
+                              Shadow(color: Colors.black54, blurRadius: 4),
+                            ],
+                          ),
+                        )
+                      : Text(burst.icon, style: const TextStyle(fontSize: 36)),
                 ),
               ),
             Positioned(
@@ -749,6 +777,8 @@ class _ChickenTarget {
     required this.size,
     required this.phase,
     required this.amplitude,
+    required this.vx,
+    required this.hop,
     required this.spawnedAt,
     required this.expiresAt,
     required this.hitsRemaining,
@@ -761,14 +791,34 @@ class _ChickenTarget {
   final double size;
   final double phase;
   final double amplitude;
+
+  /// Horizontal patrol speed (screen fractions per second, signed). The chicken
+  /// walks across and bounces off the edges — this is what makes it feel alive.
+  final double vx;
+
+  /// Hop height (screen fraction) — a little vertical bounce as it runs.
+  final double hop;
   final Duration spawnedAt;
   final Duration expiresAt;
   int hitsRemaining;
 
+  static const _lo = 0.02;
+  static const _hi = 0.9;
+
   double currentX(Duration now) {
-    final seconds = (now - spawnedAt).inMilliseconds / 1000;
-    return (baseX + math.sin(seconds * 4 + phase) * amplitude)
-        .clamp(0.02, 0.92);
+    final t = (now - spawnedAt).inMilliseconds / 1000;
+    const span = _hi - _lo;
+    // Triangle-wave reflection keeps the runner patrolling inside the field.
+    final period = 2 * span;
+    var p = (((baseX - _lo) + vx * t) % period + period) % period;
+    if (p > span) p = period - p;
+    return (_lo + p + math.sin(t * 4 + phase) * amplitude).clamp(_lo, _hi);
+  }
+
+  double currentY(Duration now) {
+    final t = (now - spawnedAt).inMilliseconds / 1000;
+    final bounce = math.sin(t * 7 + phase).abs() * hop;
+    return (y - bounce).clamp(0.02, 0.8);
   }
 
   double life(Duration now) {
@@ -790,4 +840,7 @@ class _TapBurst {
   final double y;
   final Duration createdAt;
   final String icon;
+
+  /// A floating score ("+5") rather than an emoji effect.
+  bool get isScore => icon.startsWith('+');
 }
