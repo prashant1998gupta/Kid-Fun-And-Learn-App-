@@ -6,6 +6,7 @@ import '../features/curriculum/domain/lesson.dart';
 import '../features/games/game_host_screen.dart';
 import '../features/achievements/achievements_screen.dart';
 import '../features/art_studio/art_studio_screen.dart';
+import '../features/story_maker/story_maker_screen.dart';
 import '../features/mini_games/mini_games_screen.dart';
 import '../features/mini_games/games/chicken_tap_game.dart';
 import '../features/mini_games/games/classic_2048_game.dart';
@@ -54,6 +55,7 @@ class AppRoutes {
   static const season = '/season';
   static const about = '/about';
   static const artStudio = '/art-studio';
+  static const storyMaker = '/story-maker';
   static const miniGames = '/mini-games';
   static const infinityLoop = '/mini-games/infinity-loop';
   static const chickenTap = '/mini-games/368-chickens';
@@ -132,6 +134,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.artStudio,
         pageBuilder: (_, s) => _slide(const ArtStudioScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.storyMaker,
+        pageBuilder: (_, s) => _slide(const StoryMakerScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.miniGames,

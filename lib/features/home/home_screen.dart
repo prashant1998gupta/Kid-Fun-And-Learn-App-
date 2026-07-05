@@ -431,6 +431,13 @@ class _QuickActions extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpacing.md),
             action(
+              icon: Icons.auto_stories_rounded,
+              label: 'Story Maker',
+              color: AppColors.sky,
+              onTap: () => context.push(AppRoutes.storyMaker),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
               icon: Icons.sports_esports_rounded,
               label: 'Mini Games',
               color: AppColors.accent,
