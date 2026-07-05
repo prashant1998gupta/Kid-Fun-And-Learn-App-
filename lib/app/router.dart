@@ -31,6 +31,8 @@ import '../features/profiles/profiles_controller.dart';
 import '../features/settings/about_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/season/season_pass_screen.dart';
+import '../features/world/kid_world_screen.dart';
+import '../features/world/physical_mission_screen.dart';
 
 /// Central route table. Uses [go_router] for typed, deep-linkable navigation
 /// with custom kid-friendly transitions.
@@ -61,6 +63,8 @@ class AppRoutes {
   static const chickenTap = '/mini-games/368-chickens';
   static const stackMerge = '/mini-games/stack-merge';
   static const classic2048 = '/mini-games/2048';
+  static const kidWorld = '/kid-world';
+  static const physicalMission = '/kid-world/move';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -158,6 +162,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.classic2048,
         pageBuilder: (_, s) => _slide(const Classic2048Game(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.kidWorld,
+        pageBuilder: (_, s) => _slide(const KidWorldScreen(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.physicalMission,
+        pageBuilder: (_, s) => _slide(const PhysicalMissionScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.parentGate,

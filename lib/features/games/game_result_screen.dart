@@ -6,11 +6,11 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
-import '../../core/widgets/illustrated_object.dart';
 import '../../core/widgets/mascot.dart';
 import '../achievements/domain/achievement.dart';
 import '../gamification/domain/wallet.dart';
 import '../gamification/reward_engine.dart';
+import '../world/domain/world_prize.dart';
 
 /// The reward-reveal screen shown after a lesson: animated stars, the reward
 /// bundle counting up, mascot celebration, and (if applicable) a level-up.
@@ -22,7 +22,11 @@ class GameResultScreen extends StatefulWidget {
     required this.leveledUp,
     required this.newLevel,
     required this.onReplay,
+    required this.onContinue,
+    required this.onVisitWorld,
     required this.onHome,
+    required this.prize,
+    required this.prizeWasNew,
     this.newBadges = const [],
   });
 
@@ -31,7 +35,11 @@ class GameResultScreen extends StatefulWidget {
   final bool leveledUp;
   final int newLevel;
   final VoidCallback onReplay;
+  final VoidCallback onContinue;
+  final VoidCallback onVisitWorld;
   final VoidCallback onHome;
+  final WorldPrize prize;
+  final bool prizeWasNew;
   final List<Achievement> newBadges;
 
   @override
@@ -86,7 +94,8 @@ class _GameResultScreenState extends State<GameResultScreen> {
                   _RewardRow(reward: widget.reward),
                   const SizedBox(height: 18),
                   _RewardMoment(
-                    prize: _RoundPrize.forResult(widget.result.lesson.id),
+                    prize: widget.prize,
+                    isNew: widget.prizeWasNew,
                   ),
                   if (widget.newBadges.isNotEmpty) ...[
                     const SizedBox(height: 20),
@@ -94,13 +103,24 @@ class _GameResultScreenState extends State<GameResultScreen> {
                   ],
                   const SizedBox(height: 32),
                   BouncyButton(
-                    onTap: widget.onReplay,
-                    child: _pill('Play Again', AppColors.secondary),
+                    onTap: widget.onContinue,
+                    child: _pill('Continue Adventure 🚀', AppColors.success),
                   ),
                   const SizedBox(height: 12),
                   BouncyButton(
-                    onTap: widget.onHome,
-                    child: _pill('Home', AppColors.primary),
+                    onTap: widget.onVisitWorld,
+                    child: _pill('Place My Reward 🏡', AppColors.secondary),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 16,
+                    children: [
+                      TextButton(
+                          onPressed: widget.onReplay,
+                          child: const Text('Play again')),
+                      TextButton(
+                          onPressed: widget.onHome, child: const Text('Home')),
+                    ],
                   ),
                 ],
               ),
@@ -137,55 +157,11 @@ class _GameResultScreenState extends State<GameResultScreen> {
       );
 }
 
-class _RoundPrize {
-  const _RoundPrize({
-    required this.title,
-    required this.subtitle,
-    required this.artLabel,
-    required this.color,
-  });
-
-  final String title;
-  final String subtitle;
-  final String artLabel;
-  final Color color;
-
-  static _RoundPrize forResult(String lessonId) {
-    final index =
-        lessonId.codeUnits.fold<int>(0, (sum, code) => sum + code) % 4;
-    return switch (index) {
-      0 => const _RoundPrize(
-          title: 'Treasure Chest',
-          subtitle: 'A shiny chest for finishing the round.',
-          artLabel: 'Box',
-          color: AppColors.accent,
-        ),
-      1 => const _RoundPrize(
-          title: 'Sticker Found',
-          subtitle: 'Add a bright sticker to your collection.',
-          artLabel: 'Star',
-          color: AppColors.bubblegum,
-        ),
-      2 => const _RoundPrize(
-          title: 'Pet Snack',
-          subtitle: 'A yummy snack for your buddy.',
-          artLabel: 'Apple',
-          color: AppColors.success,
-        ),
-      _ => const _RoundPrize(
-          title: 'Room Item',
-          subtitle: 'A cute decoration for your world.',
-          artLabel: 'Flower',
-          color: AppColors.sky,
-        ),
-    };
-  }
-}
-
 class _RewardMoment extends StatelessWidget {
-  const _RewardMoment({required this.prize});
+  const _RewardMoment({required this.prize, required this.isNew});
 
-  final _RoundPrize prize;
+  final WorldPrize prize;
+  final bool isNew;
 
   @override
   Widget build(BuildContext context) {
@@ -214,16 +190,16 @@ class _RewardMoment extends StatelessWidget {
               borderRadius: AppSpacing.cardRadius,
             ),
             alignment: Alignment.center,
-            child: IllustratedObjectView(label: prize.artLabel, size: 66),
+            child: Text(prize.emoji, style: const TextStyle(fontSize: 58)),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Reward Moment',
-                  style: TextStyle(
+                Text(
+                  isNew ? 'NEW WORLD REWARD' : 'COMPANION BONUS',
+                  style: const TextStyle(
                     color: AppColors.lightTextSoft,
                     fontWeight: FontWeight.w800,
                   ),
@@ -237,7 +213,9 @@ class _RewardMoment extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  prize.subtitle,
+                  isNew
+                      ? prize.revealLine
+                      : 'You already own this, so your companion gained extra sparkle!',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.lightTextSoft,
                       ),

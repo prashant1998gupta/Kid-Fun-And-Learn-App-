@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -129,7 +130,7 @@ class _TracingGameState extends State<TracingGame> {
     AudioService.instance.successHaptic();
     _celebration.celebrate(sound: false);
     AudioService.instance.speak(PraiseLines.nextSuccess());
-    await Future<void>.delayed(const Duration(milliseconds: 1000));
+    await Future<void>.delayed(FeedbackTiming.successBeat);
     if (!mounted) return;
     _advance();
   }

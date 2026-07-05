@@ -13,6 +13,8 @@ import '../profiles/profiles_controller.dart';
 import '../progress/activity_log.dart';
 import '../progress/progress_controller.dart';
 import '../season/season_controller.dart';
+import '../world/domain/world_prize.dart';
+import 'adventure_intro.dart';
 import 'engines/bubble_pop_game.dart';
 import 'engines/boss_battle_game.dart';
 import 'engines/drag_drop_game.dart';
@@ -51,6 +53,10 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
   bool _completing = false;
   int _newLevel = 1;
   List<Achievement> _newBadges = const [];
+  bool _missionStarted = false;
+  late final WorldPrize _worldPrize =
+      WorldPrizeCatalog.forLesson(widget.lesson.id);
+  bool _prizeWasNew = false;
 
   Future<void> _onComplete(LessonResult result) async {
     if (_completing) return;
@@ -86,6 +92,22 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
       await ref
           .read(seasonControllerProvider.notifier)
           .recordLesson(child.id, result.stars);
+      await profiles.rememberAdventure(
+        neededHelp: result.struggledQuestionIds.isNotEmpty,
+      );
+      _prizeWasNew = switch (_worldPrize.kind) {
+        WorldPrizeKind.decoration =>
+          await profiles.grantRoomItem(_worldPrize.id),
+        WorldPrizeKind.sticker => await profiles.grantCollectible('st_star'),
+        WorldPrizeKind.snack => true,
+      };
+      if (_worldPrize.kind == WorldPrizeKind.snack) {
+        await profiles.addCompanionXp(12,
+            memory: 'That crunchy snack made me sparkle! Thank you!');
+      } else if (!_prizeWasNew) {
+        await profiles.addCompanionXp(4,
+            memory: 'We found another ${_worldPrize.title}! What a lucky day!');
+      }
 
       final progress = ref.read(progressControllerProvider);
       newBadges =
@@ -118,7 +140,10 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
     }
   }
 
-  void _replay() => setState(() => _result = null);
+  void _replay() => setState(() {
+        _result = null;
+        _missionStarted = true;
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -143,8 +168,26 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         leveledUp: _leveledUp,
         newLevel: _newLevel,
         newBadges: _newBadges,
+        prize: _worldPrize,
+        prizeWasNew: _prizeWasNew,
         onReplay: _replay,
+        onContinue: () => context.go(
+          AppRoutes.learningMap,
+          extra: widget.lesson.subject,
+        ),
+        onVisitWorld: () => context.go(AppRoutes.kidWorld),
         onHome: () => context.go(AppRoutes.home),
+      );
+    }
+    if (!_missionStarted) {
+      final child = ref.watch(activeChildProvider);
+      return AdventureIntro(
+        mission: AdventureMission.forLesson(
+          widget.lesson,
+          heroName: child?.heroName,
+        ),
+        lessonTitle: widget.lesson.title,
+        onStart: () => setState(() => _missionStarted = true),
       );
     }
     return _engineFor(widget.lesson);

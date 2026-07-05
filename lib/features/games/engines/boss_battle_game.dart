@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -80,8 +81,10 @@ class _BossBattleGameState extends State<BossBattleGame> {
     AudioService.instance.playSfx(Sfx.correct);
     AudioService.instance.successHaptic();
     _celebration.celebrate(sound: false);
-    await Future<void>.delayed(const Duration(milliseconds: 850));
-    if (mounted) _advance();
+    AudioService.instance.speak(PraiseLines.nextSuccess());
+    await Future<void>.delayed(FeedbackTiming.successBeat);
+    if (!mounted) return;
+    _advance();
   }
 
   void _advance() {

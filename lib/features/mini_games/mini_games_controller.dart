@@ -44,7 +44,10 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
   MiniGamesController(
     this._repository, {
     Future<void> Function(RewardBundle reward)? rewardPlayer,
+    Future<int> Function(int targetXp, String memory)? syncCompanion,
+    int initialCompanionXp = 0,
   })  : _rewardPlayer = rewardPlayer,
+        _syncCompanion = syncCompanion,
         super(
           MiniGamesState(
             highScores: {
@@ -54,12 +57,15 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
             achievements: _repository.achievements(),
             playedGames: _repository.playedGames(),
             dailyChallenge: _repository.dailyChallenge(),
-            petXp: _repository.petXp(),
+            petXp: initialCompanionXp > _repository.petXp()
+                ? initialCompanionXp
+                : _repository.petXp(),
           ),
         );
 
   final MiniGamesRepository _repository;
   final Future<void> Function(RewardBundle reward)? _rewardPlayer;
+  final Future<int> Function(int targetXp, String memory)? _syncCompanion;
 
   Future<bool> recordScore(String gameId, int score) async {
     final saved = await _repository.saveHighScore(gameId, score);
@@ -92,7 +98,13 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
     await _repository.unlockAchievements(newlyUnlocked);
 
     // Feed the pet — every game a child plays helps it grow.
-    final newPetXp = await _repository.addPetXp(MiniPet.xpForScore(score));
+    final earnedPetXp = MiniPet.xpForScore(score);
+    var newPetXp = await _repository.addPetXp(earnedPetXp);
+    final sharedXp = await _syncCompanion?.call(
+      newPetXp,
+      'I loved playing ${_gameName(gameId)} with you!',
+    );
+    if (sharedXp != null) newPetXp = sharedXp;
 
     // Mini games participate in the same visible economy as learning games.
     // Rewards are intentionally modest and always positive.
@@ -116,14 +128,26 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
   bool wouldEvolve(int score) =>
       MiniPet.forXp(state.petXp + MiniPet.xpForScore(score)).stage >
       state.pet.stage;
+
+  String _gameName(String id) {
+    for (final game in kMiniGames) {
+      if (game.id == id) return game.name;
+    }
+    return 'that game';
+  }
 }
 
 final miniGamesControllerProvider =
     StateNotifierProvider<MiniGamesController, MiniGamesState>((ref) {
+  final child = ref.read(activeChildProvider);
   return MiniGamesController(
     ref.watch(miniGamesRepositoryProvider),
+    initialCompanionXp: child?.companionXp ?? 0,
     rewardPlayer: (reward) async {
       await ref.read(profilesControllerProvider.notifier).applyReward(reward);
     },
+    syncCompanion: (xp, memory) => ref
+        .read(profilesControllerProvider.notifier)
+        .syncCompanionXp(xp, memory: memory),
   );
 });

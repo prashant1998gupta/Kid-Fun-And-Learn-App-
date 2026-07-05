@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
+import '../constants/feedback_timing.dart';
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
 import 'lottie_view.dart';
@@ -110,7 +111,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
       _showLottie = true;
     });
     final burst = _lottieBurst;
-    Future<void>.delayed(const Duration(milliseconds: 1400), () {
+    Future<void>.delayed(FeedbackTiming.successBeat, () {
       if (mounted && burst == _lottieBurst) {
         setState(() => _showLottie = false);
       }

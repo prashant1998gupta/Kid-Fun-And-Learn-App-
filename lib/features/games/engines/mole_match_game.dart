@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -98,7 +99,7 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
     AudioService.instance.successHaptic();
     AudioService.instance.speak(PraiseLines.nextSuccess());
     _celebration.celebrate(sound: false);
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    await Future<void>.delayed(FeedbackTiming.successBeat);
     if (mounted) _advance();
   }
 

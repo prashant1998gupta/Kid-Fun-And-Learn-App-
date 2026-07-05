@@ -9,6 +9,7 @@ import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/celebration_overlay.dart';
 import '../gamification/domain/wallet.dart';
+import '../art_studio/data/canvas_repository.dart';
 import '../profiles/profiles_controller.dart';
 
 /// Magic Story Maker — a create-your-own picture story.
@@ -53,6 +54,16 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
     _Choice('🐸', 'Frog'),
     _Choice('🦊', 'Fox'),
   ];
+
+  List<_Choice> get _availableHeroes {
+    final child = ref.read(activeChildProvider);
+    final custom = child?.heroName;
+    return [
+      if (custom != null && custom.trim().isNotEmpty) _Choice('🎨', custom),
+      ..._heroes,
+    ];
+  }
+
   static const _places = [
     _Choice('🌳', 'forest'),
     _Choice('🌊', 'ocean'),
@@ -112,8 +123,7 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
           _phase = _Phase.story;
           _page = 0;
           _celebration.celebrate();
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => _readPage());
+          WidgetsBinding.instance.addPostFrameCallback((_) => _readPage());
         case _Phase.story:
           break;
       }
@@ -213,9 +223,7 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
       controller: _celebration,
       child: Scaffold(
         body: AnimatedBackground(
-          theme: _phase == _Phase.story
-              ? WorldTheme.sunrise
-              : WorldTheme.candy,
+          theme: _phase == _Phase.story ? WorldTheme.sunrise : WorldTheme.candy,
           child: SafeArea(
             child: Column(
               children: [
@@ -265,9 +273,12 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
             ),
           ),
           // The story-so-far chips.
-          if (_hero != null) Text(_hero!.emoji, style: const TextStyle(fontSize: 24)),
-          if (_place != null) Text(_place!.emoji, style: const TextStyle(fontSize: 24)),
-          if (_thing != null) Text(_thing!.emoji, style: const TextStyle(fontSize: 24)),
+          if (_hero != null)
+            Text(_hero!.emoji, style: const TextStyle(fontSize: 24)),
+          if (_place != null)
+            Text(_place!.emoji, style: const TextStyle(fontSize: 24)),
+          if (_thing != null)
+            Text(_thing!.emoji, style: const TextStyle(fontSize: 24)),
         ],
       ),
     );
@@ -275,7 +286,7 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
 
   Widget _pickerView(BuildContext context) {
     final options = switch (_phase) {
-      _Phase.pickHero => _heroes,
+      _Phase.pickHero => _availableHeroes,
       _Phase.pickPlace => _places,
       _Phase.pickThing => _things,
       _Phase.story => const <_Choice>[],
@@ -307,7 +318,8 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(options[i].emoji, style: const TextStyle(fontSize: 60)),
+                    Text(options[i].emoji,
+                        style: const TextStyle(fontSize: 60)),
                     const SizedBox(height: 6),
                     Text(
                       options[i].word,
@@ -403,7 +415,7 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
+                      color: Colors.white, shape: BoxShape.circle),
                   child: const Icon(Icons.volume_up_rounded,
                       color: AppColors.primary, size: 30),
                 ),
@@ -436,7 +448,8 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
           const SizedBox(height: 6),
           Text(
             'Page ${_page + 1} of ${_pages.length}',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -445,7 +458,7 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
 
   Widget _scene() {
     // Different arrangement per page keeps the pictures feeling like a story.
-    final hero = Text(_hero!.emoji, style: const TextStyle(fontSize: 84));
+    final hero = _heroArt();
     final place = Text(_place!.emoji, style: const TextStyle(fontSize: 48));
     final thing = Text(_thing!.emoji, style: const TextStyle(fontSize: 48));
     switch (_page) {
@@ -477,5 +490,26 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
           ],
         );
     }
+  }
+
+  Widget _heroArt() {
+    final child = ref.read(activeChildProvider);
+    if (_hero?.emoji == '🎨' && child?.heroDrawingId != null) {
+      for (final drawing in ref.read(canvasRepositoryProvider).loadAll()) {
+        if (drawing.id == child!.heroDrawingId) {
+          return Container(
+            width: 92,
+            height: 92,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Image.memory(drawing.thumbnailBytes, fit: BoxFit.contain),
+          );
+        }
+      }
+    }
+    return Text(_hero!.emoji, style: const TextStyle(fontSize: 84));
   }
 }

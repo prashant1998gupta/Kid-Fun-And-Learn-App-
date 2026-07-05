@@ -67,8 +67,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               slivers: [
                 SliverToBoxAdapter(child: _TopBar(child: child)),
                 SliverToBoxAdapter(child: _Greeting(child: child)),
-                SliverToBoxAdapter(child: _DailyMission()),
-                const SliverToBoxAdapter(child: _QuickActions()),
+                SliverToBoxAdapter(child: _WorldInvitation(child: child)),
+                if (!child.grade.isPreSchool)
+                  SliverToBoxAdapter(child: _DailyMission()),
+                SliverToBoxAdapter(
+                  child: _QuickActions(preschool: child.grade.isPreSchool),
+                ),
                 SliverPadding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   sliver: curriculumAsync.when(
@@ -298,8 +302,89 @@ class _DailyMission extends StatelessWidget {
 }
 
 /// Quick access to Badges and the Daily Gift.
+class _WorldInvitation extends StatelessWidget {
+  const _WorldInvitation({required this.child});
+  final ChildProfile child;
+
+  @override
+  Widget build(BuildContext context) {
+    final pet = child.activePetId == null
+        ? null
+        : CollectionCatalog.byId(child.activePetId!);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
+      child: BouncyButton(
+        onTap: () {
+          AudioService.instance.speak(
+            '${child.companionName} is waiting in your world!',
+          );
+          context.push(AppRoutes.kidWorld);
+        },
+        child: Container(
+          height: child.grade.isPreSchool ? 170 : 135,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7ED6DF), Color(0xFFFFD36E)],
+            ),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.white, width: 3),
+            boxShadow: const [
+              BoxShadow(color: Color(0x33000000), blurRadius: 14),
+            ],
+          ),
+          child: Row(
+            children: [
+              Text(pet?.emoji ?? '🐣',
+                      style: TextStyle(
+                          fontSize: child.grade.isPreSchool ? 82 : 68))
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .moveY(begin: 0, end: -6, duration: 1100.ms),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Enter My World',
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontSize: child.grade.isPreSchool ? 25 : 21,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      child.companionMemory,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_rounded,
+                  color: AppColors.lightText, size: 34),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _QuickActions extends ConsumerWidget {
-  const _QuickActions();
+  const _QuickActions({required this.preschool});
+  final bool preschool;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -366,12 +451,30 @@ class _QuickActions extends ConsumerWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
+    final actions = preschool
+        ? <Widget>[
+            action(
+              icon: Icons.home_rounded,
+              label: 'My World',
+              color: AppColors.primary,
+              onTap: () => context.push(AppRoutes.kidWorld),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.sports_esports_rounded,
+              label: 'Play',
+              color: AppColors.accent,
+              onTap: () => context.push(AppRoutes.miniGames),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            action(
+              icon: Icons.palette_rounded,
+              label: 'Create',
+              color: AppColors.bubblegum,
+              onTap: () => context.push(AppRoutes.artStudio),
+            ),
+          ]
+        : <Widget>[
             action(
               icon: Icons.emoji_events_rounded,
               label: 'Badges',
@@ -443,7 +546,14 @@ class _QuickActions extends ConsumerWidget {
               color: AppColors.accent,
               onTap: () => context.push(AppRoutes.miniGames),
             ),
-          ],
+          ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: actions,
         ),
       ),
     );

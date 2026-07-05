@@ -73,6 +73,10 @@ for low-end tablets.
   the board with drop-preview shadow, landing bounce, and merge burst; Flower
   Flow has bloom pulses; Animal Family has board squish/shake and new-friend
   pop feedback.
+- [x] **M23:** Living KidVerse pass: persistent interactive child world, one
+  cross-mode companion, real placeable lesson prizes, story-framed missions,
+  age-aware home navigation, child-drawn story heroes, physical co-play, and
+  continue-adventure result flow.
 
 ## Quality rules for Codex follow-up work
 
@@ -94,8 +98,8 @@ for low-end tablets.
   show the same first 5 prompts in the same order.
 - [ ] Expand authored preschool content pools for animals, sounds, shapes,
   safety, rhymes, and early maths so generated levels feel less formulaic.
-- [ ] Persist reward-moment prizes into room decoration, sticker, and pet-food
-  inventories instead of showing them only as a round-end reveal.
+- [x] Persist reward-moment prizes into room decoration, sticker, and pet-food
+  outcomes instead of showing them only as a round-end reveal.
 - [ ] Replace code-drawn fallback objects with commissioned PNG/SVG/Lottie art
   for the production illustration set.
 

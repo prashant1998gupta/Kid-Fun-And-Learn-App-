@@ -6,10 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/services/audio_service.dart';
+import '../../core/services/speech_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
+import '../profiles/profiles_controller.dart';
 import 'data/canvas_repository.dart';
 
 /// Art Studio — a creative free-draw canvas like Khan Academy Kids.
@@ -316,23 +318,86 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
 
       final repo = ref.read(canvasRepositoryProvider);
       final drawings = repo.loadAll();
-      drawings.insert(
-          0,
-          SavedDrawing(
-            id: _uuid.v4(),
-            name: 'Drawing ${drawings.length + 1}',
-            thumbnailBytes: bytes,
-            createdAt: DateTime.now(),
-          ));
+      final drawing = SavedDrawing(
+        id: _uuid.v4(),
+        name: 'Drawing ${drawings.length + 1}',
+        thumbnailBytes: bytes,
+        createdAt: DateTime.now(),
+      );
+      drawings.insert(0, drawing);
       await repo.saveAll(drawings);
       AudioService.instance.playSfx(Sfx.reward);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('✅ Saved to gallery!'),
-            duration: Duration(seconds: 1)),
-      );
+      await _offerAsHero(drawing);
     } catch (_) {}
+  }
+
+  Future<void> _offerAsHero(SavedDrawing drawing) async {
+    final controller = TextEditingController(text: 'My Magic Hero');
+    var listening = false;
+    final chosen = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('✨ Bring your drawing to life?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 120,
+                child: Image.memory(drawing.thumbnailBytes),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: 'Name your hero',
+                  suffixIcon: IconButton(
+                    tooltip: 'Say the name',
+                    icon: Icon(listening ? Icons.mic : Icons.mic_none_rounded),
+                    onPressed: () async {
+                      final ready = await SpeechService.instance.ensureReady();
+                      if (!ready || !dialogContext.mounted) return;
+                      setDialogState(() => listening = true);
+                      await SpeechService.instance.listen(
+                        onResult: (words, _) {
+                          if (words.trim().isNotEmpty) controller.text = words;
+                        },
+                        onDone: () {
+                          if (dialogContext.mounted) {
+                            setDialogState(() => listening = false);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Just save it'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(
+                controller.text.trim().isEmpty
+                    ? 'My Magic Hero'
+                    : controller.text.trim(),
+              ),
+              child: const Text('Make it my hero!'),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
+    if (chosen == null || !mounted) return;
+    await ref
+        .read(profilesControllerProvider.notifier)
+        .chooseDrawingHero(drawing.id, chosen);
+    AudioService.instance.speak('$chosen now lives in your world!');
   }
 
   // ─── Tool bar (colors + pen sizes) ───────────────────────────────
@@ -794,7 +859,7 @@ class _GalleryScreen extends ConsumerWidget {
               itemBuilder: (context, i) {
                 final d = drawings[i];
                 return GestureDetector(
-                  onTap: () => _viewFull(context, d),
+                  onTap: () => _viewFull(context, ref, d),
                   onLongPress: () => _confirmDelete(context, ref, d),
                   child: Container(
                     decoration: BoxDecoration(
@@ -834,15 +899,34 @@ class _GalleryScreen extends ConsumerWidget {
     );
   }
 
-  void _viewFull(BuildContext context, SavedDrawing d) {
+  void _viewFull(BuildContext context, WidgetRef ref, SavedDrawing d) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => Scaffold(
           appBar: AppBar(title: Text(d.name)),
-          body: Center(
-            child: InteractiveViewer(
-              child: Image.memory(d.thumbnailBytes),
-            ),
+          body: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: InteractiveViewer(
+                    child: Image.memory(d.thumbnailBytes),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    await ref
+                        .read(profilesControllerProvider.notifier)
+                        .chooseDrawingHero(d.id, d.name);
+                    if (context.mounted) Navigator.of(context).pop();
+                  },
+                  icon: const Icon(Icons.auto_awesome_rounded),
+                  label: const Text('Use as my story hero'),
+                ),
+              ),
+            ],
           ),
         ),
       ),

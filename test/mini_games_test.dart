@@ -92,6 +92,24 @@ void main() {
       expect(MiniPet.forXp(repository.petXp()).emoji, '🐣');
     });
 
+    test('legacy pet XP migrates forward into the shared companion', () async {
+      SharedPreferences.setMockInitialValues({'mg_pet_xp': 100});
+      final preferences = await SharedPreferences.getInstance();
+      var syncedXp = 0;
+      final controller = MiniGamesController(
+        MiniGamesRepository(preferences),
+        syncCompanion: (targetXp, _) async {
+          syncedXp = targetXp;
+          return targetXp;
+        },
+      );
+
+      await controller.recordResult(gameId: '2048', score: 25);
+
+      expect(syncedXp, greaterThan(100));
+      expect(controller.state.petXp, syncedXp);
+    });
+
     test('mini-game results grant coins and XP through the shared wallet hook',
         () async {
       SharedPreferences.setMockInitialValues({});

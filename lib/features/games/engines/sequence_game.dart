@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -74,7 +75,8 @@ class _SequenceGameState extends State<SequenceGame> {
         AudioService.instance.speak(PraiseLines.nextSuccess());
         _correct++;
         if (!_erred) _firstTry++;
-        await Future<void>.delayed(const Duration(milliseconds: 900));
+        await Future<void>.delayed(FeedbackTiming.successBeat);
+        if (!mounted) return;
         _advance();
       }
     } else {

@@ -157,6 +157,87 @@ class ProfilesController extends StateNotifier<ProfilesState> {
     await _persist();
   }
 
+  Future<int> addCompanionXp(int amount, {String? memory}) async {
+    final active = state.active;
+    if (active == null) return 0;
+    final nextXp = active.companionXp + amount.clamp(0, 1000);
+    _replace(active.copyWith(
+      companionXp: nextXp,
+      companionMemory: memory,
+      lastActiveAt: DateTime.now(),
+    ));
+    await _persist();
+    return nextXp;
+  }
+
+  /// Migrates older feature-local pet progress without ever moving the shared
+  /// companion backwards.
+  Future<int> syncCompanionXp(int targetXp, {String? memory}) async {
+    final active = state.active;
+    if (active == null) return targetXp;
+    final nextXp =
+        targetXp > active.companionXp ? targetXp : active.companionXp;
+    _replace(active.copyWith(
+      companionXp: nextXp,
+      companionMemory: memory,
+      lastActiveAt: DateTime.now(),
+    ));
+    await _persist();
+    return nextXp;
+  }
+
+  Future<void> renameCompanion(String name) async {
+    final clean = name.trim();
+    if (clean.isEmpty) return;
+    await updateActive((child) => child.copyWith(
+          companionName: clean,
+          companionMemory: 'I love my new name, $clean!',
+        ));
+  }
+
+  Future<bool> grantRoomItem(String itemId) async {
+    final active = state.active;
+    if (active == null || active.ownedRoomItems.contains(itemId)) return false;
+    _replace(active.copyWith(
+      ownedRoomItems: [...active.ownedRoomItems, itemId],
+      placedRoomItems: [...active.placedRoomItems, itemId],
+    ));
+    await _persist();
+    return true;
+  }
+
+  Future<void> toggleRoomItem(String itemId) async {
+    final active = state.active;
+    if (active == null || !active.ownedRoomItems.contains(itemId)) return;
+    final placed = [...active.placedRoomItems];
+    if (placed.contains(itemId)) {
+      placed.remove(itemId);
+    } else {
+      placed.add(itemId);
+    }
+    _replace(active.copyWith(placedRoomItems: placed));
+    await _persist();
+  }
+
+  Future<void> chooseDrawingHero(String drawingId, String name) async {
+    await updateActive(
+      (child) => child.copyWith(heroDrawingId: drawingId, heroName: name),
+    );
+  }
+
+  Future<void> rememberAdventure({required bool neededHelp}) async {
+    await updateActive((child) {
+      final memory = neededHelp
+          ? 'That was tricky, but we kept trying together!'
+          : 'You solved that adventure so confidently!';
+      return child.copyWith(
+        companionMemory: memory,
+        completedAdventures: child.completedAdventures + 1,
+        lastActiveAt: DateTime.now(),
+      );
+    });
+  }
+
   void _replace(ChildProfile updated) {
     final list = [
       for (final c in state.children)

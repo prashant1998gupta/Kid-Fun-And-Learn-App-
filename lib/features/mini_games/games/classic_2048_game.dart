@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -32,6 +33,8 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
   MiniGamePlayMode _playMode = MiniGamePlayMode.solo;
   int _currentPlayer = 1;
   bool _resultRecorded = false;
+  bool _holdingSuccess = false;
+  int _boardSession = 0;
   bool _tiltEnabled = false;
   StreamSubscription<AccelerometerEvent>? _tiltSubscription;
   DateTime _lastTilt = DateTime.fromMillisecondsSinceEpoch(0);
@@ -138,6 +141,7 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
 
   void _reset() {
     setState(() {
+      _boardSession++;
       _engine = Classic2048Engine(size: _boardSize, targetTile: _targetTile);
       _message = 'New board — plan your next move!';
       _currentPlayer = 1;
@@ -146,19 +150,27 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
       _boardPulse = 0;
       _friendPulse = 0;
       _newFriendValue = 0;
+      _holdingSuccess = false;
     });
   }
 
   void _undo() {
+    if (_holdingSuccess) return;
     if (_engine.undo()) {
       AudioService.instance.playSfx(Sfx.whoosh);
       setState(() => _message = 'Move undone. Try another direction!');
     }
   }
 
-  void _swipe(SwipeDirection direction) {
-    if (_engine.gameOver || (_engine.won && !_engine.keepPlaying)) return;
+  Future<void> _swipe(SwipeDirection direction) async {
+    if (_holdingSuccess ||
+        _engine.gameOver ||
+        (_engine.won && !_engine.keepPlaying)) {
+      return;
+    }
+    final session = _boardSession;
     final oldHighest = _engine.highestTile;
+    final oldScore = _engine.score;
     final wasWon = _engine.won;
     final moved = _engine.move(direction);
     if (!moved) {
@@ -171,22 +183,26 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
       return;
     }
 
+    final merged = _engine.score > oldScore;
     final madeNewTile = _engine.highestTile > oldHighest;
     final newAnimal = _animalNames[_engine.highestTile];
     setState(() {
       _lastMoveBlocked = false;
       _boardPulse++;
+      _holdingSuccess = merged;
       _message = madeNewTile
           ? (_animalMode && newAnimal != null
               ? 'You made a $newAnimal! ${_animals[_engine.highestTile]}'
               : 'Great merge! You made ${_engine.highestTile}.')
-          : 'Keep matching to grow!';
+          : merged
+              ? 'Great match! Watch them grow! ✨'
+              : 'Keep matching to grow!';
       if (madeNewTile) {
         _newFriendValue = _engine.highestTile;
         _friendPulse++;
       }
     });
-    AudioService.instance.playSfx(madeNewTile ? Sfx.correct : Sfx.tap);
+    AudioService.instance.playSfx(merged ? Sfx.correct : Sfx.tap);
     if (madeNewTile) {
       AudioService.instance.lightHaptic();
       // Celebrate reaching a brand-new animal — the real goal for a child.
@@ -195,20 +211,31 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
           'You made a $newAnimal! ${_animalSounds[_engine.highestTile]}!',
         );
         _celebration.celebrate(sound: false);
+      } else {
+        AudioService.instance.speak(PraiseLines.nextSuccess());
+        _celebration.celebrate(sound: false);
       }
-    }
-
-    if (_playMode == MiniGamePlayMode.together) {
-      setState(() {
-        _currentPlayer = _currentPlayer == 1 ? 2 : 1;
-        _message = 'Great move! Player $_currentPlayer, your turn!';
-      });
+    } else if (merged) {
+      AudioService.instance.lightHaptic();
+      _celebration.celebrate(sound: false);
+      AudioService.instance.speak(PraiseLines.nextSuccess());
     }
 
     final newlyWon = !wasWon && _engine.won;
     if (newlyWon) {
       _celebration.fireworks();
       AudioService.instance.speak('Amazing! You reached $_targetTile!');
+    }
+    if (merged) {
+      await Future<void>.delayed(FeedbackTiming.successBeat);
+      if (!mounted || session != _boardSession) return;
+      setState(() => _holdingSuccess = false);
+    }
+    if (_playMode == MiniGamePlayMode.together) {
+      setState(() {
+        _currentPlayer = _currentPlayer == 1 ? 2 : 1;
+        _message = 'Great move! Player $_currentPlayer, your turn!';
+      });
     }
     if (newlyWon) _recordResult();
     if (_engine.gameOver) _friendlyRescue();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -129,15 +130,21 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
       AudioService.instance.playSfx(Sfx.correct);
       AudioService.instance.successHaptic();
       _celebration.celebrate(sound: false);
+      AudioService.instance.speak(PraiseLines.nextSuccess());
       setState(() {
         _cards[_firstIndex!].matched = true;
         _cards[_secondIndex!].matched = true;
         _matchedPairs++;
         _firstIndex = null;
         _secondIndex = null;
-        _locked = false;
       });
-      if (_matchedPairs >= _pairs) _finish();
+      await Future<void>.delayed(FeedbackTiming.successBeat);
+      if (!mounted) return;
+      if (_matchedPairs >= _pairs) {
+        _finish();
+      } else {
+        setState(() => _locked = false);
+      }
     } else {
       AudioService.instance.playSfx(Sfx.wrong);
       _mismatches++;

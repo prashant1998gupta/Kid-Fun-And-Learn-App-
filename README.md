@@ -45,6 +45,9 @@ local two-player play, no-loss rescue behavior, haptics/SFX/celebrations, and
 real coin/XP and pet-growth rewards. Color-blind-safe symbols, reduced-motion
 behavior, semantic labels, and one-hand controls are built in. See
 [`docs/16_mini_games.md`](docs/16_mini_games.md) for the complete specification.
+The connected companion, room rewards, story missions, physical co-play, and
+child-created hero loop are documented in
+[`docs/17_living_kidverse.md`](docs/17_living_kidverse.md).
 
 ### Run it
 

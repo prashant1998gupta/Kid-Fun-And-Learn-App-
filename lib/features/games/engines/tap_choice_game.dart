@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -73,7 +74,8 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
       if (!_erredThisQuestion) _firstTryCorrect++;
       _celebration.celebrate(sound: false);
       AudioService.instance.speak(PraiseLines.nextSuccess());
-      await Future<void>.delayed(const Duration(milliseconds: 1100));
+      await Future<void>.delayed(FeedbackTiming.successBeat);
+      if (!mounted) return;
       _advance();
     } else {
       AudioService.instance.playSfx(Sfx.wrong);

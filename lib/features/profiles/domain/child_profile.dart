@@ -17,6 +17,14 @@ class ChildProfile extends Equatable {
     this.activeTheme = 'sunrise',
     this.ownedCollectibles = const [],
     this.activePetId,
+    this.ownedRoomItems = const [],
+    this.placedRoomItems = const [],
+    this.companionXp = 0,
+    this.companionName = 'Spark',
+    this.companionMemory = 'I am ready for our first adventure!',
+    this.heroDrawingId,
+    this.heroName,
+    this.completedAdventures = 0,
     this.createdAt,
     this.lastActiveAt,
   });
@@ -36,6 +44,18 @@ class ChildProfile extends Equatable {
 
   /// The pet companion currently shown beside the child on Home (or null).
   final String? activePetId;
+
+  /// Persistent pieces of the child's living world. These fields deliberately
+  /// ride the profile blob so rewards, mini-games, and creative play all feed
+  /// one offline-first emotional loop.
+  final List<String> ownedRoomItems;
+  final List<String> placedRoomItems;
+  final int companionXp;
+  final String companionName;
+  final String companionMemory;
+  final String? heroDrawingId;
+  final String? heroName;
+  final int completedAdventures;
   final DateTime? createdAt;
   final DateTime? lastActiveAt;
 
@@ -49,6 +69,14 @@ class ChildProfile extends Equatable {
     String? activeTheme,
     List<String>? ownedCollectibles,
     String? activePetId,
+    List<String>? ownedRoomItems,
+    List<String>? placedRoomItems,
+    int? companionXp,
+    String? companionName,
+    String? companionMemory,
+    String? heroDrawingId,
+    String? heroName,
+    int? completedAdventures,
     DateTime? lastActiveAt,
   }) {
     return ChildProfile(
@@ -62,6 +90,14 @@ class ChildProfile extends Equatable {
       activeTheme: activeTheme ?? this.activeTheme,
       ownedCollectibles: ownedCollectibles ?? this.ownedCollectibles,
       activePetId: activePetId ?? this.activePetId,
+      ownedRoomItems: ownedRoomItems ?? this.ownedRoomItems,
+      placedRoomItems: placedRoomItems ?? this.placedRoomItems,
+      companionXp: companionXp ?? this.companionXp,
+      companionName: companionName ?? this.companionName,
+      companionMemory: companionMemory ?? this.companionMemory,
+      heroDrawingId: heroDrawingId ?? this.heroDrawingId,
+      heroName: heroName ?? this.heroName,
+      completedAdventures: completedAdventures ?? this.completedAdventures,
       createdAt: createdAt,
       lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     );
@@ -78,6 +114,14 @@ class ChildProfile extends Equatable {
         'activeTheme': activeTheme,
         'ownedCollectibles': ownedCollectibles,
         'activePetId': activePetId,
+        'ownedRoomItems': ownedRoomItems,
+        'placedRoomItems': placedRoomItems,
+        'companionXp': companionXp,
+        'companionName': companionName,
+        'companionMemory': companionMemory,
+        'heroDrawingId': heroDrawingId,
+        'heroName': heroName,
+        'completedAdventures': completedAdventures,
         'createdAt': createdAt?.toIso8601String(),
         'lastActiveAt': lastActiveAt?.toIso8601String(),
       };
@@ -99,6 +143,17 @@ class ChildProfile extends Equatable {
         ownedCollectibles:
             (map['ownedCollectibles'] as List?)?.cast<String>() ?? const [],
         activePetId: map['activePetId'] as String?,
+        ownedRoomItems:
+            (map['ownedRoomItems'] as List?)?.cast<String>() ?? const [],
+        placedRoomItems:
+            (map['placedRoomItems'] as List?)?.cast<String>() ?? const [],
+        companionXp: (map['companionXp'] as num?)?.toInt() ?? 0,
+        companionName: map['companionName'] as String? ?? 'Spark',
+        companionMemory: map['companionMemory'] as String? ??
+            'I am ready for our first adventure!',
+        heroDrawingId: map['heroDrawingId'] as String?,
+        heroName: map['heroName'] as String?,
+        completedAdventures: (map['completedAdventures'] as num?)?.toInt() ?? 0,
         createdAt: DateTime.tryParse(map['createdAt'] as String? ?? ''),
         lastActiveAt: DateTime.tryParse(map['lastActiveAt'] as String? ?? ''),
       );
@@ -114,6 +169,14 @@ class ChildProfile extends Equatable {
         activeTheme,
         ownedCollectibles,
         activePetId,
+        ownedRoomItems,
+        placedRoomItems,
+        companionXp,
+        companionName,
+        companionMemory,
+        heroDrawingId,
+        heroName,
+        completedAdventures,
       ];
 }
 

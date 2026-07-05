@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -30,6 +31,7 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
   MiniGamePlayMode _playMode = MiniGamePlayMode.solo;
   int _currentPlayer = 1;
   bool _resultRecorded = false;
+  int _boardSession = 0;
   double _assistLevel = 0;
   int _activeValue = 2;
   int _dropColumn = 2;
@@ -122,6 +124,7 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
 
   void _restart() {
     setState(() {
+      _boardSession++;
       _engine = StackMergeEngine(columnCount: _columns, maxRows: _maxRows);
       _activeValue = _nextRandomValue();
       _preview = [_nextRandomValue(), _nextRandomValue()];
@@ -164,11 +167,12 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
   Future<void> _drop() async {
     if (_dropping) return;
     if (_engine.gameOver) _rescueTower();
+    final session = _boardSession;
     setState(() => _dropping = true);
     final reducedMotion = ref.read(reducedMotionProvider);
     if (!reducedMotion) {
       await Future<void>.delayed(const Duration(milliseconds: 220));
-      if (!mounted) return;
+      if (!mounted || session != _boardSession) return;
     }
 
     final droppedColumn = _dropColumn;
@@ -181,7 +185,7 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       if (result.mergeCount > 0) _mergePulse++;
       _activeValue = _preview.first;
       _preview = [_preview.last, _nextRandomValue()];
-      _dropping = false;
+      _dropping = result.mergeCount > 0;
       if (result.mergeCount >= 2) {
         _message = result.mergeCount >= 3
             ? 'Firework chain x${result.mergeCount}! The rainbow is free!'
@@ -206,6 +210,9 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       } else {
         _celebration.celebrate(sound: false);
       }
+      await Future<void>.delayed(FeedbackTiming.successBeat);
+      if (!mounted || session != _boardSession) return;
+      setState(() => _dropping = false);
     } else {
       AudioService.instance.playSfx(Sfx.tap);
     }

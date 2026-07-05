@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -34,6 +35,7 @@ class FlashcardGame extends StatefulWidget {
 class _FlashcardGameState extends State<FlashcardGame> {
   final _celebration = CelebrationController();
   int _index = 0;
+  bool _finishing = false;
   final _stopwatch = Stopwatch()..start();
 
   Question get _card => widget.lesson.questions[_index];
@@ -51,12 +53,14 @@ class _FlashcardGameState extends State<FlashcardGame> {
   }
 
   Future<void> _next() async {
+    if (_finishing) return;
     AudioService.instance.successHaptic();
     if (_index + 1 >= _total) {
+      setState(() => _finishing = true);
       _stopwatch.stop();
       _celebration.fireworks();
       AudioService.instance.speak(PraiseLines.nextSuccess());
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      await Future<void>.delayed(FeedbackTiming.successBeat);
       if (!mounted) return;
       // Learning is always a win — full marks for finishing the deck.
       widget.onComplete(

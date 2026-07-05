@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kidverse/features/collections/domain/collectible.dart';
 import 'package:kidverse/features/profiles/domain/child_profile.dart';
 import 'package:kidverse/features/profiles/domain/grade_level.dart';
+import 'package:kidverse/features/world/domain/world_prize.dart';
 
 void main() {
   group('CollectionCatalog', () {
@@ -84,6 +85,66 @@ void main() {
       });
       expect(restored.ownedCollectibles, isEmpty);
       expect(restored.activePetId, isNull);
+    });
+
+    test('living-world state survives a profile map round-trip', () {
+      const profile = ChildProfile(
+        id: 'world-child',
+        name: 'Ari',
+        grade: GradeLevel.kg,
+        avatar: AvatarConfig(),
+        ownedRoomItems: ['room_rainbow', 'room_rocket'],
+        placedRoomItems: ['room_rainbow'],
+        companionXp: 84,
+        companionName: 'Bubbles',
+        companionMemory: 'We made a story!',
+        heroDrawingId: 'drawing-7',
+        heroName: 'Captain Scribble',
+        completedAdventures: 9,
+      );
+
+      final restored = ChildProfile.fromMap(profile.toMap());
+
+      expect(restored.ownedRoomItems, profile.ownedRoomItems);
+      expect(restored.placedRoomItems, profile.placedRoomItems);
+      expect(restored.companionXp, 84);
+      expect(restored.companionName, 'Bubbles');
+      expect(restored.companionMemory, 'We made a story!');
+      expect(restored.heroDrawingId, 'drawing-7');
+      expect(restored.heroName, 'Captain Scribble');
+      expect(restored.completedAdventures, 9);
+    });
+
+    test('legacy profiles receive safe living-world defaults', () {
+      final restored = ChildProfile.fromMap(const {
+        'id': 'legacy',
+        'name': 'Lee',
+        'grade': 'grade1',
+      });
+
+      expect(restored.ownedRoomItems, isEmpty);
+      expect(restored.placedRoomItems, isEmpty);
+      expect(restored.companionXp, 0);
+      expect(restored.companionName, 'Spark');
+      expect(restored.heroDrawingId, isNull);
+    });
+  });
+
+  group('WorldPrizeCatalog', () {
+    test('prize ids are unique and deterministic per lesson', () {
+      final ids = WorldPrizeCatalog.all.map((item) => item.id).toList();
+      expect(ids.toSet(), hasLength(ids.length));
+      expect(
+        WorldPrizeCatalog.forLesson('math-bridge').id,
+        WorldPrizeCatalog.forLesson('math-bridge').id,
+      );
+    });
+
+    test('every catalog prize can be resolved by id', () {
+      for (final prize in WorldPrizeCatalog.all) {
+        expect(WorldPrizeCatalog.byId(prize.id), same(prize));
+      }
+      expect(WorldPrizeCatalog.byId('missing'), isNull);
     });
   });
 }
