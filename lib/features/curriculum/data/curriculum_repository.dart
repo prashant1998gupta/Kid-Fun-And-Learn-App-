@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -152,8 +153,9 @@ class CurriculumRepository {
       }
     } catch (e) {
       // A missing/malformed grade file must not crash the app.
-      // ignore: avoid_print
-      print('Curriculum load failed for $path: $e');
+      if (kDebugMode) {
+        debugPrint('Curriculum load failed for $path: $e');
+      }
     }
   }
 

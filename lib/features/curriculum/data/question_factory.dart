@@ -612,57 +612,17 @@ class QuestionFactory {
   }
 
   // ---- ENGLISH (CBSE-aligned for preschool) ---------------------------------
-  static const List<String> _rhymingWords = [
-    'cat',
-    'hat',
-    'bat',
-    'rat',
-    'mat',
-    'sun',
-    'fun',
-    'run',
-    'bun',
-    'gun',
-    'dog',
-    'log',
-    'frog',
-    'hog',
-    'jog',
-    'bed',
-    'red',
-    'fed',
-    'led',
-    'shed',
-    'pin',
-    'win',
-    'tin',
-    'bin',
-    'chin',
-    'ball',
-    'tall',
-    'fall',
-    'mall',
-    'call',
-    'ring',
-    'sing',
-    'king',
-    'wing',
-    'thing',
-    'cake',
-    'lake',
-    'bake',
-    'take',
-    'make',
-    'bell',
-    'well',
-    'tell',
-    'sell',
-    'fell',
-    'hen',
-    'pen',
-    'ten',
-    'men',
-    'then',
+  static const List<List<String>> _rhymeFamilies = [
+    ['cat', 'hat', 'bat', 'rat', 'mat', 'fat', 'pat', 'sat'],
+    ['sun', 'fun', 'bun', 'gun', 'run', 'nun'],
+    ['dog', 'log', 'frog', 'hog', 'jog', 'cog'],
+    ['bed', 'red', 'fed', 'led', 'shed', 'head', 'bread'],
+    ['pin', 'win', 'tin', 'bin', 'chin', 'fin', 'spin'],
+    ['ball', 'tall', 'fall', 'mall', 'call', 'wall', 'small'],
+    ['ring', 'sing', 'king', 'wing', 'thing', 'string', 'swing'],
+    ['cake', 'lake', 'bake', 'take', 'make', 'fake', 'wake'],
+    ['bell', 'well', 'tell', 'sell', 'fell', 'smell', 'spell'],
+    ['hen', 'pen', 'ten', 'men', 'then', 'when', 'den'],
   ];
 
   static const List<String> _spellingWords = [
@@ -792,15 +752,20 @@ class QuestionFactory {
             shift: index,
           );
         case 3: // Rhyming word
-          final base = _rhymingWords[k % _rhymingWords.length];
-          final rhyme = _rhymingWords[(k + 2) % _rhymingWords.length];
-          final nonRhyme = _rhymingWords[(k + 7) % _rhymingWords.length];
+          final familyIndex = k % 10;
+          final family = _rhymeFamilies[familyIndex];
+          final wordIndex = k % family.length;
+          final base = family[wordIndex];
+          final rhyme = family[(wordIndex + 1) % family.length];
+          final wrongFamily = _rhymeFamilies[(familyIndex + 3) % 10];
+          final nonRhyme1 = wrongFamily[0];
+          final nonRhyme2 = _rhymeFamilies[(familyIndex + 7) % 10][0];
           return _mc(
             id: id,
             prompt: 'Which rhymes with "$base"?',
             speak: 'Which word rhymes with $base?',
             correct: AnswerOption(label: rhyme),
-            wrong: [AnswerOption(label: nonRhyme)],
+            wrong: [AnswerOption(label: nonRhyme1), AnswerOption(label: nonRhyme2)],
             shift: index,
           );
         case 4: // Vowel identification
@@ -869,35 +834,60 @@ class QuestionFactory {
             ],
             shift: index,
           );
-        default: // Match word pairs
-          const pairs = [
-            ('Shoes', '👟'),
-            ('Socks', '🧦'),
-            ('Bread', '🍞'),
-            ('Milk', '🥛'),
-            ('Soap', '🧼'),
-            ('Comb', '🪮'),
-            ('Chair', '🪑'),
-            ('Table', '🪑'),
-            ('Pillow', '🛏️'),
-            ('Blanket', '🛏️'),
-            ('Cup', '🥤'),
-            ('Plate', '🍽️'),
+        default: // Match word pairs - semantically related items
+          const relatedPairs = [
+            ('Shoes', '👟', 'Socks', '🧦'),
+            ('Bread', '🍞', 'Butter', '🧈'),
+            ('Pillow', '🛏️', 'Blanket', '🛋️'),
+            ('Cup', '🥤', 'Plate', '🍽️'),
+            ('Pen', '✏️', 'Paper', '📝'),
+            ('Sun', '☀️', 'Moon', '🌙'),
+            ('Cat', '🐱', 'Dog', '🐶'),
+            ('Tree', '🌳', 'Flower', '🌸'),
+            ('Book', '📖', 'Pencil', '✏️'),
+            ('Bed', '🛏️', 'Pillow', '🛋️'),
           ];
-          final p = pairs[k % pairs.length];
-          final w1 = pairs[(k + 2) % pairs.length];
-          final w2 = pairs[(k + 5) % pairs.length];
-          return _mc(
-            id: id,
-            prompt: 'Which goes with ${p.$1}?',
-            speak: 'Which one goes with ${p.$1}?',
-            correct: AnswerOption(label: p.$2, emoji: p.$2),
-            wrong: [
-              AnswerOption(label: w1.$2, emoji: w1.$2),
-              AnswerOption(label: w2.$2, emoji: w2.$2),
-            ],
-            shift: index,
-          );
+          const unrelatedItems = [
+            ('Apple', '🍎'), ('Car', '🚗'), ('Ball', '⚽'), ('Fish', '🐟'),
+            ('Star', '⭐'), ('Rain', '🌧️'), ('Bird', '🐦'), ('Phone', '📱'),
+            ('Cake', '🎂'), ('Hat', '🎩'), ('Key', '🔑'), ('Door', '🚪'),
+          ];
+          final pairIndex = k % relatedPairs.length;
+          final item = relatedPairs[pairIndex].$1;
+          final itemEmoji = relatedPairs[pairIndex].$2;
+          final related = relatedPairs[pairIndex].$3;
+          final relatedEmoji = relatedPairs[pairIndex].$4;
+          // Pick unrelated distractors
+          final w1Index = (k + 2) % unrelatedItems.length;
+          final w2Index = (k + 7) % unrelatedItems.length;
+          final w1 = unrelatedItems[w1Index];
+          final w2 = unrelatedItems[w2Index];
+          // Randomly show item or its partner as the question
+          if (k % 2 == 0) {
+            return _mc(
+              id: id,
+              prompt: 'Which goes with $item?',
+              speak: 'Which one goes with $item?',
+              correct: AnswerOption(label: related, emoji: relatedEmoji),
+              wrong: [
+                AnswerOption(label: w1.$1, emoji: w1.$2),
+                AnswerOption(label: w2.$1, emoji: w2.$2),
+              ],
+              shift: index,
+            );
+          } else {
+            return _mc(
+              id: id,
+              prompt: 'Which goes with $related?',
+              speak: 'Which one goes with $related?',
+              correct: AnswerOption(label: item, emoji: itemEmoji),
+              wrong: [
+                AnswerOption(label: w1.$1, emoji: w1.$2),
+                AnswerOption(label: w2.$1, emoji: w2.$2),
+              ],
+              shift: index,
+            );
+          }
       }
     }
 
