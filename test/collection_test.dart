@@ -20,8 +20,7 @@ void main() {
     });
 
     test('totalWeight equals the sum of rarity weights', () {
-      final sum = CollectionCatalog.all
-          .fold(0, (a, c) => a + c.rarity.weight);
+      final sum = CollectionCatalog.all.fold(0, (a, c) => a + c.rarity.weight);
       expect(CollectionCatalog.totalWeight, sum);
     });
 
@@ -33,7 +32,8 @@ void main() {
 
   group('pickByWeight', () {
     test('roll 0 lands on the first catalog entry', () {
-      expect(CollectionCatalog.pickByWeight(0).id, CollectionCatalog.all.first.id);
+      expect(
+          CollectionCatalog.pickByWeight(0).id, CollectionCatalog.all.first.id);
     });
 
     test('every valid roll maps to a real catalog member', () {
@@ -48,7 +48,8 @@ void main() {
       // second item.
       final first = CollectionCatalog.all[0];
       final second = CollectionCatalog.all[1];
-      expect(CollectionCatalog.pickByWeight(first.rarity.weight - 1).id, first.id);
+      expect(
+          CollectionCatalog.pickByWeight(first.rarity.weight - 1).id, first.id);
       expect(CollectionCatalog.pickByWeight(first.rarity.weight).id, second.id);
     });
 

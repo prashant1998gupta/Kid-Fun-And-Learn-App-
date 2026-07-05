@@ -35,8 +35,7 @@ void main() {
       expect(units, isNotEmpty, reason: '${grade.name} should have subjects');
       for (final unit in units) {
         final lessons = repo.lessonsForUnit(unit);
-        expect(lessons.length, 50,
-            reason: '${unit.id} should offer 50 levels');
+        expect(lessons.length, 50, reason: '${unit.id} should offer 50 levels');
       }
     }
   });

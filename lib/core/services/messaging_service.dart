@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -21,38 +23,84 @@ class MessagingService {
 
   String? _token;
   String? get token => _token;
+  StreamSubscription<String>? _tokenRefreshSubscription;
+  bool _initialized = false;
+  String? _signedInUid;
 
   bool get _enabled => FirebaseService.instance.isAvailable;
 
   FirebaseMessaging get _fm => FirebaseMessaging.instance;
 
-  /// Requests notification permission and caches the device token. Call once
-  /// after Firebase init. Never throws.
-  Future<void> init() async {
-    if (!_enabled) return;
+  /// Initializes messaging only when a parent has already opted in. A fresh
+  /// install never sees a notification prompt during child-facing startup.
+  Future<bool> init({required bool parentEnabled}) async {
+    if (!_enabled || !parentEnabled) return false;
+    return setEnabled(true);
+  }
+
+  /// Applies the parent-controlled notification preference.
+  Future<bool> setEnabled(bool enabled, {String? uid}) async {
+    if (!_enabled) return false;
     try {
+      if (!enabled) {
+        final previousToken = _token;
+        if (uid != null && previousToken != null) {
+          await _removeToken(uid, previousToken);
+        }
+        await _fm.unsubscribeFromTopic(_streakTopic);
+        await _fm.deleteToken();
+        await _tokenRefreshSubscription?.cancel();
+        _tokenRefreshSubscription = null;
+        _token = null;
+        _initialized = false;
+        _signedInUid = null;
+        return true;
+      }
+
       await _fm.requestPermission(alert: true, badge: true, sound: true);
+      final settings = await _fm.getNotificationSettings();
+      if (settings.authorizationStatus == AuthorizationStatus.denied) {
+        return false;
+      }
       _token = await _fm.getToken();
+      if (_token == null) return false;
       await _fm.subscribeToTopic(_streakTopic);
-      _fm.onTokenRefresh.listen((t) {
+      await _tokenRefreshSubscription?.cancel();
+      _tokenRefreshSubscription = _fm.onTokenRefresh.listen((t) {
         _token = t;
-        // If a parent is already signed in, the next _saveToken picks this up.
+        final uid = _signedInUid;
+        if (uid != null) unawaited(onSignedIn(uid));
       });
+      _initialized = true;
+      if (uid != null) await onSignedIn(uid);
+      return true;
     } catch (e) {
       if (kDebugMode) debugPrint('[MessagingService] disabled: $e');
+      return false;
     }
   }
 
   /// Persists the token under `parents/{uid}.fcmTokens` so the server can reach
   /// this device. Called by [AuthController] on sign-in.
   Future<void> onSignedIn(String uid) async {
-    if (!_enabled || _token == null) return;
+    if (!_enabled || !_initialized || _token == null) return;
+    _signedInUid = uid;
     try {
       await FirebaseFirestore.instance.collection('parents').doc(uid).set({
         'fcmTokens': FieldValue.arrayUnion([_token]),
       }, SetOptions(merge: true));
     } catch (e) {
       if (kDebugMode) debugPrint('[MessagingService] token save failed: $e');
+    }
+  }
+
+  Future<void> _removeToken(String uid, String token) async {
+    try {
+      await FirebaseFirestore.instance.collection('parents').doc(uid).set({
+        'fcmTokens': FieldValue.arrayRemove([token]),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      if (kDebugMode) debugPrint('[MessagingService] token removal failed: $e');
     }
   }
 }

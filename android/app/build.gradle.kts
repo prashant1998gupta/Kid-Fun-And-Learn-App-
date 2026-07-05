@@ -7,14 +7,40 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Release signing is read from android/key.properties (git-ignored). When it's
-// absent (e.g. a fresh clone or CI without secrets) we fall back to debug keys
-// so `flutter run --release` still works. See docs for the keytool command.
+// Release signing is read from android/key.properties (git-ignored). Release
+// builds fail closed when signing material is absent: a debug-signed artifact
+// must never be mistaken for something safe to upload to Play Console.
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 val hasReleaseKeystore = keystorePropertiesFile.exists()
 if (hasReleaseKeystore) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+val requiredSigningKeys = listOf("keyAlias", "keyPassword", "storeFile", "storePassword")
+val missingSigningKeys = requiredSigningKeys.filter {
+    keystoreProperties.getProperty(it).isNullOrBlank()
+}
+if (hasReleaseKeystore && missingSigningKeys.isNotEmpty()) {
+    throw GradleException(
+        "android/key.properties is missing: ${missingSigningKeys.joinToString()}",
+    )
+}
+val requestedReleaseTask = gradle.startParameter.taskNames.any {
+    it.contains("release", ignoreCase = true)
+}
+if (requestedReleaseTask && !hasReleaseKeystore) {
+    throw GradleException(
+        "Release signing is not configured. Create android/key.properties " +
+            "and an upload keystore; see docs/13_deployment.md.",
+    )
+}
+val releaseStoreFile = if (hasReleaseKeystore) {
+    file(keystoreProperties.getProperty("storeFile"))
+} else {
+    null
+}
+if (requestedReleaseTask && releaseStoreFile?.exists() != true) {
+    throw GradleException("The configured Android release keystore does not exist.")
 }
 
 android {
@@ -44,7 +70,7 @@ android {
             if (hasReleaseKeystore) {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
+                storeFile = releaseStoreFile
                 storePassword = keystoreProperties["storePassword"] as String
             }
         }
@@ -52,11 +78,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (hasReleaseKeystore) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -75,4 +97,10 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+// Firebase remains optional for offline/debug builds. When a real native
+// config is present, apply the plugin that generates Android resources.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }

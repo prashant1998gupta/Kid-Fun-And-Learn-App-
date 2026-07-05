@@ -16,6 +16,7 @@ class SettingsState {
     this.colorBlindMode = false,
     this.largeText = false,
     this.reducedMotion = false,
+    this.notificationsEnabled = false,
     this.locale = 'en',
   });
 
@@ -27,6 +28,7 @@ class SettingsState {
   final bool colorBlindMode;
   final bool largeText;
   final bool reducedMotion;
+  final bool notificationsEnabled;
   final String locale;
 
   SettingsState copyWith({
@@ -38,6 +40,7 @@ class SettingsState {
     bool? colorBlindMode,
     bool? largeText,
     bool? reducedMotion,
+    bool? notificationsEnabled,
     String? locale,
   }) {
     return SettingsState(
@@ -49,6 +52,7 @@ class SettingsState {
       colorBlindMode: colorBlindMode ?? this.colorBlindMode,
       largeText: largeText ?? this.largeText,
       reducedMotion: reducedMotion ?? this.reducedMotion,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       locale: locale ?? this.locale,
     );
   }
@@ -71,6 +75,7 @@ class SettingsController extends StateNotifier<SettingsState> {
       colorBlindMode: _prefs.getBool('colorBlind') ?? false,
       largeText: _prefs.getBool('largeText') ?? false,
       reducedMotion: _prefs.getBool('reducedMotion') ?? false,
+      notificationsEnabled: _prefs.getBool('notificationsEnabled') ?? false,
       locale: _prefs.getString('locale') ?? 'en',
     );
     _syncAudio();
@@ -127,6 +132,11 @@ class SettingsController extends StateNotifier<SettingsState> {
   Future<void> toggleReducedMotion(bool v) async {
     state = state.copyWith(reducedMotion: v);
     await _prefs.setBool('reducedMotion', v);
+  }
+
+  Future<void> setNotificationsEnabled(bool value) async {
+    state = state.copyWith(notificationsEnabled: value);
+    await _prefs.setBool('notificationsEnabled', value);
   }
 
   Future<void> setLocale(String code) async {

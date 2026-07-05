@@ -83,13 +83,24 @@ class SyncService {
       final list = jsonDecode(raw) as List;
       final batch = _db.batch();
       final col = _parentDoc(uid).collection('children');
+      final localIds = <String>{};
       for (final e in list) {
         if (e is! Map || e['id'] is! String) continue;
+        localIds.add(e['id'] as String);
         batch.set(
           col.doc(e['id'] as String),
-          {...e.cast<String, dynamic>(), 'syncedAt': FieldValue.serverTimestamp()},
+          {
+            ...e.cast<String, dynamic>(),
+            'syncedAt': FieldValue.serverTimestamp()
+          },
           SetOptions(merge: true),
         );
+      }
+      // Propagate local profile deletion to the cloud instead of leaving
+      // orphaned child records indefinitely.
+      final remote = await col.get();
+      for (final doc in remote.docs) {
+        if (!localIds.contains(doc.id)) batch.delete(doc.reference);
       }
       await batch.commit();
     } catch (_) {

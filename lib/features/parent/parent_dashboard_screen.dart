@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../../app/router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/services/messaging_service.dart';
 import '../ai/adaptive_engine.dart';
 import '../auth/auth_controller.dart';
 import '../curriculum/domain/subject.dart';
 import '../profiles/profiles_controller.dart';
 import '../progress/activity_log.dart';
 import '../sync/sync_controller.dart';
+import '../settings/settings_controller.dart';
 import 'widgets/trend_charts.dart';
 
 /// Parent Dashboard: progress overview, per-subject mastery, weak areas &
@@ -466,7 +468,8 @@ class _AccountCard extends ConsumerWidget {
                 subtitle: Text('Signed in with '
                     '${auth.account?.provider.label ?? 'account'}'),
               ),
-              Text(_syncLine(sync), style: Theme.of(context).textTheme.bodySmall),
+              Text(_syncLine(sync),
+                  style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -527,9 +530,32 @@ class _AccountCard extends ConsumerWidget {
   }
 }
 
-class _ControlsCard extends StatelessWidget {
+class _ControlsCard extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsControllerProvider);
+    final auth = ref.watch(authControllerProvider);
+
+    Future<void> setNotifications(bool value) async {
+      final ok = await MessagingService.instance.setEnabled(
+        value,
+        uid: auth.account?.uid,
+      );
+      if (!context.mounted) return;
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .setNotificationsEnabled(value && ok);
+      if (value && !ok && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Notifications are unavailable. Check cloud setup and device permission.',
+            ),
+          ),
+        );
+      }
+    }
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -538,23 +564,76 @@ class _ControlsCard extends StatelessWidget {
           children: [
             Text('Controls', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const ListTile(
-              leading: Icon(Icons.timer_rounded),
-              title: Text('Daily screen-time limit'),
-              subtitle: Text('30 minutes'),
-              trailing: Icon(Icons.chevron_right_rounded),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              secondary: const Icon(Icons.notifications_rounded),
+              title: const Text('Parent progress reminders'),
+              subtitle: const Text(
+                'Off by default. Permission is requested only when you enable it.',
+              ),
+              value: settings.notificationsEnabled,
+              onChanged: setNotifications,
             ),
-            const ListTile(
-              leading: Icon(Icons.notifications_rounded),
-              title: Text('Progress notifications'),
-              trailing: Icon(Icons.chevron_right_rounded),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.shield_rounded),
+              title: const Text('Privacy & data'),
+              subtitle: const Text(
+                'Offline by default. Cloud sync is optional and parent-controlled.',
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(AppRoutes.about),
             ),
-            const ListTile(
-              leading: Icon(Icons.shield_rounded),
-              title: Text('Privacy & data (COPPA/GDPR)'),
-              trailing: Icon(Icons.chevron_right_rounded),
-            ),
+            if (auth.status == AuthStatus.signedIn)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.delete_forever_rounded,
+                    color: AppColors.error),
+                title: const Text('Delete cloud account'),
+                subtitle: const Text(
+                  'Permanently removes the parent account and cloud backup. Local profiles stay on this device.',
+                ),
+                onTap: () => _confirmAccountDeletion(context, ref),
+              ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmAccountDeletion(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete cloud account?'),
+            content: const Text(
+              'This permanently deletes the parent sign-in, cloud backup, and shared leaderboard entry. This cannot be undone.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete permanently'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed || !context.mounted) return;
+    final ok = await ref.read(authControllerProvider.notifier).deleteAccount();
+    if (!context.mounted) return;
+    final error = ref.read(authControllerProvider).error;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? 'Cloud account deletion started.' : (error ?? 'Delete failed.'),
         ),
       ),
     );

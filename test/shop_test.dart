@@ -3,7 +3,8 @@ import 'package:kidverse/features/shop/shop_catalog.dart';
 
 void main() {
   group('ShopCatalog', () {
-    test('has a free starter theme so the shop is never empty of owned items', () {
+    test('has a free starter theme so the shop is never empty of owned items',
+        () {
       final free = ShopCatalog.themes.where((t) => t.cost == 0).toList();
       expect(free, isNotEmpty);
       expect(free.first.id, 'sunrise');

@@ -4,7 +4,7 @@
 build/
 .flutter-plugins
 .flutter-plugins-dependencies
-pubspec.lock
+# Application lockfiles are committed for reproducible production builds.
 *.g.dart
 *.freezed.dart
 

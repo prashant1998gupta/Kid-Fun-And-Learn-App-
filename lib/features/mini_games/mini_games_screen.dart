@@ -351,12 +351,10 @@ class _GameCard extends StatelessWidget {
               child: OpenMojiView(
                 emoji: game.icon,
                 size: 46,
-                fallback:
-                    Text(game.icon, style: const TextStyle(fontSize: 40)),
+                fallback: Text(game.icon, style: const TextStyle(fontSize: 40)),
               ),
-            )
-                .animate(onPlay: (c) => c.repeat(reverse: true))
-                .moveY(begin: 0, end: -5, duration: 1600.ms, curve: Curves.easeInOut),
+            ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
+                begin: 0, end: -5, duration: 1600.ms, curve: Curves.easeInOut),
             const SizedBox(height: 10),
             Text(
               game.name,
@@ -384,8 +382,7 @@ class _GameCard extends StatelessWidget {
             const SizedBox(height: 10),
             // Status pill: bright when solved, soft "Play!" otherwise.
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(999),

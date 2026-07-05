@@ -202,6 +202,20 @@ class AuthService {
     await _auth.signOut();
   }
 
+  /// Permanently deletes the signed-in parent's Firebase Auth account. A
+  /// backend auth-delete trigger removes the associated cloud backup, child
+  /// projections, messaging tokens, and leaderboard entry.
+  Future<void> deleteAccount() async {
+    _ensureAvailable();
+    final user = _auth.currentUser;
+    if (user == null) throw const AuthException('No parent is signed in.');
+    try {
+      await user.delete();
+    } on fb.FirebaseAuthException catch (e) {
+      throw AuthException(_friendly(e));
+    }
+  }
+
   ParentAccount _requireAccount(fb.User? user) {
     final account = _toAccount(user);
     if (account == null) {
@@ -230,6 +244,8 @@ class AuthService {
         return 'No connection — check your network and retry.';
       case 'too-many-requests':
         return 'Too many attempts. Please wait a moment and retry.';
+      case 'requires-recent-login':
+        return 'For safety, sign out and sign in again before deleting the account.';
       default:
         return e.message ?? 'Something went wrong. Please try again.';
     }

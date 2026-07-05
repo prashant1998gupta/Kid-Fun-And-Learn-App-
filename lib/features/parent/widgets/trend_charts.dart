@@ -22,9 +22,7 @@ class WeeklyBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxVal = values.isEmpty
-        ? 0
-        : values.reduce((a, b) => a > b ? a : b);
+    final maxVal = values.isEmpty ? 0 : values.reduce((a, b) => a > b ? a : b);
     final labelStyle = Theme.of(context).textTheme.labelSmall;
 
     return Row(

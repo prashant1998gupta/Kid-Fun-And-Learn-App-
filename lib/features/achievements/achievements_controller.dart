@@ -55,9 +55,14 @@ class AchievementsController extends StateNotifier<Set<String>> {
   Future<void> _persist() async {
     final prefs = _ref.read(sharedPreferencesProvider);
     final raw = prefs.getString(_key);
-    final map = raw == null
-        ? <String, dynamic>{}
-        : (jsonDecode(raw) as Map).cast<String, dynamic>();
+    var map = <String, dynamic>{};
+    if (raw != null) {
+      try {
+        map = (jsonDecode(raw) as Map).cast<String, dynamic>();
+      } catch (_) {
+        // Replace only the corrupt achievement cache, preserving other prefs.
+      }
+    }
     map[_childId] = state.toList();
     await prefs.setString(_key, jsonEncode(map));
   }

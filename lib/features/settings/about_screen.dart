@@ -37,7 +37,7 @@ class AboutScreen extends StatelessWidget {
                 Text('A joyful learning universe for kids',
                     style: text.bodyMedium),
                 const SizedBox(height: 4),
-                Text('Version 0.1.0', style: text.labelMedium),
+                Text('Version 1.0.0', style: text.labelMedium),
               ],
             ),
           ),
@@ -58,9 +58,10 @@ class AboutScreen extends StatelessWidget {
           ),
           const _CreditCard(
             title: 'Privacy',
-            body: 'KidVerse is offline-first and COPPA-minded: children have no '
-                'accounts, and no child personal information is collected. '
-                'Cloud sync and leaderboards are optional and parent-controlled.',
+            body: 'KidVerse is offline-first: children have no independent '
+                'accounts. Child profiles stay on the device unless a parent '
+                'chooses cloud sync. Notifications are parent-controlled and '
+                'analytics collection is disabled by default.',
             icon: Icons.shield_rounded,
           ),
         ],

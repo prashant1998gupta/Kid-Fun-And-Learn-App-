@@ -46,10 +46,15 @@ class CanvasRepository {
   List<SavedDrawing> loadAll() {
     final raw = _prefs.getString(_key);
     if (raw == null) return [];
-    final list = jsonDecode(raw) as List;
-    return list
-        .map((e) => SavedDrawing.fromMap((e as Map).cast<String, dynamic>()))
-        .toList();
+    try {
+      final list = jsonDecode(raw) as List;
+      return [
+        for (final entry in list)
+          if (entry is Map) SavedDrawing.fromMap(entry.cast<String, dynamic>()),
+      ];
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<void> saveAll(List<SavedDrawing> drawings) async {

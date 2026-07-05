@@ -118,6 +118,28 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> deleteAccount() async {
+    state = state.copyWith(busy: true, clearError: true);
+    try {
+      await _service.deleteAccount();
+      state = state.copyWith(
+        status: AuthStatus.signedOut,
+        clearAccount: true,
+        busy: false,
+      );
+      return true;
+    } on AuthException catch (error) {
+      state = state.copyWith(busy: false, error: error.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        busy: false,
+        error: 'Account deletion failed. Please try again.',
+      );
+      return false;
+    }
+  }
+
   void clearError() => state = state.copyWith(clearError: true);
 
   @override

@@ -258,8 +258,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     final by = target.currentY(_clock.elapsed);
     setState(() {
       if (target.type == ChickenTargetType.bomb) {
-        _bursts.add(_TapBurst(
-            x: bx, y: by, createdAt: _clock.elapsed, icon: '💥'));
+        _bursts.add(
+            _TapBurst(x: bx, y: by, createdAt: _clock.elapsed, icon: '💥'));
         _targets.removeAt(index);
         _score = math.max(0, _score + ChickenTapRules.points(target.type, 0));
         _missed++;
@@ -272,8 +272,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
 
       if (target.type == ChickenTargetType.boss && target.hitsRemaining > 1) {
         target.hitsRemaining--;
-        _bursts.add(_TapBurst(
-            x: bx, y: by, createdAt: _clock.elapsed, icon: '💪'));
+        _bursts.add(
+            _TapBurst(x: bx, y: by, createdAt: _clock.elapsed, icon: '💪'));
         _message = '${target.hitsRemaining} more taps on the boss!';
         AudioService.instance.playSfx(Sfx.pop);
         return;
@@ -285,8 +285,8 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
       final points = ChickenTapRules.points(target.type, _combo);
       _score += points;
       // Floating "+N" so every catch feels rewarding.
-      _bursts.add(_TapBurst(
-          x: bx, y: by, createdAt: _clock.elapsed, icon: '+$points'));
+      _bursts.add(
+          _TapBurst(x: bx, y: by, createdAt: _clock.elapsed, icon: '+$points'));
       if (_playMode == MiniGamePlayMode.together) {
         final player = target.currentX(_clock.elapsed) < 0.5 ? 0 : 1;
         _playerScores[player] += points;

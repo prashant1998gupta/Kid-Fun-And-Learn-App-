@@ -31,11 +31,14 @@ class LeaderboardApi {
     required String avatarSeed,
     required int score,
   }) async {
-    if (!_enabled) return;
+    final normalizedCode = groupCode.trim().toUpperCase();
+    if (!_enabled || !RegExp(r'^[A-Z0-9]{6,12}$').hasMatch(normalizedCode)) {
+      return;
+    }
     try {
       await _db.collection('parents').doc(uid).set({
         'friendGroup': {
-          'code': groupCode,
+          'code': normalizedCode,
           'displayName': displayName,
           'avatarSeed': avatarSeed,
           'score': score,
@@ -49,12 +52,13 @@ class LeaderboardApi {
 
   /// Live top-N entries for a group, ranked by score desc. Empty when offline.
   Stream<List<LeaderboardEntry>> entries(String groupCode, {int limit = 50}) {
-    if (!_enabled || groupCode.isEmpty) {
+    final normalizedCode = groupCode.trim().toUpperCase();
+    if (!_enabled || !RegExp(r'^[A-Z0-9]{6,12}$').hasMatch(normalizedCode)) {
       return Stream.value(const <LeaderboardEntry>[]);
     }
     return _db
         .collection('leaderboards')
-        .doc(groupCode)
+        .doc(normalizedCode)
         .collection('entries')
         .orderBy('score', descending: true)
         .limit(limit)

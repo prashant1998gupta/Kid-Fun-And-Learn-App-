@@ -45,11 +45,10 @@ class LeaderboardController extends StateNotifier<String?> {
     final child = _ref.read(activeChildProvider);
     if (code == null || code.isEmpty || uid == null || child == null) return;
 
-    final score =
-        _ref.read(activityControllerProvider).weeklyStars(
-              child.id,
-              ActivityController.today,
-            );
+    final score = _ref.read(activityControllerProvider).weeklyStars(
+          child.id,
+          ActivityController.today,
+        );
     await _api.publishScore(
       uid,
       groupCode: code,

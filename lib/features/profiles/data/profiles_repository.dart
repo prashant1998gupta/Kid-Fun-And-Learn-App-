@@ -20,10 +20,16 @@ class ProfilesRepository {
   List<ChildProfile> loadAll() {
     final raw = _prefs.getString(_key);
     if (raw == null) return [];
-    final list = jsonDecode(raw) as List;
-    return list
-        .map((e) => ChildProfile.fromMap((e as Map).cast<String, dynamic>()))
-        .toList();
+    try {
+      final list = jsonDecode(raw) as List;
+      return [
+        for (final entry in list)
+          if (entry is Map) ChildProfile.fromMap(entry.cast<String, dynamic>()),
+      ];
+    } catch (_) {
+      // A corrupt local cache must not prevent the app from starting.
+      return [];
+    }
   }
 
   Future<void> saveAll(List<ChildProfile> profiles) async {

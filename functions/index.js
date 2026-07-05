@@ -14,6 +14,7 @@
  */
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const functionsV1 = require("firebase-functions/v1");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
@@ -32,8 +33,10 @@ exports.aggregateFriendScore = onDocumentWritten("parents/{uid}", async (event) 
   const beforeGroup = before.friendGroup || null;
   const afterGroup = after.friendGroup || null;
 
-  const beforeCode = beforeGroup?.code || null;
-  const afterCode = afterGroup?.code || null;
+  const rawBeforeCode = beforeGroup?.code || null;
+  const rawAfterCode = afterGroup?.code || null;
+  const beforeCode = validGroupCode(rawBeforeCode) ? rawBeforeCode : null;
+  const afterCode = validGroupCode(rawAfterCode) ? rawAfterCode : null;
 
   // If the family left/changed groups, remove their stale entry.
   if (beforeCode && beforeCode !== afterCode) {
@@ -67,7 +70,9 @@ exports.resetWeeklyBoards = onSchedule("5 0 * * 1", async () => {
   const boards = await db.collection("leaderboards").listDocuments();
   for (const board of boards) {
     const entries = await board.collection("entries").get();
-    const batch = db.batch();
+    // BulkWriter transparently chunks large boards beyond Firestore's
+    // 500-operation batch limit and retries transient failures.
+    const writer = db.bulkWriter();
     for (const entry of entries.docs) {
       // Archive under leaderboards/{code}/archive/{weekId}/entries/{uid}
       const archiveRef = board
@@ -75,11 +80,29 @@ exports.resetWeeklyBoards = onSchedule("5 0 * * 1", async () => {
         .doc(entry.data().weekId || "unknown")
         .collection("entries")
         .doc(entry.id);
-      batch.set(archiveRef, entry.data());
-      batch.delete(entry.ref);
+      writer.set(archiveRef, entry.data());
+      writer.delete(entry.ref);
     }
-    await batch.commit();
+    await writer.close();
   }
+});
+
+function validGroupCode(value) {
+  return typeof value === "string" && /^[A-Z0-9]{6,12}$/.test(value);
+}
+
+/** Remove all parent-owned cloud data after Firebase Auth account deletion. */
+exports.cleanupDeletedParent = functionsV1.auth.user().onDelete(async (user) => {
+  const parentRef = db.doc(`parents/${user.uid}`);
+  const parent = await parentRef.get();
+  const groupCode = parent.data()?.friendGroup?.code;
+  if (validGroupCode(groupCode)) {
+    await db
+      .doc(`leaderboards/${groupCode}/entries/${user.uid}`)
+      .delete()
+      .catch(() => {});
+  }
+  await db.recursiveDelete(parentRef);
 });
 
 /** ISO-week id like "2026-W27" — stable key for weekly boards. */

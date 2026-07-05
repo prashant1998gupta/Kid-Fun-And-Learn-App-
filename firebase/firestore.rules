@@ -19,6 +19,11 @@ service cloud.firestore {
   function isTeacher() {
     return isSignedIn() && request.auth.token.teacher == true;
   }
+  function ownsClassroom(classId) {
+    return isTeacher()
+      && get(/databases/$(db)/documents/classrooms/$(classId)).data.teacherId
+        == request.auth.uid;
+  }
 
   match /databases/{db}/documents {
 
@@ -45,12 +50,14 @@ service cloud.firestore {
 
     // ---- Classrooms (teacher dashboard) --------------------------------
     match /classrooms/{classId} {
-      allow read: if isTeacher() || isAdmin();
-      allow write: if isAdmin()
-        || (isTeacher() && request.auth.uid == resource.data.teacherId);
+      allow read: if isAdmin() || ownsClassroom(classId);
+      allow create: if isAdmin()
+        || (isTeacher()
+          && request.resource.data.teacherId == request.auth.uid);
+      allow update, delete: if isAdmin() || ownsClassroom(classId);
 
       match /rosters/{studentId} {
-        allow read, write: if isTeacher() || isAdmin();
+        allow read, write: if isAdmin() || ownsClassroom(classId);
       }
     }
 

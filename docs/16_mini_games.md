@@ -313,7 +313,7 @@ semantic labels and large one-hand-reachable touch targets.
 ## 10. Verification
 
 - `flutter analyze`: zero issues.
-- `flutter test`: all 82 tests passing at the last implementation verification.
+- `flutter test`: all 85 tests passing at the latest production-hardening verification.
 - Mini-game tests cover score persistence, wallet reward delivery, pet growth,
   daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
   Chicken target rules, and phone-viewport rendering for the catalog and all

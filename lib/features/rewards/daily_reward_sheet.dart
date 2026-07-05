@@ -79,7 +79,8 @@ class _DailyRewardSheetState extends ConsumerState<DailyRewardSheet> {
                     setState(() => _claimedNow = true);
                     AudioService.instance.playSfx(Sfx.reward);
                     AudioService.instance.speak('You got a daily gift!');
-                    await Future<void>.delayed(const Duration(milliseconds: 900));
+                    await Future<void>.delayed(
+                        const Duration(milliseconds: 900));
                     if (context.mounted) Navigator.of(context).pop();
                   }
                 : null,
@@ -141,15 +142,15 @@ class _DayTile extends StatelessWidget {
             ? AppColors.accent.withValues(alpha: 0.25)
             : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(AppSpacing.radiusMd),
-        border: highlight
-            ? Border.all(color: AppColors.accent, width: 3)
-            : null,
+        border:
+            highlight ? Border.all(color: AppColors.accent, width: 3) : null,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('Day $day',
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+              style:
+                  const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
           const SizedBox(height: 2),
           Text(reward.gems > 0 ? '💎' : '🪙',
               style: const TextStyle(fontSize: 22)),

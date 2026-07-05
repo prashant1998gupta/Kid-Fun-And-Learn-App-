@@ -88,7 +88,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.learningMap,
         pageBuilder: (context, s) {
-          final subject = s.extra as Subject;
+          final subject = s.extra;
+          if (subject is! Subject) {
+            return _fade(const _InvalidDeepLinkScreen(), s);
+          }
           return _slide(LearningMapScreen(subject: subject), s);
         },
       ),
@@ -111,7 +114,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.game,
         pageBuilder: (context, s) {
-          final lesson = s.extra as Lesson;
+          final lesson = s.extra;
+          if (lesson is! Lesson) {
+            return _fade(const _InvalidDeepLinkScreen(), s);
+          }
           return _slide(GameHostScreen(lesson: lesson), s);
         },
       ),
@@ -172,6 +178,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (_, s) => _slide(const SeasonPassScreen(), s),
       ),
     ],
+    errorBuilder: (_, __) => const _InvalidDeepLinkScreen(),
     redirect: (context, state) {
       // After splash, if there are no child profiles, force onboarding.
       final profiles = ref.read(profilesControllerProvider);
@@ -193,6 +200,39 @@ CustomTransitionPage<void> _fade(Widget child, GoRouterState state) {
     transitionsBuilder: (_, animation, __, child) =>
         FadeTransition(opacity: animation, child: child),
   );
+}
+
+class _InvalidDeepLinkScreen extends StatelessWidget {
+  const _InvalidDeepLinkScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('KidVerse')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🧭', style: TextStyle(fontSize: 64)),
+              const SizedBox(height: 12),
+              const Text(
+                'That adventure link is not available.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () => context.go(AppRoutes.home),
+                child: const Text('Go home'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 CustomTransitionPage<void> _slide(Widget child, GoRouterState state) {

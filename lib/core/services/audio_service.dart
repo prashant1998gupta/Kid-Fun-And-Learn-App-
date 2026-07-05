@@ -49,11 +49,11 @@ class AudioService {
   AudioService._();
   static final AudioService instance = AudioService._();
 
-  final AudioPlayer _sfxPlayer = AudioPlayer(playerId: 'sfx')
+  late final AudioPlayer _sfxPlayer = AudioPlayer(playerId: 'sfx')
     ..setReleaseMode(ReleaseMode.stop);
-  final AudioPlayer _musicPlayer = AudioPlayer(playerId: 'music')
+  late final AudioPlayer _musicPlayer = AudioPlayer(playerId: 'music')
     ..setReleaseMode(ReleaseMode.loop);
-  final FlutterTts _tts = FlutterTts();
+  late final FlutterTts _tts = FlutterTts();
 
   bool sfxEnabled = true;
   bool musicEnabled = true;

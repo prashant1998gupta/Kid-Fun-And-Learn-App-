@@ -71,7 +71,8 @@ class SyncController extends StateNotifier<SyncState> {
     try {
       final outcome = await _service.reconcile(uid, _now);
       if (outcome == SyncOutcome.pulled) _refreshLocalControllers();
-      state = SyncState(status: SyncStatus.synced, lastSyncedAt: DateTime.now());
+      state =
+          SyncState(status: SyncStatus.synced, lastSyncedAt: DateTime.now());
     } catch (e) {
       state = state.copyWith(
         status: SyncStatus.error,
@@ -90,7 +91,8 @@ class SyncController extends StateNotifier<SyncState> {
     state = state.copyWith(status: SyncStatus.syncing, message: null);
     try {
       await _service.push(uid, _now);
-      state = SyncState(status: SyncStatus.synced, lastSyncedAt: DateTime.now());
+      state =
+          SyncState(status: SyncStatus.synced, lastSyncedAt: DateTime.now());
     } catch (_) {
       state = state.copyWith(
         status: SyncStatus.error,

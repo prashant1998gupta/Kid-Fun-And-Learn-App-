@@ -99,9 +99,7 @@ class _ProfileTile extends StatelessWidget {
   final WidgetRef ref;
 
   void _select(BuildContext context) async {
-    await ref
-        .read(profilesControllerProvider.notifier)
-        .selectChild(child.id);
+    await ref.read(profilesControllerProvider.notifier).selectChild(child.id);
     ref.read(achievementsControllerProvider.notifier).refreshForActiveChild();
     ref.read(dailyRewardControllerProvider.notifier).refreshForActiveChild();
     ref.read(luckySpinControllerProvider.notifier).refreshForActiveChild();
@@ -139,9 +137,7 @@ class _ProfileTile extends StatelessWidget {
       onLongPress: () async {
         final confirmed = await _confirmDelete(context);
         if (confirmed && context.mounted) {
-          ref
-              .read(profilesControllerProvider.notifier)
-              .removeChild(child.id);
+          ref.read(profilesControllerProvider.notifier).removeChild(child.id);
         }
       },
       child: BouncyButton(

@@ -74,7 +74,9 @@ class DailyRewardController extends StateNotifier<DailyRewardState> {
 
   int _computeNextStreak() {
     if (state.lastClaimDay == null) return 1;
-    if (state.lastClaimDay == _today - 1) return state.streak + 1; // consecutive
+    if (state.lastClaimDay == _today - 1) {
+      return state.streak + 1; // consecutive
+    }
     if (state.lastClaimDay == _today) return state.streak; // already today
     return 1; // gap → reset
   }
@@ -87,7 +89,8 @@ class DailyRewardController extends StateNotifier<DailyRewardState> {
 
     // Apply coins/gems and sync the wallet's visible streak counter.
     final profiles = _ref.read(profilesControllerProvider.notifier);
-    await profiles.applyReward(RewardBundle(coins: reward.coins, gems: reward.gems));
+    await profiles
+        .applyReward(RewardBundle(coins: reward.coins, gems: reward.gems));
     await profiles.updateActive(
       (c) => c.copyWith(wallet: c.wallet.copyWith(streakDays: nextStreak)),
     );

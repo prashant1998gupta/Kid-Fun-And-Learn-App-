@@ -3,10 +3,11 @@
 A world-class, gamified learning universe for children **LKG → Grade 5** (ages 3–11).
 Built with **Flutter + Firebase**, offline-first, accessible, and delightful.
 
-> **Status:** Production-grade **foundation + one complete vertical slice** is
-> implemented and runnable. This document is the single source of truth for the
-> full product (the 50 deliverables) and the build roadmap for the remaining
-> modules. See [`docs/`](docs/) for the deep-dive specs.
+> **Status:** Release-candidate codebase with production hardening, automated
+> quality gates, offline-safe runtime behavior, and store build workflows.
+> Signing credentials, Firebase/App Check configuration, legal/store metadata,
+> and final physical-device review remain operator-owned release gates. See
+> [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md).
 
 ---
 
@@ -50,7 +51,7 @@ behavior, semantic labels, and one-hand controls are built in. See
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # full unit + widget suite (82 tests at last verification)
+flutter test         # full unit + widget suite (85 tests at last verification)
 flutter analyze      # lints
 ```
 

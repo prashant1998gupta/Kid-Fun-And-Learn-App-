@@ -36,10 +36,9 @@ class ParentAccount extends Equatable {
   final String? phoneNumber;
 
   /// A friendly label for the account chip in the parent dashboard.
-  String get label =>
-      displayName?.trim().isNotEmpty == true
-          ? displayName!
-          : email ?? phoneNumber ?? 'Parent';
+  String get label => displayName?.trim().isNotEmpty == true
+      ? displayName!
+      : email ?? phoneNumber ?? 'Parent';
 
   @override
   List<Object?> get props => [uid, provider, email, displayName, phoneNumber];

@@ -93,8 +93,7 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
     for (final c in 'abcdefghijklmnopqrstuvwxyz'.split(''))
       _TraceTemplate(c, 'Letters', c),
     // Numbers 0-9
-    for (final c in '0123456789'.split(''))
-      _TraceTemplate(c, 'Numbers', c),
+    for (final c in '0123456789'.split('')) _TraceTemplate(c, 'Numbers', c),
     // Shapes
     const _TraceTemplate('Circle', 'Shapes', '○'),
     const _TraceTemplate('Square', 'Shapes', '□'),
@@ -134,7 +133,8 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
 
   Widget _topBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
       child: Row(
         children: [
           BouncyButton(
@@ -145,7 +145,8 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close_rounded, color: AppColors.primary, size: 24),
+              child: const Icon(Icons.close_rounded,
+                  color: AppColors.primary, size: 24),
             ),
           ),
           const SizedBox(width: 8),
@@ -158,7 +159,8 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
           ),
           const Spacer(),
           // Undo
-          _iconBtn(Icons.undo_rounded, 'Undo', _undo, disabled: _strokes.isEmpty),
+          _iconBtn(Icons.undo_rounded, 'Undo', _undo,
+              disabled: _strokes.isEmpty),
           const SizedBox(width: 6),
           // Clear
           _iconBtn(Icons.delete_sweep_rounded, 'Clear', _confirmClear),
@@ -167,16 +169,19 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
           _iconBtn(Icons.save_rounded, 'Save', _save),
           const SizedBox(width: 6),
           // Gallery
-          _iconBtn(Icons.photo_library_rounded, 'Gallery', () =>
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const _GalleryScreen()),
-              )),
+          _iconBtn(
+              Icons.photo_library_rounded,
+              'Gallery',
+              () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const _GalleryScreen()),
+                  )),
         ],
       ),
     );
   }
 
-  Widget _iconBtn(IconData icon, String label, VoidCallback onTap, {bool disabled = false}) {
+  Widget _iconBtn(IconData icon, String label, VoidCallback onTap,
+      {bool disabled = false}) {
     return BouncyButton(
       onTap: disabled ? null : onTap,
       child: Container(
@@ -185,7 +190,8 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
           color: disabled ? Colors.white38 : Colors.white,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: disabled ? Colors.grey : AppColors.primary, size: 22),
+        child: Icon(icon,
+            color: disabled ? Colors.grey : AppColors.primary, size: 22),
       ),
     );
   }
@@ -281,7 +287,9 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
         title: const Text('Clear drawing?'),
         content: const Text('This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               _strokes.clear();
@@ -298,7 +306,8 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
 
   Future<void> _save() async {
     try {
-      final boundary = _repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary = _repaintKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
       if (boundary == null) return;
       final image = await boundary.toImage(pixelRatio: 2.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
@@ -307,17 +316,21 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
 
       final repo = ref.read(canvasRepositoryProvider);
       final drawings = repo.loadAll();
-      drawings.insert(0, SavedDrawing(
-        id: _uuid.v4(),
-        name: 'Drawing ${drawings.length + 1}',
-        thumbnailBytes: bytes,
-        createdAt: DateTime.now(),
-      ));
+      drawings.insert(
+          0,
+          SavedDrawing(
+            id: _uuid.v4(),
+            name: 'Drawing ${drawings.length + 1}',
+            thumbnailBytes: bytes,
+            createdAt: DateTime.now(),
+          ));
       await repo.saveAll(drawings);
       AudioService.instance.playSfx(Sfx.reward);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Saved to gallery!'), duration: Duration(seconds: 1)),
+        const SnackBar(
+            content: Text('✅ Saved to gallery!'),
+            duration: Duration(seconds: 1)),
       );
     } catch (_) {}
   }
@@ -435,7 +448,8 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _toolBtn(Icons.draw_rounded, 'Pen', !_isEraser && !_fillMode && !_showTracePicker),
+          _toolBtn(Icons.draw_rounded, 'Pen',
+              !_isEraser && !_fillMode && !_showTracePicker),
           _toolBtn(Icons.format_paint_rounded, 'Fill', _fillMode),
           _toolBtn(Icons.auto_fix_high_rounded, 'Trace', _showTracePicker),
           _toolBtn(Icons.auto_fix_high_rounded, 'Eraser', _isEraser),
@@ -462,14 +476,19 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? AppColors.primary.withValues(alpha: 0.15) : Colors.transparent,
+          color: active
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          border: active ? Border.all(color: AppColors.primary, width: 2) : null,
+          border:
+              active ? Border.all(color: AppColors.primary, width: 2) : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 20, color: active ? AppColors.primary : AppColors.lightText),
+            Icon(icon,
+                size: 20,
+                color: active ? AppColors.primary : AppColors.lightText),
             const SizedBox(width: 4),
             Text(
               label,
@@ -494,69 +513,78 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
-            for (final entry in cats.entries)
-              ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 6),
-                  child: Row(
-                    children: [
-                      Text('${entry.value} ${entry.key}',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
-                    ],
-                  ),
+            for (final entry in cats.entries) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 6),
+                child: Row(
+                  children: [
+                    Text('${entry.value} ${entry.key}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: Colors.white)),
+                  ],
                 ),
-                SizedBox(
-                  height: 48,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      for (final t in _traceTemplates.where((t) => t.category == entry.key))
-                        Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: BouncyButton(
-                            onTap: () => setState(() {
-                              _activeTrace = t;
-                              _showTracePicker = false;
-                            }),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.25),
-                                borderRadius: BorderRadius.circular(14),
+              ),
+              SizedBox(
+                height: 48,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    for (final t in _traceTemplates
+                        .where((t) => t.category == entry.key))
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: BouncyButton(
+                          onTap: () => setState(() {
+                            _activeTrace = t;
+                            _showTracePicker = false;
+                          }),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Text(
+                              t.label,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
                               ),
-                              child: Text(
-                                t.label,
-                                style: const TextStyle(
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_activeTrace != null &&
+                        entry.key == (_activeTrace?.category ?? ''))
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: BouncyButton(
+                          onTap: () => setState(() => _activeTrace = null),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: const Text(
+                              '✕ Remove',
+                              style: TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                ),
-                              ),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14),
                             ),
                           ),
                         ),
-                      if (_activeTrace != null && entry.key == (_activeTrace?.category ?? ''))
-                        Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: BouncyButton(
-                            onTap: () => setState(() => _activeTrace = null),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Text(
-                                '✕ Remove',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
-              ],
+              ),
+            ],
           ],
         ),
       ),
@@ -619,11 +647,14 @@ class _CanvasPainter extends CustomPainter {
 
     // ── Draw all completed strokes ──
     for (final stroke in strokes) {
-      if (stroke.points.length == 1 && stroke.points.first == const Offset(-1, -1)) {
+      if (stroke.points.length == 1 &&
+          stroke.points.first == const Offset(-1, -1)) {
         // Fill command — draw a filled rect
-        canvas.drawRect(Offset.zero & size, Paint()
-          ..color = stroke.color.withValues(alpha: 0.3)
-          ..style = PaintingStyle.fill);
+        canvas.drawRect(
+            Offset.zero & size,
+            Paint()
+              ..color = stroke.color.withValues(alpha: 0.3)
+              ..style = PaintingStyle.fill);
         continue;
       }
       if (stroke.points.length < 2) continue;
@@ -637,21 +668,25 @@ class _CanvasPainter extends CustomPainter {
       if (path != null) {
         if (!stroke.isEraser) {
           // Glow
-          canvas.drawPath(path, Paint()
-            ..color = stroke.color.withValues(alpha: 0.2)
-            ..strokeWidth = stroke.width + 8
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..style = PaintingStyle.stroke);
+          canvas.drawPath(
+              path,
+              Paint()
+                ..color = stroke.color.withValues(alpha: 0.2)
+                ..strokeWidth = stroke.width + 8
+                ..strokeCap = StrokeCap.round
+                ..strokeJoin = StrokeJoin.round
+                ..style = PaintingStyle.stroke);
         }
         if (stroke.isEraser) {
           // Truly erase by clearing pixels (reveals white background below)
-          canvas.drawPath(path, Paint()
-            ..blendMode = BlendMode.clear
-            ..strokeWidth = stroke.width + 4
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..style = PaintingStyle.stroke);
+          canvas.drawPath(
+              path,
+              Paint()
+                ..blendMode = BlendMode.clear
+                ..strokeWidth = stroke.width + 4
+                ..strokeCap = StrokeCap.round
+                ..strokeJoin = StrokeJoin.round
+                ..style = PaintingStyle.stroke);
         } else {
           canvas.drawPath(path, paint);
         }
@@ -670,21 +705,25 @@ class _CanvasPainter extends CustomPainter {
       if (path != null) {
         if (!isEraser) {
           // Glow for pen mode
-          canvas.drawPath(path, Paint()
-            ..color = currentColor.withValues(alpha: 0.2)
-            ..strokeWidth = currentWidth + 8
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..style = PaintingStyle.stroke);
+          canvas.drawPath(
+              path,
+              Paint()
+                ..color = currentColor.withValues(alpha: 0.2)
+                ..strokeWidth = currentWidth + 8
+                ..strokeCap = StrokeCap.round
+                ..strokeJoin = StrokeJoin.round
+                ..style = PaintingStyle.stroke);
         }
         if (isEraser) {
           // Eraser clears to white background (both inside saveLayer)
-          canvas.drawPath(path, Paint()
-            ..blendMode = BlendMode.clear
-            ..strokeWidth = currentWidth + 4
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..style = PaintingStyle.stroke);
+          canvas.drawPath(
+              path,
+              Paint()
+                ..blendMode = BlendMode.clear
+                ..strokeWidth = currentWidth + 4
+                ..strokeCap = StrokeCap.round
+                ..strokeJoin = StrokeJoin.round
+                ..style = PaintingStyle.stroke);
         } else {
           canvas.drawPath(path, paint);
         }
@@ -738,8 +777,8 @@ class _GalleryScreen extends ConsumerWidget {
                   Text('🎨', style: TextStyle(fontSize: 64)),
                   SizedBox(height: 16),
                   Text('No drawings yet!\nDraw something and save it.',
-                       textAlign: TextAlign.center,
-                       style: TextStyle(fontSize: 18, color: Colors.grey)),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18, color: Colors.grey)),
                 ],
               ),
             )
@@ -774,13 +813,17 @@ class _GalleryScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                            child: Image.memory(d.thumbnailBytes, fit: BoxFit.cover, width: double.infinity),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16)),
+                            child: Image.memory(d.thumbnailBytes,
+                                fit: BoxFit.cover, width: double.infinity),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8),
-                          child: Text(d.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                          child: Text(d.name,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
                         ),
                       ],
                     ),
@@ -813,7 +856,9 @@ class _GalleryScreen extends ConsumerWidget {
         title: const Text('Delete drawing?'),
         content: Text('Delete "${d.name}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               ref.read(canvasRepositoryProvider).delete(d.id);
