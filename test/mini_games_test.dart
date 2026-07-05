@@ -30,6 +30,29 @@ void main() {
       expect(repository.highScore('2048'), 140);
     });
 
+    test('scores and badges are isolated between child profiles', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final childA = MiniGamesRepository(
+        preferences,
+        scope: 'child-a',
+        fallbackToLegacy: false,
+      );
+      final childB = MiniGamesRepository(
+        preferences,
+        scope: 'child-b',
+        fallbackToLegacy: false,
+      );
+
+      await childA.saveHighScore('2048', 512);
+      await childA.unlockAchievements(const ['first_game']);
+
+      expect(childA.highScore('2048'), 512);
+      expect(childB.highScore('2048'), 0);
+      expect(childA.achievements(), contains('first_game'));
+      expect(childB.achievements(), isEmpty);
+    });
+
     test('controller exposes a newly saved score immediately', () async {
       SharedPreferences.setMockInitialValues({});
       final preferences = await SharedPreferences.getInstance();
@@ -89,7 +112,7 @@ void main() {
 
       expect(controller.state.pet.stage, greaterThan(0));
       expect(repository.petXp(), controller.state.petXp);
-      expect(MiniPet.forXp(repository.petXp()).emoji, '🐣');
+      expect(MiniPet.forXp(repository.petXp()).emoji, '🐥');
     });
 
     test('legacy pet XP migrates forward into the shared companion', () async {

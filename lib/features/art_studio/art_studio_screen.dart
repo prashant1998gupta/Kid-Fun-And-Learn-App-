@@ -361,7 +361,10 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
                       setDialogState(() => listening = true);
                       await SpeechService.instance.listen(
                         onResult: (words, _) {
-                          if (words.trim().isNotEmpty) controller.text = words;
+                          if (dialogContext.mounted &&
+                              words.trim().isNotEmpty) {
+                            controller.text = words;
+                          }
                         },
                         onDone: () {
                           if (dialogContext.mounted) {
@@ -392,6 +395,7 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
         ),
       ),
     );
+    await SpeechService.instance.stop();
     controller.dispose();
     if (chosen == null || !mounted) return;
     await ref

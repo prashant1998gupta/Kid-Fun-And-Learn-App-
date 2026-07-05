@@ -71,60 +71,95 @@ class _GameResultScreenState extends State<GameResultScreen> {
       body: AnimatedBackground(
         theme: WorldTheme.candy,
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const MascotView(mascot: Mascot.unicorn, size: 150)
-                      .animate()
-                      .scale(curve: Curves.elasticOut, duration: 700.ms),
-                  const SizedBox(height: 12),
-                  Text(
-                    widget.leveledUp ? 'LEVEL UP!' : 'Great Job!',
-                    style: Theme.of(context)
-                        .textTheme
-                        .displayMedium
-                        ?.copyWith(color: Colors.white),
-                  ).animate().fadeIn().slideY(begin: 0.3, end: 0),
-                  const SizedBox(height: 16),
-                  _Stars(stars: stars),
-                  const SizedBox(height: 24),
-                  _RewardRow(reward: widget.reward),
-                  const SizedBox(height: 18),
-                  _RewardMoment(
-                    prize: widget.prize,
-                    isNew: widget.prizeWasNew,
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.lg,
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const MascotView(mascot: Mascot.unicorn, size: 150)
+                            .animate()
+                            .scale(curve: Curves.elasticOut, duration: 700.ms),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.leveledUp ? 'LEVEL UP!' : 'Great Job!',
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium
+                              ?.copyWith(color: Colors.white),
+                        ).animate().fadeIn().slideY(begin: 0.3, end: 0),
+                        const SizedBox(height: 16),
+                        _Stars(stars: stars),
+                        const SizedBox(height: 24),
+                        _RewardRow(reward: widget.reward),
+                        const SizedBox(height: 18),
+                        _RewardMoment(
+                          prize: widget.prize,
+                          isNew: widget.prizeWasNew,
+                        ),
+                        if (widget.newBadges.isNotEmpty) ...[
+                          const SizedBox(height: 20),
+                          _BadgeBanner(badges: widget.newBadges),
+                        ],
+                        const SizedBox(height: 12),
+                      ],
+                    ),
                   ),
-                  if (widget.newBadges.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    _BadgeBanner(badges: widget.newBadges),
-                  ],
-                  const SizedBox(height: 32),
-                  BouncyButton(
-                    onTap: widget.onContinue,
-                    child: _pill('Continue Adventure 🚀', AppColors.success),
-                  ),
-                  const SizedBox(height: 12),
-                  BouncyButton(
-                    onTap: widget.onVisitWorld,
-                    child: _pill('Place My Reward 🏡', AppColors.secondary),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 16,
-                    children: [
-                      TextButton(
-                          onPressed: widget.onReplay,
-                          child: const Text('Play again')),
-                      TextButton(
-                          onPressed: widget.onHome, child: const Text('Home')),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.94),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 14,
+                      offset: Offset(0, -4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    BouncyButton(
+                      onTap: widget.onContinue,
+                      child: _pill('Continue Adventure 🚀', AppColors.success),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      runSpacing: 0,
+                      children: [
+                        TextButton(
+                          onPressed: widget.onVisitWorld,
+                          child: const Text('Place reward 🏡'),
+                        ),
+                        TextButton(
+                          onPressed: widget.onReplay,
+                          child: const Text('Play again'),
+                        ),
+                        IconButton(
+                          tooltip: 'Home',
+                          onPressed: widget.onHome,
+                          icon: const Icon(Icons.home_rounded),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

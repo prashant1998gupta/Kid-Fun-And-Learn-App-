@@ -146,10 +146,13 @@ class _ProfileTile extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AvatarView(config: child.avatar, size: 110),
-            const SizedBox(height: 12),
+            AvatarView(config: child.avatar, size: 102),
+            const SizedBox(height: 7),
             Text(
               child.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge

@@ -17,6 +17,7 @@ import '../../l10n/app_localizations.dart';
 import '../collections/domain/collectible.dart';
 import '../curriculum/data/curriculum_repository.dart';
 import '../curriculum/domain/subject.dart';
+import '../mini_games/data/mini_pet.dart';
 import '../profiles/domain/child_profile.dart';
 import '../profiles/profiles_controller.dart';
 import '../profiles/widgets/avatar_view.dart';
@@ -169,7 +170,7 @@ class _Greeting extends StatelessWidget {
                   (m) => m.name == child.mascotId,
                   orElse: () => Mascot.panda,
                 ),
-                size: 96,
+                size: 80,
               ),
               if (pet != null)
                 Positioned(
@@ -311,6 +312,7 @@ class _WorldInvitation extends StatelessWidget {
     final pet = child.activePetId == null
         ? null
         : CollectionCatalog.byId(child.activePetId!);
+    final growingPet = MiniPet.forXp(child.companionXp);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
@@ -340,7 +342,7 @@ class _WorldInvitation extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Text(pet?.emoji ?? '🐣',
+              Text(pet?.emoji ?? growingPet.emoji,
                       style: TextStyle(
                           fontSize: child.grade.isPreSchool ? 82 : 68))
                   .animate(onPlay: (c) => c.repeat(reverse: true))
@@ -585,7 +587,7 @@ class _SubjectGrid extends ConsumerWidget {
         maxCrossAxisExtent: 220,
         mainAxisSpacing: AppSpacing.md,
         crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1.0,
+        childAspectRatio: 1.2,
       ),
       delegate: SliverChildBuilderDelegate(
         (context, i) => _SubjectCard(subject: subjects[i])

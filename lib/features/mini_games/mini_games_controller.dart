@@ -129,6 +129,10 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
       MiniPet.forXp(state.petXp + MiniPet.xpForScore(score)).stage >
       state.pet.stage;
 
+  void syncPetXp(int xp) {
+    if (xp != state.petXp) state = state.copyWith(petXp: xp);
+  }
+
   String _gameName(String id) {
     for (final game in kMiniGames) {
       if (game.id == id) return game.name;
@@ -140,7 +144,7 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
 final miniGamesControllerProvider =
     StateNotifierProvider<MiniGamesController, MiniGamesState>((ref) {
   final child = ref.read(activeChildProvider);
-  return MiniGamesController(
+  final controller = MiniGamesController(
     ref.watch(miniGamesRepositoryProvider),
     initialCompanionXp: child?.companionXp ?? 0,
     rewardPlayer: (reward) async {
@@ -150,4 +154,11 @@ final miniGamesControllerProvider =
         .read(profilesControllerProvider.notifier)
         .syncCompanionXp(xp, memory: memory),
   );
+  ref.listen<int?>(
+    activeChildProvider.select((active) => active?.companionXp),
+    (_, xp) {
+      if (xp != null) controller.syncPetXp(xp);
+    },
+  );
+  return controller;
 });

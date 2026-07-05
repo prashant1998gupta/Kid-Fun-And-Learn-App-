@@ -75,16 +75,19 @@ class KidWorldScreen extends ConsumerWidget {
         child: Row(
           children: [
             BouncyButton(
-              onTap: () => context.pop(),
+              onTap: () =>
+                  context.canPop() ? context.pop() : context.go(AppRoutes.home),
               child: const CircleAvatar(
                 backgroundColor: Colors.white,
-                child: Icon(Icons.arrow_back_rounded),
+                child: Icon(Icons.arrow_back_rounded, color: AppColors.primary),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 '${child.name}\'s World',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium
@@ -177,7 +180,10 @@ class KidWorldScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('My things — tap to place or pack away',
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              style: TextStyle(
+                  color: AppColors.lightText,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16)),
           const SizedBox(height: 10),
           Wrap(
             spacing: 10,
@@ -318,102 +324,142 @@ class _LivingRoom extends StatelessWidget {
         .whereType<WorldPrize>()
         .take(6)
         .toList();
-    return AspectRatio(
-      aspectRatio: 1.35,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFB8E8FF), Color(0xFFFFE5A8)],
-          ),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.white, width: 4),
-          boxShadow: const [
-            BoxShadow(color: Color(0x33000000), blurRadius: 16),
-          ],
-        ),
-        child: Stack(
-          children: [
-            const Positioned(
-                left: 22,
-                top: 20,
-                child: Text('☀️', style: TextStyle(fontSize: 54))),
-            const Positioned(
-                right: 18,
-                top: 22,
-                child: Text('☁️', style: TextStyle(fontSize: 50))),
-            Positioned.fill(
-              top: 120,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF8ED081).withValues(alpha: 0.75),
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(50)),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final height = (width * 0.62).clamp(235.0, 310.0);
+        const decorationSpots = <Alignment>[
+          Alignment(-0.82, -0.48),
+          Alignment(0.82, -0.48),
+          Alignment(-0.82, 0.52),
+          Alignment(0.82, 0.52),
+          Alignment(-0.48, -0.72),
+          Alignment(0.48, -0.72),
+        ];
+        return SizedBox(
+          height: height,
+          child: Container(
+            key: const ValueKey('living-world-scene'),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFB8E8FF), Color(0xFFFFE5A8)],
               ),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.white, width: 4),
+              boxShadow: const [
+                BoxShadow(color: Color(0x33000000), blurRadius: 16),
+              ],
             ),
-            for (var i = 0; i < placed.length; i++)
-              Positioned(
-                left: 18.0 + (i % 3) * 92,
-                top: 125.0 + (i ~/ 3) * 70,
-                child:
-                    Text(placed[i].emoji, style: const TextStyle(fontSize: 45)),
-              ),
-            if (hero != null)
-              Positioned(
-                right: 22,
-                bottom: 28,
-                child: Column(
-                  children: [
-                    Container(
-                      width: 82,
-                      height: 82,
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Image.memory(hero!.thumbnailBytes,
-                          fit: BoxFit.contain),
+            child: Stack(
+              children: [
+                const Positioned(
+                    left: 18,
+                    top: 14,
+                    child: Text('☀️', style: TextStyle(fontSize: 38))),
+                const Positioned(
+                    right: 18,
+                    top: 16,
+                    child: Text('☁️', style: TextStyle(fontSize: 38))),
+                Positioned.fill(
+                  top: height * 0.54,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF8ED081).withValues(alpha: 0.75),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(50)),
                     ),
-                    Text(child.heroName ?? 'My Hero',
-                        style: const TextStyle(fontWeight: FontWeight.w900)),
-                  ],
-                ),
-              ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 20,
-              child: Center(
-                child: BouncyButton(
-                  onTap: onCompanionTap,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(companionEmoji, style: const TextStyle(fontSize: 88))
-                          .animate(onPlay: (c) => c.repeat(reverse: true))
-                          .moveY(begin: 0, end: -8, duration: 1100.ms),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: Text('${child.companionName} • tap me!',
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w900)),
-                      ),
-                    ],
                   ),
                 ),
-              ),
+                for (var i = 0; i < placed.length; i++)
+                  Align(
+                    alignment: decorationSpots[i],
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.72),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(placed[i].emoji,
+                            style: const TextStyle(fontSize: 30)),
+                      ),
+                    ),
+                  ),
+                if (hero != null)
+                  Positioned(
+                    right: 14,
+                    bottom: 14,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 62,
+                          height: 62,
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Image.memory(hero!.thumbnailBytes,
+                              fit: BoxFit.contain),
+                        ),
+                        Container(
+                          constraints: const BoxConstraints(maxWidth: 90),
+                          child: Text(
+                            child.heroName ?? 'My Hero',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.lightText,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Align(
+                  alignment: const Alignment(0, 0.12),
+                  child: BouncyButton(
+                    onTap: onCompanionTap,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(companionEmoji,
+                                style:
+                                    TextStyle(fontSize: width < 360 ? 58 : 68))
+                            .animate(onPlay: (c) => c.repeat(reverse: true))
+                            .scaleXY(begin: 0.98, end: 1.04, duration: 1100.ms),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 5),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20)),
+                          child: Text(
+                            '${child.companionName} • tap me!',
+                            key: const ValueKey('living-world-companion-label'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.lightText,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

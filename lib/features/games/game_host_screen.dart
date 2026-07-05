@@ -175,7 +175,7 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
           AppRoutes.learningMap,
           extra: widget.lesson.subject,
         ),
-        onVisitWorld: () => context.go(AppRoutes.kidWorld),
+        onVisitWorld: () => context.pushReplacement(AppRoutes.kidWorld),
         onHome: () => context.go(AppRoutes.home),
       );
     }

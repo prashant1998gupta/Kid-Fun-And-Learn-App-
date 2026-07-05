@@ -74,12 +74,29 @@ class _ProfileCreateScreenState extends ConsumerState<ProfileCreateScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
-                Text(
-                  'Create Your Character',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineLarge
-                      ?.copyWith(color: Colors.white),
+                Row(
+                  children: [
+                    BouncyButton(
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: const CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.arrow_back_rounded,
+                            color: AppColors.primary),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Create Your Character',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineLarge
+                            ?.copyWith(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 50),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 AvatarView(config: _avatar, size: 150),
@@ -102,11 +119,16 @@ class _ProfileCreateScreenState extends ConsumerState<ProfileCreateScreen> {
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
                     style: const TextStyle(
+                      color: AppColors.lightText,
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                     ),
                     decoration: const InputDecoration(
-                      labelText: "What's your name?",
+                      hintText: "What's your name?",
+                      hintStyle: TextStyle(
+                        color: AppColors.lightTextSoft,
+                        fontWeight: FontWeight.w700,
+                      ),
                       border: InputBorder.none,
                       icon: Icon(Icons.badge_rounded, color: AppColors.primary),
                     ),
@@ -119,7 +141,10 @@ class _ProfileCreateScreenState extends ConsumerState<ProfileCreateScreen> {
                     children: [
                       Text(
                         'Choose your class',
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(color: AppColors.lightText),
                       ),
                       const SizedBox(height: 12),
                       Wrap(
@@ -137,6 +162,14 @@ class _ProfileCreateScreenState extends ConsumerState<ProfileCreateScreen> {
                                     : AppColors.lightText,
                               ),
                               selectedColor: AppColors.primary,
+                              backgroundColor: const Color(0xFFF1EFFF),
+                              checkmarkColor: Colors.white,
+                              side: BorderSide(
+                                color: _grade == g
+                                    ? AppColors.primary
+                                    : const Color(0xFFD8D2F0),
+                              ),
+                              shape: const StadiumBorder(),
                               onSelected: (_) => setState(() => _grade = g),
                             ),
                         ],

@@ -36,11 +36,11 @@ class MiniPet {
 
   // (xpThreshold, emoji, name) — ordered.
   static const List<(int, String, String)> _stages = [
-    (0, '🥚', 'Mystery Egg'),
-    (30, '🐣', 'Hatchling'),
-    (90, '🐥', 'Fluffy Chick'),
-    (180, '🐤', 'Happy Bird'),
-    (300, '🐔', 'Proud Chicken'),
+    (0, '🐣', 'Baby Chick'),
+    (30, '🐥', 'Fluffy Chick'),
+    (90, '🐤', 'Happy Bird'),
+    (180, '🐔', 'Proud Chicken'),
+    (300, '🦜', 'Clever Parrot'),
     (460, '🦚', 'Royal Peacock'),
   ];
 

@@ -95,7 +95,8 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           BouncyButton(
-            onTap: () => context.pop(),
+            onTap: () =>
+                context.canPop() ? context.pop() : context.go(AppRoutes.home),
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../settings/settings_controller.dart';
+import '../../profiles/profiles_controller.dart';
 
 /// Data for a mini game definition.
 class MiniGameDef {
@@ -129,8 +130,14 @@ const List<MiniGameAchievement> kMiniGameAchievements = [
 
 /// Persists high scores for mini games via SharedPreferences.
 class MiniGamesRepository {
-  MiniGamesRepository(this._prefs);
+  MiniGamesRepository(
+    this._prefs, {
+    this.scope,
+    this.fallbackToLegacy = true,
+  });
   final SharedPreferences _prefs;
+  final String? scope;
+  final bool fallbackToLegacy;
 
   static const _prefix = 'mg_hs_';
   static const _playsPrefix = 'mg_plays_';
@@ -139,42 +146,59 @@ class MiniGamesRepository {
   static const _dailyProgressKey = 'mg_daily_progress';
   static const _petXpKey = 'mg_pet_xp';
 
-  int petXp() => _prefs.getInt(_petXpKey) ?? 0;
+  String _key(String base) => scope == null ? base : '$base@$scope';
+
+  int? _readInt(String base) =>
+      _prefs.getInt(_key(base)) ??
+      (scope != null && fallbackToLegacy ? _prefs.getInt(base) : null);
+
+  String? _readString(String base) =>
+      _prefs.getString(_key(base)) ??
+      (scope != null && fallbackToLegacy ? _prefs.getString(base) : null);
+
+  List<String>? _readStringList(String base) =>
+      _prefs.getStringList(_key(base)) ??
+      (scope != null && fallbackToLegacy ? _prefs.getStringList(base) : null);
+
+  int petXp() => _readInt(_petXpKey) ?? 0;
 
   /// Feeds the pet and returns its new total XP.
   Future<int> addPetXp(int amount) async {
     final next = petXp() + amount;
-    await _prefs.setInt(_petXpKey, next);
+    await _prefs.setInt(_key(_petXpKey), next);
     return next;
   }
 
-  int highScore(String gameId) => _prefs.getInt('$_prefix$gameId') ?? 0;
+  int highScore(String gameId) => _readInt('$_prefix$gameId') ?? 0;
 
   Future<bool> saveHighScore(String gameId, int score) async {
     final current = highScore(gameId);
     if (score <= current) return false;
-    await _prefs.setInt('$_prefix$gameId', score);
+    await _prefs.setInt(_key('$_prefix$gameId'), score);
     return true;
   }
 
   Set<String> achievements() =>
-      (_prefs.getStringList(_achievementsKey) ?? const <String>[]).toSet();
+      (_readStringList(_achievementsKey) ?? const <String>[]).toSet();
 
   Future<void> unlockAchievements(Iterable<String> ids) async {
     final updated = achievements()..addAll(ids);
-    await _prefs.setStringList(_achievementsKey, updated.toList()..sort());
+    await _prefs.setStringList(
+      _key(_achievementsKey),
+      updated.toList()..sort(),
+    );
   }
 
   Set<String> playedGames() {
     return {
       for (final game in kMiniGames)
-        if ((_prefs.getInt('$_playsPrefix${game.id}') ?? 0) > 0) game.id,
+        if ((_readInt('$_playsPrefix${game.id}') ?? 0) > 0) game.id,
     };
   }
 
   Future<void> recordPlay(String gameId) async {
     final key = '$_playsPrefix$gameId';
-    await _prefs.setInt(key, (_prefs.getInt(key) ?? 0) + 1);
+    await _prefs.setInt(_key(key), (_readInt(key) ?? 0) + 1);
   }
 
   DailyMiniGameChallenge dailyChallenge([DateTime? now]) {
@@ -190,9 +214,9 @@ class MiniGamesRepository {
       'stack-merge' => (title: 'Score 128 in Stack Merge', target: 128),
       _ => (title: 'Score 256 in 2048', target: 256),
     };
-    final storedDate = _prefs.getString(_dailyDateKey);
+    final storedDate = _readString(_dailyDateKey);
     final progress =
-        storedDate == dayKey ? (_prefs.getInt(_dailyProgressKey) ?? 0) : 0;
+        storedDate == dayKey ? (_readInt(_dailyProgressKey) ?? 0) : 0;
     return DailyMiniGameChallenge(
       gameId: gameId,
       title: definition.title,
@@ -211,8 +235,8 @@ class MiniGamesRepository {
     final date = now ?? DateTime.now();
     final dayKey = _dayKey(DateTime(date.year, date.month, date.day));
     final next = progress > current.progress ? progress : current.progress;
-    await _prefs.setString(_dailyDateKey, dayKey);
-    await _prefs.setInt(_dailyProgressKey, next);
+    await _prefs.setString(_key(_dailyDateKey), dayKey);
+    await _prefs.setInt(_key(_dailyProgressKey), next);
     return DailyMiniGameChallenge(
       gameId: current.gameId,
       title: current.title,
@@ -227,5 +251,18 @@ class MiniGamesRepository {
 }
 
 final miniGamesRepositoryProvider = Provider<MiniGamesRepository>((ref) {
-  return MiniGamesRepository(ref.watch(sharedPreferencesProvider));
+  final activeId = ref.watch(
+    profilesControllerProvider.select((profiles) => profiles.activeId),
+  );
+  final firstId = ref.watch(
+    profilesControllerProvider.select(
+      (profiles) =>
+          profiles.children.isEmpty ? null : profiles.children.first.id,
+    ),
+  );
+  return MiniGamesRepository(
+    ref.watch(sharedPreferencesProvider),
+    scope: activeId,
+    fallbackToLegacy: activeId != null && firstId == activeId,
+  );
 });

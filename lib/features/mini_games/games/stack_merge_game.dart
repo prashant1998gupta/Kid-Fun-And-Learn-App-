@@ -633,16 +633,16 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
 
   Widget _controls() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 14),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _control(Icons.arrow_back_rounded, () => _move(-1)),
-          const SizedBox(width: 20),
+          const SizedBox(width: 8),
           _control(Icons.arrow_downward_rounded, _drop, emphasized: true),
-          const SizedBox(width: 20),
+          const SizedBox(width: 8),
           _control(Icons.arrow_forward_rounded, () => _move(1)),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           GameCircleButton(
             icon: Icons.refresh_rounded,
             tooltip: 'Restart',
@@ -662,7 +662,7 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: emphasized ? 28 : 22,
+          horizontal: emphasized ? 20 : 16,
           vertical: 13,
         ),
         decoration: BoxDecoration(
