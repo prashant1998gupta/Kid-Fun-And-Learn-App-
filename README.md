@@ -48,6 +48,8 @@ behavior, semantic labels, and one-hand controls are built in. See
 The connected companion, room rewards, story missions, physical co-play, and
 child-created hero loop are documented in
 [`docs/17_living_kidverse.md`](docs/17_living_kidverse.md).
+The current performance, optimization, and quality-improvement audit is in
+[`docs/18_PERFORMANCE_AND_QUALITY_AUDIT.md`](docs/18_PERFORMANCE_AND_QUALITY_AUDIT.md).
 
 ### Run it
 
