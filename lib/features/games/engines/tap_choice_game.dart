@@ -9,8 +9,8 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/currency_hud.dart';
-import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
+import '../../../core/widgets/play_option_card.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
 
@@ -231,9 +231,11 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
         childAspectRatio: 1.1,
         children: [
           for (int i = 0; i < options.length; i++)
-            _OptionCard(
+            PlayOptionCard(
               key: ValueKey('$_index-$i'),
-              option: options[i],
+              index: i,
+              label: options[i].label,
+              emoji: options[i].emoji,
               state: _stateFor(i),
               onTap: () => _choose(i),
             ),
@@ -242,97 +244,10 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
     );
   }
 
-  _OptionState _stateFor(int i) {
-    if (_selected == null) return _OptionState.idle;
-    if (i == _selected && i == _q.correctIndex) return _OptionState.correct;
-    if (i == _selected) return _OptionState.wrong;
-    return _OptionState.idle;
-  }
-}
-
-enum _OptionState { idle, correct, wrong }
-
-class _OptionCard extends StatelessWidget {
-  const _OptionCard({
-    super.key,
-    required this.option,
-    required this.state,
-    required this.onTap,
-  });
-
-  final AnswerOption option;
-  final _OptionState state;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = switch (state) {
-      _OptionState.correct => AppColors.success,
-      _OptionState.wrong => AppColors.error,
-      _OptionState.idle => Theme.of(context).colorScheme.surface,
-    };
-    final fg = state == _OptionState.idle
-        ? Theme.of(context).colorScheme.onSurface
-        : Colors.white;
-
-    Widget card = BouncyButton(
-      borderRadius: AppSpacing.cardRadius,
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: AppSpacing.cardRadius,
-          boxShadow: [
-            BoxShadow(
-              color: color == Theme.of(context).colorScheme.surface
-                  ? Colors.black.withValues(alpha: 0.08)
-                  : color.withValues(alpha: 0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IllustratedObjectView(
-                label: option.label,
-                emoji: option.emoji,
-                size: option.emoji == null ? 58 : 72,
-                selected: state != _OptionState.idle,
-              ),
-              if (option.emoji != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  option.label,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(color: fg),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (state == _OptionState.wrong) {
-      card = card.animate().shake(
-            hz: 6,
-            rotation: 0,
-            offset: const Offset(10, 0),
-            duration: 400.ms,
-          );
-    } else if (state == _OptionState.correct) {
-      card = card
-          .animate()
-          .scale(begin: const Offset(1, 1), end: const Offset(1.08, 1.08))
-          .then()
-          .scale(begin: const Offset(1.08, 1.08), end: const Offset(1, 1));
-    }
-    return card;
+  PlayCardState _stateFor(int i) {
+    if (_selected == null) return PlayCardState.idle;
+    if (i == _selected && i == _q.correctIndex) return PlayCardState.correct;
+    if (i == _selected) return PlayCardState.wrong;
+    return PlayCardState.idle;
   }
 }

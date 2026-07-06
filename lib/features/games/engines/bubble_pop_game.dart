@@ -40,6 +40,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
   int _firstTry = 0;
   bool _erred = false;
   bool _locked = false;
+  int? _wrong; // bubble briefly wobbling red after a wrong tap
   final Set<int> _popped = {};
   final List<String> _struggled = [];
   final _stopwatch = Stopwatch()..start();
@@ -79,13 +80,18 @@ class _BubblePopGameState extends State<BubblePopGame> {
       if (!mounted) return;
       _advance();
     } else {
+      // A wrong bubble should wobble and stay — never disappear — so the child
+      // can keep trying the others. (It used to pop and vanish, which read as a
+      // reward.)
       AudioService.instance.playSfx(Sfx.wrong);
-      setState(() => _popped.add(i));
       if (!_erred) {
         _erred = true;
         _struggled.add(_q.id);
       }
       AudioService.instance.speak(PraiseLines.nextRetry());
+      setState(() => _wrong = i);
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      if (mounted) setState(() => _wrong = null);
     }
   }
 
@@ -108,6 +114,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
       _index++;
       _erred = false;
       _locked = false;
+      _wrong = null;
       _popped.clear();
     });
     _speak();
@@ -149,6 +156,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
 
   Widget _bubble(int i, BoxConstraints c) {
     final popped = _popped.contains(i);
+    final isWrong = _wrong == i;
     // Distribute bubbles across the area deterministically.
     final col = i % 3;
     final row = i ~/ 3;
@@ -156,7 +164,8 @@ class _BubblePopGameState extends State<BubblePopGame> {
         (c.maxWidth / 3) * col + (c.maxWidth / 6) - 55 + 20 * math.sin(i * 1.3);
     final y = 30.0 + row * 150 + 40 * math.cos(i * 0.7);
     final option = _q.options[i];
-    final color = _bubbleColors[i % _bubbleColors.length];
+    final color =
+        isWrong ? AppColors.error : _bubbleColors[i % _bubbleColors.length];
 
     Widget bubble = BouncyButton(
       onTap: () => _pop(i),
@@ -180,42 +189,66 @@ class _BubblePopGameState extends State<BubblePopGame> {
             ),
           ],
         ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (option.emoji != null)
-                IllustratedObjectView(
-                  label: option.label,
-                  emoji: option.emoji,
-                  size: 42,
-                  selected: true,
-                ),
-              Text(
-                option.label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
+        child: Stack(
+          children: [
+            // Glossy highlight — reads as a real, shiny, tappable bubble.
+            Positioned(
+              left: 24,
+              top: 16,
+              child: Container(
+                width: 26,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            ],
-          ),
+            ),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (option.emoji != null)
+                    IllustratedObjectView(
+                      label: option.label,
+                      emoji: option.emoji,
+                      size: 42,
+                      selected: true,
+                    ),
+                  Text(
+                    option.label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
 
-    if (!popped) {
-      bubble = bubble
-          .animate(onPlay: (a) => a.repeat(reverse: true))
-          .moveY(begin: -8, end: 8, duration: (1200 + i * 150).ms);
-    } else {
+    if (popped) {
       bubble = bubble.animate().fadeOut(duration: 250.ms).scale(
             begin: const Offset(1, 1),
             end: const Offset(1.4, 1.4),
             duration: 250.ms,
           );
+    } else if (isWrong) {
+      bubble = bubble.animate().shake(
+            hz: 6,
+            rotation: 0,
+            offset: const Offset(8, 0),
+            duration: 400.ms,
+          );
+    } else {
+      bubble = bubble
+          .animate(onPlay: (a) => a.repeat(reverse: true))
+          .moveY(begin: -8, end: 8, duration: (1200 + i * 150).ms);
     }
 
     return Positioned(left: x, top: y, child: bubble);

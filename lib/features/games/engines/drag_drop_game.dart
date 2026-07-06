@@ -39,6 +39,7 @@ class _DragDropGameState extends State<DragDropGame> {
   int _firstTryCorrect = 0;
   bool _erred = false;
   int? _wrongBasket; // basket index flashing red
+  int? _landedBasket; // basket the item correctly settled into
   bool _placed = false;
   final List<String> _struggled = [];
   final _stopwatch = Stopwatch()..start();
@@ -57,7 +58,10 @@ class _DragDropGameState extends State<DragDropGame> {
   Future<void> _drop(int basket) async {
     if (_placed) return;
     if (basket == _q.correctIndex) {
-      setState(() => _placed = true);
+      setState(() {
+        _placed = true;
+        _landedBasket = basket;
+      });
       AudioService.instance.playSfx(Sfx.correct);
       AudioService.instance.successHaptic();
       _celebration.celebrate(sound: false);
@@ -100,6 +104,7 @@ class _DragDropGameState extends State<DragDropGame> {
       _placed = false;
       _erred = false;
       _wrongBasket = null;
+      _landedBasket = null;
     });
     _speak();
   }
@@ -239,6 +244,7 @@ class _DragDropGameState extends State<DragDropGame> {
                   option: options[i],
                   highlight: hover,
                   wrong: wrong,
+                  landed: _landedBasket == i,
                 );
               },
             ),
@@ -289,35 +295,56 @@ class _Basket extends StatelessWidget {
     required this.option,
     required this.highlight,
     required this.wrong,
+    required this.landed,
   });
 
   final AnswerOption option;
   final bool highlight;
   final bool wrong;
+  final bool landed;
 
   @override
   Widget build(BuildContext context) {
-    final color = wrong
-        ? AppColors.error
-        : highlight
-            ? AppColors.success
-            : Colors.white;
-    return AnimatedContainer(
+    final active = highlight || landed;
+    final gradient = wrong
+        ? LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.error, AppColors.error.withValues(alpha: 0.82)],
+          )
+        : active
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.success, AppColors.mint],
+              )
+            : const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.white, Color(0xFFF2EFFF)],
+              );
+    final glow = wrong
+        ? AppColors.error.withValues(alpha: 0.4)
+        : active
+            ? AppColors.success.withValues(alpha: 0.45)
+            : AppColors.primary.withValues(alpha: 0.14);
+
+    Widget basket = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: 110,
       height: 120,
       decoration: BoxDecoration(
-        color: color,
+        gradient: gradient,
         borderRadius: AppSpacing.cardRadius,
         border: Border.all(
-          color: highlight ? AppColors.success : Colors.white,
+          color: active ? Colors.white : Colors.white.withValues(alpha: 0.8),
           width: 3,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
+            color: glow,
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -329,7 +356,7 @@ class _Basket extends StatelessWidget {
               label: option.label,
               emoji: option.emoji,
               size: 48,
-              selected: highlight || wrong,
+              selected: active || wrong,
             ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -339,13 +366,21 @@ class _Basket extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 15,
-                color:
-                    (highlight || wrong) ? Colors.white : AppColors.lightText,
+                color: (active || wrong) ? Colors.white : AppColors.lightText,
               ),
             ),
           ),
         ],
       ),
     );
+
+    if (landed) {
+      basket = basket
+          .animate()
+          .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1))
+          .then()
+          .scale(begin: const Offset(1.1, 1.1), end: const Offset(1, 1));
+    }
+    return basket;
   }
 }

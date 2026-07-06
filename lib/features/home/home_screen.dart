@@ -327,60 +327,65 @@ class _WorldInvitation extends StatelessWidget {
           );
           context.push(AppRoutes.kidWorld);
         },
+        // Clean gradient card — no white outline, just a soft shadow.
         child: Container(
           height: child.grade.isPreSchool ? 170 : 135,
+          clipBehavior: Clip.antiAlias,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF7ED6DF), Color(0xFFFFD36E)],
             ),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white, width: 3),
             boxShadow: const [
-              BoxShadow(color: Color(0x33000000), blurRadius: 14),
+              BoxShadow(
+                color: Color(0x22000000),
+                blurRadius: 16,
+                offset: Offset(0, 8),
+              ),
             ],
           ),
           child: Row(
-            children: [
-              Text(pet?.emoji ?? growingPet.emoji,
-                      style: TextStyle(
-                          fontSize: child.grade.isPreSchool ? 82 : 68))
-                  .animate(onPlay: (c) => c.repeat(reverse: true))
-                  .moveY(begin: 0, end: -6, duration: 1100.ms),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Enter My World',
-                      style: TextStyle(
-                        color: AppColors.lightText,
-                        fontSize: child.grade.isPreSchool ? 25 : 21,
-                        fontWeight: FontWeight.w900,
+              children: [
+                Text(pet?.emoji ?? growingPet.emoji,
+                        style: TextStyle(
+                            fontSize: child.grade.isPreSchool ? 82 : 68))
+                    .animate(onPlay: (c) => c.repeat(reverse: true))
+                    .moveY(begin: 0, end: -6, duration: 1100.ms),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Enter My World',
+                        style: TextStyle(
+                          color: AppColors.lightText,
+                          fontSize: child.grade.isPreSchool ? 25 : 21,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      child.companionMemory,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.lightText,
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(height: 4),
+                      Text(
+                        child.companionMemory,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.lightText,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(Icons.arrow_forward_rounded,
-                  color: AppColors.lightText, size: 34),
-            ],
+                const Icon(Icons.arrow_forward_rounded,
+                    color: AppColors.lightText, size: 34),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
 

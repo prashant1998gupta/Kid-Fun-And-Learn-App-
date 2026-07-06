@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/constants/feedback_timing.dart';
 import '../../../core/services/audio_service.dart';
@@ -8,8 +7,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
-import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
+import '../../../core/widgets/play_option_card.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
 
@@ -221,62 +220,23 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
       itemCount: _question.options.length,
       itemBuilder: (context, index) {
         final option = _question.options[index];
-        final selected = _selected == index;
-        final correct = index == _question.correctIndex;
-        final color = !selected
-            ? Colors.white
-            : correct
-                ? AppColors.success
-                : AppColors.error;
-        Widget card = BouncyButton(
+        return PlayOptionCard(
+          key: ValueKey('$_index-$index'),
+          index: index,
+          label: option.label,
+          emoji: option.emoji,
+          artSize: 86,
+          state: _stateFor(index),
           onTap: () => _choose(index),
-          borderRadius: AppSpacing.cardRadius,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: AppSpacing.cardRadius,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.14),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IllustratedObjectView(
-                  label: option.label,
-                  emoji: option.emoji,
-                  size: 86,
-                  selected: selected,
-                ),
-                if (option.emoji != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    option.label,
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: selected ? Colors.white : AppColors.lightText,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
         );
-        if (selected && !correct) {
-          card = card.animate().shake(
-                hz: 5,
-                offset: const Offset(10, 0),
-                rotation: 0,
-              );
-        }
-        return card;
       },
     );
+  }
+
+  PlayCardState _stateFor(int index) {
+    if (_selected != index) return PlayCardState.idle;
+    return index == _question.correctIndex
+        ? PlayCardState.correct
+        : PlayCardState.wrong;
   }
 }

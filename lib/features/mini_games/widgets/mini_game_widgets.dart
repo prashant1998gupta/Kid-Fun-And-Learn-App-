@@ -49,20 +49,55 @@ class PlayModePicker extends StatelessWidget {
       spacing: 8,
       children: [
         for (final mode in modes)
-          ChoiceChip(
+          _ContrastChip(
             selected: value == mode,
-            onSelected: (_) => onChanged(mode),
-            avatar: Text(mode.icon),
-            label: Text(mode.label),
-            selectedColor: Colors.white,
-            backgroundColor: Colors.white.withValues(alpha: 0.24),
-            labelStyle: TextStyle(
-              color: value == mode ? AppColors.primary : Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
+            icon: mode.icon,
+            label: mode.label,
+            onSelected: () => onChanged(mode),
           ),
       ],
+    );
+  }
+}
+
+/// A pill that stays legible on ANY backdrop — light, dark, or a colored game
+/// gradient. Selected: solid brand fill + white text. Unselected: solid white
+/// fill + brand text. Never white-on-white, never relies on the background for
+/// contrast (the old translucent-white + white-text chips vanished on pale
+/// surfaces).
+class _ContrastChip extends StatelessWidget {
+  const _ContrastChip({
+    required this.selected,
+    required this.icon,
+    required this.label,
+    required this.onSelected,
+  });
+
+  final bool selected;
+  final String icon;
+  final String label;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      avatar: Text(icon),
+      label: Text(label),
+      showCheckmark: false,
+      selectedColor: AppColors.primary,
+      backgroundColor: Colors.white,
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : AppColors.primary,
+        fontWeight: FontWeight.w800,
+      ),
+      side: BorderSide(
+        color: selected
+            ? Colors.transparent
+            : AppColors.primary.withValues(alpha: 0.35),
+        width: 1.5,
+      ),
     );
   }
 }
@@ -167,18 +202,11 @@ class DifficultyPicker extends StatelessWidget {
       spacing: 8,
       children: [
         for (final difficulty in MiniGameDifficulty.values)
-          ChoiceChip(
+          _ContrastChip(
             selected: value == difficulty,
-            onSelected: (_) => onChanged(difficulty),
-            avatar: Text(difficulty.icon),
-            label: Text(difficulty.label),
-            selectedColor: Colors.white,
-            backgroundColor: Colors.white.withValues(alpha: 0.24),
-            labelStyle: TextStyle(
-              color: value == difficulty ? AppColors.primary : Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
+            icon: difficulty.icon,
+            label: difficulty.label,
+            onSelected: () => onChanged(difficulty),
           ),
       ],
     );

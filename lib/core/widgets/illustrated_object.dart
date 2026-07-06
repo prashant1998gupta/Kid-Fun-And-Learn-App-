@@ -70,31 +70,42 @@ class _TextTile extends StatelessWidget {
         : len <= 6
             ? size * 0.28
             : size * 0.2;
+    final radius = size * 0.24;
+    // Solid-white outer = the border; gradient is clipped inside. A stroked
+    // border painted over a gradient leaves white fringes at the corners on
+    // Flutter web, so we layer them instead.
     return Container(
       width: size,
       height: size,
-      alignment: Alignment.center,
-      padding: EdgeInsets.all(size * 0.1),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFF1A6), Color(0xFFFFC048)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.all(Radius.circular(size * 0.24)),
-        border: Border.all(color: Colors.white, width: 3),
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(radius)),
       ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          style: TextStyle(
-            color: foreground,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w900,
-            height: 1.05,
+      padding: const EdgeInsets.all(3),
+      child: Container(
+        alignment: Alignment.center,
+        clipBehavior: Clip.antiAlias,
+        padding: EdgeInsets.all(size * 0.08),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFF1A6), Color(0xFFFFC048)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(radius - 3)),
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            style: TextStyle(
+              color: foreground,
+              fontSize: fontSize,
+              fontWeight: FontWeight.w900,
+              height: 1.05,
+            ),
           ),
         ),
       ),

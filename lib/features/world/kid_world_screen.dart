@@ -104,27 +104,29 @@ class KidWorldScreen extends ConsumerWidget {
       );
 
   Widget _portals(BuildContext context, bool preschool) {
-    final portals = <(String, String, Color, VoidCallback)>[
+    // Material icons (not raw emoji) so the tiles always render crisply — the
+    // emoji font can lag on first paint on web and show as empty boxes.
+    final portals = <(IconData, String, Color, VoidCallback)>[
       (
-        '🎮',
+        Icons.sports_esports_rounded,
         preschool ? 'Play' : 'Game Garden',
         AppColors.accent,
         () => context.push(AppRoutes.miniGames)
       ),
       (
-        '🎨',
+        Icons.palette_rounded,
         'Create',
         AppColors.bubblegum,
         () => context.push(AppRoutes.artStudio)
       ),
       (
-        '📖',
+        Icons.auto_stories_rounded,
         'Make a Story',
         AppColors.sky,
         () => context.push(AppRoutes.storyMaker)
       ),
       (
-        '🏃',
+        Icons.directions_run_rounded,
         'Move!',
         AppColors.success,
         () => context.push(AppRoutes.physicalMission)
@@ -138,24 +140,47 @@ class KidWorldScreen extends ConsumerWidget {
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       children: [
-        for (final portal in portals)
+        for (var i = 0; i < portals.length; i++)
           BouncyButton(
-            onTap: portal.$4,
+            onTap: portals[i].$4,
+            // Clean gradient card — no white outline. A soft shadow in the
+            // tile's own colour gives depth instead of a hard white border.
             child: Container(
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  portal.$3,
-                  portal.$3.withValues(alpha: 0.72),
-                ]),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    portals[i].$3,
+                    portals[i].$3.withValues(alpha: 0.72),
+                  ],
+                ),
                 borderRadius: AppSpacing.cardRadius,
-                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: portals[i].$3.withValues(alpha: 0.38),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(portal.$1,
-                      style: TextStyle(fontSize: preschool ? 48 : 38)),
-                  Text(portal.$2,
+                  Container(
+                    width: preschool ? 64 : 52,
+                    height: preschool ? 64 : 52,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(portals[i].$1,
+                        color: Colors.white, size: preschool ? 36 : 28),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(portals[i].$2,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
@@ -164,7 +189,10 @@ class KidWorldScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
+          )
+              .animate()
+              .fadeIn(duration: 240.ms, delay: (i * 80).ms)
+              .slideY(begin: 0.15, end: 0, delay: (i * 80).ms, duration: 300.ms),
       ],
     );
   }
