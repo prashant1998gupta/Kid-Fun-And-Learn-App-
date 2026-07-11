@@ -52,6 +52,17 @@ class LearningWorldCatalog {
         id: 'learning_laboratory', emoji: '🧪', name: 'Garden laboratory'),
     LearningWorldItem(
         id: 'learning_map_board', emoji: '🗺️', name: 'Adventure map'),
+    LearningWorldItem(id: 'learning_eco_park', emoji: '🌿', name: 'Eco park'),
+    LearningWorldItem(
+        id: 'learning_space_centre', emoji: '🚀', name: 'Space centre'),
+    LearningWorldItem(
+        id: 'learning_bazaar', emoji: '🏪', name: 'Friendly bazaar'),
+    LearningWorldItem(
+        id: 'learning_observatory', emoji: '🔬', name: 'Science observatory'),
+    LearningWorldItem(
+        id: 'learning_news_kiosk', emoji: '📰', name: 'News kiosk'),
+    LearningWorldItem(
+        id: 'learning_code_portal', emoji: '🧠', name: 'Algorithm portal'),
   ];
 
   static LearningWorldItem? byId(String id) {
@@ -82,6 +93,12 @@ class LearningWorldCatalog {
       'code-the-robot' => 16,
       'science-machine-lab' => 17,
       'map-quest' => 18,
+      'eco-city-builder' => 19,
+      'space-mission-control' => 20,
+      'business-bazaar' => 21,
+      'mystery-science-lab' => 22,
+      'news-detective' => 23,
+      'algorithm-quest' => 24,
       _ => 0,
     };
     final index = ((completedLevel - 1) * 2 + offset) % items.length;

@@ -103,6 +103,12 @@ for low-end tablets.
   reasoning, compass directions, coordinates, and distance. Every generated
   round is audited and every game carries the Class 3–4 catalog label, voice,
   Teach-Pip, daily goal, badge, and distinct world reward.
+- [x] **M28:** Class 5 Learning Adventures pass: Eco City Builder, Space
+  Mission Control, Business Bazaar, Mystery Science Lab, News Detective, and
+  Algorithm Quest add 300 persistent levels for sustainability, applied maths,
+  financial literacy, experimental design, media literacy, and computational
+  thinking. Every game has voice, Teach-Pip, five-round daily goals, a Class 5
+  catalog label, its own badge, and a distinct first Kid World reward.
 
 ## Quality rules for Codex follow-up work
 

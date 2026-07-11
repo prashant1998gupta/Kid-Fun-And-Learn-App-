@@ -7,7 +7,7 @@ breaks from the curriculum. It contains no grading or wrong-answer pressure,
 but it does share the child's wallet and growing pet so every play session has
 an emotionally meaningful reward.
 
-**Implementation status:** Complete. The catalog, twenty-three games, deep-linkable
+**Implementation status:** Complete. The catalog, twenty-nine games, deep-linkable
 routes, reactive high scores, OpenMoji art, voice tutorials, invisible adaptive
 difficulty, story goals, local co-op, no-loss play, creative mode, wallet/pet
 rewards, daily challenges, badges, physical controls, accessibility behavior,
@@ -20,7 +20,7 @@ and framework-independent rule tests are implemented.
 - First-play animated gesture guidance speaks every instruction aloud and is
   remembered locally after dismissal.
 - Solo and local **Together** modes are available across the four casual games.
-- Nineteen dedicated learning adventures add 950 persistent levels. Toy Sort and
+- Twenty-five dedicated learning adventures add 1,250 persistent levels. Toy Sort and
   Feed the Pet cover classification, food, and counting; Sound Safari covers
   listening and animal sounds; Number Garden covers quantities and early
   addition; Story Train covers sequencing and prediction; Letter Bakery covers
@@ -39,6 +39,13 @@ and framework-independent rule tests are implemented.
   covers sequences, loops, and debugging; Science Machine Lab covers matter,
   forces, circuits, simple machines, bodies, Earth, materials, and environment;
   Map Quest covers compass directions, grid coordinates, and route distance.
+- Six Class 5 adventures focus on independent reasoning: Eco City Builder
+  connects sustainability with evidence-based planning; Space Mission Control
+  applies decimals, fractions, angles, and metric conversion; Business Bazaar
+  covers budgets, discounts, profit, and unit price; Mystery Science Lab teaches
+  variables, fair tests, measurement, and conclusions; News Detective builds
+  fact, source, image-context, advertising, and sample-size literacy; Algorithm
+  Quest develops nested-loop, condition, efficiency, and debugging skills.
 - Every learning level contains five to nine short prompts. Seeded shuffling and
   rotating themes prevent adjacent rounds from presenting the same sequence.
 - On selected rounds Pip deliberately makes a funny wrong guess. The child
@@ -56,7 +63,7 @@ and framework-independent rule tests are implemented.
 - Optional tilt control in Animal Family and trace gestures in Flower Flow add
   physical, memorable play.
 - One rotating local daily challenge with persistent progress.
-- Twenty-six local mini-game badges plus persistent coin, XP, high-score, play, and
+- Thirty-two local mini-game badges plus persistent coin, XP, high-score, play, and
   pet-growth progress.
 - Local high scores and play history persist through `SharedPreferences`.
 
@@ -87,6 +94,12 @@ and framework-independent rule tests are implemented.
 | Code the Robot | 50 Class 3–4 levels; exact movement sequences, repeated-command loops, result prediction, and one-step debugging |
 | Science Machine Lab | 50 Class 3–4 levels; authored reasoning missions across matter, forces, machines, circuits, life, Earth, materials, and environment |
 | Map Quest | 50 Class 3–4 levels; cardinal directions, A1–C3 coordinate movement, and multi-leg distance problems |
+| Eco City Builder | 50 Class 5 levels; clean energy, transport, water, waste, biodiversity, flood protection, and green-building choices |
+| Space Mission Control | 50 Class 5 levels; decimals, straight-line angles, metric conversions, and fractions of quantities |
+| Business Bazaar | 50 Class 5 levels; budgets, discounts, profit, and unit-price decisions |
+| Mystery Science Lab | 50 Class 5 levels; variables, fair tests, reliable evidence, graphing, measurement, safety, and conclusions |
+| News Detective | 50 Class 5 levels; facts and opinions, source/date checks, image context, corroboration, advertising, surveys, and corrections |
+| Algorithm Quest | 50 Class 5 levels; nested loops, conditions, efficiency, boundary cases, and debugging |
 
 Inspired by: [Infinity Loop Hex](https://poki.com/en/g/infinity-loop-hex),
 [368 Chickens](https://368chickens.com/),
@@ -108,14 +121,14 @@ Home Screen Quick Actions:
 
 ---
 
-## 2. Mini Game Catalog (23 games)
+## 2. Mini Game Catalog (29 games)
 
 Each is a **self-contained stateful widget** with no dependency on `Lesson`,
 `Question`, or curriculum data. They are pure Flutter games.
 
-The first four are casual logic/reaction breaks. The other nineteen are
-learning-first preschool games whose level and world-reward progress persists
-through `MiniGamesRepository`.
+The first four are casual logic/reaction breaks. The other twenty-five are
+learning-first games from preschool through Class 5 whose level and
+world-reward progress persists through `MiniGamesRepository`.
 
 ### Game 1: Flower Flow
 
@@ -366,7 +379,8 @@ semantic labels and large one-hand-reachable touch targets.
   daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
   Chicken target rules, learning-level persistence, per-child Kid World items,
   full Toy Sort/Feed the Pet progression, and phone-viewport rendering for the
-  catalog and all twenty-three game screens.
+  catalog and all twenty-nine game screens. The shared content audit validates
+  5,750 generated rounds across every 50-level adventure.
 
 ---
 
@@ -396,3 +410,9 @@ semantic labels and large one-hand-reachable touch targets.
 - `/mini-games/code-the-robot`
 - `/mini-games/science-machine-lab`
 - `/mini-games/map-quest`
+- `/mini-games/eco-city-builder`
+- `/mini-games/space-mission-control`
+- `/mini-games/business-bazaar`
+- `/mini-games/mystery-science-lab`
+- `/mini-games/news-detective`
+- `/mini-games/algorithm-quest`

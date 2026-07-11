@@ -33,6 +33,12 @@ enum LearningAdventureType {
   codeRobot,
   scienceLab,
   mapQuest,
+  ecoCity,
+  spaceMission,
+  businessBazaar,
+  mysteryScience,
+  newsDetective,
+  algorithmQuest,
 }
 
 extension LearningAdventureTypeData on LearningAdventureType {
@@ -54,6 +60,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.codeRobot => 'code-the-robot',
         LearningAdventureType.scienceLab => 'science-machine-lab',
         LearningAdventureType.mapQuest => 'map-quest',
+        LearningAdventureType.ecoCity => 'eco-city-builder',
+        LearningAdventureType.spaceMission => 'space-mission-control',
+        LearningAdventureType.businessBazaar => 'business-bazaar',
+        LearningAdventureType.mysteryScience => 'mystery-science-lab',
+        LearningAdventureType.newsDetective => 'news-detective',
+        LearningAdventureType.algorithmQuest => 'algorithm-quest',
       };
 
   String get title => switch (this) {
@@ -74,6 +86,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.codeRobot => 'Code the Robot',
         LearningAdventureType.scienceLab => 'Science Machine Lab',
         LearningAdventureType.mapQuest => 'Map Quest',
+        LearningAdventureType.ecoCity => 'Eco City Builder',
+        LearningAdventureType.spaceMission => 'Space Mission Control',
+        LearningAdventureType.businessBazaar => 'Business Bazaar',
+        LearningAdventureType.mysteryScience => 'Mystery Science Lab',
+        LearningAdventureType.newsDetective => 'News Detective',
+        LearningAdventureType.algorithmQuest => 'Algorithm Quest',
       };
 
   String get icon => switch (this) {
@@ -94,6 +112,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.codeRobot => '🤖',
         LearningAdventureType.scienceLab => '🧪',
         LearningAdventureType.mapQuest => '🗺️',
+        LearningAdventureType.ecoCity => '🏙️',
+        LearningAdventureType.spaceMission => '🚀',
+        LearningAdventureType.businessBazaar => '💼',
+        LearningAdventureType.mysteryScience => '🔬',
+        LearningAdventureType.newsDetective => '📰',
+        LearningAdventureType.algorithmQuest => '🧠',
       };
 
   String get mascot => switch (this) {
@@ -114,6 +138,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.codeRobot => '🤖',
         LearningAdventureType.scienceLab => '🧑‍🔬',
         LearningAdventureType.mapQuest => '🦜',
+        LearningAdventureType.ecoCity => '🦊',
+        LearningAdventureType.spaceMission => '🐱‍🚀',
+        LearningAdventureType.businessBazaar => '🦁',
+        LearningAdventureType.mysteryScience => '🧑‍🔬',
+        LearningAdventureType.newsDetective => '🦉',
+        LearningAdventureType.algorithmQuest => '🤖',
       };
 
   String get achievementId => switch (this) {
@@ -134,6 +164,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.codeRobot => 'robot_coder',
         LearningAdventureType.scienceLab => 'junior_scientist',
         LearningAdventureType.mapQuest => 'map_explorer',
+        LearningAdventureType.ecoCity => 'eco_mayor',
+        LearningAdventureType.spaceMission => 'mission_commander',
+        LearningAdventureType.businessBazaar => 'business_brain',
+        LearningAdventureType.mysteryScience => 'evidence_expert',
+        LearningAdventureType.newsDetective => 'truth_tracker',
+        LearningAdventureType.algorithmQuest => 'algorithm_ace',
       };
 
   WorldTheme get worldTheme => switch (this) {
@@ -154,6 +190,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.codeRobot => WorldTheme.space,
         LearningAdventureType.scienceLab => WorldTheme.ocean,
         LearningAdventureType.mapQuest => WorldTheme.jungle,
+        LearningAdventureType.ecoCity => WorldTheme.jungle,
+        LearningAdventureType.spaceMission => WorldTheme.space,
+        LearningAdventureType.businessBazaar => WorldTheme.sunrise,
+        LearningAdventureType.mysteryScience => WorldTheme.ocean,
+        LearningAdventureType.newsDetective => WorldTheme.night,
+        LearningAdventureType.algorithmQuest => WorldTheme.aurora,
       };
 
   Color get accent => switch (this) {
@@ -174,6 +216,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.codeRobot => const Color(0xFF1565C0),
         LearningAdventureType.scienceLab => const Color(0xFF00838F),
         LearningAdventureType.mapQuest => const Color(0xFF2E7D32),
+        LearningAdventureType.ecoCity => const Color(0xFF00A86B),
+        LearningAdventureType.spaceMission => const Color(0xFF3949AB),
+        LearningAdventureType.businessBazaar => const Color(0xFFF57C00),
+        LearningAdventureType.mysteryScience => const Color(0xFF00838F),
+        LearningAdventureType.newsDetective => const Color(0xFF37474F),
+        LearningAdventureType.algorithmQuest => const Color(0xFF6A1B9A),
       };
 
   String get tutorial => switch (this) {
@@ -211,6 +259,18 @@ extension LearningAdventureTypeData on LearningAdventureType {
           'Study the experiment clue and choose the scientific explanation.',
         LearningAdventureType.mapQuest =>
           'Use directions, coordinates, distance, and map symbols to find the answer.',
+        LearningAdventureType.ecoCity =>
+          'Choose sustainable systems and balance the needs of a growing city.',
+        LearningAdventureType.spaceMission =>
+          'Use decimals, fractions, angles, and measurement to repair the spacecraft.',
+        LearningAdventureType.businessBazaar =>
+          'Manage budgets, discounts, revenue, cost, and simple profit missions.',
+        LearningAdventureType.mysteryScience =>
+          'Choose fair tests, variables, evidence, and conclusions for each mystery.',
+        LearningAdventureType.newsDetective =>
+          'Separate facts, opinions, strong evidence, and unreliable claims.',
+        LearningAdventureType.algorithmQuest =>
+          'Predict loops and conditions, trace algorithms, and debug efficient solutions.',
       };
 }
 
@@ -364,6 +424,60 @@ class MapQuestGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const LearningAdventureGame(
         type: LearningAdventureType.mapQuest,
+      );
+}
+
+class EcoCityBuilderGame extends StatelessWidget {
+  const EcoCityBuilderGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.ecoCity,
+      );
+}
+
+class SpaceMissionControlGame extends StatelessWidget {
+  const SpaceMissionControlGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.spaceMission,
+      );
+}
+
+class BusinessBazaarGame extends StatelessWidget {
+  const BusinessBazaarGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.businessBazaar,
+      );
+}
+
+class MysteryScienceLabGame extends StatelessWidget {
+  const MysteryScienceLabGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.mysteryScience,
+      );
+}
+
+class NewsDetectiveGame extends StatelessWidget {
+  const NewsDetectiveGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.newsDetective,
+      );
+}
+
+class AlgorithmQuestGame extends StatelessWidget {
+  const AlgorithmQuestGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.algorithmQuest,
       );
 }
 
@@ -911,6 +1025,12 @@ class _AdventureContent {
         LearningAdventureType.codeRobot => _code(level, round),
         LearningAdventureType.scienceLab => _science(level, round),
         LearningAdventureType.mapQuest => _map(level, round),
+        LearningAdventureType.ecoCity => _eco(level, round),
+        LearningAdventureType.spaceMission => _space(level, round),
+        LearningAdventureType.businessBazaar => _business(level, round),
+        LearningAdventureType.mysteryScience => _mystery(level, round),
+        LearningAdventureType.newsDetective => _news(level, round),
+        LearningAdventureType.algorithmQuest => _algorithm(level, round),
       };
 
   static _AdventureRound _sound(int level, int round) {
@@ -1699,6 +1819,323 @@ class _AdventureContent {
     );
   }
 
+  static _AdventureRound _eco(int level, int round) {
+    final question =
+        _ecoQuestions[(level * 7 + round * 5) % _ecoQuestions.length];
+    return _authoredReasoningRound(
+      question,
+      level,
+      round,
+      sceneIcon: '🏙️',
+    );
+  }
+
+  static _AdventureRound _space(int level, int round) {
+    final mode = (level + round) % 4;
+    if (mode == 0) {
+      final firstTenths = 5 + ((level * 3 + round) % 40);
+      final secondTenths = 2 + ((level + round * 2) % 20);
+      final answerTenths = firstTenths + secondTenths;
+      final answer = (answerTenths / 10).toStringAsFixed(1);
+      final choices = <String>{
+        answer,
+        ((answerTenths + 1) / 10).toStringAsFixed(1),
+        ((answerTenths - 2) / 10).toStringAsFixed(1),
+      }.toList()
+        ..shuffle(math.Random(level * 601 + round));
+      return _AdventureRound(
+        skill: 'Decimal calculation',
+        prompt: 'How much fuel altogether?',
+        spokenPrompt:
+            'Tank one has ${(firstTenths / 10).toStringAsFixed(1)} litres and tank two has ${(secondTenths / 10).toStringAsFixed(1)} litres. How much altogether?',
+        scene: ['🚀', '⛽', '➕', '⛽'],
+        sceneLabel:
+            '${(firstTenths / 10).toStringAsFixed(1)} L + ${(secondTenths / 10).toStringAsFixed(1)} L',
+        choices: [for (final value in choices) _AdventureChoice('$value L')],
+        correctIndex: choices.indexOf(answer),
+        hint: 'Line up the decimal points before adding.',
+        explanation: 'The tanks hold $answer litres altogether!',
+      );
+    }
+    if (mode == 1) {
+      final known = 20 + (((level * 7 + round * 10) % 14) * 10);
+      final answer = 180 - known;
+      final choices = _nearbyNumbers(answer, level * 607 + round, max: 180);
+      return _AdventureRound(
+        skill: 'Angles on a straight line',
+        prompt: 'Find the missing angle.',
+        spokenPrompt:
+            'Angles on a straight line total one hundred eighty degrees. One angle is $known degrees. Find the other.',
+        scene: ['📐', '━', '$known°', '❓'],
+        sceneLabel: '$known° + ? = 180°',
+        choices: [for (final value in choices) _AdventureChoice('$value°')],
+        correctIndex: choices.indexOf(answer),
+        hint: 'Subtract $known from 180.',
+        explanation: 'The missing angle is $answer degrees!',
+      );
+    }
+    if (mode == 2) {
+      final metres = 1 + ((level + round) % 9);
+      final answer = metres * 100;
+      final choices = _nearbyNumbers(answer, level * 613 + round, max: 1000);
+      return _AdventureRound(
+        skill: 'Metric measurement',
+        prompt: '$metres metres equals how many centimetres?',
+        spokenPrompt:
+            'Convert $metres metres into centimetres for the spacecraft cable.',
+        scene: ['🛰️', '📏', '🔌'],
+        sceneLabel: '$metres m = ? cm',
+        choices: [for (final value in choices) _AdventureChoice('$value cm')],
+        correctIndex: choices.indexOf(answer),
+        hint: 'One metre equals one hundred centimetres.',
+        explanation: '$metres metres equals $answer centimetres!',
+      );
+    }
+    final denominator = [2, 4, 5, 10][(level + round) % 4];
+    final whole = denominator * (2 + ((level + round) % 5));
+    final numerator = 1 + ((level * 2 + round) % (denominator - 1));
+    final answer = whole ~/ denominator * numerator;
+    final choices = _nearbyNumbers(answer, level * 617 + round, max: 100);
+    return _AdventureRound(
+      skill: 'Fractions of quantities',
+      prompt: 'What is $numerator/$denominator of $whole?',
+      spokenPrompt:
+          'The mission uses $numerator over $denominator of $whole energy cells. How many cells is that?',
+      scene: ['🔋', '$whole', '×', '$numerator/$denominator'],
+      sceneLabel: '$numerator/$denominator OF $whole CELLS',
+      choices: [for (final value in choices) _AdventureChoice('$value')],
+      correctIndex: choices.indexOf(answer),
+      hint: 'Divide $whole by $denominator, then multiply by $numerator.',
+      explanation: '$numerator/$denominator of $whole is $answer!',
+    );
+  }
+
+  static _AdventureRound _business(int level, int round) {
+    final mode = (level + round) % 4;
+    if (mode == 0) {
+      final budget = 100 + (((level + round) % 5) * 50);
+      final cost = 30 + (((level * 3 + round) % 7) * 10);
+      final answer = budget - cost;
+      final choices = _nearbyNumbers(answer, level * 631 + round, max: 500);
+      return _moneyRound(
+        skill: 'Budgeting',
+        prompt: 'How much budget remains?',
+        spoken:
+            'The shop budget is $budget rupees and supplies cost $cost rupees. How much remains?',
+        sceneLabel: '₹$budget BUDGET − ₹$cost COST',
+        answer: answer,
+        choices: choices,
+        hint: 'Subtract the cost from the budget.',
+        explanation: '₹$answer remains in the budget!',
+      );
+    }
+    if (mode == 1) {
+      final percent = [10, 20, 25, 50][(level + round) % 4];
+      final price = percent == 25
+          ? 40 * (1 + ((level + round) % 5))
+          : 100 + (((level + round) % 5) * 100);
+      final answer = price * percent ~/ 100;
+      final choices = _nearbyNumbers(answer, level * 641 + round, max: 500);
+      return _moneyRound(
+        skill: 'Percentages and discounts',
+        prompt: 'How much is the discount?',
+        spoken:
+            'An item costs $price rupees and has a $percent percent discount. How many rupees are taken off?',
+        sceneLabel: '$percent% OF ₹$price',
+        answer: answer,
+        choices: choices,
+        hint: percent == 50
+            ? 'Fifty percent means half.'
+            : percent == 25
+                ? 'Twenty-five percent means one quarter.'
+                : 'Find one tenth first, then scale it.',
+        explanation: 'The discount is ₹$answer!',
+      );
+    }
+    if (mode == 2) {
+      final cost = 50 + (((level + round) % 6) * 20);
+      final profit = 10 + (((level * 2 + round) % 5) * 10);
+      final selling = cost + profit;
+      final choices = _nearbyNumbers(profit, level * 643 + round, max: 300);
+      return _moneyRound(
+        skill: 'Cost, revenue, and profit',
+        prompt: 'What is the profit?',
+        spoken:
+            'A product costs $cost rupees and sells for $selling rupees. What is the profit?',
+        sceneLabel: 'SELL ₹$selling − COST ₹$cost',
+        answer: profit,
+        choices: choices,
+        hint: 'Profit equals selling price minus cost price.',
+        explanation: 'The profit is ₹$profit!',
+      );
+    }
+    final quantity = 2 + ((level + round) % 8);
+    final unitPrice = 5 * (1 + ((level * 2 + round) % 6));
+    final answer = quantity * unitPrice;
+    final choices = _nearbyNumbers(answer, level * 647 + round, max: 500);
+    return _moneyRound(
+      skill: 'Unit price and total cost',
+      prompt: 'What is the total price?',
+      spoken:
+          '$quantity notebooks cost $unitPrice rupees each. What is the total price?',
+      sceneLabel: '$quantity × ₹$unitPrice EACH',
+      answer: answer,
+      choices: choices,
+      hint: 'Multiply quantity by price per item.',
+      explanation: 'The total price is ₹$answer!',
+    );
+  }
+
+  static _AdventureRound _mystery(int level, int round) {
+    final question =
+        _mysteryQuestions[(level * 5 + round * 7) % _mysteryQuestions.length];
+    return _authoredReasoningRound(
+      question,
+      level,
+      round,
+      sceneIcon: '🔬',
+    );
+  }
+
+  static _AdventureRound _news(int level, int round) {
+    final question =
+        _newsQuestions[(level * 3 + round * 5) % _newsQuestions.length];
+    return _authoredReasoningRound(
+      question,
+      level,
+      round,
+      sceneIcon: '📰',
+    );
+  }
+
+  static _AdventureRound _algorithm(int level, int round) {
+    final mode = (level + round) % 4;
+    if (mode == 0) {
+      final outer = 2 + ((level + round) % 4);
+      final inner = 2 + ((level * 2 + round) % 3);
+      final moves = 1 + ((level + round * 2) % 3);
+      final answer = outer * inner * moves;
+      final choices = _nearbyNumbers(answer, level * 661 + round, max: 60);
+      return _AdventureRound(
+        skill: 'Nested loops',
+        prompt: 'How many moves run?',
+        spokenPrompt:
+            'An outer loop repeats $outer times. Inside it, a loop repeats $inner times and moves $moves steps. How many moves altogether?',
+        scene: ['🤖', '🔁', '$outer', '🔁', '$inner', '➡️', '$moves'],
+        sceneLabel: 'REPEAT $outer [ REPEAT $inner [ MOVE $moves ] ]',
+        choices: [for (final value in choices) _AdventureChoice('$value')],
+        correctIndex: choices.indexOf(answer),
+        hint: 'Multiply outer repeats, inner repeats, and moves.',
+        explanation: 'The algorithm runs $answer moves!',
+      );
+    }
+    if (mode == 1) {
+      final energy = 20 + ((level * 7 + round * 5) % 80);
+      const threshold = 50;
+      final answer = energy >= threshold ? 'OPEN GATE' : 'CHARGE BATTERY';
+      final choices = <String>{answer, 'TURN AROUND', 'DELETE PROGRAM'}.toList()
+        ..shuffle(math.Random(level * 673 + round));
+      return _AdventureRound(
+        skill: 'Conditions and branching',
+        prompt: 'Which branch runs?',
+        spokenPrompt:
+            'If energy is at least $threshold, open the gate. Otherwise charge the battery. Energy is $energy. What happens?',
+        scene: ['🔋', '$energy', '⚖️', '$threshold', '🚪'],
+        sceneLabel: 'IF ENERGY ≥ $threshold',
+        choices: [for (final value in choices) _AdventureChoice(value)],
+        correctIndex: choices.indexOf(answer),
+        hint: 'Compare $energy with $threshold before choosing the branch.',
+        explanation: 'The program will ${answer.toLowerCase()}!',
+      );
+    }
+    if (mode == 2) {
+      const answer = 'REPEAT 5 [MOVE 1]';
+      final choices = <String>{
+        answer,
+        'MOVE 1, MOVE 1, MOVE 1, MOVE 1, MOVE 1',
+        'REPEAT 5 [TURN RIGHT]',
+      }.toList()
+        ..shuffle(math.Random(level * 677 + round));
+      return _AdventureRound(
+        skill: 'Algorithm efficiency',
+        prompt: 'Which correct code is shortest?',
+        spokenPrompt:
+            'The robot must move forward five times. Choose the correct code with the fewest instructions.',
+        scene: ['🤖', '➡️', '➡️', '➡️', '➡️', '➡️'],
+        sceneLabel: 'REACH THE STAR IN 5 MOVES',
+        choices: [for (final value in choices) _AdventureChoice(value)],
+        correctIndex: choices.indexOf(answer),
+        hint: 'A loop can replace repeated identical instructions.',
+        explanation: 'The repeat loop is correct and compact!',
+      );
+    }
+    final target = 8 + ((level + round) % 8);
+    final actual = target - 1;
+    const answer = 'CHANGE < TO <=';
+    final choices = <String>{answer, 'REMOVE THE LOOP', 'CHANGE + TO −'}
+        .toList()
+      ..shuffle(math.Random(level * 683 + round));
+    return _AdventureRound(
+      skill: 'Boundary-condition debugging',
+      prompt: 'How do you fix the missing last step?',
+      spokenPrompt:
+          'The loop stops at $actual but must reach $target. The condition uses less than target. Which fix includes the final value?',
+      scene: ['🐛', '$actual', '➡️', '$target', '🎯'],
+      sceneLabel: 'WHILE POSITION < $target',
+      choices: [for (final value in choices) _AdventureChoice(value)],
+      correctIndex: choices.indexOf(answer),
+      hint: 'Less than or equal includes the boundary value.',
+      explanation: 'Using less than or equal includes the final step!',
+    );
+  }
+
+  static _AdventureRound _moneyRound({
+    required String skill,
+    required String prompt,
+    required String spoken,
+    required String sceneLabel,
+    required int answer,
+    required List<int> choices,
+    required String hint,
+    required String explanation,
+  }) {
+    return _AdventureRound(
+      skill: skill,
+      prompt: prompt,
+      spokenPrompt: spoken,
+      scene: ['🛒', '🪙', '🧮'],
+      sceneLabel: sceneLabel,
+      choices: [for (final value in choices) _AdventureChoice('₹$value')],
+      correctIndex: choices.indexOf(answer),
+      hint: hint,
+      explanation: explanation,
+    );
+  }
+
+  static _AdventureRound _authoredReasoningRound(
+    _ScienceQuestion question,
+    int level,
+    int round, {
+    required String sceneIcon,
+  }) {
+    final choices = <String>[
+      question.answer,
+      question.distractorOne,
+      question.distractorTwo,
+    ]..shuffle(math.Random(level * 691 + round));
+    return _AdventureRound(
+      skill: question.skill,
+      prompt: question.prompt,
+      spokenPrompt: question.spokenPrompt,
+      scene: [question.emoji, sceneIcon, '💡'],
+      sceneLabel: question.sceneLabel.toUpperCase(),
+      choices: [for (final value in choices) _AdventureChoice(value)],
+      correctIndex: choices.indexOf(question.answer),
+      hint: question.hint,
+      explanation: question.explanation,
+    );
+  }
+
   static List<int> _nearbyNumbers(int answer, int seed, {required int max}) {
     final values = <int>{answer};
     var offset = 1;
@@ -2463,6 +2900,464 @@ const _scienceQuestions = <_ScienceQuestion>[
       distractorTwo: 'BURN IT OUTSIDE',
       hint: 'Reduce waste and keep it out of nature.',
       explanation: 'Reusing and recycling reduces plastic waste.'),
+];
+
+const _ecoQuestions = <_ScienceQuestion>[
+  _ScienceQuestion(
+      emoji: '☀️',
+      skill: 'Clean energy',
+      sceneLabel: 'The city needs electricity with less smoke',
+      prompt: 'Which energy source should the mayor choose?',
+      spokenPrompt:
+          'The city needs electricity with less air pollution. Which energy source should the mayor choose?',
+      answer: 'SOLAR PANELS',
+      distractorOne: 'MORE COAL',
+      distractorTwo: 'BURN RUBBISH',
+      hint: 'Choose a source that uses sunlight and makes no smoke.',
+      explanation: 'Solar panels make electricity without producing smoke.'),
+  _ScienceQuestion(
+      emoji: '🌧️',
+      skill: 'Water conservation',
+      sceneLabel: 'Rain falls on the school roof',
+      prompt: 'How can the city save this water?',
+      spokenPrompt: 'Rain falls on the school roof. How can the city save it?',
+      answer: 'USE A RAINWATER TANK',
+      distractorOne: 'LET IT ALL DRAIN AWAY',
+      distractorTwo: 'COVER THE ROOF IN PLASTIC',
+      hint: 'Collect the rain now so it can be used later.',
+      explanation: 'A rainwater tank stores water for gardens and cleaning.'),
+  _ScienceQuestion(
+      emoji: '🚌',
+      skill: 'Clean transport',
+      sceneLabel: 'Many cars crowd one road',
+      prompt: 'What can reduce traffic and pollution?',
+      spokenPrompt:
+          'Many cars crowd one road. What can reduce traffic and pollution?',
+      answer: 'RELIABLE PUBLIC BUSES',
+      distractorOne: 'WIDER CAR PARKS',
+      distractorTwo: 'MORE EMPTY CARS',
+      hint: 'One vehicle can carry many people together.',
+      explanation:
+          'Good public transport reduces the number of cars on roads.'),
+  _ScienceQuestion(
+      emoji: '🍂',
+      skill: 'Waste management',
+      sceneLabel: 'The market has fruit peels and dry leaves',
+      prompt: 'What is the best use for this waste?',
+      spokenPrompt:
+          'The market has fruit peels and dry leaves. What is the best use for them?',
+      answer: 'MAKE COMPOST',
+      distractorOne: 'THROW THEM IN A RIVER',
+      distractorTwo: 'MIX THEM WITH GLASS',
+      hint: 'Organic waste can become food for soil.',
+      explanation: 'Composting turns organic waste into useful plant food.'),
+  _ScienceQuestion(
+      emoji: '🌳',
+      skill: 'Biodiversity',
+      sceneLabel: 'A new park needs plants for local birds',
+      prompt: 'Which plants are the best choice?',
+      spokenPrompt:
+          'A new park needs plants for local birds. Which plants are the best choice?',
+      answer: 'NATIVE TREES AND FLOWERS',
+      distractorOne: 'ONLY PLASTIC PLANTS',
+      distractorTwo: 'NO PLANTS AT ALL',
+      hint: 'Local animals are adapted to plants from their area.',
+      explanation:
+          'Native plants provide suitable food and shelter for local wildlife.'),
+  _ScienceQuestion(
+      emoji: '🚰',
+      skill: 'Resource planning',
+      sceneLabel: 'A pipe leaks clean water every day',
+      prompt: 'What should the city repair first?',
+      spokenPrompt:
+          'A pipe leaks clean water every day. What should the city repair first?',
+      answer: 'THE LEAKING PIPE',
+      distractorOne: 'THE PARK BENCH',
+      distractorTwo: 'THE CLOCK TOWER',
+      hint: 'Stop the problem that wastes an important resource.',
+      explanation:
+          'Repairing the leak prevents clean water from being wasted.'),
+  _ScienceQuestion(
+      emoji: '♻️',
+      skill: 'Sorting waste',
+      sceneLabel: 'Homes put food, paper and batteries in one bin',
+      prompt: 'What system will make recycling safer?',
+      spokenPrompt:
+          'Homes mix food, paper and batteries. What system will make recycling safer?',
+      answer: 'SEPARATE LABELLED BINS',
+      distractorOne: 'ONE UNMARKED PILE',
+      distractorTwo: 'DROP WASTE ON ROADS',
+      hint: 'Different materials need different treatment.',
+      explanation:
+          'Labelled bins keep recyclable, organic and hazardous waste separate.'),
+  _ScienceQuestion(
+      emoji: '💡',
+      skill: 'Energy efficiency',
+      sceneLabel: 'The library replaces old light bulbs',
+      prompt: 'Which bulbs usually use less electricity?',
+      spokenPrompt:
+          'The library replaces old light bulbs. Which bulbs usually use less electricity?',
+      answer: 'LED BULBS',
+      distractorOne: 'BROKEN BULBS',
+      distractorTwo: 'HOT COAL LAMPS',
+      hint: 'Look for the efficient modern lighting choice.',
+      explanation: 'LED bulbs provide light while using less electricity.'),
+  _ScienceQuestion(
+      emoji: '🪷',
+      skill: 'Flood protection',
+      sceneLabel: 'A wetland beside the town stores storm water',
+      prompt: 'How should the city treat the wetland?',
+      spokenPrompt:
+          'A wetland stores storm water and shelters animals. What should the city do?',
+      answer: 'PROTECT AND RESTORE IT',
+      distractorOne: 'FILL IT WITH CONCRETE',
+      distractorTwo: 'DUMP WASTE THERE',
+      hint: 'Keep the natural place that absorbs water.',
+      explanation: 'Healthy wetlands absorb flood water and support wildlife.'),
+  _ScienceQuestion(
+      emoji: '🚲',
+      skill: 'Healthy streets',
+      sceneLabel: 'Children want to cycle safely to school',
+      prompt: 'What should the city add?',
+      spokenPrompt:
+          'Children want to cycle safely to school. What should the city add?',
+      answer: 'A PROTECTED CYCLE LANE',
+      distractorOne: 'A FASTER CAR LANE',
+      distractorTwo: 'A WALL ACROSS THE ROAD',
+      hint: 'Separate bicycles from fast traffic.',
+      explanation: 'A protected cycle lane makes active travel safer.'),
+  _ScienceQuestion(
+      emoji: '🏠',
+      skill: 'Green buildings',
+      sceneLabel: 'A home gets very hot and uses much cooling',
+      prompt: 'Which change can reduce energy use?',
+      spokenPrompt:
+          'A home gets very hot and uses much cooling. Which change can reduce energy use?',
+      answer: 'ADD SHADE AND INSULATION',
+      distractorOne: 'LEAVE EVERY DOOR OPEN',
+      distractorTwo: 'RUN MORE EMPTY FRIDGES',
+      hint: 'Keep unwanted heat outside the building.',
+      explanation:
+          'Shade and insulation help rooms stay comfortable with less energy.'),
+  _ScienceQuestion(
+      emoji: '📱',
+      skill: 'E-waste safety',
+      sceneLabel: 'Old phones and batteries need disposal',
+      prompt: 'Where should they go?',
+      spokenPrompt:
+          'Old phones and batteries need disposal. Where should they go?',
+      answer: 'AN E-WASTE COLLECTION CENTRE',
+      distractorOne: 'THE PLAYGROUND',
+      distractorTwo: 'THE FOOD COMPOST BIN',
+      hint: 'Electronics need specialist recycling.',
+      explanation:
+          'E-waste centres recover materials and handle batteries safely.'),
+];
+
+const _mysteryQuestions = <_ScienceQuestion>[
+  _ScienceQuestion(
+      emoji: '🌱',
+      skill: 'Variables',
+      sceneLabel: 'Mira changes the light given to bean plants',
+      prompt: 'What is the independent variable?',
+      spokenPrompt:
+          'Mira changes the amount of light given to bean plants. What is the independent variable?',
+      answer: 'AMOUNT OF LIGHT',
+      distractorOne: 'PLANT HEIGHT',
+      distractorTwo: 'TYPE OF RULER',
+      hint: 'It is the factor the scientist deliberately changes.',
+      explanation: 'The amount of light is changed by the scientist.'),
+  _ScienceQuestion(
+      emoji: '📏',
+      skill: 'Variables',
+      sceneLabel: 'Mira measures each plant after two weeks',
+      prompt: 'What is the dependent variable?',
+      spokenPrompt:
+          'Mira measures each plant after two weeks. What is the dependent variable?',
+      answer: 'PLANT HEIGHT',
+      distractorOne: 'AMOUNT OF LIGHT',
+      distractorTwo: 'COLOUR OF THE POT',
+      hint: 'It is the result that is measured.',
+      explanation: 'Plant height is the measured outcome.'),
+  _ScienceQuestion(
+      emoji: '🧪',
+      skill: 'Fair testing',
+      sceneLabel: 'Two liquids are tested for evaporation',
+      prompt: 'How can this be a fair test?',
+      spokenPrompt:
+          'Two liquids are tested for evaporation. How can this be a fair test?',
+      answer: 'CHANGE ONLY THE LIQUID',
+      distractorOne: 'USE DIFFERENT TEMPERATURES',
+      distractorTwo: 'USE DIFFERENT CUP SIZES',
+      hint: 'Keep every other condition the same.',
+      explanation: 'Changing one factor lets us compare its effect fairly.'),
+  _ScienceQuestion(
+      emoji: '🔁',
+      skill: 'Reliable evidence',
+      sceneLabel: 'One trial gives a surprising result',
+      prompt: 'What should the scientist do next?',
+      spokenPrompt:
+          'One trial gives a surprising result. What should the scientist do next?',
+      answer: 'REPEAT THE TRIAL',
+      distractorOne: 'HIDE THE RESULT',
+      distractorTwo: 'GUESS A NEW NUMBER',
+      hint: 'Check whether the result happens again.',
+      explanation: 'Repeated trials help reveal whether a result is reliable.'),
+  _ScienceQuestion(
+      emoji: '👥',
+      skill: 'Sample size',
+      sceneLabel: 'A food test uses only one child',
+      prompt: 'How can the investigation improve?',
+      spokenPrompt:
+          'A food preference test uses only one child. How can the investigation improve?',
+      answer: 'TEST A LARGER GROUP',
+      distractorOne: 'ASK THE SAME CHILD AGAIN',
+      distractorTwo: 'REMOVE ALL RESULTS',
+      hint: 'More participants make the evidence more representative.',
+      explanation:
+          'A larger sample reduces the effect of one unusual response.'),
+  _ScienceQuestion(
+      emoji: '💭',
+      skill: 'Hypotheses',
+      sceneLabel: 'A team writes a prediction before testing',
+      prompt: 'Which hypothesis can be tested?',
+      spokenPrompt: 'Which hypothesis can be tested with measurements?',
+      answer: 'MORE LIGHT INCREASES GROWTH',
+      distractorOne: 'PLANTS ARE ALWAYS HAPPY',
+      distractorTwo: 'GREEN IS THE NICEST COLOUR',
+      hint: 'Choose a claim with measurable factors.',
+      explanation: 'Light and growth can both be changed or measured.'),
+  _ScienceQuestion(
+      emoji: '📊',
+      skill: 'Graph reading',
+      sceneLabel: 'A graph shows temperature changing over time',
+      prompt: 'Where should time usually go?',
+      spokenPrompt:
+          'A graph shows temperature changing over time. On which axis should time usually go?',
+      answer: 'THE HORIZONTAL X-AXIS',
+      distractorOne: 'ONLY IN THE TITLE',
+      distractorTwo: 'OUTSIDE THE GRAPH',
+      hint: 'The independent variable normally goes across the bottom.',
+      explanation:
+          'Time is the independent variable and is plotted on the x-axis.'),
+  _ScienceQuestion(
+      emoji: '⚖️',
+      skill: 'Measurement tools',
+      sceneLabel: 'A powder must be measured by mass',
+      prompt: 'Which tool should be used?',
+      spokenPrompt:
+          'A powder must be measured by mass. Which tool should be used?',
+      answer: 'A BALANCE',
+      distractorOne: 'A THERMOMETER',
+      distractorTwo: 'A STOPWATCH',
+      hint: 'Choose the tool that measures grams.',
+      explanation: 'A balance measures mass.'),
+  _ScienceQuestion(
+      emoji: '🧊',
+      skill: 'Control groups',
+      sceneLabel: 'Salt is tested to see if it melts ice faster',
+      prompt: 'What should the control ice receive?',
+      spokenPrompt:
+          'Salt is tested to see if it melts ice faster. What should the control ice receive?',
+      answer: 'NO SALT',
+      distractorOne: 'TWICE AS MUCH SALT',
+      distractorTwo: 'HOT JUICE',
+      hint: 'The control does not receive the factor being tested.',
+      explanation: 'Ice without salt provides a comparison for the treatment.'),
+  _ScienceQuestion(
+      emoji: '🔎',
+      skill: 'Evidence',
+      sceneLabel: 'A footprint is found beside spilled soil',
+      prompt: 'Which statement is an observation?',
+      spokenPrompt:
+          'A footprint is found beside spilled soil. Which statement is an observation?',
+      answer: 'THE PRINT IS 18 CM LONG',
+      distractorOne: 'A GIANT MADE IT',
+      distractorTwo: 'THE PERSON WAS ANGRY',
+      hint: 'Choose what can be directly seen or measured.',
+      explanation:
+          'The print length is measurable evidence; the others are guesses.'),
+  _ScienceQuestion(
+      emoji: '🧤',
+      skill: 'Lab safety',
+      sceneLabel: 'A bottle has an unknown liquid',
+      prompt: 'What is the safest action?',
+      spokenPrompt:
+          'A bottle has an unknown liquid. What is the safest action?',
+      answer: 'ASK AN ADULT AND READ THE LABEL',
+      distractorOne: 'TASTE IT',
+      distractorTwo: 'SPLASH IT ON A FRIEND',
+      hint: 'Never touch or taste an unknown chemical.',
+      explanation:
+          'Labels and adult supervision help us handle substances safely.'),
+  _ScienceQuestion(
+      emoji: '📈',
+      skill: 'Conclusions',
+      sceneLabel: 'Warm water dissolved sugar fastest in every trial',
+      prompt: 'Which conclusion fits the evidence?',
+      spokenPrompt:
+          'Warm water dissolved sugar fastest in every trial. Which conclusion fits the evidence?',
+      answer: 'WARM WATER DISSOLVED IT FASTER',
+      distractorOne: 'SUGAR NEVER DISSOLVES',
+      distractorTwo: 'COLD WATER WAS ALWAYS FASTEST',
+      hint: 'The conclusion must match the recorded results.',
+      explanation:
+          'The evidence supports only the result observed in the trials.'),
+];
+
+const _newsQuestions = <_ScienceQuestion>[
+  _ScienceQuestion(
+      emoji: '🗣️',
+      skill: 'Fact or opinion',
+      sceneLabel: 'A post says, “Our playground is the best ever!”',
+      prompt: 'What kind of statement is this?',
+      spokenPrompt:
+          'A post says our playground is the best ever. What kind of statement is this?',
+      answer: 'AN OPINION',
+      distractorOne: 'A MEASURED FACT',
+      distractorTwo: 'A WEATHER RECORD',
+      hint: 'The word best depends on personal preference.',
+      explanation: '“Best” is a judgement, so the statement is an opinion.'),
+  _ScienceQuestion(
+      emoji: '📒',
+      skill: 'Primary sources',
+      sceneLabel: 'A report says the garden grew 12 kg of tomatoes',
+      prompt: 'Which source can best confirm it?',
+      spokenPrompt:
+          'A report says the garden grew twelve kilograms of tomatoes. Which source can best confirm it?',
+      answer: 'THE GARDEN WEIGHING RECORD',
+      distractorOne: 'A RANDOM COMMENT',
+      distractorTwo: 'A CARTOON ABOUT TOMATOES',
+      hint: 'Look for a direct record made during the harvest.',
+      explanation: 'The weighing record is direct evidence from the event.'),
+  _ScienceQuestion(
+      emoji: '📅',
+      skill: 'Freshness',
+      sceneLabel: 'A storm warning is shared in a group chat',
+      prompt: 'What should you check first?',
+      spokenPrompt:
+          'A storm warning is shared in a group chat. What should you check first?',
+      answer: 'THE DATE AND OFFICIAL SOURCE',
+      distractorOne: 'THE FONT COLOUR',
+      distractorTwo: 'HOW MANY EMOJIS IT HAS',
+      hint: 'An old warning may no longer be true.',
+      explanation:
+          'The date and official weather source show whether a warning is current.'),
+  _ScienceQuestion(
+      emoji: '📰',
+      skill: 'Headlines',
+      sceneLabel: 'A dramatic headline makes a huge claim',
+      prompt: 'What should a careful reader do?',
+      spokenPrompt:
+          'A dramatic headline makes a huge claim. What should a careful reader do?',
+      answer: 'READ THE EVIDENCE IN THE ARTICLE',
+      distractorOne: 'BELIEVE ONLY THE HEADLINE',
+      distractorTwo: 'SHARE IT WITHOUT READING',
+      hint: 'A headline is a summary, not proof.',
+      explanation:
+          'The full article should provide sources and evidence for its headline.'),
+  _ScienceQuestion(
+      emoji: '🕵️',
+      skill: 'Source checking',
+      sceneLabel: 'A claim is credited only to “someone online”',
+      prompt: 'Why should we be cautious?',
+      spokenPrompt:
+          'A claim is credited only to someone online. Why should we be cautious?',
+      answer: 'THE SOURCE CANNOT BE VERIFIED',
+      distractorOne: 'ALL ONLINE CLAIMS ARE TRUE',
+      distractorTwo: 'SHORT SENTENCES ARE FALSE',
+      hint: 'We cannot check who provided the information.',
+      explanation: 'Unnamed, untraceable sources are difficult to evaluate.'),
+  _ScienceQuestion(
+      emoji: '🖼️',
+      skill: 'Image context',
+      sceneLabel: 'A flood photo is attached to today’s message',
+      prompt: 'How can you check the photo?',
+      spokenPrompt:
+          'A flood photo is attached to today’s message. How can you check whether it belongs to the event?',
+      answer: 'FIND ITS ORIGINAL DATE AND SOURCE',
+      distractorOne: 'TRUST IT BECAUSE IT IS BRIGHT',
+      distractorTwo: 'ADD A FUNNY STICKER',
+      hint: 'Images can be old or taken somewhere else.',
+      explanation:
+          'The original source reveals when and where an image was made.'),
+  _ScienceQuestion(
+      emoji: '✅',
+      skill: 'Corroboration',
+      sceneLabel: 'One website reports a surprising school closure',
+      prompt: 'What is the strongest next check?',
+      spokenPrompt:
+          'One website reports a surprising school closure. What is the strongest next check?',
+      answer: 'CHECK THE SCHOOL AND ANOTHER SOURCE',
+      distractorOne: 'FORWARD IT IMMEDIATELY',
+      distractorTwo: 'COUNT THE EXCLAMATION MARKS',
+      hint: 'Confirm important claims independently.',
+      explanation:
+          'The official school notice and another reliable source can confirm the claim.'),
+  _ScienceQuestion(
+      emoji: '📣',
+      skill: 'Advertising',
+      sceneLabel: 'A video praises a toy and says “paid promotion”',
+      prompt: 'What does the label tell us?',
+      spokenPrompt:
+          'A video praises a toy and says paid promotion. What does the label tell us?',
+      answer: 'THE CREATOR WAS PAID',
+      distractorOne: 'THE TOY WON EVERY TEST',
+      distractorTwo: 'THE VIDEO IS A SCIENCE REPORT',
+      hint: 'The recommendation may be part of an advertisement.',
+      explanation:
+          'A paid promotion is advertising and may not be an independent review.'),
+  _ScienceQuestion(
+      emoji: '😱',
+      skill: 'Emotional language',
+      sceneLabel: 'A message says “SHOCKING! Share before it disappears!”',
+      prompt: 'What is this language trying to do?',
+      spokenPrompt:
+          'A message says shocking, share before it disappears. What is this language trying to do?',
+      answer: 'MAKE YOU REACT QUICKLY',
+      distractorOne: 'SHOW CAREFUL EVIDENCE',
+      distractorTwo: 'MEASURE A RESULT',
+      hint: 'Strong emotion can stop us checking first.',
+      explanation:
+          'Urgent emotional wording pressures readers to react without verifying.'),
+  _ScienceQuestion(
+      emoji: '📊',
+      skill: 'Survey evidence',
+      sceneLabel: 'Three friends vote for one snack',
+      prompt: 'Can this prove every child prefers it?',
+      spokenPrompt:
+          'Three friends vote for one snack. Can this prove every child prefers it?',
+      answer: 'NO, THE SAMPLE IS TOO SMALL',
+      distractorOne: 'YES, THREE IS EVERYONE',
+      distractorTwo: 'YES, SNACKS NEED NO DATA',
+      hint: 'A tiny group may not represent all children.',
+      explanation: 'A larger, varied sample is needed for a broad claim.'),
+  _ScienceQuestion(
+      emoji: '🔮',
+      skill: 'Predictions',
+      sceneLabel: 'An article says a team will win tomorrow',
+      prompt: 'Is the result already a fact?',
+      spokenPrompt:
+          'An article says a team will win tomorrow. Is the result already a fact?',
+      answer: 'NO, IT IS A PREDICTION',
+      distractorOne: 'YES, THE GAME IS FINISHED',
+      distractorTwo: 'YES, ALL GUESSES ARE FACTS',
+      hint: 'Future events have not happened yet.',
+      explanation:
+          'A statement about an uncertain future event is a prediction.'),
+  _ScienceQuestion(
+      emoji: '✏️',
+      skill: 'Corrections',
+      sceneLabel: 'A news page clearly corrects an earlier mistake',
+      prompt: 'Why is the correction useful?',
+      spokenPrompt:
+          'A news page clearly corrects an earlier mistake. Why is the correction useful?',
+      answer: 'IT MAKES THE UPDATE TRANSPARENT',
+      distractorOne: 'IT HIDES ALL EVIDENCE',
+      distractorTwo: 'IT MAKES THE OLD ERROR TRUE',
+      hint: 'Readers can see what changed and why.',
+      explanation:
+          'Visible corrections help readers track accurate updated information.'),
 ];
 
 class _DirectionItem {

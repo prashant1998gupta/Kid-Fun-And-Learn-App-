@@ -85,6 +85,12 @@ class AppRoutes {
   static const codeTheRobot = '/mini-games/code-the-robot';
   static const scienceMachineLab = '/mini-games/science-machine-lab';
   static const mapQuest = '/mini-games/map-quest';
+  static const ecoCityBuilder = '/mini-games/eco-city-builder';
+  static const spaceMissionControl = '/mini-games/space-mission-control';
+  static const businessBazaar = '/mini-games/business-bazaar';
+  static const mysteryScienceLab = '/mini-games/mystery-science-lab';
+  static const newsDetective = '/mini-games/news-detective';
+  static const algorithmQuest = '/mini-games/algorithm-quest';
   static const kidWorld = '/kid-world';
   static const physicalMission = '/kid-world/move';
 }
@@ -260,6 +266,30 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.mapQuest,
         pageBuilder: (_, s) => _slide(const MapQuestGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.ecoCityBuilder,
+        pageBuilder: (_, s) => _slide(const EcoCityBuilderGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.spaceMissionControl,
+        pageBuilder: (_, s) => _slide(const SpaceMissionControlGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.businessBazaar,
+        pageBuilder: (_, s) => _slide(const BusinessBazaarGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.mysteryScienceLab,
+        pageBuilder: (_, s) => _slide(const MysteryScienceLabGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.newsDetective,
+        pageBuilder: (_, s) => _slide(const NewsDetectiveGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.algorithmQuest,
+        pageBuilder: (_, s) => _slide(const AlgorithmQuestGame(), s),
       ),
       GoRoute(
         path: AppRoutes.kidWorld,

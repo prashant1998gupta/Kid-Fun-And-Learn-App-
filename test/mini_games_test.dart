@@ -210,6 +210,12 @@ void main() {
         'code-the-robot',
         'science-machine-lab',
         'map-quest',
+        'eco-city-builder',
+        'space-mission-control',
+        'business-bazaar',
+        'mystery-science-lab',
+        'news-detective',
+        'algorithm-quest',
       ];
       final rewards = {
         for (final id in ids) LearningWorldCatalog.rewardFor(id, 1).id,
@@ -337,7 +343,7 @@ void main() {
   });
 
   testWidgets(
-      'catalog and all twenty-three game screens render on a phone viewport',
+      'catalog and all twenty-nine game screens render on a phone viewport',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -466,6 +472,30 @@ void main() {
     await render(const MapQuestGame());
     expect(find.textContaining('Level 1/50'), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await render(const EcoCityBuilderGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const SpaceMissionControlGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const BusinessBazaarGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const MysteryScienceLabGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const NewsDetectiveGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const AlgorithmQuestGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Toy Sort always advances after a correct basket choice',
@@ -554,6 +584,12 @@ void main() {
       'mg_tutorial_code-the-robot': true,
       'mg_tutorial_science-machine-lab': true,
       'mg_tutorial_map-quest': true,
+      'mg_tutorial_eco-city-builder': true,
+      'mg_tutorial_space-mission-control': true,
+      'mg_tutorial_business-bazaar': true,
+      'mg_tutorial_mystery-science-lab': true,
+      'mg_tutorial_news-detective': true,
+      'mg_tutorial_algorithm-quest': true,
     });
     final preferences = await SharedPreferences.getInstance();
     tester.view.physicalSize = const Size(360, 800);
@@ -579,6 +615,12 @@ void main() {
       ('code-the-robot', CodeTheRobotGame()),
       ('science-machine-lab', ScienceMachineLabGame()),
       ('map-quest', MapQuestGame()),
+      ('eco-city-builder', EcoCityBuilderGame()),
+      ('space-mission-control', SpaceMissionControlGame()),
+      ('business-bazaar', BusinessBazaarGame()),
+      ('mystery-science-lab', MysteryScienceLabGame()),
+      ('news-detective', NewsDetectiveGame()),
+      ('algorithm-quest', AlgorithmQuestGame()),
     ];
 
     for (final game in games) {
