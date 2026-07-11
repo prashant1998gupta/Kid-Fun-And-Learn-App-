@@ -5,6 +5,9 @@ part of 'learning_adventure_game.dart';
 class LearningAdventureAudit {
   LearningAdventureAudit._();
 
+  static int correctIndex(LearningAdventureType type, int level, int round) =>
+      _AdventureContent.question(type, level, round).correctIndex;
+
   static List<String> validateAll() {
     final errors = <String>[];
     for (final type in LearningAdventureType.values) {
@@ -29,6 +32,36 @@ class LearningAdventureAudit {
                 question.spokenPrompt.trim().isEmpty ||
                 question.scene.isEmpty) {
               errors.add('$location has incomplete child-facing content');
+            }
+            // Protect the teach-first progression inside each 50-level game.
+            // Later concepts must not leak into the recognition/foundation
+            // levels simply because a generator formula changed.
+            final skill = question.skill.toLowerCase();
+            if (type == LearningAdventureType.numberGarden &&
+                level <= 30 &&
+                skill.contains('addition')) {
+              errors.add('$location introduces addition before level 31');
+            }
+            if (type == LearningAdventureType.clockAdventure &&
+                level <= 25 &&
+                skill.contains('half-hour')) {
+              errors.add('$location introduces half-hours before level 26');
+            }
+            if (type == LearningAdventureType.fractionCafe &&
+                level <= 18 &&
+                (skill.contains('equivalent') || skill.contains('add like'))) {
+              errors.add('$location skips basic fraction models');
+            }
+            if (type == LearningAdventureType.multiplicationKingdom &&
+                level <= 18 &&
+                (skill.contains('division') ||
+                    skill.contains('missing factor'))) {
+              errors.add('$location skips equal-group foundations');
+            }
+            if (type == LearningAdventureType.codeRobot &&
+                level <= 18 &&
+                (skill.contains('loop') || skill.contains('debug'))) {
+              errors.add('$location skips movement-command foundations');
             }
           } catch (error) {
             errors.add('${type.id} level $level round ${round + 1}: $error');

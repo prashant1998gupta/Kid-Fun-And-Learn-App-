@@ -15,6 +15,7 @@ import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// Pop-the-right-bubble. Options float as bobbing bubbles; the child pops the
 /// one that answers the spoken prompt. Wrong pops fizzle (no penalty beyond the
@@ -41,6 +42,8 @@ class _BubblePopGameState extends State<BubblePopGame> {
   bool _erred = false;
   bool _locked = false;
   int? _wrong; // bubble briefly wobbling red after a wrong tap
+  int _mistakes = 0;
+  bool _rescue = false;
   final Set<int> _popped = {};
   final List<String> _struggled = [];
   final _stopwatch = Stopwatch()..start();
@@ -80,6 +83,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
       if (!mounted) return;
       _advance();
     } else {
+      _mistakes++;
       // A wrong bubble should wobble and stay — never disappear — so the child
       // can keep trying the others. (It used to pop and vanish, which read as a
       // reward.)
@@ -91,7 +95,12 @@ class _BubblePopGameState extends State<BubblePopGame> {
       AudioService.instance.speak(PraiseLines.nextRetry());
       setState(() => _wrong = i);
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      if (mounted) setState(() => _wrong = null);
+      if (!mounted) return;
+      setState(() => _wrong = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _q);
+      }
     }
   }
 
@@ -116,13 +125,15 @@ class _BubblePopGameState extends State<BubblePopGame> {
       _locked = false;
       _wrong = null;
       _popped.clear();
+      _mistakes = 0;
+      _rescue = false;
     });
     _speak();
   }
 
   @override
   Widget build(BuildContext context) {
-    final options = _q.options;
+    final optionIndexes = rescueOptionIndexes(_q, rescue: _rescue);
     return CelebrationOverlay(
       controller: _celebration,
       child: Scaffold(
@@ -139,7 +150,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
                     builder: (context, constraints) {
                       return Stack(
                         children: [
-                          for (int i = 0; i < options.length; i++)
+                          for (final i in optionIndexes)
                             _bubble(i, constraints),
                         ],
                       );

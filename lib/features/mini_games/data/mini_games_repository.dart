@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../settings/settings_controller.dart';
 import '../../profiles/profiles_controller.dart';
+import '../../profiles/domain/grade_level.dart';
 import 'mini_game_story.dart';
 
 /// Data for a mini game definition.
@@ -14,7 +15,8 @@ class MiniGameDef {
     required this.color,
     required this.description,
     this.learning = false,
-    this.gradeBand,
+    this.minGrade,
+    this.maxGrade,
   });
 
   final String id;
@@ -23,7 +25,26 @@ class MiniGameDef {
   final int color;
   final String description;
   final bool learning;
-  final String? gradeBand;
+  final GradeLevel? minGrade;
+  final GradeLevel? maxGrade;
+
+  bool supportsGrade(GradeLevel grade) {
+    if (!learning) return true;
+    final min = minGrade?.difficultyTier ?? GradeLevel.lkg.difficultyTier;
+    final max = maxGrade?.difficultyTier ?? GradeLevel.kg.difficultyTier;
+    return grade.difficultyTier >= min && grade.difficultyTier <= max;
+  }
+
+  String? get gradeBand {
+    if (!learning) return null;
+    final min = minGrade ?? GradeLevel.lkg;
+    final max = maxGrade ?? GradeLevel.kg;
+    if (min == GradeLevel.lkg && max == GradeLevel.kg) return 'Preschool';
+    if (min == max) return min.label.replaceFirst('Grade', 'Class');
+    final minLabel = min.label.replaceFirst('Grade', 'Class');
+    final maxLabel = max.label.replaceFirst('Grade ', '');
+    return '$minLabel–$maxLabel';
+  }
 }
 
 class MiniGameAchievement {
@@ -108,6 +129,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFFFF8A65,
     description: 'Teach Pip colors, shapes, sizes and groups!',
     learning: true,
+    minGrade: GradeLevel.lkg,
+    maxGrade: GradeLevel.kg,
   ),
   MiniGameDef(
     id: 'feed-the-pet',
@@ -116,6 +139,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF26A69A,
     description: 'Count tasty food for a hungry friend!',
     learning: true,
+    minGrade: GradeLevel.lkg,
+    maxGrade: GradeLevel.kg,
   ),
   MiniGameDef(
     id: 'sound-safari',
@@ -124,6 +149,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF00A878,
     description: 'Listen and discover who makes each sound!',
     learning: true,
+    minGrade: GradeLevel.lkg,
+    maxGrade: GradeLevel.kg,
   ),
   MiniGameDef(
     id: 'number-garden',
@@ -132,6 +159,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFFFFB000,
     description: 'Count flowers and grow a number garden!',
     learning: true,
+    minGrade: GradeLevel.lkg,
+    maxGrade: GradeLevel.kg,
   ),
   MiniGameDef(
     id: 'story-train',
@@ -140,6 +169,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF3D7EFF,
     description: 'Put events in order and predict what comes next!',
     learning: true,
+    minGrade: GradeLevel.lkg,
+    maxGrade: GradeLevel.kg,
   ),
   MiniGameDef(
     id: 'letter-bakery',
@@ -148,6 +179,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFFE84393,
     description: 'Bake words by matching their first letters!',
     learning: true,
+    minGrade: GradeLevel.lkg,
+    maxGrade: GradeLevel.kg,
   ),
   MiniGameDef(
     id: 'clean-room-helper',
@@ -156,6 +189,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF7C5CE7,
     description: 'Help Pip put everyday things in their places!',
     learning: true,
+    minGrade: GradeLevel.lkg,
+    maxGrade: GradeLevel.kg,
   ),
   MiniGameDef(
     id: 'math-market',
@@ -164,7 +199,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFFFF8F00,
     description: 'Shop with coins and catch silly change mistakes!',
     learning: true,
-    gradeBand: 'Class 1–2',
+    minGrade: GradeLevel.grade1,
+    maxGrade: GradeLevel.grade2,
   ),
   MiniGameDef(
     id: 'word-wizard-workshop',
@@ -173,7 +209,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF6C5CE7,
     description: 'Repair words with beginning, ending and spelling magic!',
     learning: true,
-    gradeBand: 'Class 1–2',
+    minGrade: GradeLevel.grade1,
+    maxGrade: GradeLevel.grade2,
   ),
   MiniGameDef(
     id: 'sentence-train',
@@ -182,7 +219,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF1976D2,
     description: 'Complete grammar carriages and punctuation tracks!',
     learning: true,
-    gradeBand: 'Class 1–2',
+    minGrade: GradeLevel.grade1,
+    maxGrade: GradeLevel.grade2,
   ),
   MiniGameDef(
     id: 'clock-adventure',
@@ -191,7 +229,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFFE91E63,
     description: 'Read clocks and match times to everyday routines!',
     learning: true,
-    gradeBand: 'Class 1–2',
+    minGrade: GradeLevel.grade1,
+    maxGrade: GradeLevel.grade2,
   ),
   MiniGameDef(
     id: 'nature-detective',
@@ -200,7 +239,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF00897B,
     description: 'Solve animal, plant and habitat mysteries!',
     learning: true,
-    gradeBand: 'Class 1–2',
+    minGrade: GradeLevel.grade1,
+    maxGrade: GradeLevel.grade2,
   ),
   MiniGameDef(
     id: 'shape-builder',
@@ -209,7 +249,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF5E35B1,
     description: 'Build with shapes, sides and repeating patterns!',
     learning: true,
-    gradeBand: 'Class 1–2',
+    minGrade: GradeLevel.grade1,
+    maxGrade: GradeLevel.grade2,
   ),
   MiniGameDef(
     id: 'fraction-cafe',
@@ -218,7 +259,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFFFF7043,
     description: 'Serve, compare and add equal pizza fractions!',
     learning: true,
-    gradeBand: 'Class 3–4',
+    minGrade: GradeLevel.grade3,
+    maxGrade: GradeLevel.grade4,
   ),
   MiniGameDef(
     id: 'multiplication-kingdom',
@@ -227,7 +269,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF7B1FA2,
     description: 'Build bridges with multiplication and division facts!',
     learning: true,
-    gradeBand: 'Class 3–4',
+    minGrade: GradeLevel.grade3,
+    maxGrade: GradeLevel.grade4,
   ),
   MiniGameDef(
     id: 'grammar-detective',
@@ -236,7 +279,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF455A64,
     description: 'Investigate nouns, verbs, tense and punctuation clues!',
     learning: true,
-    gradeBand: 'Class 3–4',
+    minGrade: GradeLevel.grade3,
+    maxGrade: GradeLevel.grade4,
   ),
   MiniGameDef(
     id: 'code-the-robot',
@@ -245,7 +289,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF1565C0,
     description: 'Sequence moves, use loops and debug silly robot code!',
     learning: true,
-    gradeBand: 'Class 3–4',
+    minGrade: GradeLevel.grade3,
+    maxGrade: GradeLevel.grade4,
   ),
   MiniGameDef(
     id: 'science-machine-lab',
@@ -254,7 +299,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF00838F,
     description: 'Reason through matter, forces, machines and nature!',
     learning: true,
-    gradeBand: 'Class 3–4',
+    minGrade: GradeLevel.grade3,
+    maxGrade: GradeLevel.grade4,
   ),
   MiniGameDef(
     id: 'map-quest',
@@ -263,7 +309,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF2E7D32,
     description: 'Navigate compass directions, grids and distances!',
     learning: true,
-    gradeBand: 'Class 3–4',
+    minGrade: GradeLevel.grade3,
+    maxGrade: GradeLevel.grade4,
   ),
   MiniGameDef(
     id: 'eco-city-builder',
@@ -272,7 +319,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF2E7D32,
     description: 'Plan a clean, green city using evidence and smart choices!',
     learning: true,
-    gradeBand: 'Class 5',
+    minGrade: GradeLevel.grade5,
+    maxGrade: GradeLevel.grade5,
   ),
   MiniGameDef(
     id: 'space-mission-control',
@@ -281,7 +329,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF3949AB,
     description: 'Launch missions with decimals, angles and metric maths!',
     learning: true,
-    gradeBand: 'Class 5',
+    minGrade: GradeLevel.grade5,
+    maxGrade: GradeLevel.grade5,
   ),
   MiniGameDef(
     id: 'business-bazaar',
@@ -290,7 +339,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFFEF6C00,
     description: 'Run a shop using budgets, discounts, profit and unit price!',
     learning: true,
-    gradeBand: 'Class 5',
+    minGrade: GradeLevel.grade5,
+    maxGrade: GradeLevel.grade5,
   ),
   MiniGameDef(
     id: 'mystery-science-lab',
@@ -299,7 +349,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF00838F,
     description: 'Design fair tests and solve mysteries with strong evidence!',
     learning: true,
-    gradeBand: 'Class 5',
+    minGrade: GradeLevel.grade5,
+    maxGrade: GradeLevel.grade5,
   ),
   MiniGameDef(
     id: 'news-detective',
@@ -308,7 +359,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF5D4037,
     description: 'Check facts, sources, images and headlines before sharing!',
     learning: true,
-    gradeBand: 'Class 5',
+    minGrade: GradeLevel.grade5,
+    maxGrade: GradeLevel.grade5,
   ),
   MiniGameDef(
     id: 'algorithm-quest',
@@ -317,7 +369,8 @@ const List<MiniGameDef> kMiniGames = [
     color: 0xFF6A1B9A,
     description: 'Predict loops, test conditions and debug efficient plans!',
     learning: true,
-    gradeBand: 'Class 5',
+    minGrade: GradeLevel.grade5,
+    maxGrade: GradeLevel.grade5,
   ),
   MiniGameDef(
     id: 'infinity-loop',

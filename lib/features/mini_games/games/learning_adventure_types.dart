@@ -1,5 +1,27 @@
 part of 'learning_adventure_game.dart';
 
+class LearningAdventureGradePolicy {
+  const LearningAdventureGradePolicy._();
+
+  /// Maps visible progress (always 1–50) to an age-safe content curve. This
+  /// keeps rewards and saved levels stable while LKG/Grade 1 learners receive
+  /// a gentler version than KG/Grade 2 inside the same story world.
+  static int contentLevel(GradeLevel? grade, int savedLevel) {
+    final level = savedLevel.clamp(1, 50);
+    final ceiling = switch (grade) {
+      GradeLevel.lkg => 20,
+      GradeLevel.ukg => 40,
+      GradeLevel.kg || null => 50,
+      GradeLevel.grade1 => 30,
+      GradeLevel.grade2 => 50,
+      GradeLevel.grade3 => 32,
+      GradeLevel.grade4 || GradeLevel.grade5 => 50,
+    };
+    if (ceiling == 50) return level;
+    return 1 + ((level - 1) * (ceiling - 1) ~/ 49);
+  }
+}
+
 enum LearningAdventureType {
   soundSafari,
   numberGarden,

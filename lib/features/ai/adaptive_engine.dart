@@ -15,17 +15,34 @@ import '../settings/settings_controller.dart';
 /// privacy-preserving; aggregate signals can later sync to Firestore to feed a
 /// server-side recommendation engine, but nothing here requires the network.
 class SkillModel {
-  SkillModel({Map<String, double>? skills, Map<String, int>? struggles})
-      : _skills = skills ?? {},
+  SkillModel({
+    Map<String, double>? skills,
+    Map<String, double>? concepts,
+    Map<String, int>? struggles,
+  })  : _skills = skills ?? {},
+        _concepts = concepts ?? {},
         _struggles = struggles ?? {};
 
   final Map<String, double> _skills; // key: "childId|subject"
+  final Map<String, double> _concepts; // key: "childId|skillId"
   final Map<String, int> _struggles; // key: "childId|questionId"
 
   static const _alpha = 0.35; // EMA responsiveness
 
   double skillFor(String childId, Subject subject) =>
       _skills['$childId|${subject.name}'] ?? 0.4; // start "still learning"
+
+  bool hasSeenConcept(String childId, String skillId) =>
+      _concepts.containsKey('$childId|$skillId');
+
+  double conceptMastery(String childId, String skillId) =>
+      _concepts['$childId|$skillId'] ?? 0.0;
+
+  bool prerequisitesMet(String childId, List<String> prerequisiteSkillIds,
+          {double threshold = 0.6}) =>
+      prerequisiteSkillIds.every(
+        (skillId) => conceptMastery(childId, skillId) >= threshold,
+      );
 
   /// Fold a completed lesson into the model.
   void observe(String childId, LessonResult result) {
@@ -36,6 +53,13 @@ class SkillModel {
     for (final qid in result.struggledQuestionIds) {
       final sk = '$childId|$qid';
       _struggles[sk] = (_struggles[sk] ?? 0) + 1;
+    }
+    final struggled = result.struggledQuestionIds.toSet();
+    for (final question in result.lesson.questions) {
+      final conceptKey = '$childId|${question.skillId}';
+      final previous = _concepts[conceptKey] ?? 0.35;
+      final observation = struggled.contains(question.id) ? 0.35 : 1.0;
+      _concepts[conceptKey] = previous * (1 - _alpha) + observation * _alpha;
     }
   }
 
@@ -78,10 +102,17 @@ class SkillModel {
     ];
   }
 
-  Map<String, dynamic> toMap() => {'skills': _skills, 'struggles': _struggles};
+  Map<String, dynamic> toMap() => {
+        'skills': _skills,
+        'concepts': _concepts,
+        'struggles': _struggles,
+      };
 
   factory SkillModel.fromMap(Map<String, dynamic> m) => SkillModel(
         skills: (m['skills'] as Map?)
+                ?.map((k, v) => MapEntry(k as String, (v as num).toDouble())) ??
+            {},
+        concepts: (m['concepts'] as Map?)
                 ?.map((k, v) => MapEntry(k as String, (v as num).toDouble())) ??
             {},
         struggles: (m['struggles'] as Map?)

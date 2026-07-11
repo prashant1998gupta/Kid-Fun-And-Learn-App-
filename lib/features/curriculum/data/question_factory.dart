@@ -2,16 +2,19 @@ import '../../profiles/domain/grade_level.dart';
 import '../domain/lesson.dart';
 import '../domain/subject.dart';
 
-/// Generates broad, grade-appropriate, CBSE-aligned, **factually correct**
-/// question banks so every subject offers a 50-level journey of 20 unique
-/// questions each (1000+ questions per subject).
+part 'question_factory_banks.dart';
+
+/// Generates broad, grade-appropriate question banks for each subject's
+/// 50-level journey. Session length follows the learner's age and interaction
+/// type rather than forcing every child through the same number of questions.
 ///
 /// Design rules:
 ///  - Deterministic: content is a pure function of (grade, subject, gameType,
 ///    level, index). No Random/DateTime, so it is stable across rebuilds.
 ///  - Correct by construction: math is parametric (the answer is computed);
-///    other subjects draw from curated CBSE-standard banks where the right
-///    answer is authored next to its distractors.
+///    other subjects draw from curated primary-school banks where the right
+///    answer is authored next to its distractors. Formal board alignment still
+///    requires educator review before it can be claimed in product marketing.
 ///  - De-duplicated within a level: [forLevel] never shows the same question
 ///    twice in a single level.
 ///  - Non-repeating across levels: bank cycling covers enough unique entries
@@ -34,14 +37,26 @@ class QuestionFactory {
     var i = 0;
     // Try up to count*6 indices to collect `count` distinct questions.
     while (out.length < count && i < count * 6) {
-      final q = _one(seed + i, grade, subject, gameType, out.length);
+      final q = _withLearningSupport(
+        _one(seed + i, grade, subject, gameType, level, out.length),
+        grade: grade,
+        subject: subject,
+        gameType: gameType,
+        level: level,
+      );
       final sig = _signature(q);
       if (seen.add(sig)) out.add(q);
       i++;
     }
     // Safety pad (bank smaller than count): accept remaining even if similar.
     while (out.length < count) {
-      out.add(_one(seed + i, grade, subject, gameType, out.length));
+      out.add(_withLearningSupport(
+        _one(seed + i, grade, subject, gameType, level, out.length),
+        grade: grade,
+        subject: subject,
+        gameType: gameType,
+        level: level,
+      ));
       i++;
     }
     return out;
@@ -52,27 +67,269 @@ class QuestionFactory {
     return '${q.prompt}|$opts|${q.answer}';
   }
 
+  static Question _withLearningSupport(
+    Question question, {
+    required GradeLevel grade,
+    required Subject subject,
+    required GameType gameType,
+    required int level,
+  }) {
+    final text = '${question.prompt} ${question.speak ?? ''}'.toLowerCase();
+    String skill;
+    if (gameType == GameType.flashcard) {
+      skill = subject == Subject.math ? 'math.facts' : 'english.letter-sounds';
+    } else if (gameType == GameType.tracing) {
+      skill = subject == Subject.math
+          ? 'math.number-formation'
+          : 'english.letter-formation';
+    } else if (gameType == GameType.memoryMatch) {
+      skill = 'logic.visual-memory';
+    } else if (gameType == GameType.sequence) {
+      skill =
+          subject == Subject.english ? 'english.sequence' : 'logic.sequence';
+    } else if (subject == Subject.math) {
+      skill = switch (text) {
+        final value when value.contains('lcm') => 'math.lcm',
+        final value when value.contains('hcf') => 'math.hcf',
+        final value when value.contains('volume') => 'math.volume',
+        final value when value.contains('%') => 'math.percentage',
+        final value when value.contains('fraction') || value.contains('/') =>
+          'math.fractions',
+        final value
+            when value.contains('decimal') ||
+                RegExp(r'\b0\.\d').hasMatch(value) =>
+          'math.decimals',
+        final value when value.contains('area') => 'math.area',
+        final value when value.contains('perimeter') => 'math.perimeter',
+        final value when value.contains('÷') || value.contains('shared') =>
+          'math.division',
+        final value when value.contains('×') || value.contains('multiple') =>
+          'math.multiplication',
+        final value when value.contains('+') || value.contains('altogether') =>
+          'math.addition',
+        final value
+            when value.contains('-') ||
+                value.contains('left') ||
+                value.contains('take away') =>
+          'math.subtraction',
+        final value
+            when value.contains('tens') ||
+                value.contains('ones') ||
+                value.contains('hundreds') =>
+          'math.place-value',
+        final value when value.contains('clock') || value.contains(':00') =>
+          'math.time',
+        _ => 'math.number-sense',
+      };
+    } else if (subject == Subject.english || subject == Subject.rhymes) {
+      final upperMode = (level - 1) % 8;
+      if (grade == GradeLevel.grade3) {
+        skill = const [
+          'english.nouns',
+          'english.verbs',
+          'english.adjectives',
+          'english.synonyms',
+          'english.antonyms',
+          'english.pronouns',
+          'english.prepositions',
+          'english.prepositions',
+        ][upperMode];
+      } else if (grade == GradeLevel.grade4) {
+        skill = const [
+          'english.synonyms',
+          'english.antonyms',
+          'english.homophones',
+          'english.prepositions',
+          'english.conjunctions',
+          'english.agreement',
+          'english.adverbs',
+          'english.adverbs',
+        ][upperMode];
+      } else if (grade == GradeLevel.grade5) {
+        skill = const [
+          'english.synonyms',
+          'english.antonyms',
+          'english.homophones',
+          'english.conjunctions',
+          'english.tenses',
+          'english.agreement',
+          'english.prepositions',
+          'english.prepositions',
+        ][upperMode];
+      } else if (grade == GradeLevel.grade1 || grade == GradeLevel.grade2) {
+        skill = const [
+          'english.antonyms',
+          'english.antonyms',
+          'english.plurals',
+          'english.plurals',
+          'english.spelling',
+          'english.spelling',
+          'english.sentences',
+          'english.sentences',
+        ][upperMode];
+      } else {
+        skill = switch (text) {
+          final value
+              when value.contains('noun') || value.contains('naming word') =>
+            'english.nouns',
+          final value
+              when value.contains('verb') || value.contains('action word') =>
+            'english.verbs',
+          final value
+              when value.contains('adjective') ||
+                  value.contains('describing word') =>
+            'english.adjectives',
+          final value
+              when value.contains('opposite') || value.contains('antonym') =>
+            'english.antonyms',
+          final value
+              when value.contains('synonym') || value.contains('word like') =>
+            'english.synonyms',
+          final value
+              when value.contains('plural') ||
+                  value.contains('more than one') =>
+            'english.plurals',
+          final value when value.contains('spell') => 'english.spelling',
+          final value
+              when value.contains('sentence') || value.contains('___') =>
+            'english.sentences',
+          final value when value.contains('rhyme') => 'english.rhyming',
+          final value when value.contains('vowel') => 'english.vowels',
+          _ => 'english.letter-sounds',
+        };
+      }
+    } else if (subject == Subject.science || subject == Subject.evs) {
+      skill = '${subject.name}.${grade.name}.core';
+    } else if (subject == Subject.logic) {
+      skill = text.contains('different')
+          ? 'logic.classification'
+          : text.contains('biggest') || text.contains('smallest')
+              ? 'logic.comparison'
+              : 'logic.patterns';
+    } else {
+      skill = '${subject.name}.core';
+    }
+
+    final prerequisites = switch (skill) {
+      'math.subtraction' => const ['math.number-sense'],
+      'math.multiplication' => const ['math.addition'],
+      'math.division' => const ['math.multiplication'],
+      'math.fractions' => const ['math.division'],
+      'math.decimals' => const ['math.place-value'],
+      'math.area' || 'math.perimeter' => const ['math.multiplication'],
+      'math.volume' => const ['math.area'],
+      'math.lcm' || 'math.hcf' => const ['math.multiplication'],
+      'math.percentage' => const ['math.fractions'],
+      'english.spelling' => const ['english.letter-sounds'],
+      'english.sentences' => const ['english.nouns', 'english.verbs'],
+      'english.adjectives' => const ['english.nouns'],
+      'english.pronouns' => const ['english.nouns'],
+      'english.adverbs' => const ['english.verbs'],
+      'english.agreement' => const ['english.nouns', 'english.verbs'],
+      'english.tenses' => const ['english.verbs'],
+      'english.conjunctions' => const ['english.sentences'],
+      _ => const <String>[],
+    };
+    final teachingTip = _teachingTip(skill);
+    final correctAnswer = question.correctIndex != null &&
+            question.correctIndex! >= 0 &&
+            question.correctIndex! < question.options.length
+        ? question.options[question.correctIndex!].label
+        : question.answer;
+    final rescueTip = correctAnswer == null
+        ? '$teachingTip Let us try one smaller step together.'
+        : '$teachingTip For this one, the answer is $correctAnswer. Now try it with fewer choices.';
+    return question.withLearningSupport(
+      skillId: skill,
+      prerequisiteSkillIds: prerequisites,
+      teachingTip: teachingTip,
+      rescueTip: rescueTip,
+    );
+  }
+
+  static String _teachingTip(String skill) => switch (skill) {
+        'math.addition' =>
+          'Addition joins groups. Start with the first group and count on.',
+        'math.subtraction' =>
+          'Subtraction takes away. Start with the whole group and count what remains.',
+        'math.multiplication' =>
+          'Multiplication means equal groups. Count each group or skip-count.',
+        'math.division' => 'Division shares a total into equal groups.',
+        'math.fractions' =>
+          'A fraction describes equal parts: the bottom counts all equal parts and the top counts chosen parts.',
+        'math.decimals' =>
+          'Decimal places show tenths and hundredths. Line up decimal points when calculating.',
+        'math.area' =>
+          'Area counts the square units inside a shape: length times width.',
+        'math.perimeter' =>
+          'Perimeter is the distance around a shape. Add every outside side.',
+        'math.volume' =>
+          'Volume counts cubes inside: length times width times height.',
+        'math.lcm' =>
+          'The LCM is the first number found in both lists of multiples.',
+        'math.hcf' =>
+          'The HCF is the greatest number that divides both numbers exactly.',
+        'math.percentage' =>
+          'Percent means out of one hundred. Use a familiar fraction such as one half or one tenth.',
+        'math.place-value' =>
+          'A digit has a value based on its place: ones, tens, hundreds and beyond.',
+        'math.time' =>
+          'The short hand shows the hour and the long hand shows minutes.',
+        'english.nouns' => 'A noun names a person, place, animal or thing.',
+        'english.verbs' => 'A verb shows an action or a state.',
+        'english.adjectives' => 'An adjective describes a noun.',
+        'english.pronouns' =>
+          'A pronoun can replace a naming word, such as she, he, it, we or they.',
+        'english.prepositions' =>
+          'A preposition shows where or when something is, such as under, beside or after.',
+        'english.conjunctions' =>
+          'A conjunction joins ideas. Words such as and, but, because and so connect parts.',
+        'english.adverbs' =>
+          'An adverb tells how, when or where an action happens.',
+        'english.agreement' =>
+          'The subject and verb must match: one is, many are.',
+        'english.tenses' =>
+          'Verb tense shows when something happens: past, present or future.',
+        'english.homophones' =>
+          'Homophones sound alike but have different spellings and meanings. Use the sentence clue.',
+        'english.sentences' =>
+          'A sentence needs words in an order that makes a complete thought.',
+        'english.spelling' =>
+          'Say the word slowly and listen for each sound in order.',
+        'english.rhyming' => 'Rhyming words have the same ending sound.',
+        'english.vowels' => 'The vowel letters are A, E, I, O and U.',
+        'logic.patterns' =>
+          'Find what changes each time, then repeat the same rule.',
+        'logic.classification' =>
+          'Look for two things that share a group; the other one is different.',
+        'logic.comparison' =>
+          'Compare the objects using the same feature, such as size.',
+        _ =>
+          'Look closely, listen to the clue, and connect it to something you already know.',
+      };
+
   static Question _one(
     int index,
     GradeLevel grade,
     Subject subject,
     GameType gameType,
+    int level,
     int slot,
   ) {
     switch (gameType) {
       case GameType.tracing:
-        return _tracing(index, subject);
+        return _tracing(index, grade, subject);
       case GameType.sequence:
-        return _sequence(index, grade, subject, slot);
+        return _sequence(index, grade, subject, level, slot);
       case GameType.memoryMatch:
-        return _memory(index, subject, slot);
+        return _memory(index, grade, subject, slot);
       case GameType.dragDrop:
       case GameType.sorting:
-        return _sorting(index, grade, subject, slot);
+        return _sorting(index, grade, subject, level, slot);
       case GameType.flashcard:
-        return _flashcard(index, grade, subject);
+        return _flashcard(index, grade, subject, level);
       default:
-        return _choiceBySubject(index, grade, subject, slot);
+        return _choiceBySubject(index, grade, subject, level, slot);
     }
   }
 
@@ -135,10 +392,15 @@ class QuestionFactory {
   static String _numberWord(int n) =>
       n >= 0 && n < _numberWords.length ? _numberWords[n] : '$n';
 
-  static Question _flashcard(int index, GradeLevel grade, Subject subject) {
+  static Question _flashcard(
+      int index, GradeLevel grade, Subject subject, int level) {
     if (subject == Subject.math) {
       if (grade.difficultyTier >= 4) {
-        final table = index % 9 + 2;
+        final maxTable = switch (grade) {
+          GradeLevel.grade2 => level < 21 ? 5 : 10,
+          _ => 12,
+        };
+        final table = index % (maxTable - 1) + 2;
         final by = index ~/ 9 % 10 + 1;
         final product = table * by;
         return Question(
@@ -148,14 +410,22 @@ class QuestionFactory {
           speak: '$table times $by equals $product',
         );
       }
-      final n = index % 50 + 1;
+      final maxNumber = switch (grade) {
+        GradeLevel.lkg => 5,
+        GradeLevel.ukg => 10,
+        GradeLevel.kg => 20,
+        GradeLevel.grade1 => 100,
+        _ => 50,
+      };
+      final n = index % maxNumber + 1;
       return Question(
         id: 'gen_fc_num_$index',
         prompt: '$n',
         promptEmoji: '🔢',
         answer: _numberWord(n),
-        speak:
-            'The number $n. ${n >= _numberWords.length ? '' : _numberWords[n]}.',
+        speak: n >= _numberWords.length
+            ? 'The number $n.'
+            : 'The number $n. ${_numberWords[n]}.',
       );
     }
     final e = _alphabet[index % _alphabet.length];
@@ -237,9 +507,16 @@ class QuestionFactory {
   // ---------------------------------------------------------------------------
   // Tracing
   // ---------------------------------------------------------------------------
-  static Question _tracing(int index, Subject subject) {
+  static Question _tracing(int index, GradeLevel grade, Subject subject) {
     if (subject == Subject.math) {
-      final n = index % 51;
+      final maxNumber = switch (grade) {
+        GradeLevel.lkg => 5,
+        GradeLevel.ukg => 10,
+        GradeLevel.kg => 20,
+        GradeLevel.grade1 => 50,
+        _ => 100,
+      };
+      final n = index % (maxNumber + 1);
       return Question(
           id: 'gen_trace_$index',
           prompt: 'Trace $n',
@@ -258,11 +535,20 @@ class QuestionFactory {
   // Sequence
   // ---------------------------------------------------------------------------
   static Question _sequence(
-      int index, GradeLevel grade, Subject subject, int slot) {
+      int index, GradeLevel grade, Subject subject, int level, int slot) {
     final width =
         grade.difficultyTier <= 1 ? 3 : (grade.difficultyTier <= 4 ? 4 : 5);
     if (subject == Subject.math || subject == Subject.logic) {
-      final steps = [1, 2, 3, 5, 10, 4, 6, 7, 8, 9];
+      final steps = switch (grade) {
+        GradeLevel.lkg => const [1],
+        GradeLevel.ukg => const [1, 2],
+        GradeLevel.kg => const [1, 2, 5],
+        GradeLevel.grade1 => const [1, 2, 5, 10],
+        GradeLevel.grade2 => const [2, 3, 5, 10],
+        GradeLevel.grade3 => const [2, 3, 4, 5, 10],
+        GradeLevel.grade4 => const [3, 4, 6, 7, 8, 9],
+        GradeLevel.grade5 => const [4, 6, 7, 8, 9, 11, 12],
+      };
       final step = steps[index % steps.length];
       final start = (index % 10 + 1) * step;
       return Question(
@@ -275,23 +561,60 @@ class QuestionFactory {
         ],
       );
     }
-    const sets = [
+    if (subject == Subject.english || subject == Subject.rhymes) {
+      if (grade.isPreSchool) {
+        final start = index % 23;
+        return Question(
+          id: 'gen_seq_${index}_$slot',
+          prompt: 'Put the letters in order',
+          speak: 'Tap the letters in alphabet order',
+          options: [
+            for (var i = 0; i < width; i++)
+              AnswerOption(
+                  label: String.fromCharCode('A'.codeUnitAt(0) + start + i))
+          ],
+        );
+      }
+      const sentences = [
+        ['I', 'like', 'red', 'apples.'],
+        ['The', 'sun', 'is', 'bright.'],
+        ['Birds', 'build', 'small', 'nests.'],
+        ['We', 'play', 'after', 'school.'],
+        ['My', 'friend', 'reads', 'daily.'],
+        ['Plants', 'need', 'water', 'and sunlight.'],
+        ['The', 'little', 'puppy', 'barked.'],
+        ['Please', 'close', 'the', 'door.'],
+      ];
+      final words = sentences[index % sentences.length];
+      return Question(
+          id: 'gen_seq_${index}_$slot',
+          prompt: 'Build the sentence',
+          speak: 'Tap the words to build a sentence',
+          options: [for (final word in words) AnswerOption(label: word)]);
+    }
+
+    const earlySets = [
       ['🐜 Ant', '🐱 Cat', '🐶 Dog', '🐘 Elephant', '🐳 Whale'],
       ['🌰 Seed', '🌱 Sprout', '🪴 Plant', '🌳 Tree'],
       ['🥚 Egg', '🐛 Caterpillar', '🦋 Butterfly'],
       ['🌅 Morning', '☀️ Noon', '🌆 Evening', '🌙 Night'],
-      ['👶 Baby', '🧒 Child', '🧑 Adult', '👴 Elder'],
       ['🥚 Egg', '🐣 Chick', '🐔 Hen'],
       ['☁️ Cloud', '🌧️ Rain', '🌈 Rainbow'],
-      ['🧊 Ice', '💧 Water', '💨 Steam'],
-      ['🌑 New Moon', '🌓 Quarter', '🌕 Full Moon'],
       ['🌱 Seed', '🌿 Plant', '🌸 Flower', '🍎 Fruit'],
-      ['🧵 Thread', '👕 Shirt', '👖 Pants'],
-      ['📖 Open Book', '📕 Closed Book'],
       ['🐸 Tadpole', '🐸 Frog'],
+    ];
+    const olderSets = [
+      ['🧊 Ice', '💧 Water', '💨 Water vapour'],
+      ['🌑 New Moon', '🌓 Quarter Moon', '🌕 Full Moon'],
+      ['👶 Baby', '🧒 Child', '🧑 Adult', '👴 Elder'],
       ['🍼 Baby', '🧒 Toddler', '🧑 Teen', '👨 Adult'],
       ['🌄 Dawn', '☀️ Noon', '🌅 Dusk', '🌙 Night'],
+      ['🌱 Producer', '🐰 Herbivore', '🦊 Carnivore', '🍄 Decomposer'],
+      ['🌧️ Rain', '🌊 Collection', '☀️ Evaporation', '☁️ Condensation'],
+      ['🔋 Cell', '🔘 Switch', '💡 Bulb lights'],
     ];
+    final sets =
+        grade.difficultyTier <= 2 ? earlySets : [...earlySets, ...olderSets];
     final set = sets[index % sets.length];
     return Question(
       id: 'gen_seq_${index}_$slot',
@@ -304,7 +627,8 @@ class QuestionFactory {
   // ---------------------------------------------------------------------------
   // Memory
   // ---------------------------------------------------------------------------
-  static Question _memory(int index, Subject subject, int slot) {
+  static Question _memory(
+      int index, GradeLevel grade, Subject subject, int slot) {
     const sets = [
       ['🐶', '🐱', '🐮', '🐷', '🐰'],
       ['🍎', '🍌', '🍇', '🍓', '🍊'],
@@ -317,10 +641,16 @@ class QuestionFactory {
       ['🎈', '🎀', '🎁', '🎉', '🎊'],
       ['🍕', '🍔', '🍟', '🌭', '🍪'],
     ];
-    final faces = sets[index % sets.length];
+    final pairCount = switch (grade) {
+      GradeLevel.lkg => 3,
+      GradeLevel.ukg => 4,
+      _ => 5,
+    };
+    final faces = sets[index % sets.length].take(pairCount);
     return Question(
       id: 'gen_mem_${index}_$slot',
       prompt: 'Find the matching pairs',
+      speak: 'Find two matching pictures',
       options: [for (final f in faces) AnswerOption(label: f, emoji: f)],
     );
   }
@@ -329,7 +659,102 @@ class QuestionFactory {
   // Sorting / drag-drop
   // ---------------------------------------------------------------------------
   static Question _sorting(
-      int index, GradeLevel grade, Subject subject, int slot) {
+      int index, GradeLevel grade, Subject subject, int level, int slot) {
+    final id = 'gen_sort_${index}_$slot';
+    if (subject == Subject.math) {
+      if (grade == GradeLevel.lkg) {
+        const items = [
+          ('3', '3️⃣', 0),
+          ('Circle', '🔵', 1),
+          ('5', '5️⃣', 0),
+          ('Star', '⭐', 1),
+          ('2', '2️⃣', 0),
+          ('Square', '🟥', 1)
+        ];
+        final item = items[index % items.length];
+        return Question(
+            id: id,
+            prompt: 'Where does this go?',
+            promptEmoji: item.$2,
+            speak: 'Is it a number or a shape?',
+            correctIndex: item.$3,
+            options: const [
+              AnswerOption(label: 'Number', emoji: '🔢'),
+              AnswerOption(label: 'Shape', emoji: '🔷')
+            ]);
+      }
+      if (grade.isPreSchool) {
+        final n = index % (grade == GradeLevel.ukg ? 10 : 20) + 1;
+        final isSmall = n <= (grade == GradeLevel.ukg ? 5 : 10);
+        return Question(
+            id: id,
+            prompt: 'Sort number $n',
+            promptEmoji: '🔢',
+            speak: 'Which number group?',
+            correctIndex: isSmall ? 0 : 1,
+            options: [
+              AnswerOption(
+                  label: grade == GradeLevel.ukg ? '1 to 5' : '1 to 10'),
+              AnswerOption(
+                  label: grade == GradeLevel.ukg ? '6 to 10' : '11 to 20')
+            ]);
+      }
+      final divisor = grade.difficultyTier <= 4 ? 2 : index % 4 + 2;
+      final n = index % 90 + 10;
+      final divisible = n % divisor == 0;
+      return Question(
+          id: id,
+          prompt: 'Sort $n',
+          promptEmoji: '🔢',
+          speak: 'Is $n divisible by $divisor?',
+          correctIndex: divisible ? 0 : 1,
+          options: [
+            AnswerOption(label: 'Multiple of $divisor'),
+            const AnswerOption(label: 'Not a multiple')
+          ]);
+    }
+
+    if (subject == Subject.english || subject == Subject.rhymes) {
+      if (grade.isPreSchool) {
+        final item = _alphabet[index % _alphabet.length];
+        final other = _alphabet[(index + 7) % _alphabet.length];
+        return Question(
+            id: id,
+            prompt: 'First sound of ${item.$2}?',
+            promptEmoji: item.$3,
+            speak: 'Which letter does ${item.$2} start with?',
+            correctIndex: 0,
+            options: [
+              AnswerOption(label: item.$1),
+              AnswerOption(label: other.$1)
+            ]);
+      }
+      const words = [
+        ('garden', 'Noun', 0),
+        ('jump', 'Action', 1),
+        ('teacher', 'Noun', 0),
+        ('write', 'Action', 1),
+        ('river', 'Noun', 0),
+        ('laugh', 'Action', 1),
+        ('planet', 'Noun', 0),
+        ('whisper', 'Action', 1),
+        ('market', 'Noun', 0),
+        ('build', 'Action', 1),
+        ('pencil', 'Noun', 0),
+        ('explore', 'Action', 1),
+      ];
+      final word = words[index % words.length];
+      return Question(
+          id: id,
+          prompt: 'Sort “${word.$1}”',
+          speak: 'Is ${word.$1} a naming word or an action word?',
+          correctIndex: word.$3,
+          options: const [
+            AnswerOption(label: 'Naming word'),
+            AnswerOption(label: 'Action word')
+          ]);
+    }
+
     // (item, emoji, catA, catAEmoji, catB, catBEmoji, correctIndex)
     const items = [
       ('Apple', '🍎', 'Fruit', '🍓', 'Vegetable', '🥕', 0),
@@ -363,7 +788,7 @@ class QuestionFactory {
     ];
     final it = items[index % items.length];
     return Question(
-      id: 'gen_sort_${index}_$slot',
+      id: id,
       prompt: 'Where does the ${it.$1.toLowerCase()} go?',
       speak: 'Where does the ${it.$1.toLowerCase()} go?',
       promptEmoji: it.$2,
@@ -379,235 +804,398 @@ class QuestionFactory {
   // Choice questions routed by subject.
   // ---------------------------------------------------------------------------
   static Question _choiceBySubject(
-      int index, GradeLevel grade, Subject subject, int slot) {
-    final tier = grade.difficultyTier;
+      int index, GradeLevel grade, Subject subject, int level, int slot) {
     switch (subject) {
       case Subject.math:
-        return _math(index, tier, slot);
+        return _math(index, grade, level, slot);
       case Subject.english:
       case Subject.rhymes:
-        return _english(index, tier, slot);
+        return _english(index, grade, level, slot);
       case Subject.evs:
       case Subject.science:
-        return _world(index, tier, slot);
+        return _world(index, grade, subject, level, slot);
       case Subject.logic:
-        return _logic(index, tier, slot);
+        return _logic(index, grade, level, slot);
       case Subject.art:
         return _art(index, slot);
     }
   }
 
   // ---- MATH (parametric, infinite questions) --------------------------------
-  static Question _math(int index, int tier, int slot) {
+  static Question _math(int index, GradeLevel grade, int level, int slot) {
     final id = 'gen_math_${index}_$slot';
-    final mode = index % 8;
+    final phase = ((level - 1) ~/ 10).clamp(0, 4);
 
-    if (tier <= 2) {
-      // LKG/UKG/KG: counting, simple add/sub, number after/before, bigger
-      switch (mode) {
-        case 0: // How many? (1-10)
-          final n = index % 10 + 1;
-          return _numMc(
-              index, id, 'How many? ${'⭐' * n}', 'How many stars?', n);
-        case 1: // Simple addition
-          final a = index % 5 + 1;
-          final b = (index ~/ 2) % 5 + 1;
-          return _numMc(index, id, '$a + $b = ?', 'What is $a + $b?', a + b);
-        case 2: // What comes after?
-          final n = index % 20 + 1;
-          return _numMc(
-              index, id, 'What comes after $n?', 'What comes after $n?', n + 1);
-        case 3: // Which is bigger?
-          final a = index % 10 + 1;
-          var b = (index ~/ 3) % 10 + 1;
-          if (b == a) b = b % 10 + 1;
-          final big = a > b ? a : b;
-          final small = a > b ? b : a;
-          return _mc(
-            id: id,
-            prompt: 'Which is bigger: $a or $b?',
-            speak: 'Which number is bigger?',
-            correct: AnswerOption(label: '$big'),
-            wrong: [AnswerOption(label: '$small')],
-            shift: index,
-          );
-        case 4: // What comes before?
-          final n = index % 20 + 2;
-          return _numMc(index, id, 'What comes before $n?',
-              'What comes before $n?', n - 1);
-        case 5: // Simple subtraction
-          final a = (index % 10 + 2);
-          final b = index % 9 + 1;
-          if (b >= a) {
+    int differentFrom(int value, int max) {
+      final candidate = (index ~/ 3) % max + 1;
+      return candidate == value ? candidate % max + 1 : candidate;
+    }
+
+    Question compare(int max, {required bool bigger}) {
+      final a = index % max + 1;
+      final b = differentFrom(a, max);
+      final answer = bigger ? (a > b ? a : b) : (a < b ? a : b);
+      final other = answer == a ? b : a;
+      final biggerPrompts = [
+        'Which is bigger',
+        'Find the bigger number',
+        'Tap the larger number',
+        'Which number has more',
+        'Choose the bigger one',
+      ];
+      final smallerPrompts = [
+        'Which is smaller',
+        'Find the smaller number',
+        'Tap the little number',
+        'Which number has less',
+        'Choose the smaller one',
+      ];
+      return _mc(
+        id: id,
+        prompt:
+            '${(bigger ? biggerPrompts : smallerPrompts)[slot % 5]}: $a or $b?',
+        speak: bigger ? 'Which number is bigger?' : 'Which number is smaller?',
+        correct: AnswerOption(label: '$answer'),
+        wrong: [AnswerOption(label: '$other')],
+        shift: index,
+      );
+    }
+
+    switch (grade) {
+      case GradeLevel.lkg:
+        // Ages 3–4: concrete quantities 1–5. Symbols are introduced only
+        // after repeated counting practice; there is no subtraction.
+        final max = phase < 2 ? 3 : 5;
+        switch ((level - 1) % (phase < 3 ? 4 : 5)) {
+          case 0:
+          case 1:
+            final n = index % max + 1;
+            final object = const ['⭐', '🍎', '🐝', '🎈', '🐟'][slot % 5];
             return _numMc(
-                index, id, '$a + ${b % a + 1} = ?', '', a + (b % a + 1));
-          }
-          return _numMc(index, id, '$a - $b = ?', 'What is $a - $b?', a - b);
-        case 6: // Count objects
-          final n = index % 9 + 2;
-          return _numMc(index, id, 'Count: ${'🍎' * n}', 'How many apples?', n);
-        default: // Smaller number
-          final a = index % 10 + 1;
-          var b = (index ~/ 3) % 10 + 1;
-          if (b == a) b = b % 10 + 1;
-          final small = a < b ? a : b;
-          final big = a < b ? b : a;
-          return _mc(
-            id: id,
-            prompt: 'Which is smaller: $a or $b?',
-            speak: 'Which number is smaller?',
-            correct: AnswerOption(label: '$small'),
-            wrong: [AnswerOption(label: '$big')],
-            shift: index,
-          );
-      }
-    }
-
-    if (tier <= 4) {
-      // Grades 1-2: add/sub 0-100, simple multiply, groups, skip counting
-      switch (index % 6) {
-        case 0:
-          final a = index % 40 + 5;
-          final b = index % 25 + 3;
-          return _numMc(index, id, '$a + $b = ?', 'What is $a + $b?', a + b);
-        case 1:
-          final a = index % 40 + 20;
-          final b = index % 15 + 1;
-          return _numMc(index, id, '$a - $b = ?', 'What is $a - $b?', a - b);
-        case 2:
-          final a = index % 5 + 2;
-          final b = index % 5 + 2;
-          return _numMc(index, id, '$a × $b = ?', 'What is $a × $b?', a * b);
-        case 3:
-          final groups = index % 4 + 2;
-          final each = index % 4 + 2;
-          return _numMc(index, id, '$groups × $each = ?', 'How many in all?',
-              groups * each);
-        default:
-          final step = [2, 5, 10, 3, 4][index % 5];
-          final n = (index % 8 + 1) * step;
-          return _numMc(index, id, 'Count by $step: $n, then?',
-              'What comes next?', n + step);
-      }
-    }
-
-    // tier 5-7: CBSE Grade 4-5 full curriculum
-    final g4mode = index % 12;
-    switch (g4mode) {
-      // -- Operations (large numbers) --
-      case 0: // Large addition (up to 5-digit)
-        final a = (index % 900 + 100);
-        final b = (index ~/ 3 % 900 + 100);
-        return _numMc(index, id, '$a + $b = ?', null, a + b);
-      case 1: // Large subtraction
-        final a = (index % 500 + 500);
-        final b = (index ~/ 3 % 400 + 50);
-        if (b >= a) {
-          return _numMc(
-              index, id, '$a + ${(b % 50) + 10} = ?', null, a + (b % 50) + 10);
+                index, id, 'Count ${object * n}', 'How many can you count?', n);
+          case 2:
+            final n = index % max + 1;
+            final verb =
+                const ['Find', 'Tap', 'Point to', 'Spot', 'Choose'][slot % 5];
+            return _numMc(index, id, '$verb $n', 'Tap number $n', n);
+          case 3:
+            return compare(max, bigger: true);
+          default:
+            final a = index % 3 + 1;
+            final object = const ['🍎', '🐝', '🎈', '⭐', '🐟'][slot % 5];
+            return _numMc(index, id, '${object * a} and one more $object',
+                '$a and one more. How many?', a + 1);
         }
-        return _numMc(index, id, '$a - $b = ?', null, a - b);
-      // -- Fractions & Decimals --
-      case 2: // Like fraction addition (same denominator)
-        final denom = [2, 3, 4, 5, 6, 8, 10][index % 7];
-        final an = (index % (denom - 1)) + 1;
-        final bn = ((index ~/ 3) % (denom - 1)) + 1;
-        final sum = an + bn;
-        if (denom <= sum) {
-          return _numMc(
-              index,
-              id,
-              '$an/$denom + $bn/$denom = ${sum - denom}/$denom?',
-              null,
-              sum - denom);
+      case GradeLevel.ukg:
+        // Ages 4–5: 1–10, then teen numbers; concrete addition/subtraction.
+        final max = phase < 2 ? 10 : 20;
+        switch ((level - 1) % 7) {
+          case 0:
+            final n = index % 10 + 1;
+            return _numMc(index, id, 'Count ${'🐝' * n}', 'Count the bees', n);
+          case 1:
+            final n = index % max + 1;
+            return _numMc(
+                index, id, 'After $n?', 'What comes after $n?', n + 1);
+          case 2:
+            final n = index % max + 2;
+            return _numMc(
+                index, id, 'Before $n?', 'What comes before $n?', n - 1);
+          case 3:
+            final a = index % 5 + 1;
+            final b = index ~/ 2 % 3 + 1;
+            return _numMc(index, id, '${'🍎' * a} and ${'🍎' * b}',
+                '$a apples and $b more. How many apples?', a + b);
+          case 4:
+            final a = index % 6 + 4;
+            final b = index % 3 + 1;
+            final friend = const [
+              'birds',
+              'ducks',
+              'butterflies',
+              'fish',
+              'bunnies',
+              'bees',
+              'frogs'
+            ][slot % 7];
+            return _numMc(index, id, '$a $friend. $b go away.',
+                '$a $friend. $b go away. How many stay?', a - b);
+          case 5:
+            return compare(max, bigger: true);
+          default:
+            return compare(max, bigger: false);
         }
-        return _numMc(index, id, '$an/$denom + $bn/$denom = ?', null, sum);
-      case 3: // Compare decimals
-        final w = index % 10 + 1;
-        final x = (index ~/ 2) % 10 + 1;
-        final a = 0.1 * w;
-        final b = 0.1 * x;
-        if (a == b) {
-          return _numMc(index, id, '0.$w + 0.$x = ?', null, (a + b).round());
+      case GradeLevel.kg:
+        // Ages 5–6: numbers to 50, facts within 10/20 and gentle skip-counting.
+        switch ((level - 1) % 8) {
+          case 0:
+            final n = index % (phase < 2 ? 20 : 50) + 1;
+            return _numMc(index, id, 'After $n?', null, n + 1);
+          case 1:
+            final a = index % 9 + 1;
+            final b = index ~/ 2 % 9 + 1;
+            return _numMc(index, id, '$a + $b = ?', null, a + b);
+          case 2:
+            final a = index % 10 + 8;
+            final b = index % 7 + 1;
+            return _numMc(index, id, '$a - $b = ?', null, a - b);
+          case 3:
+            return compare(50, bigger: true);
+          case 4:
+            final tens = index % 5 + 1;
+            return _numMc(index, id, '$tens tens = ?', null, tens * 10);
+          default:
+            final step = phase < 2 ? 2 : (index.isEven ? 5 : 10);
+            final n = (index % 6 + 1) * step;
+            final trail = const [
+              '🐰 Hop',
+              '🚀 Launch',
+              '🌟 Star path',
+              '🚂 Number train',
+              '🐸 Lily pads',
+              '🎈 Balloon trail',
+              '🐝 Bee path',
+              '🦋 Garden path'
+            ][slot % 8];
+            return _numMc(index, id, '$trail: $n, ${n + step}, ?',
+                'What comes next?', n + 2 * step);
         }
-        final bigger = a > b ? a : b;
-        return _mc(
-          id: id,
-          prompt: 'Which is bigger: $a or $b?',
-          correct: AnswerOption(label: '$bigger'),
-          wrong: [
-            AnswerOption(label: '${bigger == a ? b : a}'),
-            const AnswerOption(label: '0.0'),
-          ],
-          shift: index,
-        );
-      case 4: // Fraction of a number
-        final n = [2, 3, 4, 5][index % 4];
-        final v = (index % 10 + 1) * n;
-        return _numMc(index, id, '1/$n of $v = ?', null, v ~/ n);
-      // -- Measurement & Time --
-      case 5: // Time conversion
-        final hours = index % 12 + 1;
-        return _numMc(index, id, '$hours hours = ? minutes', null, hours * 60);
-      case 6: // Money word problems
-        final r = index % 20 + 1;
-        final p = (index ~/ 3) % 100;
-        return _numMc(
-            index,
-            id,
-            '₹$r.${p.toString().padLeft(2, '0')} + ₹${r % 5 + 1}.${(p % 50 + 1).toString().padLeft(2, '0')} = ?',
-            null,
-            r + (r % 5 + 1));
-      // -- Geometry --
-      case 7: // Area of rectangle
-        final l = index % 12 + 3;
-        final w = (index ~/ 2) % 8 + 2;
-        final area = l * w;
-        return _mc(
-          id: id,
-          prompt: 'Area of ${l}cm × ${w}cm rectangle?',
-          correct: AnswerOption(label: '${area}cm²'),
-          wrong: [
-            AnswerOption(label: '${2 * (l + w)}cm'),
-            AnswerOption(label: '${area + 2}cm²'),
-          ],
-          shift: index,
-        );
-      case 8: // Perimeter
-        final l = index % 12 + 4;
-        final w = index % 8 + 3;
-        return _numMc(
-            index, id, 'Perimeter of $l×$w rectangle?', null, 2 * (l + w));
-      // -- Data Handling --
-      case 9: // Pictograph interpretation
-        final cats = index % 4 + 2;
-        return _numMc(index, id, 'Each 🍎=5. $cats apples shown. Total = ?',
-            null, cats * 5);
-      // -- LCM & HCF --
-      case 10: // LCM
-        final a = index % 6 + 2;
-        final b = index % 8 + 3;
-        if (a == b) {
-          return _numMc(index, id, '$a × ${index % 5 + 2} = ?', null,
-              a * (index % 5 + 2));
+      case GradeLevel.grade1:
+        // Grade 1: place value and add/subtract within 20, growing to 100.
+        final limit = phase < 2 ? 20 : 100;
+        switch ((level - 1) % 8) {
+          case 0:
+            final a = index % (limit ~/ 2) + 1;
+            final b = index ~/ 2 % (limit ~/ 3) + 1;
+            return _numMc(index, id, '$a + $b = ?', null, a + b);
+          case 1:
+            final a = index % (limit ~/ 2) + limit ~/ 2;
+            final b = index % (a.clamp(2, 20) - 1) + 1;
+            return _numMc(index, id, '$a - $b = ?', null, a - b);
+          case 2:
+            final n = index % 90 + 10;
+            return _numMc(index, id, 'Tens in $n?', null, n ~/ 10);
+          case 3:
+            final n = index % 90 + 10;
+            return _numMc(index, id, 'Ones in $n?', null, n % 10);
+          case 4:
+            final hour = index % 12 + 1;
+            return _mc(
+                id: id,
+                prompt: '🕐 Clock shows $hour o’clock. Choose it.',
+                correct: AnswerOption(label: '$hour:00'),
+                wrong: [
+                  AnswerOption(label: '${hour % 12 + 1}:00'),
+                  const AnswerOption(label: '12:30')
+                ],
+                shift: index);
+          case 5:
+            return compare(limit, bigger: true);
+          default:
+            final step = [2, 5, 10][index % 3];
+            final n = (index % 8 + 1) * step;
+            return _numMc(index, id, '$n, ${n + step}, ?', null, n + 2 * step);
         }
-        var lcm = a;
-        while (lcm % b != 0) {
-          lcm += a;
+      case GradeLevel.grade2:
+        // Grade 2: three-digit place value, regrouping, tables 2–10,
+        // equal sharing, money and clock intervals.
+        switch ((level - 1) % 10) {
+          case 0:
+            final a = index % 300 + 100;
+            final b = index ~/ 2 % 150 + 20;
+            return _numMc(index, id, '$a + $b = ?', null, a + b);
+          case 1:
+            final a = index % 300 + 300;
+            final b = index ~/ 2 % 180 + 20;
+            return _numMc(index, id, '$a - $b = ?', null, a - b);
+          case 2:
+            final a = index % (phase < 2 ? 4 : 9) + 2;
+            final b = index ~/ 2 % 10 + 1;
+            return _numMc(index, id, '$a × $b = ?', null, a * b);
+          case 3:
+            final groups = index % 5 + 2;
+            final each = index % 6 + 2;
+            return _numMc(index, id, '${groups * each} shared by $groups = ?',
+                null, each);
+          case 4:
+            final n = index % 900 + 100;
+            return _numMc(index, id, 'Hundreds in $n?', null, n ~/ 100);
+          case 5:
+            final rupees = index % 40 + 10;
+            final spend = index % 9 + 1;
+            return _numMc(
+                index,
+                id,
+                'You have ₹$rupees and spend ₹$spend. Left?',
+                null,
+                rupees - spend);
+          default:
+            final step = [3, 4, 5, 10][index % 4];
+            final n = (index % 8 + 1) * step;
+            return _numMc(index, id, '$n, ${n + step}, ?', null, n + 2 * step);
         }
-        return _numMc(index, id, 'LCM of $a and $b?', null, lcm);
-      default: // HCF
-        var a = index % 12 + 6;
-        var b = (index ~/ 2) % 10 + 4;
-        if (a == b) b += 3;
-        final oa = a;
-        final ob = b;
-        while (b != 0) {
-          final t = b;
-          b = a % b;
-          a = t;
+      case GradeLevel.grade3:
+        // Grade 3: tables/division, 4-digit operations, simple fractions,
+        // measurement and introductory area/perimeter. No LCM/HCF/decimals.
+        switch ((level - 1) % 10) {
+          case 0:
+            final a = index % 3000 + 500;
+            final b = index ~/ 2 % 900 + 100;
+            return _numMc(index, id, '$a + $b = ?', null, a + b);
+          case 1:
+            final a = index % 3000 + 2000;
+            final b = index ~/ 2 % 900 + 100;
+            return _numMc(index, id, '$a - $b = ?', null, a - b);
+          case 2:
+            final a = index % 11 + 2;
+            final b = index ~/ 2 % 10 + 1;
+            return _numMc(index, id, '$a × $b = ?', null, a * b);
+          case 3:
+            final divisor = index % 9 + 2;
+            final quotient = index ~/ 2 % 10 + 1;
+            return _numMc(index, id, '${divisor * quotient} ÷ $divisor = ?',
+                null, quotient);
+          case 4:
+            final d = [2, 3, 4, 5, 8][index % 5];
+            return _mc(
+                id: id,
+                prompt: 'Which shows one part out of $d?',
+                correct: AnswerOption(label: '1/$d'),
+                wrong: [
+                  AnswerOption(label: '$d/1'),
+                  AnswerOption(label: '1/${d + 1}')
+                ],
+                shift: index);
+          case 5:
+            final cm = (index % 25 + 1) * 100;
+            return _numMc(index, id, '$cm cm = ? m', null, cm ~/ 100);
+          case 6:
+            final l = index % 8 + 2;
+            final w = index ~/ 2 % 6 + 2;
+            return _numMc(index, id, 'Area of $l × $w rectangle?', null, l * w);
+          default:
+            final l = index % 8 + 2;
+            final w = index ~/ 2 % 6 + 2;
+            return _numMc(index, id, 'Perimeter of $l × $w rectangle?', null,
+                2 * (l + w));
         }
-        return _numMc(index, id, 'HCF of $oa and $ob?', null, a);
+      case GradeLevel.grade4:
+        // Grade 4: large numbers, factors/multiples, equivalent fractions,
+        // tenths/hundredths, geometry and unit conversion.
+        switch ((level - 1) % 11) {
+          case 0:
+            final a = index % 8000 + 1000;
+            final b = index ~/ 2 % 4000 + 500;
+            return _numMc(index, id, '$a + $b = ?', null, a + b);
+          case 1:
+            final a = index % 8000 + 9000;
+            final b = index ~/ 2 % 4000 + 500;
+            return _numMc(index, id, '$a - $b = ?', null, a - b);
+          case 2:
+            final a = index % 99 + 11;
+            final b = index ~/ 2 % 9 + 2;
+            return _numMc(index, id, '$a × $b = ?', null, a * b);
+          case 3:
+            final n = index % 10 + 2;
+            final multiplier = index ~/ 2 % 5 + 2;
+            return _mc(
+                id: id,
+                prompt: 'Equivalent to 1/$n?',
+                correct: AnswerOption(label: '$multiplier/${n * multiplier}'),
+                wrong: [
+                  AnswerOption(label: '1/${n + 1}'),
+                  AnswerOption(label: '${multiplier + 1}/${n * multiplier}')
+                ],
+                shift: index);
+          case 4:
+            final hundredths = index % 99 + 1;
+            final answer = (hundredths / 100).toStringAsFixed(2);
+            return _mc(
+                id: id,
+                prompt: '$hundredths hundredths as a decimal?',
+                correct: AnswerOption(label: answer),
+                wrong: [
+                  AnswerOption(label: '$hundredths.0'),
+                  AnswerOption(
+                      label: ((hundredths + 1) / 100).toStringAsFixed(2))
+                ],
+                shift: index);
+          case 5:
+            final n = index % 10 + 2;
+            final factor =
+                [2, 3, 5, 7].firstWhere((f) => n % f == 0, orElse: () => 1);
+            return _mc(
+                id: id,
+                prompt: 'Which is a factor of $n?',
+                correct: AnswerOption(label: '$factor'),
+                wrong: [
+                  AnswerOption(label: '${n + 1}'),
+                  AnswerOption(label: '${n + 2}')
+                ],
+                shift: index);
+          case 6:
+            final kg = index % 25 + 1;
+            return _numMc(index, id, '$kg kg = ? g', null, kg * 1000);
+          default:
+            final l = index % 12 + 3;
+            final w = index ~/ 2 % 8 + 2;
+            return _numMc(index, id, 'Area of $l × $w rectangle?', null, l * w);
+        }
+      case GradeLevel.grade5:
+        // Grade 5: multi-step operations, fractions/decimals, percentage,
+        // volume, LCM and HCF after the foundations from earlier grades.
+        switch ((level - 1) % 12) {
+          case 0:
+            final a = index % 900 + 100;
+            final b = index ~/ 3 % 90 + 10;
+            return _numMc(index, id, '$a × $b = ?', null, a * b);
+          case 1:
+            final divisor = index % 18 + 2;
+            final quotient = index ~/ 2 % 40 + 5;
+            return _numMc(index, id, '${divisor * quotient} ÷ $divisor = ?',
+                null, quotient);
+          case 2:
+            final d = [3, 4, 5, 6, 8, 10][index % 6];
+            final a = index % (d - 1) + 1;
+            final b = index ~/ 2 % (d - 1) + 1;
+            return _numMc(index, id, '$a/$d + $b/$d = ?/$d', null, a + b);
+          case 3:
+            final a = index % 90 + 10;
+            final b = index ~/ 2 % 90 + 10;
+            return _numMc(
+                index, id, '$a tenths + $b tenths = ? tenths', null, a + b);
+          case 4:
+            final percent = [10, 20, 25, 50][index % 4];
+            final value = (index % 9 + 1) * 20;
+            return _numMc(index, id, '$percent% of $value = ?', null,
+                value * percent ~/ 100);
+          case 5:
+            final l = index % 8 + 2;
+            final w = index ~/ 2 % 6 + 2;
+            final h = index ~/ 3 % 5 + 2;
+            return _numMc(
+                index, id, 'Volume of $l × $w × $h cuboid?', null, l * w * h);
+          case 6:
+            final a = index % 6 + 2;
+            final b = index ~/ 2 % 7 + 3;
+            var lcm = a;
+            while (lcm % b != 0) {
+              lcm += a;
+            }
+            return _numMc(index, id, 'LCM of $a and $b?', null, lcm);
+          default:
+            var a = index % 18 + 8;
+            var b = index ~/ 2 % 14 + 4;
+            final originalA = a;
+            final originalB = b;
+            while (b != 0) {
+              final remainder = a % b;
+              a = b;
+              b = remainder;
+            }
+            return _numMc(
+                index, id, 'HCF of $originalA and $originalB?', null, a);
+        }
     }
   }
 
@@ -701,10 +1289,18 @@ class QuestionFactory {
     'bus',
   ];
 
-  static Question _english(int index, int tier, int slot) {
+  static Question _english(int index, GradeLevel grade, int level, int slot) {
     final id = 'gen_en_${index}_$slot';
     final k = index ~/ 2;
-    final mode = index % 8;
+    final tier = grade.difficultyTier;
+    final mode = switch (grade) {
+      // LKG stays visual and voice-first: letter finding, picture naming and
+      // initial sounds. It never depends on reading a word independently.
+      GradeLevel.lkg => const [0, 0, 6, 2][(level - 1) % 4],
+      // UKG introduces upper/lower-case matching and oral rhymes gradually.
+      GradeLevel.ukg => const [0, 1, 2, 4, 6][(level - 1) % 5],
+      _ => (level - 1) % 8,
+    };
 
     if (tier <= 2) {
       // LKG/UKG/KG: letter recognition, first letter, rhyming, simple words
@@ -735,14 +1331,19 @@ class QuestionFactory {
             shift: index,
           );
         case 2: // First letter of word
-          final word = _threeLetterWords[k % _threeLetterWords.length];
+          final picture = _alphabet[k % _alphabet.length];
+          final word = grade == GradeLevel.lkg
+              ? picture.$2.toLowerCase()
+              : _threeLetterWords[k % _threeLetterWords.length];
           final first = word[0].toUpperCase();
           final w1 = String.fromCharCode('A'.codeUnitAt(0) + (k % 26 + 5) % 26);
           final w2 =
               String.fromCharCode('A'.codeUnitAt(0) + (k % 26 + 12) % 26);
           return _mc(
             id: id,
-            prompt: 'First letter of "$word"?',
+            prompt: grade == GradeLevel.lkg
+                ? '${picture.$3} Starts with?'
+                : 'First letter of "$word"?',
             speak: 'What is the first letter of $word?',
             correct: AnswerOption(label: first),
             wrong: [
@@ -765,7 +1366,10 @@ class QuestionFactory {
             prompt: 'Which rhymes with "$base"?',
             speak: 'Which word rhymes with $base?',
             correct: AnswerOption(label: rhyme),
-            wrong: [AnswerOption(label: nonRhyme1), AnswerOption(label: nonRhyme2)],
+            wrong: [
+              AnswerOption(label: nonRhyme1),
+              AnswerOption(label: nonRhyme2)
+            ],
             shift: index,
           );
         case 4: // Vowel identification
@@ -848,9 +1452,18 @@ class QuestionFactory {
             ('Bed', '🛏️', 'Pillow', '🛋️'),
           ];
           const unrelatedItems = [
-            ('Apple', '🍎'), ('Car', '🚗'), ('Ball', '⚽'), ('Fish', '🐟'),
-            ('Star', '⭐'), ('Rain', '🌧️'), ('Bird', '🐦'), ('Phone', '📱'),
-            ('Cake', '🎂'), ('Hat', '🎩'), ('Key', '🔑'), ('Door', '🚪'),
+            ('Apple', '🍎'),
+            ('Car', '🚗'),
+            ('Ball', '⚽'),
+            ('Fish', '🐟'),
+            ('Star', '⭐'),
+            ('Rain', '🌧️'),
+            ('Bird', '🐦'),
+            ('Phone', '📱'),
+            ('Cake', '🎂'),
+            ('Hat', '🎩'),
+            ('Key', '🔑'),
+            ('Door', '🚪'),
           ];
           final pairIndex = k % relatedPairs.length;
           final item = relatedPairs[pairIndex].$1;
@@ -891,7 +1504,11 @@ class QuestionFactory {
       }
     }
 
-    // Tier 3+: opposites, plurals, spelling, grammar
+    if (grade.difficultyTier >= GradeLevel.grade3.difficultyTier) {
+      return _upperPrimaryEnglish(index, grade, level, slot);
+    }
+
+    // Grades 1–2: opposites, regular plurals, spelling and short sentences.
     switch (mode) {
       case 0:
       case 1: // Opposites bank
@@ -1047,572 +1664,361 @@ class QuestionFactory {
     }
   }
 
-  // ---- EVS / SCIENCE (CBSE-aligned, expanded to 1000+ unique questions) -----
-  static const List<(String, String, String, String, String, String, String)>
-      _facts = [
-    // Animals & Birds
-    ('Who says moo?', 'Cow', '🐄', 'Dog', '🐶', 'Duck', '🦆'),
-    ('Who says woof?', 'Dog', '🐶', 'Cat', '🐱', 'Cow', '🐄'),
-    ('Who says meow?', 'Cat', '🐱', 'Dog', '🐶', 'Bird', '🐦'),
-    ('Who says quack?', 'Duck', '🦆', 'Hen', '🐔', 'Cow', '🐄'),
-    ('Who says baa?', 'Sheep', '🐑', 'Dog', '🐶', 'Cat', '🐱'),
-    ('Who says neigh?', 'Horse', '🐴', 'Cow', '🐄', 'Pig', '🐷'),
-    ('Who says cluck?', 'Hen', '🐔', 'Duck', '🦆', 'Dog', '🐶'),
-    ('Who says oink?', 'Pig', '🐷', 'Sheep', '🐑', 'Horse', '🐴'),
-    ('Which can fly?', 'Bird', '🐦', 'Fish', '🐟', 'Dog', '🐶'),
-    ('Which can swim?', 'Fish', '🐟', 'Bird', '🐦', 'Cat', '🐱'),
-    ('Which has four legs?', 'Cow', '🐄', 'Duck', '🦆', 'Fish', '🐟'),
-    ('Which has two legs?', 'Hen', '🐔', 'Cow', '🐄', 'Horse', '🐴'),
-    ('Which lives in a nest?', 'Bird', '🐦', 'Fish', '🐟', 'Dog', '🐶'),
-    ('Which lives in water?', 'Fish', '🐟', 'Bird', '🐦', 'Lion', '🦁'),
-    ('Baby of a dog?', 'Puppy', '🐶', 'Kitten', '🐱', 'Calf', '🐄'),
-    ('Baby of a cat?', 'Kitten', '🐱', 'Puppy', '🐶', 'Foal', '🐴'),
-    ('Baby of a cow?', 'Calf', '🐄', 'Puppy', '🐶', 'Lamb', '🐑'),
-    ('Baby of a hen?', 'Chick', '🐣', 'Calf', '🐄', 'Foal', '🐴'),
-    ('Baby of a sheep?', 'Lamb', '🐑', 'Chick', '🐣', 'Kitten', '🐱'),
-    ('Which animal gives milk?', 'Cow', '🐄', 'Hen', '🐔', 'Dog', '🐶'),
-    ('Which animal has a trunk?', 'Elephant', '🐘', 'Dog', '🐶', 'Cat', '🐱'),
-    (
-      'Which animal is the king of jungle?',
-      'Lion',
-      '🦁',
-      'Tiger',
-      '🐯',
-      'Bear',
-      '🧸'
-    ),
-    (
-      'Which animal has stripes?',
-      'Tiger',
-      '🐯',
-      'Lion',
-      '🦁',
-      'Elephant',
-      '🐘'
-    ),
-    ('Which animal has spots?', 'Leopard', '🐆', 'Tiger', '🐯', 'Lion', '🦁'),
-    (
-      'Which animal has a long neck?',
-      'Giraffe',
-      '🦒',
-      'Elephant',
-      '🐘',
-      'Lion',
-      '🦁'
-    ),
-    ('Which animal lives in a hive?', 'Bee', '🐝', 'Bird', '🐦', 'Ant', '🐜'),
-    ('Which animal spins a web?', 'Spider', '🕸️', 'Bee', '🐝', 'Ant', '🐜'),
-    ('Which animal lives in a den?', 'Lion', '🦁', 'Fish', '🐟', 'Bird', '🐦'),
-    ('Which animal carries its home?', 'Snail', '🐌', 'Dog', '🐶', 'Cat', '🐱'),
-    ('Which animal hops?', 'Frog', '🐸', 'Snake', '🪱', 'Fish', '🐟'),
-    // Fruits & Vegetables
-    ('Which is a fruit?', 'Apple', '🍎', 'Carrot', '🥕', 'Potato', '🥔'),
-    ('Which is a vegetable?', 'Carrot', '🥕', 'Apple', '🍎', 'Mango', '🥭'),
-    ('Which fruit is yellow?', 'Banana', '🍌', 'Apple', '🍎', 'Grapes', '🍇'),
-    ('Which fruit is red?', 'Apple', '🍎', 'Banana', '🍌', 'Mango', '🥭'),
-    ('Which fruit is round?', 'Orange', '🍊', 'Banana', '🍌', 'Carrot', '🥕'),
-    ('Which grows on a vine?', 'Grapes', '🍇', 'Apple', '🍎', 'Mango', '🥭'),
-    ('Which grows underground?', 'Potato', '🥔', 'Mango', '🥭', 'Banana', '🍌'),
-    (
-      'Which is a leafy vegetable?',
-      'Cabbage',
-      '🥬',
-      'Potato',
-      '🥔',
-      'Carrot',
-      '🥕'
-    ),
-    ('Which is sour?', 'Lemon', '🍋', 'Banana', '🍌', 'Mango', '🥭'),
-    ('Which is sweet?', 'Mango', '🥭', 'Lemon', '🍋', 'Chili', '🌶️'),
-    // Body Parts & Senses
-    ('What do we see with?', 'Eyes', '👀', 'Ears', '👂', 'Nose', '👃'),
-    ('What do we hear with?', 'Ears', '👂', 'Eyes', '👀', 'Mouth', '👄'),
-    ('What do we smell with?', 'Nose', '👃', 'Eyes', '👀', 'Ears', '👂'),
-    ('What do we taste with?', 'Tongue', '👅', 'Nose', '👃', 'Eyes', '👀'),
-    ('What do we touch with?', 'Hands', '🤚', 'Ears', '👂', 'Nose', '👃'),
-    ('How many fingers on one hand?', 'Five', '🖐️', 'Four', '✌️', 'Ten', '🔟'),
-    ('How many eyes do we have?', 'Two', '👀', 'One', '👁️', 'Three', '3️⃣'),
-    ('How many ears do we have?', 'Two', '👂', 'One', '👃', 'Four', '4️⃣'),
-    ('What covers our body?', 'Skin', '🫃', 'Fur', '🐾', 'Feathers', '🪶'),
-    ('Which part helps us walk?', 'Legs', '🦵', 'Arms', '💪', 'Head', '🗣️'),
-    // Nature & Weather
-    ('What shines in the day?', 'Sun', '☀️', 'Moon', '🌙', 'Star', '⭐'),
-    ('What shines at night?', 'Moon', '🌙', 'Sun', '☀️', 'Cloud', '☁️'),
-    ('What gives us light?', 'Sun', '☀️', 'Moon', '🌙', 'Star', '⭐'),
-    ('What makes a rainbow?', 'Rain', '🌧️', 'Snow', '❄️', 'Wind', '💨'),
-    ('What comes after sunset?', 'Night', '🌙', 'Morning', '🌅', 'Noon', '☀️'),
-    (
-      'What comes after sunrise?',
-      'Morning',
-      '🌅',
-      'Night',
-      '🌙',
-      'Evening',
-      '🌆'
-    ),
-    ('Which season is hot?', 'Summer', '☀️', 'Winter', '❄️', 'Rainy', '🌧️'),
-    ('Which season is cold?', 'Winter', '❄️', 'Summer', '☀️', 'Spring', '🌸'),
-    (
-      'Which season brings rain?',
-      'Monsoon',
-      '🌧️',
-      'Summer',
-      '☀️',
-      'Winter',
-      '❄️'
-    ),
-    (
-      'What do we see in the sky at night?',
-      'Stars',
-      '⭐',
-      'Sun',
-      '☀️',
-      'Rainbow',
-      '🌈'
-    ),
-    ('What is water in the sky?', 'Cloud', '☁️', 'Star', '⭐', 'Moon', '🌙'),
-    ('What falls from clouds?', 'Rain', '🌧️', 'Snow', '❄️', 'Hail', '🧊'),
-    (
-      'When do we see a rainbow?',
-      'After rain',
-      '🌈',
-      'At night',
-      '🌙',
-      'At noon',
-      '☀️'
-    ),
-    ('What grows in soil?', 'Plant', '🌱', 'Rock', '🪨', 'Glass', '🪟'),
-    // Plants
-    ('Which one grows?', 'Tree', '🌳', 'Rock', '🪨', 'Chair', '🪑'),
-    (
-      'What do plants need to grow?',
-      'Sunlight',
-      '☀️',
-      'Candy',
-      '🍬',
-      'Toys',
-      '🧸'
-    ),
-    (
-      'What do plants need from soil?',
-      'Water',
-      '💧',
-      'Milk',
-      '🥛',
-      'Juice',
-      '🧃'
-    ),
-    (
-      'What part of plant is underground?',
-      'Root',
-      '🪴',
-      'Leaf',
-      '🍃',
-      'Flower',
-      '🌸'
-    ),
-    (
-      'What part of plant is green and flat?',
-      'Leaf',
-      '🍃',
-      'Root',
-      '🪴',
-      'Fruit',
-      '🍎'
-    ),
-    (
-      'What part of plant is colorful?',
-      'Flower',
-      '🌸',
-      'Leaf',
-      '🍃',
-      'Root',
-      '🪴'
-    ),
-    (
-      'What do bees collect from flowers?',
-      'Nectar',
-      '🍯',
-      'Pollen',
-      '🌸',
-      'Leaves',
-      '🍃'
-    ),
-    ('What grows from a seed?', 'Plant', '🌱', 'Rock', '🪨', 'Toy', '🧸'),
-    ('Which gives us shade?', 'Tree', '🌳', 'Flower', '🌸', 'Grass', '🌿'),
-    // Food & Health
-    ('Which is healthy to eat?', 'Fruit', '🍎', 'Candy', '🍬', 'Chips', '🍟'),
-    (
-      'What do we drink for strong bones?',
-      'Milk',
-      '🥛',
-      'Soda',
-      '🥤',
-      'Juice',
-      '🧃'
-    ),
-    ('What keeps us clean?', 'Soap', '🧼', 'Candy', '🍬', 'Toy', '🧸'),
-    (
-      'What do we use to brush teeth?',
-      'Toothbrush',
-      '🪥',
-      'Comb',
-      '🪮',
-      'Soap',
-      '🧼'
-    ),
-    (
-      'What do we wear in cold?',
-      'Sweater',
-      '🧥',
-      'T-shirt',
-      '👕',
-      'Shorts',
-      '🩳'
-    ),
-    (
-      'What keeps us dry in rain?',
-      'Umbrella',
-      '☂️',
-      'Cap',
-      '🧢',
-      'Shoes',
-      '👟'
-    ),
-    (
-      'What do we eat for breakfast?',
-      'Bread',
-      '🍞',
-      'Cake',
-      '🎂',
-      'Ice cream',
-      '🍦'
-    ),
-    ('Which is good for eyes?', 'Carrot', '🥕', 'Candy', '🍬', 'Chips', '🍟'),
-    (
-      'What do we drink when thirsty?',
-      'Water',
-      '💧',
-      'Soap',
-      '🧼',
-      'Paint',
-      '🎨'
-    ),
-    ('What gives us energy?', 'Food', '🍽️', 'Sleep', '🛏️', 'TV', '📺'),
-    // Transport & Community Helpers
-    ('Which has wings?', 'Aeroplane', '✈️', 'Car', '🚗', 'Train', '🚂'),
-    ('Which runs on tracks?', 'Train', '🚂', 'Car', '🚗', 'Bus', '🚌'),
-    ('Which flies in the sky?', 'Helicopter', '🚁', 'Car', '🚗', 'Train', '🚂'),
-    ('Which travels in water?', 'Boat', '⛵', 'Car', '🚗', 'Bus', '🚌'),
-    (
-      'Who drives a bus?',
-      'Driver',
-      '🚌',
-      'Doctor',
-      '👨‍⚕️',
-      'Teacher',
-      '👩‍🏫'
-    ),
-    (
-      'Who teaches children?',
-      'Teacher',
-      '👩‍🏫',
-      'Doctor',
-      '👨‍⚕️',
-      'Pilot',
-      '👨‍✈️'
-    ),
-    (
-      'Who treats sick people?',
-      'Doctor',
-      '👨‍⚕️',
-      'Teacher',
-      '👩‍🏫',
-      'Driver',
-      '🚌'
-    ),
-    (
-      'Who brings letters?',
-      'Postman',
-      '📬',
-      'Doctor',
-      '👨‍⚕️',
-      'Teacher',
-      '👩‍🏫'
-    ),
-    (
-      'Who catches thieves?',
-      'Police',
-      '👮‍♂️',
-      'Doctor',
-      '👨‍⚕️',
-      'Teacher',
-      '👩‍🏫'
-    ),
-    (
-      'Who grows food for us?',
-      'Farmer',
-      '👨‍🌾',
-      'Doctor',
-      '👨‍⚕️',
-      'Police',
-      '👮‍♂️'
-    ),
-    ('Who cooks food?', 'Chef', '👨‍🍳', 'Teacher', '👩‍🏫', 'Driver', '🚌'),
-    (
-      'Who puts out fire?',
-      'Firefighter',
-      '🧑‍🚒',
-      'Police',
-      '👮‍♂️',
-      'Postman',
-      '📬'
-    ),
-    ('Three wheels have a?', 'Rickshaw', '🛺', 'Car', '🚗', 'Cycle', '🚲'),
-    ('Two wheels have a?', 'Cycle', '🚲', 'Car', '🚗', 'Bus', '🚌'),
-    // Home & School
-    ('Where do we sleep?', 'Bed', '🛏️', 'Chair', '🪑', 'Table', '🪑'),
-    ('Where do we sit?', 'Chair', '🪑', 'Bed', '🛏️', 'Floor', '🏠'),
-    ('What tells time?', 'Clock', '🕐', 'Phone', '📱', 'Book', '📖'),
-    ('What do we read?', 'Book', '📖', 'Food', '🍽️', 'Toy', '🧸'),
-    ('What do we write with?', 'Pencil', '✏️', 'Spoon', '🥄', 'Comb', '🪮'),
-    ('What do we use to draw?', 'Crayon', '🖍️', 'Spoon', '🥄', 'Mug', '☕'),
-    (
-      'What do we cut paper with?',
-      'Scissors',
-      '✂️',
-      'Pencil',
-      '✏️',
-      'Brush',
-      '🖌️'
-    ),
-    ('Where do children learn?', 'School', '🏫', 'Park', '🏞️', 'Shop', '🏪'),
-    (
-      'Where do we play?',
-      'Playground',
-      '🎪',
-      'Classroom',
-      '🏫',
-      'Library',
-      '📚'
-    ),
-    (
-      'Where do we borrow books?',
-      'Library',
-      '📚',
-      'Kitchen',
-      '🍳',
-      'Bedroom',
-      '🛏️'
-    ),
-    // Water & Air
-    ('What do we breathe?', 'Air', '💨', 'Milk', '🥛', 'Juice', '🧃'),
-    ('Where do fish live?', 'Water', '💧', 'Land', '🌳', 'Sky', '☁️'),
-    ('What floats on water?', 'Boat', '⛵', 'Rock', '🪨', 'Key', '🔑'),
-    ('What sinks in water?', 'Stone', '🪨', 'Boat', '⛵', 'Leaf', '🍃'),
-    ('Where does rain come from?', 'Clouds', '☁️', 'Ground', '🌍', 'Sea', '🌊'),
-    ('What turns water into ice?', 'Cold', '🧊', 'Heat', '🔥', 'Wind', '💨'),
-    ('What melts ice?', 'Heat', '🔥', 'Cold', '🧊', 'Wind', '💨'),
-    ('Water vapor rises as?', 'Steam', '💨', 'Ice', '🧊', 'Rain', '🌧️'),
-    (
-      'Where do rivers flow?',
-      'To the sea',
-      '🌊',
-      'To the sky',
-      '☁️',
-      'To the mountain',
-      '🏔️'
-    ),
-    (
-      'What colour is clean water?',
-      'Colourless',
-      '💧',
-      'Blue',
-      '🔵',
-      'White',
-      '⚪'
-    ),
-    // Earth & Universe
-    ('Shape of the Earth?', 'Round', '🌍', 'Flat', '⬜', 'Square', '🟥'),
-    ('What is the Earth?', 'A planet', '🌍', 'A star', '⭐', 'A moon', '🌙'),
-    ('What is the Sun?', 'A star', '☀️', 'A planet', '🌍', 'A moon', '🌙'),
-    ('What goes around Earth?', 'Moon', '🌙', 'Sun', '☀️', 'Mars', '🪐'),
-    (
-      'How many planets in Solar System?',
-      'Eight',
-      '🪐',
-      'Seven',
-      '7️⃣',
-      'Nine',
-      '9️⃣'
-    ),
-    (
-      'Which planet is called Red Planet?',
-      'Mars',
-      '🪐',
-      'Venus',
-      '🪐',
-      'Saturn',
-      '🪐'
-    ),
-    ('Which planet has rings?', 'Saturn', '🪐', 'Mars', '🪐', 'Jupiter', '🪐'),
-    (
-      'Which is the biggest planet?',
-      'Jupiter',
-      '🪐',
-      'Saturn',
-      '🪐',
-      'Neptune',
-      '🪐'
-    ),
-    (
-      'Which is the smallest planet?',
-      'Mercury',
-      '🪐',
-      'Mars',
-      '🪐',
-      'Earth',
-      '🌍'
-    ),
-    (
-      'Which star is nearest to Earth?',
-      'Sun',
-      '☀️',
-      'Moon',
-      '🌙',
-      'Mars',
-      '🪐'
-    ),
-    // Safety & Good Habits
-    (
-      'What colour is a danger sign?',
-      'Red',
-      '🔴',
-      'Green',
-      '🟢',
-      'Yellow',
-      '🟡'
-    ),
-    ('What do we wear on road?', 'Helmet', '⛑️', 'Hat', '🎩', 'Crown', '👑'),
-    (
-      'Where do we walk on road?',
-      'Footpath',
-      '🚶',
-      'Middle',
-      '🛣️',
-      'Cycle track',
-      '🚲'
-    ),
-    (
-      'What does red traffic light mean?',
-      'Stop',
-      '🛑',
-      'Go',
-      '🟢',
-      'Wait',
-      '🟡'
-    ),
-    (
-      'What does green traffic light mean?',
-      'Go',
-      '🟢',
-      'Stop',
-      '🛑',
-      'Slow',
-      '🐢'
-    ),
-    (
-      'What should we do before eating?',
-      'Wash hands',
-      '🧼',
-      'Run',
-      '🏃',
-      'Sleep',
-      '🛏️'
-    ),
-    (
-      'What should we do after eating?',
-      'Brush teeth',
-      '🪥',
-      'Play',
-      '🎮',
-      'Watch TV',
-      '📺'
-    ),
-    (
-      'What keeps us healthy?',
-      'Exercise',
-      '🏃',
-      'Sleeping all day',
-      '🛏️',
-      'Eating candy',
-      '🍬'
-    ),
-    (
-      'What should we say when we hurt someone?',
-      'Sorry',
-      '🙏',
-      'Thank you',
-      '🙇',
-      'Hello',
-      '👋'
-    ),
-    (
-      'What should we say when someone helps?',
-      'Thank you',
-      '🙏',
-      'Sorry',
-      '🙏',
-      'Please',
-      '🙏'
-    ),
-    // Our Country & Culture
-    (
-      'Colour of our national flag top band?',
-      'Saffron',
-      '🟠',
-      'White',
-      '⚪',
-      'Green',
-      '🟢'
-    ),
-    ('Our national animal?', 'Tiger', '🐯', 'Lion', '🦁', 'Elephant', '🐘'),
-    ('Our national bird?', 'Peacock', '🦚', 'Parrot', '🦜', 'Eagle', '🦅'),
-    ('Our national flower?', 'Lotus', '🪷', 'Rose', '🌹', 'Sunflower', '🌻'),
-    ('Our national tree?', 'Banyan', '🌳', 'Mango', '🥭', 'Neem', '🌿'),
-    ('Our national sport?', 'Hockey', '🏑', 'Cricket', '🏏', 'Football', '⚽'),
-    (
-      'Capital of India?',
-      'New Delhi',
-      '🏛️',
-      'Mumbai',
-      '🏙️',
-      'Kolkata',
-      '🏙️'
-    ),
-    (
-      'Largest state in India?',
-      'Rajasthan',
-      '🏜️',
-      'Goa',
-      '🏖️',
-      'Kerala',
-      '🌴'
-    ),
-    (
-      'National animal of India?',
-      'Tiger',
-      '🐯',
-      'Lion',
-      '🦁',
-      'Elephant',
-      '🐘'
-    ),
-    ('National bird of India?', 'Peacock', '🦚', 'Crow', '🐦', 'Sparrow', '🐦'),
-  ];
+  static Question _upperPrimaryEnglish(
+      int index, GradeLevel grade, int level, int slot) {
+    final id = 'gen_en_${index}_$slot';
+    final k = index ~/ 2;
+    const synonyms = [
+      ('happy', 'glad', 'angry', 'tiny'),
+      ('big', 'large', 'slow', 'quiet'),
+      ('quick', 'fast', 'late', 'soft'),
+      ('begin', 'start', 'finish', 'break'),
+      ('silent', 'quiet', 'noisy', 'bright'),
+      ('brave', 'bold', 'afraid', 'sleepy'),
+      ('clever', 'smart', 'dull', 'weak'),
+      ('tiny', 'small', 'huge', 'wide'),
+      ('reply', 'answer', 'question', 'forget'),
+      ('choose', 'select', 'drop', 'hide'),
+      ('ancient', 'old', 'modern', 'young'),
+      ('protect', 'guard', 'damage', 'lose'),
+    ];
+    const antonyms = [
+      ('early', 'late', 'quick', 'first'),
+      ('strong', 'weak', 'brave', 'heavy'),
+      ('accept', 'refuse', 'receive', 'allow'),
+      ('victory', 'defeat', 'prize', 'game'),
+      ('include', 'exclude', 'enter', 'collect'),
+      ('generous', 'selfish', 'helpful', 'cheerful'),
+      ('increase', 'decrease', 'improve', 'measure'),
+      ('visible', 'hidden', 'bright', 'clear'),
+      ('maximum', 'minimum', 'middle', 'total'),
+      ('careful', 'careless', 'gentle', 'useful'),
+      ('arrive', 'depart', 'travel', 'visit'),
+      ('create', 'destroy', 'build', 'draw'),
+    ];
+    const homophones = [
+      ('The ___ is shining.', 'sun', 'son', 'soon'),
+      ('I can ___ the bird.', 'see', 'sea', 'say'),
+      ('She ate a juicy ___.', 'pear', 'pair', 'peer'),
+      ('Please come over ___.', 'here', 'hear', 'hair'),
+      ('The wind ___ hard.', 'blew', 'blue', 'blow'),
+      ('We bought ___ pencils.', 'two', 'too', 'to'),
+      ('The dog wagged ___ tail.', 'its', "it's", 'it'),
+      ('The knight rode a ___.', 'horse', 'hoarse', 'house'),
+      ('Please ___ your name.', 'write', 'right', 'rite'),
+      ('The boat raised its ___.', 'sail', 'sale', 'sell'),
+      ('Flour is made from ___.', 'wheat', 'sweet', 'wait'),
+      ('I ___ the answer.', 'knew', 'new', 'know'),
+    ];
+    const prepositions = [
+      ('The cat is ___ the table.', 'under', 'quickly', 'because'),
+      ('The bird flew ___ the tree.', 'over', 'softly', 'but'),
+      ('The book is ___ the bag.', 'inside', 'happy', 'and'),
+      ('We walked ___ the river.', 'beside', 'bright', 'or'),
+      ('The ball rolled ___ the chair.', 'behind', 'loudly', 'so'),
+      ('She stood ___ her friends.', 'between', 'kindly', 'yet'),
+      ('The train went ___ the tunnel.', 'through', 'slow', 'for'),
+      ('A bridge runs ___ the road.', 'across', 'careful', 'nor'),
+      ('Meet me ___ noon.', 'at', 'nearby', 'then'),
+      ('The kite rose ___ the clouds.', 'above', 'blue', 'unless'),
+      ('The puppy ran ___ its owner.', 'towards', 'playful', 'although'),
+      ('We travelled ___ Delhi to Agra.', 'from', 'early', 'because'),
+    ];
+    const conjunctions = [
+      ('I was tired, ___ I rested.', 'so', 'or', 'until'),
+      ('Riya sang ___ danced.', 'and', 'because', 'unless'),
+      ('Take an umbrella ___ it may rain.', 'because', 'but', 'or'),
+      ('I called him, ___ he did not answer.', 'but', 'so', 'and'),
+      ('Would you like tea ___ milk?', 'or', 'because', 'although'),
+      ('Wait here ___ I return.', 'until', 'but', 'so'),
+      ('We can play ___ homework is done.', 'after', 'or', 'yet'),
+      ('She smiled ___ she saw the puppy.', 'when', 'but', 'unless'),
+      ('___ it was cold, we wore coats.', 'Because', 'Or', 'Yet'),
+      ('I will help ___ you ask politely.', 'if', 'and', 'but'),
+      ('He practised ___ he could improve.', 'so that', 'or', 'yet'),
+      ('___ the rain stopped, we went out.', 'After', 'But', 'Nor'),
+    ];
 
-  static Question _world(int index, int tier, int slot) {
-    final f = _facts[index % _facts.length];
+    final mode = (level - 1) % 8;
+    if (grade == GradeLevel.grade3) {
+      switch (mode) {
+        case 0:
+          const rows = [
+            ('The playful puppy ran.', 'puppy'),
+            ('Mina opened the window.', 'Mina'),
+            ('Birds built a nest.', 'Birds'),
+            ('The river is wide.', 'river'),
+            ('Our teacher smiled.', 'teacher'),
+            ('A rainbow appeared.', 'rainbow'),
+          ];
+          final r = rows[k % rows.length];
+          return _mc(
+              id: id,
+              prompt: 'Find the noun: ${r.$1}',
+              correct: AnswerOption(label: r.$2),
+              wrong: const [
+                AnswerOption(label: 'quickly'),
+                AnswerOption(label: 'and')
+              ],
+              shift: index);
+        case 1:
+          const rows = [
+            ('The rabbit hops.', 'hops'),
+            ('We read books.', 'read'),
+            ('Fish swim in water.', 'swim'),
+            ('The baby laughed.', 'laughed'),
+            ('Stars shine brightly.', 'shine'),
+            ('I carry my bag.', 'carry'),
+          ];
+          final r = rows[k % rows.length];
+          return _mc(
+              id: id,
+              prompt: 'Find the action word: ${r.$1}',
+              correct: AnswerOption(label: r.$2),
+              wrong: const [
+                AnswerOption(label: 'the'),
+                AnswerOption(label: 'blue')
+              ],
+              shift: index);
+        case 2:
+          const rows = [
+            ('a red ball', 'red'),
+            ('a tall tree', 'tall'),
+            ('soft fur', 'soft'),
+            ('three apples', 'three'),
+            ('a noisy class', 'noisy'),
+            ('cold water', 'cold')
+          ];
+          final r = rows[k % rows.length];
+          return _mc(
+              id: id,
+              prompt: 'Describing word in “${r.$1}”?',
+              correct: AnswerOption(label: r.$2),
+              wrong: const [
+                AnswerOption(label: 'runs'),
+                AnswerOption(label: 'and')
+              ],
+              shift: index);
+        case 3:
+          final r = synonyms[k % synonyms.length];
+          return _mc(
+              id: id,
+              prompt: 'A word like “${r.$1}”?',
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        case 4:
+          final r = antonyms[k % antonyms.length];
+          return _mc(
+              id: id,
+              prompt: 'Opposite of “${r.$1}”?',
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        case 5:
+          const rows = [
+            ('Ria has a kite.', 'She'),
+            ('Aman is running.', 'He'),
+            ('The dogs are barking.', 'They'),
+            ('The book is new.', 'It'),
+            ('Mira and I sing.', 'We'),
+            ('Sam and Ali play.', 'They')
+          ];
+          final r = rows[k % rows.length];
+          return _mc(
+              id: id,
+              prompt: 'Replace the name: ${r.$1}',
+              correct: AnswerOption(label: r.$2),
+              wrong: const [
+                AnswerOption(label: 'It'),
+                AnswerOption(label: 'I')
+              ],
+              shift: index);
+        default:
+          final r = prepositions[k % prepositions.length];
+          return _mc(
+              id: id,
+              prompt: r.$1,
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+      }
+    }
+
+    if (grade == GradeLevel.grade4) {
+      switch (mode) {
+        case 0:
+          final r = synonyms[k % synonyms.length];
+          return _mc(
+              id: id,
+              prompt: 'Synonym of “${r.$1}”?',
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        case 1:
+          final r = antonyms[k % antonyms.length];
+          return _mc(
+              id: id,
+              prompt: 'Antonym of “${r.$1}”?',
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        case 2:
+          final r = homophones[k % homophones.length];
+          return _mc(
+              id: id,
+              prompt: r.$1,
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        case 3:
+          final r = prepositions[k % prepositions.length];
+          return _mc(
+              id: id,
+              prompt: r.$1,
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        case 4:
+          final r = conjunctions[k % conjunctions.length];
+          return _mc(
+              id: id,
+              prompt: r.$1,
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        case 5:
+          const rows = [
+            ('The birds ___ singing.', 'are', 'is', 'am'),
+            ('My friend ___ helpful.', 'is', 'are', 'am'),
+            ('I ___ ready.', 'am', 'is', 'are'),
+            ('The children ___ outside.', 'are', 'is', 'am'),
+            ('This book ___ mine.', 'is', 'are', 'am'),
+            ('We ___ a team.', 'are', 'is', 'am'),
+            ('Those flowers ___ colourful.', 'are', 'is', 'am'),
+            ('The puppy ___ playful.', 'is', 'are', 'am'),
+            ('You ___ very kind.', 'are', 'is', 'am')
+          ];
+          final r = rows[k % rows.length];
+          return _mc(
+              id: id,
+              prompt: r.$1,
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+        default:
+          const rows = [
+            ('She sang ___.', 'beautifully', 'beautiful', 'beauty'),
+            ('The turtle moved ___.', 'slowly', 'slow', 'slowness'),
+            ('He answered ___.', 'politely', 'polite', 'politeness'),
+            ('The rain fell ___.', 'heavily', 'heavy', 'heaviness'),
+            ('We waited ___.', 'patiently', 'patient', 'patience'),
+            ('The child smiled ___.', 'happily', 'happy', 'happiness'),
+            ('The bell rang ___.', 'loudly', 'loud', 'loudness'),
+            ('The artist worked ___.', 'carefully', 'careful', 'care'),
+            ('The athlete ran ___.', 'swiftly', 'swift', 'swiftness')
+          ];
+          final r = rows[k % rows.length];
+          return _mc(
+              id: id,
+              prompt: r.$1,
+              correct: AnswerOption(label: r.$2),
+              wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+              shift: index);
+      }
+    }
+
+    switch (mode) {
+      case 0:
+        final r = synonyms[k % synonyms.length];
+        return _mc(
+            id: id,
+            prompt: 'Best synonym of “${r.$1}”?',
+            correct: AnswerOption(label: r.$2),
+            wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+            shift: index);
+      case 1:
+        final r = antonyms[k % antonyms.length];
+        return _mc(
+            id: id,
+            prompt: 'Best antonym of “${r.$1}”?',
+            correct: AnswerOption(label: r.$2),
+            wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+            shift: index);
+      case 2:
+        final r = homophones[k % homophones.length];
+        return _mc(
+            id: id,
+            prompt: r.$1,
+            correct: AnswerOption(label: r.$2),
+            wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+            shift: index);
+      case 3:
+        final r = conjunctions[k % conjunctions.length];
+        return _mc(
+            id: id,
+            prompt: r.$1,
+            correct: AnswerOption(label: r.$2),
+            wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+            shift: index);
+      case 4:
+        const rows = [
+          ('If I study, I ___ learn.', 'will', 'would', 'had'),
+          ('Yesterday we ___ the museum.', 'visited', 'visit', 'will visit'),
+          ('By noon, she had ___ the book.', 'finished', 'finish', 'finishing'),
+          ('Tomorrow they ___ compete.', 'will', 'did', 'have'),
+          ('He has ___ his lunch.', 'eaten', 'ate', 'eat'),
+          ('We were ___ when it rained.', 'playing', 'played', 'play'),
+          ('She is ___ a model now.', 'building', 'built', 'build'),
+          ('Last week they ___ a tree.', 'planted', 'plant', 'will plant'),
+          (
+            'By evening, I will have ___ it.',
+            'completed',
+            'complete',
+            'completing'
+          )
+        ];
+        final r = rows[k % rows.length];
+        return _mc(
+            id: id,
+            prompt: r.$1,
+            correct: AnswerOption(label: r.$2),
+            wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+            shift: index);
+      case 5:
+        const rows = [
+          ('The team of players ___ ready.', 'is', 'are', 'am'),
+          ('Each child ___ a badge.', 'has', 'have', 'having'),
+          ('Neither answer ___ correct.', 'is', 'are', 'be'),
+          ('The books on the shelf ___ new.', 'are', 'is', 'was'),
+          ('Mathematics ___ my favourite subject.', 'is', 'are', 'were'),
+          ('My friends ___ nearby.', 'live', 'lives', 'living'),
+          ('One of the lamps ___ broken.', 'is', 'are', 'were'),
+          ('Both solutions ___ possible.', 'are', 'is', 'was'),
+          ('The basket of mangoes ___ heavy.', 'is', 'are', 'were')
+        ];
+        final r = rows[k % rows.length];
+        return _mc(
+            id: id,
+            prompt: r.$1,
+            correct: AnswerOption(label: r.$2),
+            wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+            shift: index);
+      default:
+        final r = prepositions[k % prepositions.length];
+        return _mc(
+            id: id,
+            prompt: r.$1,
+            correct: AnswerOption(label: r.$2),
+            wrong: [AnswerOption(label: r.$3), AnswerOption(label: r.$4)],
+            shift: index);
+    }
+  }
+
+  static Question _world(
+      int index, GradeLevel grade, Subject subject, int level, int slot) {
+    final facts = _GradeWorldBanks.forGrade(grade, subject);
+    final f = facts[index % facts.length];
     return _mc(
       id: 'gen_world_${index}_$slot',
       prompt: f.$1,
@@ -1627,14 +2033,29 @@ class QuestionFactory {
   }
 
   // ---- LOGIC (expanded) ----------------------------------------------------
-  static Question _logic(int index, int tier, int slot) {
+  static Question _logic(int index, GradeLevel grade, int level, int slot) {
     final id = 'gen_logic_${index}_$slot';
     final k = index ~/ 3;
-    switch (index % 3) {
+    switch ((level - 1) % 3) {
       case 0: // Number pattern
-        final steps = [1, 2, 3, 5, 10, 4, 6, 7, 8, 9, 11, 12];
+        final steps = switch (grade) {
+          GradeLevel.lkg => const [1],
+          GradeLevel.ukg => const [1, 2],
+          GradeLevel.kg => const [1, 2, 5],
+          GradeLevel.grade1 => const [1, 2, 5, 10],
+          GradeLevel.grade2 => const [2, 3, 4, 5, 10],
+          GradeLevel.grade3 => const [2, 3, 4, 5, 6, 10],
+          GradeLevel.grade4 => const [3, 4, 6, 7, 8, 9],
+          GradeLevel.grade5 => const [4, 6, 7, 8, 9, 11, 12],
+        };
         final step = steps[k % steps.length];
-        final start = (k % 10 + 1) * step;
+        final groups = switch (grade) {
+          GradeLevel.lkg => 3,
+          GradeLevel.ukg => 5,
+          GradeLevel.kg => 6,
+          _ => 10,
+        };
+        final start = (k % groups + 1) * step;
         final next = start + step * 3;
         return _numMc(
           index,
@@ -1684,8 +2105,8 @@ class QuestionFactory {
             'Triangle',
             '🔺'
           ),
-          ('Which is different?', 'Pizza', '🍕', 'Burger', '🍔', 'Pen', '🖊️'),
-          ('Which is different?', 'Bread', '🍞', 'Milk', '🥛', 'Hat', '🎩'),
+          ('Which is different?', 'Pen', '🖊️', 'Pizza', '🍕', 'Burger', '🍔'),
+          ('Which is different?', 'Hat', '🎩', 'Bread', '🍞', 'Milk', '🥛'),
         ];
         final s = sets[k % sets.length];
         return _mc(
@@ -1712,7 +2133,7 @@ class QuestionFactory {
           ('smallest', 'Seeds', '🌰', 'Apple', '🍎', 'Pumpkin', '🎃'),
           ('biggest', 'Ship', '🚢', 'Boat', '⛵', 'Car', '🚗'),
           ('smallest', 'Key', '🔑', 'Book', '📖', 'Table', '🪑'),
-          ('biggest', 'Planet', '🌍', 'Moon', '🌙', 'Star', '⭐'),
+          ('biggest', 'Bus', '🚌', 'Car', '🚗', 'Bicycle', '🚲'),
           ('smallest', 'Pea', '🫛', 'Egg', '🥚', 'Ball', '⚽'),
           ('biggest', 'Whale', '🐳', 'Dolphin', '🐬', 'Seal', '🦭'),
           ('smallest', 'Button', '🔘', 'Phone', '📱', 'TV', '📺'),

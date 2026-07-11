@@ -11,6 +11,7 @@ import '../../../core/widgets/mascot.dart';
 import '../../../core/widgets/play_option_card.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// A pre-reader activity with one spoken instruction and large visual targets.
 /// The child can replay the spoken prompt at any time; large targets keep
@@ -40,6 +41,8 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
   int? _selected;
   bool _missed = false;
   bool _locked = false;
+  int _mistakes = 0;
+  bool _rescue = false;
 
   Question get _question => widget.lesson.questions[_index];
   int get _total => widget.lesson.questions.length;
@@ -59,6 +62,7 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
     final isCorrect = index == _question.correctIndex;
     setState(() => _selected = index);
     if (!isCorrect) {
+      _mistakes++;
       if (!_missed) {
         _missed = true;
         _struggled.add(_question.id);
@@ -66,7 +70,12 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
       AudioService.instance.playSfx(Sfx.wrong);
       AudioService.instance.speak(PraiseLines.nextRetry());
       await Future<void>.delayed(const Duration(milliseconds: 550));
-      if (mounted) setState(() => _selected = null);
+      if (!mounted) return;
+      setState(() => _selected = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _question);
+      }
       return;
     }
 
@@ -101,6 +110,8 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
       _selected = null;
       _missed = false;
       _locked = false;
+      _mistakes = 0;
+      _rescue = false;
     });
     _speak();
   }
@@ -209,6 +220,7 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
   }
 
   Widget _options(BuildContext context) {
+    final optionIndexes = rescueOptionIndexes(_question, rescue: _rescue);
     return GridView.builder(
       padding: const EdgeInsets.all(AppSpacing.md),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -217,17 +229,18 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
         crossAxisSpacing: AppSpacing.md,
         childAspectRatio: 1,
       ),
-      itemCount: _question.options.length,
+      itemCount: optionIndexes.length,
       itemBuilder: (context, index) {
-        final option = _question.options[index];
+        final originalIndex = optionIndexes[index];
+        final option = _question.options[originalIndex];
         return PlayOptionCard(
-          key: ValueKey('$_index-$index'),
-          index: index,
+          key: ValueKey('$_index-$originalIndex'),
+          index: originalIndex,
           label: option.label,
           emoji: option.emoji,
           artSize: 86,
-          state: _stateFor(index),
-          onTap: () => _choose(index),
+          state: _stateFor(originalIndex),
+          onTap: () => _choose(originalIndex),
         );
       },
     );

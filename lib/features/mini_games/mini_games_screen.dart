@@ -9,6 +9,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/openmoji_view.dart';
+import '../profiles/profiles_controller.dart';
 import 'data/mini_pet.dart';
 import 'data/mini_game_story.dart';
 import 'data/mini_games_repository.dart';
@@ -17,11 +18,7 @@ import 'mini_games_controller.dart';
 
 enum _MiniGameFilter {
   all('All'),
-  learning('Learning'),
-  preschool('Preschool'),
-  classOneTwo('Class 1–2'),
-  classThreeFour('Class 3–4'),
-  classFive('Class 5'),
+  learning('My Learning'),
   justFun('Just Fun');
 
   const _MiniGameFilter(this.label);
@@ -109,14 +106,13 @@ class _MiniGamesScreenState extends ConsumerState<MiniGamesScreen> {
   }
 
   List<MiniGameDef> _gamesForFilter(_MiniGameFilter filter) {
+    final child = ref.read(activeChildProvider);
     return kMiniGames.where((game) {
+      final allowed = child == null || game.supportsGrade(child.grade);
+      if (!allowed) return false;
       return switch (filter) {
         _MiniGameFilter.all => true,
         _MiniGameFilter.learning => game.learning,
-        _MiniGameFilter.preschool => game.learning && game.gradeBand == null,
-        _MiniGameFilter.classOneTwo => game.gradeBand == 'Class 1–2',
-        _MiniGameFilter.classThreeFour => game.gradeBand == 'Class 3–4',
-        _MiniGameFilter.classFive => game.gradeBand == 'Class 5',
         _MiniGameFilter.justFun => !game.learning,
       };
     }).toList();

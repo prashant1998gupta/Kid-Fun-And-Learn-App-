@@ -13,6 +13,7 @@ import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// Put-it-in-order. [Question.options] are authored in the correct sequence and
 /// shown scrambled; the child taps them in order (1 → 2 → 3…). Great for
@@ -39,6 +40,8 @@ class _SequenceGameState extends State<SequenceGame> {
   bool _erred = false;
   int _nextExpected = 0; // original index we expect next
   int? _wrongTile;
+  int _mistakes = 0;
+  bool _rescue = false;
   late List<int> _order; // scrambled display order (original indices)
   final List<String> _struggled = [];
   final _stopwatch = Stopwatch()..start();
@@ -80,6 +83,7 @@ class _SequenceGameState extends State<SequenceGame> {
         _advance();
       }
     } else {
+      _mistakes++;
       AudioService.instance.playSfx(Sfx.wrong);
       if (!_erred) {
         _erred = true;
@@ -88,7 +92,12 @@ class _SequenceGameState extends State<SequenceGame> {
       AudioService.instance.speak('Which one comes next?');
       setState(() => _wrongTile = originalIndex);
       await Future<void>.delayed(const Duration(milliseconds: 450));
-      if (mounted) setState(() => _wrongTile = null);
+      if (!mounted) return;
+      setState(() => _wrongTile = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _q);
+      }
     }
   }
 
@@ -113,6 +122,8 @@ class _SequenceGameState extends State<SequenceGame> {
       _erred = false;
       _wrongTile = null;
       _order = _scramble(_q.options.length);
+      _mistakes = 0;
+      _rescue = false;
     });
     _speak();
   }
@@ -187,6 +198,7 @@ class _SequenceGameState extends State<SequenceGame> {
             option: _q.options[original],
             placed: original < _nextExpected,
             wrong: original == _wrongTile,
+            hint: _rescue && original == _nextExpected,
             onTap: () => _tap(original),
           ),
       ],
@@ -273,12 +285,14 @@ class _Tile extends StatelessWidget {
     required this.option,
     required this.placed,
     required this.wrong,
+    required this.hint,
     required this.onTap,
   });
 
   final AnswerOption option;
   final bool placed;
   final bool wrong;
+  final bool hint;
   final VoidCallback onTap;
 
   @override
@@ -293,7 +307,11 @@ class _Tile extends StatelessWidget {
           width: 92,
           height: 92,
           decoration: BoxDecoration(
-            color: wrong ? AppColors.error : Colors.white,
+            color: wrong
+                ? AppColors.error
+                : hint
+                    ? AppColors.star.withValues(alpha: 0.9)
+                    : Colors.white,
             borderRadius: AppSpacing.cardRadius,
             boxShadow: [
               BoxShadow(

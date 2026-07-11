@@ -55,11 +55,19 @@ class AdventureIntro extends StatefulWidget {
     super.key,
     required this.mission,
     required this.lessonTitle,
+    required this.skillName,
+    required this.teachingTip,
+    required this.isNewSkill,
+    this.foundationNote,
     required this.onStart,
   });
 
   final AdventureMission mission;
   final String lessonTitle;
+  final String skillName;
+  final String teachingTip;
+  final bool isNewSkill;
+  final String? foundationNote;
   final VoidCallback onStart;
 
   @override
@@ -71,7 +79,8 @@ class _AdventureIntroState extends State<AdventureIntro> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => AudioService.instance.speak(widget.mission.story),
+      (_) => AudioService.instance.speak(
+          '${widget.mission.story} ${widget.foundationNote ?? ''} ${widget.teachingTip}'),
     );
   }
 
@@ -123,6 +132,41 @@ class _AdventureIntroState extends State<AdventureIntro> {
                         style: const TextStyle(
                             color: AppColors.lightTextSoft,
                             fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.star.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                              '${widget.isNewSkill ? 'NEW SKILL' : 'QUICK REMINDER'} • ${widget.skillName.toUpperCase()}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w900)),
+                          const SizedBox(height: 6),
+                          Text(widget.teachingTip,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: AppColors.lightText,
+                                  fontSize: 16,
+                                  height: 1.35,
+                                  fontWeight: FontWeight.w700)),
+                          if (widget.foundationNote != null) ...[
+                            const SizedBox(height: 8),
+                            Text(widget.foundationNote!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    color: AppColors.error,
+                                    fontWeight: FontWeight.w800)),
+                          ],
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     BouncyButton(
                       onTap: widget.onStart,

@@ -10,6 +10,7 @@ import '../../../core/widgets/bouncy_button.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// A friendly end-of-unit challenge. Every correct answer removes one segment
 /// of boss health; wrong answers cost a heart but never block completion.
@@ -40,6 +41,8 @@ class _BossBattleGameState extends State<BossBattleGame> {
   int? _selected;
   bool _missed = false;
   bool _locked = false;
+  int _mistakes = 0;
+  bool _rescue = false;
 
   Question get _question => widget.lesson.questions[_index];
   int get _total => widget.lesson.questions.length;
@@ -60,6 +63,7 @@ class _BossBattleGameState extends State<BossBattleGame> {
     setState(() => _selected = option);
 
     if (!correct) {
+      _mistakes++;
       setState(() {
         _attack++;
         _hearts = (_hearts - 1).clamp(0, 3);
@@ -71,7 +75,12 @@ class _BossBattleGameState extends State<BossBattleGame> {
       AudioService.instance.playSfx(Sfx.wrong);
       AudioService.instance.speak('The boss blocked it. Try again!');
       await Future<void>.delayed(const Duration(milliseconds: 650));
-      if (mounted) setState(() => _selected = null);
+      if (!mounted) return;
+      setState(() => _selected = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _question);
+      }
       return;
     }
 
@@ -108,6 +117,8 @@ class _BossBattleGameState extends State<BossBattleGame> {
       _selected = null;
       _missed = false;
       _locked = false;
+      _mistakes = 0;
+      _rescue = false;
     });
     _speakPrompt();
   }
@@ -218,6 +229,7 @@ class _BossBattleGameState extends State<BossBattleGame> {
   }
 
   Widget _options(BuildContext context) {
+    final optionIndexes = rescueOptionIndexes(_question, rescue: _rescue);
     return GridView.builder(
       padding: const EdgeInsets.all(AppSpacing.md),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -226,17 +238,18 @@ class _BossBattleGameState extends State<BossBattleGame> {
         crossAxisSpacing: AppSpacing.md,
         childAspectRatio: 1.7,
       ),
-      itemCount: _question.options.length,
+      itemCount: optionIndexes.length,
       itemBuilder: (context, index) {
-        final isSelected = _selected == index;
-        final isCorrect = index == _question.correctIndex;
+        final originalIndex = optionIndexes[index];
+        final isSelected = _selected == originalIndex;
+        final isCorrect = originalIndex == _question.correctIndex;
         final color = !isSelected
             ? Colors.white
             : isCorrect
                 ? AppColors.success
                 : AppColors.error;
         return BouncyButton(
-          onTap: () => _choose(index),
+          onTap: () => _choose(originalIndex),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             alignment: Alignment.center,
@@ -246,7 +259,7 @@ class _BossBattleGameState extends State<BossBattleGame> {
               border: Border.all(color: Colors.white, width: 2),
             ),
             child: Text(
-              _question.options[index].display,
+              _question.options[originalIndex].display,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: isSelected ? Colors.white : AppColors.lightText,

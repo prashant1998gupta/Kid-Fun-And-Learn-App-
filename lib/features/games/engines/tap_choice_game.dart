@@ -13,6 +13,7 @@ import '../../../core/widgets/mascot.dart';
 import '../../../core/widgets/play_option_card.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// "Pick the right answer" — the workhorse engine used by tapChoice, bubblePop,
 /// count-catch, and spot-match lessons.
@@ -44,6 +45,8 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
   bool _erredThisQuestion = false;
   int? _selected;
   bool _locked = false;
+  int _mistakes = 0;
+  bool _rescue = false;
   final List<String> _struggled = [];
   final _stopwatch = Stopwatch()..start();
 
@@ -78,6 +81,7 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
       if (!mounted) return;
       _advance();
     } else {
+      _mistakes++;
       AudioService.instance.playSfx(Sfx.wrong);
       if (!_erredThisQuestion) {
         _erredThisQuestion = true;
@@ -85,7 +89,12 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
       }
       AudioService.instance.speak(PraiseLines.nextRetry());
       await Future<void>.delayed(const Duration(milliseconds: 700));
-      if (mounted) setState(() => _selected = null);
+      if (!mounted) return;
+      setState(() => _selected = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _q);
+      }
     }
   }
 
@@ -109,6 +118,8 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
       _selected = null;
       _locked = false;
       _erredThisQuestion = false;
+      _mistakes = 0;
+      _rescue = false;
     });
     _speakPrompt();
   }
@@ -221,16 +232,17 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
 
   Widget _options(BuildContext context) {
     final options = _q.options;
+    final optionIndexes = rescueOptionIndexes(_q, rescue: _rescue);
     final wide = MediaQuery.of(context).size.width > 600;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: GridView.count(
-        crossAxisCount: wide ? options.length.clamp(1, 4) : 2,
+        crossAxisCount: wide ? optionIndexes.length.clamp(1, 4) : 2,
         mainAxisSpacing: AppSpacing.md,
         crossAxisSpacing: AppSpacing.md,
         childAspectRatio: 1.1,
         children: [
-          for (int i = 0; i < options.length; i++)
+          for (final i in optionIndexes)
             PlayOptionCard(
               key: ValueKey('$_index-$i'),
               index: i,

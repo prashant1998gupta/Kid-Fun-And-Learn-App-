@@ -93,6 +93,10 @@ class Question extends Equatable {
     this.answer,
     this.speak,
     this.formulaTip,
+    this.skillId = 'general.practice',
+    this.prerequisiteSkillIds = const [],
+    this.teachingTip,
+    this.rescueTip,
   });
 
   final String id;
@@ -120,8 +124,38 @@ class Question extends Equatable {
   /// questions (Area, Perimeter, LCM, HCF, Fractions, Decimals, etc.).
   final String? formulaTip;
 
+  /// Stable curriculum concept used for teaching cards, mastery and routing.
+  final String skillId;
+  final List<String> prerequisiteSkillIds;
+  final String? teachingTip;
+  final String? rescueTip;
+
+  Question withLearningSupport({
+    required String skillId,
+    required List<String> prerequisiteSkillIds,
+    required String teachingTip,
+    required String rescueTip,
+  }) =>
+      Question(
+        id: id,
+        prompt: prompt,
+        promptEmoji: promptEmoji,
+        promptImage: promptImage,
+        options: options,
+        correctIndex: correctIndex,
+        correctIndices: correctIndices,
+        pairs: pairs,
+        answer: answer,
+        speak: speak,
+        formulaTip: formulaTip,
+        skillId: skillId,
+        prerequisiteSkillIds: prerequisiteSkillIds,
+        teachingTip: teachingTip,
+        rescueTip: rescueTip,
+      );
+
   @override
-  List<Object?> get props => [id, prompt, correctIndex, formulaTip];
+  List<Object?> get props => [id, prompt, correctIndex, formulaTip, skillId];
 }
 
 class AnswerOption extends Equatable {

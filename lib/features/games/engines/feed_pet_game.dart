@@ -13,6 +13,7 @@ import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// A preschool-friendly toy loop: feed a cute pet the correct food/object.
 /// It keeps the same question schema as tap-choice, but wraps answers in a
@@ -43,6 +44,8 @@ class _FeedPetGameState extends State<FeedPetGame> {
   bool _missed = false;
   bool _locked = false;
   bool _petHappy = false;
+  int _mistakes = 0;
+  bool _rescue = false;
 
   Question get _question => widget.lesson.questions[_index];
   int get _total => widget.lesson.questions.length;
@@ -63,6 +66,7 @@ class _FeedPetGameState extends State<FeedPetGame> {
     setState(() => _selected = index);
 
     if (!isCorrect) {
+      _mistakes++;
       if (!_missed) {
         _missed = true;
         _struggled.add(_question.id);
@@ -70,7 +74,12 @@ class _FeedPetGameState extends State<FeedPetGame> {
       AudioService.instance.playSfx(Sfx.wrong);
       AudioService.instance.speak(PraiseLines.nextRetry());
       await Future<void>.delayed(const Duration(milliseconds: 520));
-      if (mounted) setState(() => _selected = null);
+      if (!mounted) return;
+      setState(() => _selected = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _question);
+      }
       return;
     }
 
@@ -108,6 +117,8 @@ class _FeedPetGameState extends State<FeedPetGame> {
       _missed = false;
       _locked = false;
       _petHappy = false;
+      _mistakes = 0;
+      _rescue = false;
     });
     _speak();
   }
@@ -203,6 +214,7 @@ class _FeedPetGameState extends State<FeedPetGame> {
   }
 
   Widget _foodTray(BuildContext context) {
+    final optionIndexes = rescueOptionIndexes(_question, rescue: _rescue);
     return GridView.builder(
       padding: const EdgeInsets.all(AppSpacing.md),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -211,20 +223,21 @@ class _FeedPetGameState extends State<FeedPetGame> {
         crossAxisSpacing: AppSpacing.md,
         childAspectRatio: 0.95,
       ),
-      itemCount: _question.options.length,
+      itemCount: optionIndexes.length,
       itemBuilder: (context, index) {
-        final option = _question.options[index];
-        final selected = _selected == index;
-        final correct = index == _question.correctIndex;
+        final originalIndex = optionIndexes[index];
+        final option = _question.options[originalIndex];
+        final selected = _selected == originalIndex;
+        final correct = originalIndex == _question.correctIndex;
         final bg = !selected
             ? Colors.white
             : correct
                 ? AppColors.success
                 : AppColors.error;
         Widget card = BouncyButton(
-          key: ValueKey('feed-$index'),
+          key: ValueKey('feed-$originalIndex'),
           borderRadius: AppSpacing.cardRadius,
-          onTap: () => _choose(index),
+          onTap: () => _choose(originalIndex),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             decoration: BoxDecoration(

@@ -10,7 +10,12 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/openmoji_view.dart';
+import '../../profiles/domain/grade_level.dart';
+import '../../profiles/profiles_controller.dart';
+import '../../curriculum/domain/lesson.dart';
+import '../../games/learning_support.dart';
 import '../data/learning_world_item.dart';
+import '../data/mini_games_repository.dart';
 import '../mini_games_controller.dart';
 import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
@@ -42,11 +47,17 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
   int _reaction = 0;
   bool _locked = false;
   bool _complete = false;
+  bool _rescue = false;
   String _message = 'A new learning adventure is ready!';
   LearningWorldItem? _reward;
 
+  GradeLevel? get _grade => ref.read(activeChildProvider)?.grade;
+  int get _contentLevel => LearningAdventureGradePolicy.contentLevel(
+        _grade,
+        _level,
+      );
   _AdventureRound get _question =>
-      _AdventureContent.question(widget.type, _level, _round);
+      _AdventureContent.question(widget.type, _contentLevel, _round);
   bool get _teachPip => _round == 2 || _round == 4;
 
   @override
@@ -76,7 +87,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
     AudioService.instance.speak(spoken);
   }
 
-  void _choose(int index) {
+  Future<void> _choose(int index) async {
     if (_locked || _complete) return;
     if (index != _question.correctIndex) {
       setState(() {
@@ -89,6 +100,23 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
       AudioService.instance.speak(
         '$_message ${_question.hint}',
       );
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(
+          context,
+          Question(
+            id: '${widget.type.id}-$_level-$_round',
+            prompt: _question.prompt,
+            correctIndex: _question.correctIndex,
+            options: [
+              for (final choice in _question.choices)
+                AnswerOption(label: choice.label, emoji: choice.emoji),
+            ],
+            rescueTip:
+                '${_question.hint} ${_question.explanation} Try again with two choices.',
+          ),
+        );
+      }
       return;
     }
 
@@ -114,6 +142,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
           _round++;
           _mistakes = 0;
           _locked = false;
+          _rescue = false;
           _message = _teachPip
               ? 'Pip made a funny guess. Can you help?'
               : 'Here comes the next learning challenge!';
@@ -153,6 +182,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
       _mistakes = 0;
       _locked = false;
       _complete = false;
+      _rescue = false;
       _reward = null;
       _message = 'Level $_level is ready!';
     });
@@ -161,6 +191,33 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
 
   @override
   Widget build(BuildContext context) {
+    final grade = ref.watch(activeChildProvider)?.grade;
+    final definition =
+        kMiniGames.firstWhere((game) => game.id == widget.type.id);
+    if (grade != null && !definition.supportsGrade(grade)) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🧭', style: TextStyle(fontSize: 72)),
+                const SizedBox(height: 12),
+                Text('This adventure is saved for ${definition.gradeBand}.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  child: const Text('Choose my adventures'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: CelebrationOverlay(
         controller: _celebration,
@@ -234,6 +291,16 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
   }
 
   Widget _playArea() {
+    final supportQuestion = Question(
+      id: 'support',
+      prompt: _question.prompt,
+      correctIndex: _question.correctIndex,
+      options: [
+        for (final choice in _question.choices)
+          AnswerOption(label: choice.label, emoji: choice.emoji),
+      ],
+    );
+    final optionIndexes = rescueOptionIndexes(supportQuestion, rescue: _rescue);
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
@@ -259,13 +326,13 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: _question.choices.length,
+                  crossAxisCount: optionIndexes.length,
                   mainAxisSpacing: 8,
                   crossAxisSpacing: 8,
                   childAspectRatio: 0.9,
                 ),
-                itemCount: _question.choices.length,
-                itemBuilder: (_, index) => _choiceCard(index),
+                itemCount: optionIndexes.length,
+                itemBuilder: (_, index) => _choiceCard(optionIndexes[index]),
               ),
             ],
           ),

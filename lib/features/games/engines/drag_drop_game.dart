@@ -13,6 +13,7 @@ import '../../../core/widgets/illustrated_object.dart';
 import '../../../core/widgets/mascot.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// Drag-and-drop sorting. For each question the child drags the prompt item
 /// (an emoji) into one of the labeled baskets ([Question.options]); the correct
@@ -41,6 +42,8 @@ class _DragDropGameState extends State<DragDropGame> {
   int? _wrongBasket; // basket index flashing red
   int? _landedBasket; // basket the item correctly settled into
   bool _placed = false;
+  int _mistakes = 0;
+  bool _rescue = false;
   final List<String> _struggled = [];
   final _stopwatch = Stopwatch()..start();
 
@@ -72,6 +75,7 @@ class _DragDropGameState extends State<DragDropGame> {
       if (!mounted) return;
       _advance();
     } else {
+      _mistakes++;
       AudioService.instance.playSfx(Sfx.wrong);
       if (!_erred) {
         _erred = true;
@@ -80,7 +84,12 @@ class _DragDropGameState extends State<DragDropGame> {
       AudioService.instance.speak(PraiseLines.nextRetry());
       setState(() => _wrongBasket = basket);
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      if (mounted) setState(() => _wrongBasket = null);
+      if (!mounted) return;
+      setState(() => _wrongBasket = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _q);
+      }
     }
   }
 
@@ -105,6 +114,8 @@ class _DragDropGameState extends State<DragDropGame> {
       _erred = false;
       _wrongBasket = null;
       _landedBasket = null;
+      _mistakes = 0;
+      _rescue = false;
     });
     _speak();
   }
@@ -242,7 +253,7 @@ class _DragDropGameState extends State<DragDropGame> {
                 final wrong = _wrongBasket == i;
                 return _Basket(
                   option: options[i],
-                  highlight: hover,
+                  highlight: hover || (_rescue && i == _q.correctIndex),
                   wrong: wrong,
                   landed: _landedBasket == i,
                 );

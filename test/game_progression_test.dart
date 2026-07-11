@@ -74,6 +74,50 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
   });
 
+  testWidgets('two wrong attempts explain and reduce answer choices',
+      (tester) async {
+    const lesson = Lesson(
+      id: 'rescue',
+      title: 'Rescue',
+      subject: Subject.math,
+      grade: GradeLevel.grade2,
+      gameType: GameType.tapChoice,
+      questions: [
+        Question(
+          id: 'rescue-q',
+          prompt: 'Three groups of two?',
+          correctIndex: 2,
+          options: [
+            AnswerOption(label: '5'),
+            AnswerOption(label: '7'),
+            AnswerOption(label: '6'),
+          ],
+          skillId: 'math.multiplication',
+          teachingTip: 'Multiplication means equal groups.',
+          rescueTip:
+              'Three equal groups of two make six. Try with two choices.',
+        ),
+      ],
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: TapChoiceGame(lesson: lesson, onComplete: (_) {}),
+    ));
+
+    await tester.tap(find.text('7'));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.tap(find.text('7'));
+    await tester.pump(const Duration(milliseconds: 750));
+
+    expect(find.text('Let’s learn it together'), findsOneWidget);
+    expect(find.textContaining('Three equal groups'), findsOneWidget);
+    await tester.tap(find.text('Try the easier step ✨'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('6'), findsOneWidget);
+    expect(find.text('5'), findsOneWidget);
+    expect(find.text('7'), findsNothing);
+  });
+
   testWidgets('boss battle holds success feedback before advancing',
       (tester) async {
     const lesson = Lesson(

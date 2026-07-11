@@ -41,18 +41,31 @@ void main() {
   });
 
   test('every level has a full, non-repeating question set', () {
-    // Minimum questions by mini-game (memory is one board; tap games a round).
-    int minFor(GameType g) => switch (g) {
-          GameType.memoryMatch => 1,
-          GameType.sequence => 5,
-          GameType.tracing => 6,
-          _ => 10,
-        };
+    // Session length follows attention span. Preschool levels deliberately
+    // end sooner so young children receive frequent, finishable wins.
+    int minFor(GradeLevel grade, GameType game) {
+      final standard = switch (grade) {
+        GradeLevel.lkg => 5,
+        GradeLevel.ukg => 7,
+        GradeLevel.kg => 8,
+        GradeLevel.grade1 => 10,
+        GradeLevel.grade2 || GradeLevel.grade3 => 12,
+        GradeLevel.grade4 || GradeLevel.grade5 => 15,
+      };
+      return switch (game) {
+        GameType.memoryMatch => 1,
+        GameType.sequence => standard.clamp(3, 6),
+        GameType.tracing => standard.clamp(4, 8),
+        GameType.flashcard => standard.clamp(5, 12),
+        _ => standard,
+      };
+    }
+
     for (final grade in GradeLevel.values) {
       for (final unit in repo.unitsForGrade(grade)) {
         for (final lesson in repo.lessonsForUnit(unit)) {
           expect(lesson.questions.length,
-              greaterThanOrEqualTo(minFor(lesson.gameType)),
+              greaterThanOrEqualTo(minFor(grade, lesson.gameType)),
               reason: '${lesson.id} (${lesson.gameType.name}) is too short');
           // No two questions in a level are identical.
           final sigs = lesson.questions.map(signature).toList();

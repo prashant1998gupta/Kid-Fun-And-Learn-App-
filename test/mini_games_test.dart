@@ -18,6 +18,7 @@ import 'package:kidverse/features/mini_games/logic/classic_2048_engine.dart';
 import 'package:kidverse/features/mini_games/logic/stack_merge_engine.dart';
 import 'package:kidverse/features/mini_games/mini_games_controller.dart';
 import 'package:kidverse/features/mini_games/mini_games_screen.dart';
+import 'package:kidverse/features/profiles/domain/grade_level.dart';
 import 'package:kidverse/features/settings/settings_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -341,6 +342,37 @@ void main() {
     test('all 50-level learning-adventure banks are structurally valid', () {
       expect(LearningAdventureAudit.validateAll(), isEmpty);
     });
+
+    test('learning adventures expose exact grade ranges', () {
+      final learning = kMiniGames.where((game) => game.learning);
+      expect(learning.every((game) => game.minGrade != null), isTrue);
+      expect(learning.every((game) => game.maxGrade != null), isTrue);
+
+      final preschool =
+          learning.firstWhere((game) => game.id == 'number-garden');
+      expect(preschool.supportsGrade(GradeLevel.lkg), isTrue);
+      expect(preschool.supportsGrade(GradeLevel.grade1), isFalse);
+      final fractions =
+          learning.firstWhere((game) => game.id == 'fraction-cafe');
+      expect(fractions.supportsGrade(GradeLevel.grade3), isTrue);
+      expect(fractions.supportsGrade(GradeLevel.grade4), isTrue);
+      expect(fractions.supportsGrade(GradeLevel.grade2), isFalse);
+    });
+
+    test('shared story worlds scale content separately inside a grade band',
+        () {
+      expect(LearningAdventureGradePolicy.contentLevel(GradeLevel.lkg, 50), 20);
+      expect(LearningAdventureGradePolicy.contentLevel(GradeLevel.ukg, 50), 40);
+      expect(LearningAdventureGradePolicy.contentLevel(GradeLevel.kg, 50), 50);
+      expect(
+          LearningAdventureGradePolicy.contentLevel(GradeLevel.grade1, 50), 30);
+      expect(
+          LearningAdventureGradePolicy.contentLevel(GradeLevel.grade2, 50), 50);
+      expect(
+          LearningAdventureGradePolicy.contentLevel(GradeLevel.grade3, 50), 32);
+      expect(
+          LearningAdventureGradePolicy.contentLevel(GradeLevel.grade4, 50), 50);
+    });
   });
 
   group('Classic2048Engine', () {
@@ -490,10 +522,9 @@ void main() {
     await tester.tap(find.text('💖 Kind'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('💖 Kind ending'), findsOneWidget);
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Preschool'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'My Learning'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Toy Sort'), findsOneWidget);
-    expect(find.text('Eco City Builder'), findsNothing);
     expect(tester.takeException(), isNull);
 
     await render(const InfinityLoopGame());
@@ -721,30 +752,82 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    const games = <(String, Widget)>[
-      ('sound-safari', SoundSafariGame()),
-      ('number-garden', NumberGardenGame()),
-      ('story-train', StoryTrainGame()),
-      ('letter-bakery', LetterBakeryGame()),
-      ('clean-room-helper', CleanRoomHelperGame()),
-      ('math-market', MathMarketGame()),
-      ('word-wizard-workshop', WordWizardWorkshopGame()),
-      ('sentence-train', SentenceTrainGame()),
-      ('clock-adventure', ClockAdventureGame()),
-      ('nature-detective', NatureDetectiveGame()),
-      ('shape-builder', ShapeBuilderGame()),
-      ('fraction-cafe', FractionCafeGame()),
-      ('multiplication-kingdom', MultiplicationKingdomGame()),
-      ('grammar-detective', GrammarDetectiveGame()),
-      ('code-the-robot', CodeTheRobotGame()),
-      ('science-machine-lab', ScienceMachineLabGame()),
-      ('map-quest', MapQuestGame()),
-      ('eco-city-builder', EcoCityBuilderGame()),
-      ('space-mission-control', SpaceMissionControlGame()),
-      ('business-bazaar', BusinessBazaarGame()),
-      ('mystery-science-lab', MysteryScienceLabGame()),
-      ('news-detective', NewsDetectiveGame()),
-      ('algorithm-quest', AlgorithmQuestGame()),
+    const games = <(String, Widget, LearningAdventureType)>[
+      ('sound-safari', SoundSafariGame(), LearningAdventureType.soundSafari),
+      ('number-garden', NumberGardenGame(), LearningAdventureType.numberGarden),
+      ('story-train', StoryTrainGame(), LearningAdventureType.storyTrain),
+      ('letter-bakery', LetterBakeryGame(), LearningAdventureType.letterBakery),
+      (
+        'clean-room-helper',
+        CleanRoomHelperGame(),
+        LearningAdventureType.cleanRoom
+      ),
+      ('math-market', MathMarketGame(), LearningAdventureType.mathMarket),
+      (
+        'word-wizard-workshop',
+        WordWizardWorkshopGame(),
+        LearningAdventureType.wordWizard
+      ),
+      (
+        'sentence-train',
+        SentenceTrainGame(),
+        LearningAdventureType.sentenceTrain
+      ),
+      (
+        'clock-adventure',
+        ClockAdventureGame(),
+        LearningAdventureType.clockAdventure
+      ),
+      (
+        'nature-detective',
+        NatureDetectiveGame(),
+        LearningAdventureType.natureDetective
+      ),
+      ('shape-builder', ShapeBuilderGame(), LearningAdventureType.shapeBuilder),
+      ('fraction-cafe', FractionCafeGame(), LearningAdventureType.fractionCafe),
+      (
+        'multiplication-kingdom',
+        MultiplicationKingdomGame(),
+        LearningAdventureType.multiplicationKingdom
+      ),
+      (
+        'grammar-detective',
+        GrammarDetectiveGame(),
+        LearningAdventureType.grammarDetective
+      ),
+      ('code-the-robot', CodeTheRobotGame(), LearningAdventureType.codeRobot),
+      (
+        'science-machine-lab',
+        ScienceMachineLabGame(),
+        LearningAdventureType.scienceLab
+      ),
+      ('map-quest', MapQuestGame(), LearningAdventureType.mapQuest),
+      ('eco-city-builder', EcoCityBuilderGame(), LearningAdventureType.ecoCity),
+      (
+        'space-mission-control',
+        SpaceMissionControlGame(),
+        LearningAdventureType.spaceMission
+      ),
+      (
+        'business-bazaar',
+        BusinessBazaarGame(),
+        LearningAdventureType.businessBazaar
+      ),
+      (
+        'mystery-science-lab',
+        MysteryScienceLabGame(),
+        LearningAdventureType.mysteryScience
+      ),
+      (
+        'news-detective',
+        NewsDetectiveGame(),
+        LearningAdventureType.newsDetective
+      ),
+      (
+        'algorithm-quest',
+        AlgorithmQuestGame(),
+        LearningAdventureType.algorithmQuest
+      ),
     ];
 
     for (final game in games) {
@@ -759,10 +842,10 @@ void main() {
       await tester.pump();
 
       for (var round = 0; round < 5; round++) {
-        for (var choice = 0; choice < 3; choice++) {
-          final answer = find.byKey(ValueKey('answer-${game.$1}-$choice'));
-          if (answer.evaluate().isNotEmpty) await tester.tap(answer);
-        }
+        final choice = LearningAdventureAudit.correctIndex(game.$3, 1, round);
+        final answer = find.byKey(ValueKey('answer-${game.$1}-$choice'));
+        await tester.ensureVisible(answer);
+        await tester.tap(answer);
         await tester.pump(const Duration(milliseconds: 900));
       }
 

@@ -228,6 +228,8 @@ void main() {
     await tester.pump();
     expect(find.text('Repair the Moon Bridge'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('Let’s help! 🚀'));
+    await tester.pump();
     await tester.tap(find.text('Let’s help! 🚀'));
     await tester.pump();
     await tester.tap(find.text('4'));

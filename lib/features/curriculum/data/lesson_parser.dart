@@ -43,6 +43,11 @@ class LessonParser {
       pairs: (j['pairs'] as List?)?.cast<String>() ?? const [],
       answer: j['answer'] as String?,
       speak: j['speak'] as String?,
+      skillId: j['skillId'] as String? ?? 'general.practice',
+      prerequisiteSkillIds:
+          (j['prerequisiteSkillIds'] as List?)?.cast<String>() ?? const [],
+      teachingTip: j['teachingTip'] as String?,
+      rescueTip: j['rescueTip'] as String?,
       options: ((j['options'] as List?) ?? const [])
           .map((o) => AnswerOption.fromJson((o as Map).cast<String, dynamic>()))
           .toList(),

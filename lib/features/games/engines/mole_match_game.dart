@@ -13,6 +13,7 @@ import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/illustrated_object.dart';
 import '../../curriculum/domain/lesson.dart';
 import '../../gamification/reward_engine.dart';
+import '../learning_support.dart';
 
 /// Friendly whack-a-mole-style learning: characters pop from different holes
 /// holding answer cards. There is no countdown or fail state.
@@ -44,6 +45,8 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
   int? _selected;
   bool _missed = false;
   bool _locked = false;
+  int _mistakes = 0;
+  bool _rescue = false;
 
   Question get _question => widget.lesson.questions[_index];
   int get _total => widget.lesson.questions.length;
@@ -68,7 +71,8 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
   }
 
   int? _optionAtHole(int hole) {
-    for (var option = 0; option < _question.options.length; option++) {
+    final optionIndexes = rescueOptionIndexes(_question, rescue: _rescue);
+    for (final option in optionIndexes) {
       if ((option * 2 + _tick) % 6 == hole) return option;
     }
     return null;
@@ -79,6 +83,7 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
     final isCorrect = option == _question.correctIndex;
     setState(() => _selected = option);
     if (!isCorrect) {
+      _mistakes++;
       _combo = 0;
       if (!_missed) {
         _missed = true;
@@ -87,7 +92,12 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
       AudioService.instance.playSfx(Sfx.wrong);
       AudioService.instance.speak(PraiseLines.nextRetry());
       await Future<void>.delayed(const Duration(milliseconds: 450));
-      if (mounted) setState(() => _selected = null);
+      if (!mounted) return;
+      setState(() => _selected = null);
+      if (_mistakes >= 2 && !_rescue) {
+        setState(() => _rescue = true);
+        await showLearningRescue(context, _question);
+      }
       return;
     }
 
@@ -124,6 +134,8 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
       _selected = null;
       _missed = false;
       _locked = false;
+      _mistakes = 0;
+      _rescue = false;
     });
     _speak();
   }

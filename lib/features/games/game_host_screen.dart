@@ -181,12 +181,25 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
     }
     if (!_missionStarted) {
       final child = ref.watch(activeChildProvider);
+      final question = widget.lesson.questions.first;
+      final adaptive = ref.watch(adaptiveControllerProvider);
+      final isNewSkill =
+          child == null || !adaptive.hasSeenConcept(child.id, question.skillId);
+      final prerequisitesMet = child == null ||
+          adaptive.prerequisitesMet(child.id, question.prerequisiteSkillIds);
       return AdventureIntro(
         mission: AdventureMission.forLesson(
           widget.lesson,
           heroName: child?.heroName,
         ),
         lessonTitle: widget.lesson.title,
+        skillName: question.skillId.split('.').last.replaceAll('-', ' '),
+        teachingTip: question.teachingTip ??
+            'Listen to the clue, try one step, and use the hint if you need it.',
+        isNewSkill: isNewSkill,
+        foundationNote: prerequisitesMet
+            ? null
+            : 'We will go slowly because an earlier building block still needs practice.',
         onStart: () => setState(() => _missionStarted = true),
       );
     }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/audio_service.dart';
 import '../gamification/domain/wallet.dart';
 import '../profiles/profiles_controller.dart';
+import '../profiles/domain/grade_level.dart';
 import 'data/mini_games_repository.dart';
 import 'data/mini_pet.dart';
 
@@ -238,21 +239,12 @@ final miniGamesControllerProvider =
 });
 
 Iterable<String>? _adventureGameIdsForGrade(String? gradeName) {
-  final gradeBand = switch (gradeName) {
-    'lkg' || 'ukg' || 'kg' => null,
-    'grade1' || 'grade2' => 'Class 1–2',
-    'grade3' || 'grade4' => 'Class 3–4',
-    'grade5' => 'Class 5',
-    _ => 'all',
-  };
-  if (gradeBand == 'all') return null;
+  if (gradeName == null ||
+      !GradeLevel.values.any((grade) => grade.name == gradeName)) {
+    return null;
+  }
+  final grade = GradeLevel.fromId(gradeName);
   return kMiniGames
-      .where(
-        (game) =>
-            !game.learning ||
-            (gradeBand == null
-                ? game.gradeBand == null
-                : game.gradeBand == gradeBand),
-      )
+      .where((game) => game.supportsGrade(grade))
       .map((game) => game.id);
 }

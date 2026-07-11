@@ -35,15 +35,26 @@ class CurriculumRepository {
   /// Levels every subject offers, in every grade.
   static const int _levelsPerUnit = 50;
 
-  /// How many questions a level holds, by mini-game. Memory is a single board;
-  /// tracing/sequence are shorter by nature; tap-style games get a full round.
-  static int _questionCountFor(GameType gameType) {
+  /// Session length follows attention span as well as game type. Preschool
+  /// children get short, finishable wins; older children build towards longer
+  /// missions. A level should end while the child still wants one more turn.
+  static int _questionCountFor(GameType gameType, GradeLevel grade) {
+    final standard = switch (grade) {
+      GradeLevel.lkg => 5,
+      GradeLevel.ukg => 7,
+      GradeLevel.kg => 8,
+      GradeLevel.grade1 => 10,
+      GradeLevel.grade2 => 12,
+      GradeLevel.grade3 => 12,
+      GradeLevel.grade4 => 15,
+      GradeLevel.grade5 => 15,
+    };
     return switch (gameType) {
       GameType.memoryMatch => 1,
-      GameType.tracing => 8,
-      GameType.sequence => 6,
-      GameType.flashcard => 13, // a friendly learn-through deck
-      _ => 20, // 20 questions per level for CBSE-standard sessions
+      GameType.tracing => standard.clamp(4, 8),
+      GameType.sequence => standard.clamp(3, 6),
+      GameType.flashcard => standard.clamp(5, 12),
+      _ => standard,
     };
   }
 
@@ -107,7 +118,7 @@ class CurriculumRepository {
             subject: unit.subject,
             gameType: gameType,
             level: level,
-            count: _questionCountFor(gameType),
+            count: _questionCountFor(gameType, grade),
           ),
           emoji: seed.emoji,
           instruction: seed.instruction,

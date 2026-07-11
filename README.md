@@ -53,13 +53,16 @@ child-created hero loop are documented in
 [`docs/17_living_kidverse.md`](docs/17_living_kidverse.md).
 The current performance, optimization, and quality-improvement audit is in
 [`docs/18_PERFORMANCE_AND_QUALITY_AUDIT.md`](docs/18_PERFORMANCE_AND_QUALITY_AUDIT.md).
+The class-by-class content progression, defects found, automated grade-fit
+guards, and educator-review checklist are in
+[`docs/19_CURRICULUM_AND_GRADE_FIT.md`](docs/19_CURRICULUM_AND_GRADE_FIT.md).
 
 ### Run it
 
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # full unit + widget suite (112 tests at last verification)
+flutter test         # full unit + widget suite (122 tests at last verification)
 flutter analyze      # lints
 ```
 
