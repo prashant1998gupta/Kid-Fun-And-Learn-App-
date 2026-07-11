@@ -21,6 +21,12 @@ enum LearningAdventureType {
   storyTrain,
   letterBakery,
   cleanRoom,
+  mathMarket,
+  wordWizard,
+  sentenceTrain,
+  clockAdventure,
+  natureDetective,
+  shapeBuilder,
 }
 
 extension LearningAdventureTypeData on LearningAdventureType {
@@ -30,6 +36,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.storyTrain => 'story-train',
         LearningAdventureType.letterBakery => 'letter-bakery',
         LearningAdventureType.cleanRoom => 'clean-room-helper',
+        LearningAdventureType.mathMarket => 'math-market',
+        LearningAdventureType.wordWizard => 'word-wizard-workshop',
+        LearningAdventureType.sentenceTrain => 'sentence-train',
+        LearningAdventureType.clockAdventure => 'clock-adventure',
+        LearningAdventureType.natureDetective => 'nature-detective',
+        LearningAdventureType.shapeBuilder => 'shape-builder',
       };
 
   String get title => switch (this) {
@@ -38,6 +50,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.storyTrain => 'Story Train',
         LearningAdventureType.letterBakery => 'Letter Bakery',
         LearningAdventureType.cleanRoom => 'Clean Room Helper',
+        LearningAdventureType.mathMarket => 'Math Market',
+        LearningAdventureType.wordWizard => 'Word Wizard Workshop',
+        LearningAdventureType.sentenceTrain => 'Sentence Train',
+        LearningAdventureType.clockAdventure => 'Clock Adventure',
+        LearningAdventureType.natureDetective => 'Nature Detective',
+        LearningAdventureType.shapeBuilder => 'Shape Builder',
       };
 
   String get icon => switch (this) {
@@ -46,6 +64,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.storyTrain => '🚂',
         LearningAdventureType.letterBakery => '🥐',
         LearningAdventureType.cleanRoom => '🧹',
+        LearningAdventureType.mathMarket => '🛒',
+        LearningAdventureType.wordWizard => '🧙',
+        LearningAdventureType.sentenceTrain => '🚂',
+        LearningAdventureType.clockAdventure => '⏰',
+        LearningAdventureType.natureDetective => '🔎',
+        LearningAdventureType.shapeBuilder => '🏗️',
       };
 
   String get mascot => switch (this) {
@@ -54,6 +78,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.storyTrain => '🐼',
         LearningAdventureType.letterBakery => '🧑‍🍳',
         LearningAdventureType.cleanRoom => '🐧',
+        LearningAdventureType.mathMarket => '🦊',
+        LearningAdventureType.wordWizard => '🦉',
+        LearningAdventureType.sentenceTrain => '🐼',
+        LearningAdventureType.clockAdventure => '🐰',
+        LearningAdventureType.natureDetective => '🐻',
+        LearningAdventureType.shapeBuilder => '🦖',
       };
 
   String get achievementId => switch (this) {
@@ -62,6 +92,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.storyTrain => 'story_conductor',
         LearningAdventureType.letterBakery => 'letter_baker',
         LearningAdventureType.cleanRoom => 'tidy_helper',
+        LearningAdventureType.mathMarket => 'market_master',
+        LearningAdventureType.wordWizard => 'word_wizard',
+        LearningAdventureType.sentenceTrain => 'sentence_conductor',
+        LearningAdventureType.clockAdventure => 'time_keeper',
+        LearningAdventureType.natureDetective => 'nature_detective',
+        LearningAdventureType.shapeBuilder => 'shape_architect',
       };
 
   WorldTheme get worldTheme => switch (this) {
@@ -70,6 +106,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.storyTrain => WorldTheme.ocean,
         LearningAdventureType.letterBakery => WorldTheme.candy,
         LearningAdventureType.cleanRoom => WorldTheme.aurora,
+        LearningAdventureType.mathMarket => WorldTheme.sunrise,
+        LearningAdventureType.wordWizard => WorldTheme.aurora,
+        LearningAdventureType.sentenceTrain => WorldTheme.ocean,
+        LearningAdventureType.clockAdventure => WorldTheme.candy,
+        LearningAdventureType.natureDetective => WorldTheme.jungle,
+        LearningAdventureType.shapeBuilder => WorldTheme.space,
       };
 
   Color get accent => switch (this) {
@@ -78,6 +120,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.storyTrain => const Color(0xFF3D7EFF),
         LearningAdventureType.letterBakery => const Color(0xFFE84393),
         LearningAdventureType.cleanRoom => const Color(0xFF7C5CE7),
+        LearningAdventureType.mathMarket => const Color(0xFFFF8F00),
+        LearningAdventureType.wordWizard => const Color(0xFF6C5CE7),
+        LearningAdventureType.sentenceTrain => const Color(0xFF1976D2),
+        LearningAdventureType.clockAdventure => const Color(0xFFE91E63),
+        LearningAdventureType.natureDetective => const Color(0xFF00897B),
+        LearningAdventureType.shapeBuilder => const Color(0xFF5E35B1),
       };
 
   String get tutorial => switch (this) {
@@ -91,6 +139,18 @@ extension LearningAdventureTypeData on LearningAdventureType {
           'Look at the picture, then tap the letter its word starts with.',
         LearningAdventureType.cleanRoom =>
           'Look at the object, then tap the place where it belongs.',
+        LearningAdventureType.mathMarket =>
+          'Count the coins and prices, then tap the correct answer.',
+        LearningAdventureType.wordWizard =>
+          'Look at the picture and use the right letter or word.',
+        LearningAdventureType.sentenceTrain =>
+          'Read the sentence carriages and choose the word that completes them.',
+        LearningAdventureType.clockAdventure =>
+          'Look at the clock and choose the matching time or daily activity.',
+        LearningAdventureType.natureDetective =>
+          'Read or listen to the nature clue and choose the best answer.',
+        LearningAdventureType.shapeBuilder =>
+          'Study the shapes, sides, and patterns, then choose the right piece.',
       };
 }
 
@@ -139,7 +199,101 @@ class CleanRoomHelperGame extends StatelessWidget {
       );
 }
 
-/// Shared no-fail engine for five preschool learning adventures.
+class MathMarketGame extends StatelessWidget {
+  const MathMarketGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.mathMarket,
+      );
+}
+
+class WordWizardWorkshopGame extends StatelessWidget {
+  const WordWizardWorkshopGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.wordWizard,
+      );
+}
+
+class SentenceTrainGame extends StatelessWidget {
+  const SentenceTrainGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.sentenceTrain,
+      );
+}
+
+class ClockAdventureGame extends StatelessWidget {
+  const ClockAdventureGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.clockAdventure,
+      );
+}
+
+class NatureDetectiveGame extends StatelessWidget {
+  const NatureDetectiveGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.natureDetective,
+      );
+}
+
+class ShapeBuilderGame extends StatelessWidget {
+  const ShapeBuilderGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.shapeBuilder,
+      );
+}
+
+/// Structural audit used by tests to exercise every generated learning round,
+/// including levels that a short widget test cannot reasonably play through.
+class LearningAdventureAudit {
+  LearningAdventureAudit._();
+
+  static List<String> validateAll() {
+    final errors = <String>[];
+    for (final type in LearningAdventureType.values) {
+      for (var level = 1; level <= 50; level++) {
+        for (var round = 0; round < 5; round++) {
+          try {
+            final question = _AdventureContent.question(type, level, round);
+            final location = '${type.id} level $level round ${round + 1}';
+            if (question.choices.length < 2 || question.choices.length > 3) {
+              errors.add('$location has ${question.choices.length} choices');
+            }
+            if (question.correctIndex < 0 ||
+                question.correctIndex >= question.choices.length) {
+              errors.add('$location has an invalid correct answer');
+            }
+            final labels =
+                question.choices.map((choice) => choice.label).toSet();
+            if (labels.length != question.choices.length) {
+              errors.add('$location has duplicate answer labels');
+            }
+            if (question.prompt.trim().isEmpty ||
+                question.spokenPrompt.trim().isEmpty ||
+                question.scene.isEmpty) {
+              errors.add('$location has incomplete child-facing content');
+            }
+          } catch (error) {
+            errors.add('${type.id} level $level round ${round + 1}: $error');
+          }
+        }
+      }
+    }
+    return errors;
+  }
+}
+
+/// Shared no-fail engine for preschool and early-primary learning adventures.
 class LearningAdventureGame extends ConsumerStatefulWidget {
   const LearningAdventureGame({required this.type, super.key});
 
@@ -630,6 +784,12 @@ class _AdventureContent {
         LearningAdventureType.storyTrain => _story(level, round),
         LearningAdventureType.letterBakery => _letter(level, round),
         LearningAdventureType.cleanRoom => _clean(level, round),
+        LearningAdventureType.mathMarket => _market(level, round),
+        LearningAdventureType.wordWizard => _wordWizard(level, round),
+        LearningAdventureType.sentenceTrain => _sentence(level, round),
+        LearningAdventureType.clockAdventure => _clock(level, round),
+        LearningAdventureType.natureDetective => _nature(level, round),
+        LearningAdventureType.shapeBuilder => _shape(level, round),
       };
 
   static _AdventureRound _sound(int level, int round) {
@@ -796,6 +956,348 @@ class _AdventureContent {
     );
   }
 
+  static _AdventureRound _market(int level, int round) {
+    final first = _marketItems[(level * 3 + round * 2) % _marketItems.length];
+    final second =
+        _marketItems[(level * 5 + round * 3 + 1) % _marketItems.length];
+    final firstPrice = 1 + ((level + round * 2) % (level <= 15 ? 9 : 15));
+    final secondPrice = 1 + ((level * 2 + round) % (level <= 15 ? 6 : 12));
+    final changeQuestion = level > 15 && (level + round).isEven;
+    final threeItems = level > 35 && !changeQuestion;
+    final thirdPrice = threeItems ? 1 + ((level + round * 4) % 8) : 0;
+    final answer = changeQuestion
+        ? firstPrice + secondPrice
+        : firstPrice + secondPrice + thirdPrice;
+    final paid = changeQuestion ? answer + 2 + ((level + round) % 8) : 0;
+    final finalAnswer = changeQuestion ? paid - answer : answer;
+    final numbers = _nearbyNumbers(finalAnswer, level * 307 + round, max: 40);
+    return _AdventureRound(
+      skill: changeQuestion ? 'Subtraction and change' : 'Addition and money',
+      prompt: changeQuestion
+          ? 'You pay $paid coins. How much change?'
+          : 'How many coins altogether?',
+      spokenPrompt: changeQuestion
+          ? 'The ${first.name} and ${second.name} cost $answer coins. You pay $paid coins. How many coins come back?'
+          : 'The ${first.name} costs $firstPrice coins and the ${second.name} costs $secondPrice coins${threeItems ? ', with $thirdPrice more coins for another item' : ''}. How many coins altogether?',
+      scene: [
+        first.emoji,
+        '$firstPrice',
+        '🪙',
+        second.emoji,
+        '$secondPrice',
+        '🪙',
+        if (threeItems) ...['🎁', '$thirdPrice', '🪙'],
+      ],
+      sceneLabel:
+          changeQuestion ? 'COST $answer • PAY $paid' : 'ADD THE PRICES',
+      choices: [
+        for (final number in numbers) _AdventureChoice('$number', '🪙'),
+      ],
+      correctIndex: numbers.indexOf(finalAnswer),
+      hint: changeQuestion
+          ? 'Count forward from $answer to $paid.'
+          : 'Start with $firstPrice, then count on $secondPrice${threeItems ? ' and $thirdPrice' : ''}.',
+      explanation: changeQuestion
+          ? '$finalAnswer coins come back!'
+          : 'The total is $finalAnswer coins!',
+    );
+  }
+
+  static _AdventureRound _wordWizard(int level, int round) {
+    final word = _words[(level * 7 + round * 5) % _words.length];
+    final firstLetter = word.letter;
+    final lastLetter = word.word[word.word.length - 1].toUpperCase();
+    if (level <= 18) {
+      final letters = _letterChoices(firstLetter, level * 401 + round);
+      return _AdventureRound(
+        skill: 'Beginning sounds and spelling',
+        prompt: 'Which letter completes the word?',
+        spokenPrompt:
+            '${word.word}. Which letter starts the word ${word.word}?',
+        scene: [word.emoji, '✨'],
+        sceneLabel: '_${word.word.substring(1).toUpperCase()}',
+        choices: [for (final letter in letters) _AdventureChoice(letter)],
+        correctIndex: letters.indexOf(firstLetter),
+        hint: '${word.word} begins with the sound $firstLetter.',
+        explanation: '$firstLetter completes ${word.word}!',
+      );
+    }
+    if (level <= 34) {
+      final letters = _letterChoices(lastLetter, level * 409 + round);
+      return _AdventureRound(
+        skill: 'Ending sounds and spelling',
+        prompt: 'Which letter finishes the word?',
+        spokenPrompt:
+            '${word.word}. Listen to the final sound. Which letter finishes ${word.word}?',
+        scene: [word.emoji, '🪄'],
+        sceneLabel:
+            '${word.word.substring(0, word.word.length - 1).toUpperCase()}_',
+        choices: [for (final letter in letters) _AdventureChoice(letter)],
+        correctIndex: letters.indexOf(lastLetter),
+        hint: '${word.word} ends with $lastLetter.',
+        explanation: '$lastLetter finishes ${word.word}!',
+      );
+    }
+    final correct = word.word.toUpperCase();
+    final wrongFirst =
+        '${String.fromCharCode(65 + ((firstLetter.codeUnitAt(0) - 64) % 26))}${correct.substring(1)}';
+    final missing = correct.substring(0, correct.length - 1);
+    final spellings = <String>{correct, wrongFirst, missing}.toList()
+      ..shuffle(math.Random(level * 419 + round));
+    return _AdventureRound(
+      skill: 'Whole-word spelling',
+      prompt: 'Which spelling is correct?',
+      spokenPrompt: 'Choose the correct spelling of ${word.word}.',
+      scene: [word.emoji, '🧙'],
+      sceneLabel: 'SPELL ${word.word.toUpperCase()}',
+      choices: [for (final spelling in spellings) _AdventureChoice(spelling)],
+      correctIndex: spellings.indexOf(correct),
+      hint: 'Say each sound slowly: ${word.word}.',
+      explanation: '$correct is the correct spelling!',
+    );
+  }
+
+  static _AdventureRound _sentence(int level, int round) {
+    final item = _sentences[(level * 5 + round * 3) % _sentences.length];
+    final punctuation = level > 30 && (level + round).isEven;
+    if (punctuation) {
+      final marks = <String>[item.mark, '.', '?']
+        ..shuffle(math.Random(level * 433 + round));
+      final uniqueMarks = marks.toSet().toList();
+      while (uniqueMarks.length < 3) {
+        uniqueMarks.add('!');
+      }
+      return _AdventureRound(
+        skill: 'Sentence punctuation',
+        prompt: 'Which mark completes the sentence?',
+        spokenPrompt:
+            '${item.completeSentence} Which punctuation mark belongs at the end?',
+        scene: [item.emoji, '🚂'],
+        sceneLabel: '${item.completeSentence.toUpperCase()} _',
+        choices: [for (final mark in uniqueMarks) _AdventureChoice(mark)],
+        correctIndex: uniqueMarks.indexOf(item.mark),
+        hint: item.mark == '?'
+            ? 'A question ends with a question mark.'
+            : item.mark == '!'
+                ? 'An excited sentence can end with an exclamation mark.'
+                : 'A telling sentence ends with a full stop.',
+        explanation: '${item.mark} completes the sentence!',
+      );
+    }
+    final words = <String>[item.answer, item.distractorOne, item.distractorTwo]
+      ..shuffle(math.Random(level * 431 + round));
+    return _AdventureRound(
+      skill: level <= 18 ? 'Build simple sentences' : 'Grammar and verb choice',
+      prompt: 'Which word completes the sentence?',
+      spokenPrompt:
+          '${item.before}, blank, ${item.after}. Choose the best word.',
+      scene: [item.emoji, '🚂', '❓'],
+      sceneLabel:
+          '${item.before.toUpperCase()} ___ ${item.after.toUpperCase()}',
+      choices: [for (final word in words) _AdventureChoice(word.toUpperCase())],
+      correctIndex: words.indexOf(item.answer),
+      hint:
+          'Read the whole sentence and listen for the word that sounds right.',
+      explanation: '${item.answer} makes the sentence correct!',
+    );
+  }
+
+  static _AdventureRound _clock(int level, int round) {
+    final halfHour = level > 25 && (level + round).isEven;
+    final hour = 1 + ((level * 3 + round * 2) % 12);
+    final correctTime = halfHour ? '$hour:30' : '$hour:00';
+    final times = <String>{correctTime};
+    var offset = 1;
+    while (times.length < 3) {
+      final otherHour = 1 + ((hour - 1 + offset * 3) % 12);
+      times.add(halfHour ? '$otherHour:30' : '$otherHour:00');
+      offset++;
+    }
+    final choices = times.toList()..shuffle(math.Random(level * 443 + round));
+    final activityMode = level > 38 && round.isOdd;
+    final activity = _dailyTimes[(level + round) % _dailyTimes.length];
+    if (activityMode) {
+      final activityChoices = <_DailyTime>[activity];
+      var cursor = (_dailyTimes.indexOf(activity) + 2) % _dailyTimes.length;
+      while (activityChoices.length < 3) {
+        final candidate = _dailyTimes[cursor % _dailyTimes.length];
+        if (!activityChoices.contains(candidate)) {
+          activityChoices.add(candidate);
+        }
+        cursor++;
+      }
+      activityChoices.shuffle(math.Random(level * 449 + round));
+      return _AdventureRound(
+        skill: 'Time and daily routines',
+        prompt: 'What usually happens at ${activity.time}?',
+        spokenPrompt:
+            'It is ${activity.spokenTime}. What activity usually happens now?',
+        scene: [activity.clock, '⏰'],
+        sceneLabel: activity.time,
+        choices: [
+          for (final choice in activityChoices)
+            _AdventureChoice(choice.activity, choice.emoji),
+        ],
+        correctIndex: activityChoices.indexOf(activity),
+        hint: '${activity.activity} often happens at ${activity.time}.',
+        explanation: '${activity.activity} matches ${activity.time}!',
+      );
+    }
+    return _AdventureRound(
+      skill: halfHour ? 'Read half-hour clocks' : 'Read hour clocks',
+      prompt: 'What time does the clock show?',
+      spokenPrompt: 'Look at the clock hands. What time is it?',
+      scene: [_clockEmoji(hour, halfHour)],
+      sceneLabel: halfHour ? 'HALF PAST $hour' : '$hour O\'CLOCK',
+      choices: [for (final time in choices) _AdventureChoice(time)],
+      correctIndex: choices.indexOf(correctTime),
+      hint: halfHour
+          ? 'The minute hand points to six, so it is half past.'
+          : 'The minute hand points to twelve, so it is exactly on the hour.',
+      explanation: 'The time is $correctTime!',
+    );
+  }
+
+  static _AdventureRound _nature(int level, int round) {
+    final index = (level * 7 + round * 5) % _natureItems.length;
+    final target = _natureItems[index];
+    final habitatMode = level > 22 && (level + round).isEven;
+    if (habitatMode) {
+      final habitats = <String>{target.habitat};
+      var cursor = (index + 1) % _natureItems.length;
+      while (habitats.length < 3) {
+        habitats.add(_natureItems[cursor].habitat);
+        cursor = (cursor + 1) % _natureItems.length;
+      }
+      final choices = habitats.toList()
+        ..shuffle(math.Random(level * 457 + round));
+      return _AdventureRound(
+        skill: 'Habitats and adaptation',
+        prompt: 'Where does the ${target.name} live?',
+        spokenPrompt: 'Where would you find a ${target.name} in nature?',
+        scene: [target.emoji, '🔎'],
+        sceneLabel: target.clue.toUpperCase(),
+        choices: [
+          for (final habitat in choices)
+            _AdventureChoice(habitat.toUpperCase(), _habitatEmoji(habitat)),
+        ],
+        correctIndex: choices.indexOf(target.habitat),
+        hint: 'Think about the body and needs of the ${target.name}.',
+        explanation: 'The ${target.name} lives in the ${target.habitat}!',
+      );
+    }
+    final candidates =
+        _candidateIndexes(index, _natureItems.length, level, round);
+    return _AdventureRound(
+      skill: 'Observe and infer from clues',
+      prompt: 'Which living thing matches the clue?',
+      spokenPrompt: '${target.clue}. Which living thing am I describing?',
+      scene: ['🔎', '🌿', '❓'],
+      sceneLabel: target.clue.toUpperCase(),
+      choices: [
+        for (final candidate in candidates)
+          _AdventureChoice(
+              _natureItems[candidate].name, _natureItems[candidate].emoji),
+      ],
+      correctIndex: candidates.indexOf(index),
+      hint: 'Look for the important words in the clue.',
+      explanation: 'It is the ${target.name}!',
+    );
+  }
+
+  static _AdventureRound _shape(int level, int round) {
+    final index = (level * 5 + round * 2) % _shapes.length;
+    final target = _shapes[index];
+    final patternMode = level > 30 && (level + round).isEven;
+    final sidesMode = !patternMode && level > 15 && round.isOdd;
+    if (patternMode) {
+      final second = _shapes[(index + 2) % _shapes.length];
+      final candidates = _candidateIndexes(index, _shapes.length, level, round);
+      return _AdventureRound(
+        skill: 'Shape patterns',
+        prompt: 'Which shape comes next?',
+        spokenPrompt:
+            '${target.name}, ${second.name}, ${target.name}, ${second.name}. Which shape comes next?',
+        scene: [target.emoji, second.emoji, target.emoji, second.emoji, '❓'],
+        sceneLabel: 'FIND THE REPEATING PATTERN',
+        choices: [
+          for (final candidate in candidates)
+            _AdventureChoice(_shapes[candidate].name, _shapes[candidate].emoji),
+        ],
+        correctIndex: candidates.indexOf(index),
+        hint: 'The two shapes take turns.',
+        explanation: 'The ${target.name} continues the pattern!',
+      );
+    }
+    if (sidesMode) {
+      final numbers =
+          _nearbyNumbers(target.sides, level * 463 + round, max: 12);
+      return _AdventureRound(
+        skill: 'Shape properties and sides',
+        prompt: 'How many straight sides?',
+        spokenPrompt: 'How many straight sides does a ${target.name} have?',
+        scene: [target.emoji, '📏'],
+        sceneLabel: target.name.toUpperCase(),
+        choices: [for (final number in numbers) _AdventureChoice('$number')],
+        correctIndex: numbers.indexOf(target.sides),
+        hint: 'Trace around the shape and count each straight edge.',
+        explanation: 'A ${target.name} has ${target.sides} straight sides!',
+      );
+    }
+    final candidates = _candidateIndexes(index, _shapes.length, level, round);
+    return _AdventureRound(
+      skill: 'Recognise 2D shapes',
+      prompt: 'Find the ${target.name}.',
+      spokenPrompt: 'Which picture is a ${target.name}?',
+      scene: ['🏗️', '🧱'],
+      sceneLabel: 'CHOOSE THE ${target.name.toUpperCase()}',
+      choices: [
+        for (final candidate in candidates)
+          _AdventureChoice(_shapes[candidate].name, _shapes[candidate].emoji),
+      ],
+      correctIndex: candidates.indexOf(index),
+      hint: target.description,
+      explanation: 'That is the ${target.name}!',
+    );
+  }
+
+  static List<int> _nearbyNumbers(int answer, int seed, {required int max}) {
+    final values = <int>{answer};
+    var offset = 1;
+    while (values.length < 3) {
+      values.add((answer + (offset.isOdd ? offset : -offset)).clamp(0, max));
+      offset++;
+    }
+    return values.toList()..shuffle(math.Random(seed));
+  }
+
+  static List<String> _letterChoices(String answer, int seed) {
+    final values = <String>{answer};
+    final base = answer.codeUnitAt(0) - 65;
+    var offset = 1;
+    while (values.length < 3) {
+      values.add(String.fromCharCode(65 + ((base + offset * 7) % 26)));
+      offset++;
+    }
+    return values.toList()..shuffle(math.Random(seed));
+  }
+
+  static String _clockEmoji(int hour, bool halfHour) {
+    final index = (hour - 1) % 12;
+    return halfHour ? _halfHourClocks[index] : _hourClocks[index];
+  }
+
+  static String _habitatEmoji(String habitat) => switch (habitat) {
+        'ocean' => '🌊',
+        'pond' => '🌿',
+        'forest' => '🌲',
+        'desert' => '🏜️',
+        'farm' => '🐄',
+        'garden' => '🌻',
+        'polar ice' => '🧳',
+        _ => '🌍',
+      };
+
   static List<int> _candidateIndexes(
     int target,
     int length,
@@ -959,4 +1461,177 @@ const _tidyItems = <_TidyItem>[
   _TidyItem('📘', 'blue book', 'books'),
   _TidyItem('📗', 'green book', 'books'),
   _TidyItem('📙', 'orange book', 'books'),
+];
+
+class _MarketItem {
+  const _MarketItem(this.emoji, this.name);
+  final String emoji;
+  final String name;
+}
+
+const _marketItems = <_MarketItem>[
+  _MarketItem('🍎', 'apple'),
+  _MarketItem('🍌', 'banana'),
+  _MarketItem('🥕', 'carrot'),
+  _MarketItem('🧸', 'teddy'),
+  _MarketItem('⚽', 'ball'),
+  _MarketItem('✏️', 'pencil'),
+  _MarketItem('📕', 'book'),
+  _MarketItem('🪁', 'kite'),
+  _MarketItem('🥪', 'sandwich'),
+  _MarketItem('🍹', 'juice'),
+  _MarketItem('🍪', 'cookie'),
+  _MarketItem('🧩', 'puzzle'),
+];
+
+class _SentenceItem {
+  const _SentenceItem(
+    this.emoji,
+    this.before,
+    this.answer,
+    this.after,
+    this.distractorOne,
+    this.distractorTwo,
+    this.mark,
+  );
+  final String emoji;
+  final String before;
+  final String answer;
+  final String after;
+  final String distractorOne;
+  final String distractorTwo;
+  final String mark;
+
+  String get completeSentence => '$before $answer $after';
+}
+
+const _sentences = <_SentenceItem>[
+  _SentenceItem('🐱', 'The cat', 'sits', 'on the mat', 'sit', 'sleep', '.'),
+  _SentenceItem('🐶', 'The dog', 'runs', 'in the park', 'run', 'reads', '.'),
+  _SentenceItem('🐦', 'A bird', 'flies', 'in the sky', 'fly', 'swims', '.'),
+  _SentenceItem('🐟', 'The fish', 'swims', 'in water', 'swim', 'walks', '.'),
+  _SentenceItem('🌙', 'The moon', 'shines', 'at night', 'shine', 'eats', '.'),
+  _SentenceItem('👧', 'Mia', 'reads', 'a story', 'read', 'jumps', '.'),
+  _SentenceItem('👦', 'Sam', 'kicks', 'the ball', 'kick', 'drinks', '.'),
+  _SentenceItem(
+      '🐝', 'The bees', 'buzz', 'near flowers', 'buzzes', 'roar', '.'),
+  _SentenceItem('🌧️', 'Why is it', 'raining', 'today', 'rain', 'yellow', '?'),
+  _SentenceItem('🎂', 'What a', 'wonderful', 'cake', 'wonder', 'slowly', '!'),
+  _SentenceItem('🚲', 'Can you', 'ride', 'a bicycle', 'rides', 'blue', '?'),
+  _SentenceItem(
+      '🌈', 'Look at the', 'bright', 'rainbow', 'brightness', 'swim', '!'),
+  _SentenceItem('👫', 'The children', 'play', 'together', 'plays', 'red', '.'),
+  _SentenceItem('🌱', 'A seed', 'grows', 'into a plant', 'grow', 'sings', '.'),
+  _SentenceItem(
+      '🐘', 'The elephant', 'has', 'a long trunk', 'have', 'are', '.'),
+];
+
+class _DailyTime {
+  const _DailyTime(
+    this.clock,
+    this.time,
+    this.spokenTime,
+    this.emoji,
+    this.activity,
+  );
+  final String clock;
+  final String time;
+  final String spokenTime;
+  final String emoji;
+  final String activity;
+}
+
+const _dailyTimes = <_DailyTime>[
+  _DailyTime('🕡', '6:30', 'half past six', '🌅', 'WAKE UP'),
+  _DailyTime('🕢', '7:30', 'half past seven', '🥣', 'BREAKFAST'),
+  _DailyTime('🕘', '9:00', 'nine o clock', '🏫', 'SCHOOL'),
+  _DailyTime('🕛', '12:00', 'twelve o clock', '🍛', 'LUNCH'),
+  _DailyTime('🕞', '3:00', 'three o clock', '⚽', 'PLAY TIME'),
+  _DailyTime('🕡', '6:00', 'six o clock', '🍽️', 'DINNER'),
+  _DailyTime('🕣', '8:30', 'half past eight', '🛌', 'BEDTIME'),
+];
+
+const _hourClocks = <String>[
+  '🕐',
+  '🕑',
+  '🕒',
+  '🕓',
+  '🕔',
+  '🕕',
+  '🕖',
+  '🕗',
+  '🕘',
+  '🕙',
+  '🕚',
+  '🕛',
+];
+
+const _halfHourClocks = <String>[
+  '🕜',
+  '🕝',
+  '🕞',
+  '🕟',
+  '🕠',
+  '🕡',
+  '🕢',
+  '🕣',
+  '🕤',
+  '🕥',
+  '🕦',
+  '🕧',
+];
+
+class _NatureItem {
+  const _NatureItem(
+    this.emoji,
+    this.name,
+    this.clue,
+    this.habitat,
+  );
+  final String emoji;
+  final String name;
+  final String clue;
+  final String habitat;
+}
+
+const _natureItems = <_NatureItem>[
+  _NatureItem(
+      '🐫', 'camel', 'I store fat in my hump and need little water', 'desert'),
+  _NatureItem('🐋', 'whale', 'I am a huge mammal that breathes air', 'ocean'),
+  _NatureItem('🐸', 'frog', 'I have moist skin and can hop and swim', 'pond'),
+  _NatureItem('🦉', 'owl', 'I hunt at night and have large eyes', 'forest'),
+  _NatureItem('🐄', 'cow', 'I eat grass and give milk', 'farm'),
+  _NatureItem(
+      '🐝', 'bee', 'I collect nectar and help flowers make seeds', 'garden'),
+  _NatureItem(
+      '🐧', 'penguin', 'I am a bird that swims but cannot fly', 'polar ice'),
+  _NatureItem('🐠', 'fish', 'I breathe with gills and have fins', 'ocean'),
+  _NatureItem('🦋', 'butterfly', 'I begin life as a caterpillar', 'garden'),
+  _NatureItem('🐒', 'monkey', 'I climb trees and use my hands', 'forest'),
+  _NatureItem(
+      '🦆', 'duck', 'I have webbed feet and waterproof feathers', 'pond'),
+  _NatureItem('🐔', 'chicken', 'I have feathers and lay eggs', 'farm'),
+  _NatureItem('🌵', 'cactus', 'My thick stem stores water', 'desert'),
+  _NatureItem(
+      '🌻', 'sunflower', 'I turn toward sunlight and make seeds', 'garden'),
+];
+
+class _ShapeItem {
+  const _ShapeItem(this.emoji, this.name, this.sides, this.description);
+  final String emoji;
+  final String name;
+  final int sides;
+  final String description;
+}
+
+const _shapes = <_ShapeItem>[
+  _ShapeItem('🔴', 'circle', 0, 'A circle is round and has no straight sides.'),
+  _ShapeItem('🟦', 'square', 4, 'A square has four equal straight sides.'),
+  _ShapeItem('🔺', 'triangle', 3, 'A triangle has three straight sides.'),
+  _ShapeItem('🟩', 'rectangle', 4,
+      'A rectangle has four sides and opposite sides match.'),
+  _ShapeItem('⭐', 'star', 10, 'A five-point star has ten outside edges.'),
+  _ShapeItem('🔷', 'diamond', 4, 'A diamond looks like a tilted square.'),
+  _ShapeItem('⬡', 'hexagon', 6, 'A hexagon has six straight sides.'),
+  _ShapeItem('🫥', 'oval', 0, 'An oval is round but stretched longer.'),
 ];

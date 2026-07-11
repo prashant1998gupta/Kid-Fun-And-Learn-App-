@@ -32,6 +32,15 @@ class LearningWorldCatalog {
     LearningWorldItem(id: 'learning_puzzle', emoji: '🧩', name: 'Puzzle box'),
     LearningWorldItem(
         id: 'learning_rainbow', emoji: '🌈', name: 'Rainbow arch'),
+    LearningWorldItem(id: 'learning_market', emoji: '🏪', name: 'Market stall'),
+    LearningWorldItem(
+        id: 'learning_spellbook', emoji: '📖', name: 'Magic word book'),
+    LearningWorldItem(
+        id: 'learning_station', emoji: '🚉', name: 'Train station'),
+    LearningWorldItem(id: 'learning_clock', emoji: '🕰️', name: 'Garden clock'),
+    LearningWorldItem(
+        id: 'learning_butterflies', emoji: '🦋', name: 'Butterfly garden'),
+    LearningWorldItem(id: 'learning_castle', emoji: '🏰', name: 'Shape castle'),
   ];
 
   static LearningWorldItem? byId(String id) {
@@ -50,6 +59,12 @@ class LearningWorldCatalog {
       'story-train' => 4,
       'letter-bakery' => 5,
       'clean-room-helper' => 6,
+      'math-market' => 7,
+      'word-wizard-workshop' => 8,
+      'sentence-train' => 9,
+      'clock-adventure' => 10,
+      'nature-detective' => 11,
+      'shape-builder' => 12,
       _ => 0,
     };
     final index = ((completedLevel - 1) * 2 + offset) % items.length;

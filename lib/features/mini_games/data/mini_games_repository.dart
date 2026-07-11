@@ -13,6 +13,7 @@ class MiniGameDef {
     required this.color,
     required this.description,
     this.learning = false,
+    this.gradeBand,
   });
 
   final String id;
@@ -21,6 +22,7 @@ class MiniGameDef {
   final int color;
   final String description;
   final bool learning;
+  final String? gradeBand;
 }
 
 class MiniGameAchievement {
@@ -112,6 +114,60 @@ const List<MiniGameDef> kMiniGames = [
     learning: true,
   ),
   MiniGameDef(
+    id: 'math-market',
+    name: 'Math Market',
+    icon: '🛒',
+    color: 0xFFFF8F00,
+    description: 'Shop with coins and catch silly change mistakes!',
+    learning: true,
+    gradeBand: 'Class 1–2',
+  ),
+  MiniGameDef(
+    id: 'word-wizard-workshop',
+    name: 'Word Wizard',
+    icon: '🧙',
+    color: 0xFF6C5CE7,
+    description: 'Repair words with beginning, ending and spelling magic!',
+    learning: true,
+    gradeBand: 'Class 1–2',
+  ),
+  MiniGameDef(
+    id: 'sentence-train',
+    name: 'Sentence Train',
+    icon: '🚂',
+    color: 0xFF1976D2,
+    description: 'Complete grammar carriages and punctuation tracks!',
+    learning: true,
+    gradeBand: 'Class 1–2',
+  ),
+  MiniGameDef(
+    id: 'clock-adventure',
+    name: 'Clock Adventure',
+    icon: '⏰',
+    color: 0xFFE91E63,
+    description: 'Read clocks and match times to everyday routines!',
+    learning: true,
+    gradeBand: 'Class 1–2',
+  ),
+  MiniGameDef(
+    id: 'nature-detective',
+    name: 'Nature Detective',
+    icon: '🔎',
+    color: 0xFF00897B,
+    description: 'Solve animal, plant and habitat mysteries!',
+    learning: true,
+    gradeBand: 'Class 1–2',
+  ),
+  MiniGameDef(
+    id: 'shape-builder',
+    name: 'Shape Builder',
+    icon: '🏗️',
+    color: 0xFF5E35B1,
+    description: 'Build with shapes, sides and repeating patterns!',
+    learning: true,
+    gradeBand: 'Class 1–2',
+  ),
+  MiniGameDef(
     id: 'infinity-loop',
     name: 'Flower Flow',
     icon: '🌸',
@@ -189,6 +245,42 @@ const List<MiniGameAchievement> kMiniGameAchievements = [
     title: 'Tidy Helper',
     description: 'Finish a Clean Room Helper level',
     icon: '🧹',
+  ),
+  MiniGameAchievement(
+    id: 'market_master',
+    title: 'Market Master',
+    description: 'Finish a Math Market level',
+    icon: '🛒',
+  ),
+  MiniGameAchievement(
+    id: 'word_wizard',
+    title: 'Word Wizard',
+    description: 'Finish a Word Wizard level',
+    icon: '🧙',
+  ),
+  MiniGameAchievement(
+    id: 'sentence_conductor',
+    title: 'Sentence Conductor',
+    description: 'Finish a Sentence Train level',
+    icon: '🚂',
+  ),
+  MiniGameAchievement(
+    id: 'time_keeper',
+    title: 'Time Keeper',
+    description: 'Finish a Clock Adventure level',
+    icon: '⏰',
+  ),
+  MiniGameAchievement(
+    id: 'nature_detective',
+    title: 'Nature Detective',
+    description: 'Finish a Nature Detective level',
+    icon: '🔎',
+  ),
+  MiniGameAchievement(
+    id: 'shape_architect',
+    title: 'Shape Architect',
+    description: 'Finish a Shape Builder level',
+    icon: '🏗️',
   ),
   MiniGameAchievement(
     id: 'game_explorer',
@@ -340,6 +432,12 @@ class MiniGamesRepository {
       'story-train' => (title: 'Finish 5 story steps', target: 5),
       'letter-bakery' => (title: 'Bake 5 starting letters', target: 5),
       'clean-room-helper' => (title: 'Put away 5 objects', target: 5),
+      'math-market' => (title: 'Solve 5 market totals', target: 5),
+      'word-wizard-workshop' => (title: 'Repair 5 words', target: 5),
+      'sentence-train' => (title: 'Complete 5 sentences', target: 5),
+      'clock-adventure' => (title: 'Read 5 clocks', target: 5),
+      'nature-detective' => (title: 'Solve 5 nature clues', target: 5),
+      'shape-builder' => (title: 'Solve 5 shape puzzles', target: 5),
       'infinity-loop' => (title: 'Solve one loop', target: 1),
       '368-chickens' => (title: 'Score 40 in Chicken Tap', target: 40),
       'stack-merge' => (title: 'Score 128 in Stack Merge', target: 128),

@@ -89,6 +89,13 @@ for low-end tablets.
   prediction, phonics, letter matching, and practical-life sorting. All five
   use the shared no-fail voice-guided engine, Teach-Pip confidence rounds,
   daily challenges, badges, and distinct Kid World reward paths.
+- [x] **M26:** Classes 1–2 Learning Adventures pass: Math Market, Word Wizard
+  Workshop, Sentence Train, Clock Adventure, Nature Detective, and Shape
+  Builder add 300 persistent levels for coin arithmetic and change, spelling,
+  grammar and punctuation, hour/half-hour clocks and routines, nature clues and
+  habitats, plus 2D-shape properties and patterns. Catalog cards carry a clear
+  Class 1–2 label and every game has voice, Teach-Pip, badges, daily goals, and
+  its own first Kid World reward.
 
 ## Quality rules for Codex follow-up work
 

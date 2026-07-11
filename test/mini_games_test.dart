@@ -198,12 +198,22 @@ void main() {
         'story-train',
         'letter-bakery',
         'clean-room-helper',
+        'math-market',
+        'word-wizard-workshop',
+        'sentence-train',
+        'clock-adventure',
+        'nature-detective',
+        'shape-builder',
       ];
       final rewards = {
         for (final id in ids) LearningWorldCatalog.rewardFor(id, 1).id,
       };
 
       expect(rewards, hasLength(ids.length));
+    });
+
+    test('all 50-level learning-adventure banks are structurally valid', () {
+      expect(LearningAdventureAudit.validateAll(), isEmpty);
     });
   });
 
@@ -320,7 +330,8 @@ void main() {
     });
   });
 
-  testWidgets('catalog and all eleven game screens render on a phone viewport',
+  testWidgets(
+      'catalog and all seventeen game screens render on a phone viewport',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -401,6 +412,30 @@ void main() {
     await render(const CleanRoomHelperGame());
     expect(find.textContaining('Level 1/50'), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await render(const MathMarketGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const WordWizardWorkshopGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const SentenceTrainGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const ClockAdventureGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const NatureDetectiveGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const ShapeBuilderGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Toy Sort always advances after a correct basket choice',
@@ -477,6 +512,12 @@ void main() {
       'mg_tutorial_story-train': true,
       'mg_tutorial_letter-bakery': true,
       'mg_tutorial_clean-room-helper': true,
+      'mg_tutorial_math-market': true,
+      'mg_tutorial_word-wizard-workshop': true,
+      'mg_tutorial_sentence-train': true,
+      'mg_tutorial_clock-adventure': true,
+      'mg_tutorial_nature-detective': true,
+      'mg_tutorial_shape-builder': true,
     });
     final preferences = await SharedPreferences.getInstance();
     tester.view.physicalSize = const Size(360, 800);
@@ -490,6 +531,12 @@ void main() {
       ('story-train', StoryTrainGame()),
       ('letter-bakery', LetterBakeryGame()),
       ('clean-room-helper', CleanRoomHelperGame()),
+      ('math-market', MathMarketGame()),
+      ('word-wizard-workshop', WordWizardWorkshopGame()),
+      ('sentence-train', SentenceTrainGame()),
+      ('clock-adventure', ClockAdventureGame()),
+      ('nature-detective', NatureDetectiveGame()),
+      ('shape-builder', ShapeBuilderGame()),
     ];
 
     for (final game in games) {

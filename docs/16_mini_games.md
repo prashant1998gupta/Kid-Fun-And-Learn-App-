@@ -7,7 +7,7 @@ breaks from the curriculum. It contains no grading or wrong-answer pressure,
 but it does share the child's wallet and growing pet so every play session has
 an emotionally meaningful reward.
 
-**Implementation status:** Complete. The catalog, eleven games, deep-linkable
+**Implementation status:** Complete. The catalog, seventeen games, deep-linkable
 routes, reactive high scores, OpenMoji art, voice tutorials, invisible adaptive
 difficulty, story goals, local co-op, no-loss play, creative mode, wallet/pet
 rewards, daily challenges, badges, physical controls, accessibility behavior,
@@ -20,12 +20,18 @@ and framework-independent rule tests are implemented.
 - First-play animated gesture guidance speaks every instruction aloud and is
   remembered locally after dismissal.
 - Solo and local **Together** modes are available across the four casual games.
-- Seven dedicated learning adventures add 350 persistent levels. Toy Sort and
+- Thirteen dedicated learning adventures add 650 persistent levels. Toy Sort and
   Feed the Pet cover classification, food, and counting; Sound Safari covers
   listening and animal sounds; Number Garden covers quantities and early
   addition; Story Train covers sequencing and prediction; Letter Bakery covers
   first sounds and upper/lowercase letters; Clean Room Helper covers practical
   classification and everyday independence.
+- Six Class 1–2 adventures extend the world into applied learning: Math Market
+  covers totals and change; Word Wizard covers beginning/ending sounds and
+  whole-word spelling; Sentence Train covers grammar and punctuation; Clock
+  Adventure covers hour/half-hour clocks and routines; Nature Detective covers
+  observation and habitats; Shape Builder covers recognition, sides, and
+  patterns.
 - Every learning level contains five to nine short prompts. Seeded shuffling and
   rotating themes prevent adjacent rounds from presenting the same sequence.
 - On selected rounds Pip deliberately makes a funny wrong guess. The child
@@ -43,7 +49,7 @@ and framework-independent rule tests are implemented.
 - Optional tilt control in Animal Family and trace gestures in Flower Flow add
   physical, memorable play.
 - One rotating local daily challenge with persistent progress.
-- Fourteen local mini-game badges plus persistent coin, XP, high-score, play, and
+- Twenty local mini-game badges plus persistent coin, XP, high-score, play, and
   pet-growth progress.
 - Local high scores and play history persist through `SharedPreferences`.
 
@@ -62,6 +68,12 @@ and framework-independent rule tests are implemented.
 | Story Train | 50 levels; illustrated event pairs; predict the logical next event; routines, nature, creativity, and self-care stories |
 | Letter Bakery | 50 levels; 26 illustrated words; first-sound matching; uppercase foundations followed by lowercase transfer |
 | Clean Room Helper | 50 levels; sort toys, clothes, dishes, bathroom items, and books into meaningful real-life places |
+| Math Market | 50 Class 1–2 levels; add two/three prices; pay with coins; calculate friendly change; practical shop stories |
+| Word Wizard Workshop | 50 Class 1–2 levels; beginning sounds, ending sounds, and whole-word spelling repair |
+| Sentence Train | 50 Class 1–2 levels; choose correct verbs and describing words; finish telling, asking, and excited sentences with punctuation |
+| Clock Adventure | 50 Class 1–2 levels; read full and half-hour clock faces; connect times to unique daily routines |
+| Nature Detective | 50 Class 1–2 levels; infer animals/plants from clues and match living things to seven habitats |
+| Shape Builder | 50 Class 1–2 levels; recognise eight shapes, count straight sides, and continue alternating patterns |
 
 Inspired by: [Infinity Loop Hex](https://poki.com/en/g/infinity-loop-hex),
 [368 Chickens](https://368chickens.com/),
@@ -83,12 +95,12 @@ Home Screen Quick Actions:
 
 ---
 
-## 2. Mini Game Catalog (11 games)
+## 2. Mini Game Catalog (17 games)
 
 Each is a **self-contained stateful widget** with no dependency on `Lesson`,
 `Question`, or curriculum data. They are pure Flutter games.
 
-The first four are casual logic/reaction breaks. The other seven are
+The first four are casual logic/reaction breaks. The other thirteen are
 learning-first preschool games whose level and world-reward progress persists
 through `MiniGamesRepository`.
 
@@ -336,12 +348,12 @@ semantic labels and large one-hand-reachable touch targets.
 ## 10. Verification
 
 - `flutter analyze`: zero issues.
-- `flutter test`: all 107 tests pass at the latest verification.
+- `flutter test`: all 108 tests pass at the latest verification.
 - Mini-game tests cover score persistence, wallet reward delivery, pet growth,
   daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
   Chicken target rules, learning-level persistence, per-child Kid World items,
   full Toy Sort/Feed the Pet progression, and phone-viewport rendering for the
-  catalog and all eleven game screens.
+  catalog and all seventeen game screens.
 
 ---
 
@@ -359,3 +371,9 @@ semantic labels and large one-hand-reachable touch targets.
 - `/mini-games/story-train`
 - `/mini-games/letter-bakery`
 - `/mini-games/clean-room-helper`
+- `/mini-games/math-market`
+- `/mini-games/word-wizard-workshop`
+- `/mini-games/sentence-train`
+- `/mini-games/clock-adventure`
+- `/mini-games/nature-detective`
+- `/mini-games/shape-builder`

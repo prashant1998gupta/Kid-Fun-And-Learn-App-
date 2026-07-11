@@ -108,6 +108,12 @@ class MiniGamesScreen extends ConsumerWidget {
       'story-train' => AppRoutes.storyTrain,
       'letter-bakery' => AppRoutes.letterBakery,
       'clean-room-helper' => AppRoutes.cleanRoomHelper,
+      'math-market' => AppRoutes.mathMarket,
+      'word-wizard-workshop' => AppRoutes.wordWizard,
+      'sentence-train' => AppRoutes.sentenceTrain,
+      'clock-adventure' => AppRoutes.clockAdventure,
+      'nature-detective' => AppRoutes.natureDetective,
+      'shape-builder' => AppRoutes.shapeBuilder,
       'infinity-loop' => AppRoutes.infinityLoop,
       '368-chickens' => AppRoutes.chickenTap,
       'stack-merge' => AppRoutes.stackMerge,
@@ -376,7 +382,9 @@ class _GameCard extends StatelessWidget {
     final deep = Color.lerp(base, Colors.black, 0.22)!;
     final solved = highScore > 0;
     final status = game.learning
-        ? 'Level ${learningLevel ?? 1}/50'
+        ? game.gradeBand == null
+            ? 'Level ${learningLevel ?? 1}/50'
+            : '${game.gradeBand} • L${learningLevel ?? 1}'
         : solved
             ? (game.id == 'infinity-loop' ? '✓ Solved' : '🏆 $highScore')
             : 'Play!';
