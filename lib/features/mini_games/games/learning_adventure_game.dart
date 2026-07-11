@@ -27,6 +27,12 @@ enum LearningAdventureType {
   clockAdventure,
   natureDetective,
   shapeBuilder,
+  fractionCafe,
+  multiplicationKingdom,
+  grammarDetective,
+  codeRobot,
+  scienceLab,
+  mapQuest,
 }
 
 extension LearningAdventureTypeData on LearningAdventureType {
@@ -42,6 +48,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.clockAdventure => 'clock-adventure',
         LearningAdventureType.natureDetective => 'nature-detective',
         LearningAdventureType.shapeBuilder => 'shape-builder',
+        LearningAdventureType.fractionCafe => 'fraction-cafe',
+        LearningAdventureType.multiplicationKingdom => 'multiplication-kingdom',
+        LearningAdventureType.grammarDetective => 'grammar-detective',
+        LearningAdventureType.codeRobot => 'code-the-robot',
+        LearningAdventureType.scienceLab => 'science-machine-lab',
+        LearningAdventureType.mapQuest => 'map-quest',
       };
 
   String get title => switch (this) {
@@ -56,6 +68,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.clockAdventure => 'Clock Adventure',
         LearningAdventureType.natureDetective => 'Nature Detective',
         LearningAdventureType.shapeBuilder => 'Shape Builder',
+        LearningAdventureType.fractionCafe => 'Pizza Fraction Café',
+        LearningAdventureType.multiplicationKingdom => 'Multiplication Kingdom',
+        LearningAdventureType.grammarDetective => 'Grammar Detective',
+        LearningAdventureType.codeRobot => 'Code the Robot',
+        LearningAdventureType.scienceLab => 'Science Machine Lab',
+        LearningAdventureType.mapQuest => 'Map Quest',
       };
 
   String get icon => switch (this) {
@@ -70,6 +88,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.clockAdventure => '⏰',
         LearningAdventureType.natureDetective => '🔎',
         LearningAdventureType.shapeBuilder => '🏗️',
+        LearningAdventureType.fractionCafe => '🍕',
+        LearningAdventureType.multiplicationKingdom => '🏰',
+        LearningAdventureType.grammarDetective => '🕵️',
+        LearningAdventureType.codeRobot => '🤖',
+        LearningAdventureType.scienceLab => '🧪',
+        LearningAdventureType.mapQuest => '🗺️',
       };
 
   String get mascot => switch (this) {
@@ -84,6 +108,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.clockAdventure => '🐰',
         LearningAdventureType.natureDetective => '🐻',
         LearningAdventureType.shapeBuilder => '🦖',
+        LearningAdventureType.fractionCafe => '🧑‍🍳',
+        LearningAdventureType.multiplicationKingdom => '🐉',
+        LearningAdventureType.grammarDetective => '🦉',
+        LearningAdventureType.codeRobot => '🤖',
+        LearningAdventureType.scienceLab => '🧑‍🔬',
+        LearningAdventureType.mapQuest => '🦜',
       };
 
   String get achievementId => switch (this) {
@@ -98,6 +128,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.clockAdventure => 'time_keeper',
         LearningAdventureType.natureDetective => 'nature_detective',
         LearningAdventureType.shapeBuilder => 'shape_architect',
+        LearningAdventureType.fractionCafe => 'fraction_chef',
+        LearningAdventureType.multiplicationKingdom => 'times_table_knight',
+        LearningAdventureType.grammarDetective => 'grammar_sleuth',
+        LearningAdventureType.codeRobot => 'robot_coder',
+        LearningAdventureType.scienceLab => 'junior_scientist',
+        LearningAdventureType.mapQuest => 'map_explorer',
       };
 
   WorldTheme get worldTheme => switch (this) {
@@ -112,6 +148,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.clockAdventure => WorldTheme.candy,
         LearningAdventureType.natureDetective => WorldTheme.jungle,
         LearningAdventureType.shapeBuilder => WorldTheme.space,
+        LearningAdventureType.fractionCafe => WorldTheme.candy,
+        LearningAdventureType.multiplicationKingdom => WorldTheme.aurora,
+        LearningAdventureType.grammarDetective => WorldTheme.night,
+        LearningAdventureType.codeRobot => WorldTheme.space,
+        LearningAdventureType.scienceLab => WorldTheme.ocean,
+        LearningAdventureType.mapQuest => WorldTheme.jungle,
       };
 
   Color get accent => switch (this) {
@@ -126,6 +168,12 @@ extension LearningAdventureTypeData on LearningAdventureType {
         LearningAdventureType.clockAdventure => const Color(0xFFE91E63),
         LearningAdventureType.natureDetective => const Color(0xFF00897B),
         LearningAdventureType.shapeBuilder => const Color(0xFF5E35B1),
+        LearningAdventureType.fractionCafe => const Color(0xFFFF7043),
+        LearningAdventureType.multiplicationKingdom => const Color(0xFF7B1FA2),
+        LearningAdventureType.grammarDetective => const Color(0xFF455A64),
+        LearningAdventureType.codeRobot => const Color(0xFF1565C0),
+        LearningAdventureType.scienceLab => const Color(0xFF00838F),
+        LearningAdventureType.mapQuest => const Color(0xFF2E7D32),
       };
 
   String get tutorial => switch (this) {
@@ -151,6 +199,18 @@ extension LearningAdventureTypeData on LearningAdventureType {
           'Read or listen to the nature clue and choose the best answer.',
         LearningAdventureType.shapeBuilder =>
           'Study the shapes, sides, and patterns, then choose the right piece.',
+        LearningAdventureType.fractionCafe =>
+          'Look at the pizza parts, then choose the matching fraction.',
+        LearningAdventureType.multiplicationKingdom =>
+          'Count equal groups and solve the multiplication or division mission.',
+        LearningAdventureType.grammarDetective =>
+          'Inspect the sentence clue and choose the correct grammar evidence.',
+        LearningAdventureType.codeRobot =>
+          'Read the robot commands, predict the result, and fix silly bugs.',
+        LearningAdventureType.scienceLab =>
+          'Study the experiment clue and choose the scientific explanation.',
+        LearningAdventureType.mapQuest =>
+          'Use directions, coordinates, distance, and map symbols to find the answer.',
       };
 }
 
@@ -250,6 +310,60 @@ class ShapeBuilderGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const LearningAdventureGame(
         type: LearningAdventureType.shapeBuilder,
+      );
+}
+
+class FractionCafeGame extends StatelessWidget {
+  const FractionCafeGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.fractionCafe,
+      );
+}
+
+class MultiplicationKingdomGame extends StatelessWidget {
+  const MultiplicationKingdomGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.multiplicationKingdom,
+      );
+}
+
+class GrammarDetectiveGame extends StatelessWidget {
+  const GrammarDetectiveGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.grammarDetective,
+      );
+}
+
+class CodeTheRobotGame extends StatelessWidget {
+  const CodeTheRobotGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.codeRobot,
+      );
+}
+
+class ScienceMachineLabGame extends StatelessWidget {
+  const ScienceMachineLabGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.scienceLab,
+      );
+}
+
+class MapQuestGame extends StatelessWidget {
+  const MapQuestGame({super.key});
+
+  @override
+  Widget build(BuildContext context) => const LearningAdventureGame(
+        type: LearningAdventureType.mapQuest,
       );
 }
 
@@ -790,6 +904,13 @@ class _AdventureContent {
         LearningAdventureType.clockAdventure => _clock(level, round),
         LearningAdventureType.natureDetective => _nature(level, round),
         LearningAdventureType.shapeBuilder => _shape(level, round),
+        LearningAdventureType.fractionCafe => _fraction(level, round),
+        LearningAdventureType.multiplicationKingdom =>
+          _multiplication(level, round),
+        LearningAdventureType.grammarDetective => _grammar(level, round),
+        LearningAdventureType.codeRobot => _code(level, round),
+        LearningAdventureType.scienceLab => _science(level, round),
+        LearningAdventureType.mapQuest => _map(level, round),
       };
 
   static _AdventureRound _sound(int level, int round) {
@@ -1261,6 +1382,323 @@ class _AdventureContent {
     );
   }
 
+  static _AdventureRound _fraction(int level, int round) {
+    final denominators =
+        level <= 12 ? const [2, 3, 4] : const [2, 3, 4, 5, 6, 8];
+    final denominator = denominators[(level + round * 2) % denominators.length];
+    final numerator = 1 + ((level * 3 + round) % (denominator - 1));
+    final addition = level > 34 && (level + round).isEven;
+    final equivalent = !addition && level > 18 && round.isOdd;
+    if (addition) {
+      final first = 1 + ((level + round) % math.max(1, denominator - 2));
+      final second = 1 + ((level * 2 + round) % (denominator - first));
+      final answerTop = first + second;
+      final answer = '$answerTop/$denominator';
+      final choices = <String>{
+        answer,
+        '${math.max(1, answerTop - 1)}/$denominator',
+        '$answerTop/${denominator + 1}',
+      }.toList()
+        ..shuffle(math.Random(level * 503 + round));
+      return _AdventureRound(
+        skill: 'Add like fractions',
+        prompt: 'How much pizza altogether?',
+        spokenPrompt:
+            'Add $first $denominator-ths and $second $denominator-ths. The pieces are the same size.',
+        scene: [
+          for (var i = 0; i < first; i++) '🍕',
+          '➕',
+          for (var i = 0; i < second; i++) '🍕',
+        ],
+        sceneLabel: '$first/$denominator + $second/$denominator',
+        choices: [for (final value in choices) _AdventureChoice(value)],
+        correctIndex: choices.indexOf(answer),
+        hint: 'Keep the denominator $denominator and add the top numbers.',
+        explanation: '$first/$denominator + $second/$denominator = $answer!',
+      );
+    }
+    if (equivalent) {
+      final doubled = '${numerator * 2}/${denominator * 2}';
+      final choiceSet = <String>{
+        doubled,
+        '${numerator + 1}/${denominator * 2}',
+        '${numerator * 2}/${denominator + 1}',
+      };
+      if (choiceSet.length < 3) {
+        choiceSet.add('$numerator/${denominator * 2}');
+      }
+      final choices = choiceSet.toList()
+        ..shuffle(math.Random(level * 509 + round));
+      return _AdventureRound(
+        skill: 'Equivalent fractions',
+        prompt: 'Which fraction is equal?',
+        spokenPrompt:
+            'Which fraction has the same value as $numerator over $denominator?',
+        scene: ['🍕', '⚖️', '🍕'],
+        sceneLabel: '$numerator/$denominator = ?',
+        choices: [for (final value in choices) _AdventureChoice(value)],
+        correctIndex: choices.indexOf(doubled),
+        hint: 'Multiply the top and bottom by the same number.',
+        explanation: '$numerator/$denominator equals $doubled!',
+      );
+    }
+    final answer = '$numerator/$denominator';
+    final choices = <String>{
+      answer,
+      '${math.max(1, numerator - 1)}/$denominator',
+      '$numerator/${denominator + 1}',
+    }.toList();
+    while (choices.length < 3) {
+      choices.add('${numerator + 1}/$denominator');
+    }
+    choices.shuffle(math.Random(level * 499 + round));
+    return _AdventureRound(
+      skill: 'Read fractions of a whole',
+      prompt: 'What fraction is served?',
+      spokenPrompt:
+          '$numerator of $denominator equal pizza pieces are served. What fraction is that?',
+      scene: [
+        for (var i = 0; i < numerator; i++) '🍕',
+        for (var i = numerator; i < denominator; i++) '▫️',
+      ],
+      sceneLabel: '$numerator OF $denominator EQUAL PIECES',
+      choices: [for (final value in choices) _AdventureChoice(value)],
+      correctIndex: choices.indexOf(answer),
+      hint:
+          'The top number counts served pieces. The bottom counts all pieces.',
+      explanation: '$numerator out of $denominator is $answer!',
+    );
+  }
+
+  static _AdventureRound _multiplication(int level, int round) {
+    final maxFactor = level <= 12
+        ? 5
+        : level <= 28
+            ? 10
+            : 12;
+    final first = 2 + ((level + round * 3) % (maxFactor - 1));
+    final second = 2 + ((level * 2 + round) % (maxFactor - 1));
+    final product = first * second;
+    final division = level > 18 && (level + round).isEven;
+    final missingFactor = level > 35 && !division && round.isOdd;
+    final answer = division
+        ? second
+        : missingFactor
+            ? first
+            : product;
+    final numbers = _nearbyNumbers(answer, level * 521 + round, max: 144);
+    return _AdventureRound(
+      skill: division
+          ? 'Division as equal sharing'
+          : missingFactor
+              ? 'Find a missing factor'
+              : 'Multiplication facts',
+      prompt: division
+          ? '$product ÷ $first = ?'
+          : missingFactor
+              ? '? × $second = $product'
+              : '$first × $second = ?',
+      spokenPrompt: division
+          ? 'Share $product objects into $first equal groups. How many are in each group?'
+          : missingFactor
+              ? 'What number times $second makes $product?'
+              : 'There are $first equal groups of $second. How many altogether?',
+      scene: [
+        for (var i = 0; i < math.min(first, 8); i++) '🛡️',
+        '×',
+        '$second',
+      ],
+      sceneLabel: division
+          ? '$product SHARED INTO $first GROUPS'
+          : '$first GROUPS OF $second',
+      choices: [for (final value in numbers) _AdventureChoice('$value')],
+      correctIndex: numbers.indexOf(answer),
+      hint: division
+          ? 'Use the multiplication fact $first × $second = $product.'
+          : 'Skip-count by $second, $first times.',
+      explanation: division
+          ? '$product ÷ $first = $answer!'
+          : '$first × $second = $product!',
+    );
+  }
+
+  static _AdventureRound _grammar(int level, int round) {
+    final question =
+        _grammarQuestions[(level * 7 + round * 3) % _grammarQuestions.length];
+    final choices = <String>[
+      question.answer,
+      question.distractorOne,
+      question.distractorTwo,
+    ]..shuffle(math.Random(level * 523 + round));
+    return _AdventureRound(
+      skill: question.skill,
+      prompt: question.prompt,
+      spokenPrompt: question.spokenPrompt,
+      scene: [question.emoji, '🔎', '📖'],
+      sceneLabel: question.sentence.toUpperCase(),
+      choices: [for (final choice in choices) _AdventureChoice(choice)],
+      correctIndex: choices.indexOf(question.answer),
+      hint: question.hint,
+      explanation: question.explanation,
+    );
+  }
+
+  static _AdventureRound _code(int level, int round) {
+    final loopMode = level > 18 && (level + round).isEven;
+    final debugMode = level > 35 && !loopMode && round.isOdd;
+    if (loopMode) {
+      final repeats = 2 + ((level + round) % 4);
+      final moves = 1 + ((level * 2 + round) % 3);
+      final answer = repeats * moves;
+      final numbers = _nearbyNumbers(answer, level * 541 + round, max: 20);
+      return _AdventureRound(
+        skill: 'Loops and repeated commands',
+        prompt: 'Where does the robot finish?',
+        spokenPrompt:
+            'Repeat move $moves steps, $repeats times. How many steps altogether?',
+        scene: ['🤖', '🔁', '$repeats', '➡️', '$moves', '⭐'],
+        sceneLabel: 'REPEAT $repeats [ MOVE $moves ]',
+        choices: [for (final number in numbers) _AdventureChoice('$number')],
+        correctIndex: numbers.indexOf(answer),
+        hint: 'Add $moves once for every repeat.',
+        explanation: 'The robot moves $answer steps!',
+      );
+    }
+    final target = 3 + ((level * 3 + round) % 7);
+    if (debugMode) {
+      final actual = target + ((level + round).isEven ? 1 : -1);
+      final answer = actual > target ? 'REMOVE 1' : 'ADD 1';
+      final choices = <String>{answer, 'TURN LEFT', 'REPEAT AGAIN'}.toList()
+        ..shuffle(math.Random(level * 547 + round));
+      return _AdventureRound(
+        skill: 'Debug an algorithm',
+        prompt: 'Which fix reaches the star?',
+        spokenPrompt:
+            'The star is $target steps away, but the code moves $actual steps. Which fix works?',
+        scene: ['🤖', '➡️', '$actual', '🐛', '⭐'],
+        sceneLabel: 'TARGET $target • CODE MOVES $actual',
+        choices: [for (final choice in choices) _AdventureChoice(choice)],
+        correctIndex: choices.indexOf(answer),
+        hint: 'Compare the target distance with the coded distance.',
+        explanation: '$answer fixes the code!',
+      );
+    }
+    final commands = <String>{
+      'MOVE $target',
+      'MOVE ${target + 1}',
+      'MOVE ${target - 1}'
+    }.toList()
+      ..shuffle(math.Random(level * 539 + round));
+    return _AdventureRound(
+      skill: 'Sequence movement commands',
+      prompt: 'Which command reaches the star?',
+      spokenPrompt:
+          'The star is $target spaces ahead. Choose the exact move command.',
+      scene: ['🤖', for (var i = 0; i < math.min(target, 7); i++) '▫️', '⭐'],
+      sceneLabel: '$target SPACES FORWARD',
+      choices: [for (final command in commands) _AdventureChoice(command)],
+      correctIndex: commands.indexOf('MOVE $target'),
+      hint: 'Count every space between the robot and star.',
+      explanation: 'MOVE $target reaches the star exactly!',
+    );
+  }
+
+  static _AdventureRound _science(int level, int round) {
+    final question =
+        _scienceQuestions[(level * 5 + round * 7) % _scienceQuestions.length];
+    final choices = <String>[
+      question.answer,
+      question.distractorOne,
+      question.distractorTwo,
+    ]..shuffle(math.Random(level * 557 + round));
+    return _AdventureRound(
+      skill: question.skill,
+      prompt: question.prompt,
+      spokenPrompt: question.spokenPrompt,
+      scene: [question.emoji, '🧪', '💡'],
+      sceneLabel: question.sceneLabel.toUpperCase(),
+      choices: [for (final choice in choices) _AdventureChoice(choice)],
+      correctIndex: choices.indexOf(question.answer),
+      hint: question.hint,
+      explanation: question.explanation,
+    );
+  }
+
+  static _AdventureRound _map(int level, int round) {
+    final coordinateMode = level > 18 && (level + round).isEven;
+    final distanceMode = level > 35 && !coordinateMode && round.isOdd;
+    if (distanceMode) {
+      final first = 2 + ((level + round) % 7);
+      final second = 2 + ((level * 2 + round) % 7);
+      final answer = first + second;
+      final numbers = _nearbyNumbers(answer, level * 577 + round, max: 20);
+      return _AdventureRound(
+        skill: 'Map distance and scale',
+        prompt: 'How far is the full journey?',
+        spokenPrompt:
+            'Walk $first kilometres to the bridge, then $second kilometres to the camp. How far altogether?',
+        scene: ['🏕️', '━', '$first km', '🌉', '━', '$second km', '🏕️'],
+        sceneLabel: '$first km + $second km',
+        choices: [for (final value in numbers) _AdventureChoice('$value km')],
+        correctIndex: numbers.indexOf(answer),
+        hint: 'Add both parts of the route.',
+        explanation: 'The journey is $answer kilometres!',
+      );
+    }
+    if (coordinateMode) {
+      final row = 1 + ((level * 2 + round) % 3);
+      final east = (level + round).isEven;
+      final column = east ? (level + round) % 2 : 1 + ((level + round) % 2);
+      final nextColumn = column + (east ? 1 : -1);
+      final answer = '${String.fromCharCode(65 + nextColumn)}$row';
+      final choices = <String>{
+        answer,
+        '${String.fromCharCode(65 + column)}${row == 3 ? 2 : row + 1}',
+        '${String.fromCharCode(65 + ((nextColumn + 1) % 3))}$row',
+      }.toList();
+      while (choices.length < 3) {
+        choices.add('${String.fromCharCode(65 + column)}${row == 1 ? 3 : 1}');
+      }
+      choices.shuffle(math.Random(level * 571 + round));
+      return _AdventureRound(
+        skill: 'Grid coordinates',
+        prompt: 'Which square do you reach?',
+        spokenPrompt:
+            'Start at ${String.fromCharCode(65 + column)}$row and move one square ${east ? 'east' : 'west'}. Where do you land?',
+        scene: ['🗺️', east ? '➡️' : '⬅️', '🎯'],
+        sceneLabel:
+            'START ${String.fromCharCode(65 + column)}$row • MOVE ${east ? 'EAST' : 'WEST'}',
+        choices: [for (final value in choices) _AdventureChoice(value)],
+        correctIndex: choices.indexOf(answer),
+        hint: 'Letters move left and right; numbers stay on the same row.',
+        explanation: 'You arrive at $answer!',
+      );
+    }
+    final directionIndex = (level * 3 + round) % _directions.length;
+    final direction = _directions[directionIndex];
+    final candidates = _candidateIndexes(
+      directionIndex,
+      _directions.length,
+      level,
+      round,
+    );
+    return _AdventureRound(
+      skill: 'Compass directions',
+      prompt: 'Which direction does the arrow point?',
+      spokenPrompt: 'Use the compass. Which direction does this arrow show?',
+      scene: ['🧭', direction.arrow, '🗺️'],
+      sceneLabel: 'NORTH IS AT THE TOP',
+      choices: [
+        for (final candidate in candidates)
+          _AdventureChoice(
+              _directions[candidate].name, _directions[candidate].arrow),
+      ],
+      correctIndex: candidates.indexOf(directionIndex),
+      hint: 'North is up, south is down, east is right, and west is left.',
+      explanation: 'The arrow points ${direction.name.toLowerCase()}!',
+    );
+  }
+
   static List<int> _nearbyNumbers(int answer, int seed, {required int max}) {
     final values = <int>{answer};
     var offset = 1;
@@ -1634,4 +2072,408 @@ const _shapes = <_ShapeItem>[
   _ShapeItem('🔷', 'diamond', 4, 'A diamond looks like a tilted square.'),
   _ShapeItem('⬡', 'hexagon', 6, 'A hexagon has six straight sides.'),
   _ShapeItem('🫥', 'oval', 0, 'An oval is round but stretched longer.'),
+];
+
+class _GrammarQuestion {
+  const _GrammarQuestion({
+    required this.emoji,
+    required this.skill,
+    required this.sentence,
+    required this.prompt,
+    required this.spokenPrompt,
+    required this.answer,
+    required this.distractorOne,
+    required this.distractorTwo,
+    required this.hint,
+    required this.explanation,
+  });
+  final String emoji;
+  final String skill;
+  final String sentence;
+  final String prompt;
+  final String spokenPrompt;
+  final String answer;
+  final String distractorOne;
+  final String distractorTwo;
+  final String hint;
+  final String explanation;
+}
+
+const _grammarQuestions = <_GrammarQuestion>[
+  _GrammarQuestion(
+      emoji: '🐶',
+      skill: 'Parts of speech',
+      sentence: 'The playful dog barked',
+      prompt: 'Which word is the noun?',
+      spokenPrompt:
+          'In the sentence, the playful dog barked, which word names an animal?',
+      answer: 'DOG',
+      distractorOne: 'PLAYFUL',
+      distractorTwo: 'BARKED',
+      hint: 'A noun names a person, place, animal, or thing.',
+      explanation: 'Dog is the noun.'),
+  _GrammarQuestion(
+      emoji: '🏃',
+      skill: 'Parts of speech',
+      sentence: 'Mia runs quickly',
+      prompt: 'Which word is the verb?',
+      spokenPrompt: 'In Mia runs quickly, which word shows the action?',
+      answer: 'RUNS',
+      distractorOne: 'MIA',
+      distractorTwo: 'QUICKLY',
+      hint: 'A verb shows an action or state.',
+      explanation: 'Runs is the action verb.'),
+  _GrammarQuestion(
+      emoji: '🌺',
+      skill: 'Adjectives',
+      sentence: 'The red flower bloomed',
+      prompt: 'Which word describes the flower?',
+      spokenPrompt: 'Which word tells us more about the flower?',
+      answer: 'RED',
+      distractorOne: 'FLOWER',
+      distractorTwo: 'BLOOMED',
+      hint: 'An adjective describes a noun.',
+      explanation: 'Red is the describing adjective.'),
+  _GrammarQuestion(
+      emoji: '🐢',
+      skill: 'Adverbs',
+      sentence: 'The turtle walked slowly',
+      prompt: 'Which word tells how it walked?',
+      spokenPrompt: 'Which word tells how the turtle walked?',
+      answer: 'SLOWLY',
+      distractorOne: 'TURTLE',
+      distractorTwo: 'WALKED',
+      hint: 'Many adverbs tell how an action happens.',
+      explanation: 'Slowly tells how it walked.'),
+  _GrammarQuestion(
+      emoji: '👧',
+      skill: 'Pronouns',
+      sentence: 'Mia has a book. She reads it.',
+      prompt: 'Which word replaces Mia?',
+      spokenPrompt: 'Which pronoun replaces the name Mia?',
+      answer: 'SHE',
+      distractorOne: 'BOOK',
+      distractorTwo: 'IT',
+      hint: 'Use a pronoun instead of repeating a name.',
+      explanation: 'She replaces Mia.'),
+  _GrammarQuestion(
+      emoji: '👦',
+      skill: 'Subject-verb agreement',
+      sentence: 'Sam ___ to school',
+      prompt: 'Choose the correct verb.',
+      spokenPrompt: 'Sam, blank, to school. Which verb agrees with Sam?',
+      answer: 'WALKS',
+      distractorOne: 'WALK',
+      distractorTwo: 'WALKING',
+      hint: 'A single person often takes a verb ending in s.',
+      explanation: 'Sam walks to school.'),
+  _GrammarQuestion(
+      emoji: '👫',
+      skill: 'Subject-verb agreement',
+      sentence: 'The children ___ outside',
+      prompt: 'Choose the correct verb.',
+      spokenPrompt:
+          'The children, blank, outside. Which verb agrees with children?',
+      answer: 'PLAY',
+      distractorOne: 'PLAYS',
+      distractorTwo: 'PLAYING',
+      hint: 'A plural subject uses play, without s.',
+      explanation: 'The children play outside.'),
+  _GrammarQuestion(
+      emoji: '⏪',
+      skill: 'Past tense',
+      sentence: 'Yesterday we ___ football',
+      prompt: 'Choose the past-tense verb.',
+      spokenPrompt: 'Yesterday we blank football. Which word shows the past?',
+      answer: 'PLAYED',
+      distractorOne: 'PLAY',
+      distractorTwo: 'WILL PLAY',
+      hint: 'Yesterday tells us the action already happened.',
+      explanation: 'Played is past tense.'),
+  _GrammarQuestion(
+      emoji: '⏩',
+      skill: 'Future tense',
+      sentence: 'Tomorrow I ___ my aunt',
+      prompt: 'Choose the future-tense verb.',
+      spokenPrompt: 'Tomorrow I blank my aunt. Which phrase shows the future?',
+      answer: 'WILL VISIT',
+      distractorOne: 'VISITED',
+      distractorTwo: 'VISIT',
+      hint: 'Will can show an action that has not happened yet.',
+      explanation: 'Will visit is future tense.'),
+  _GrammarQuestion(
+      emoji: '❓',
+      skill: 'Sentence types',
+      sentence: 'Where is my pencil',
+      prompt: 'Which punctuation mark belongs?',
+      spokenPrompt: 'Where is my pencil? Which ending mark belongs?',
+      answer: '?',
+      distractorOne: '.',
+      distractorTwo: '!',
+      hint: 'A direct question ends with a question mark.',
+      explanation: 'The sentence needs a question mark.'),
+  _GrammarQuestion(
+      emoji: '🎉',
+      skill: 'Sentence types',
+      sentence: 'What an amazing surprise',
+      prompt: 'Which punctuation mark belongs?',
+      spokenPrompt:
+          'What an amazing surprise! Which ending mark shows excitement?',
+      answer: '!',
+      distractorOne: '.',
+      distractorTwo: '?',
+      hint: 'Strong excitement can end with an exclamation mark.',
+      explanation: 'The sentence needs an exclamation mark.'),
+  _GrammarQuestion(
+      emoji: '📍',
+      skill: 'Prepositions',
+      sentence: 'The ball is under the table',
+      prompt: 'Which word shows position?',
+      spokenPrompt: 'Which word tells where the ball is?',
+      answer: 'UNDER',
+      distractorOne: 'BALL',
+      distractorTwo: 'TABLE',
+      hint: 'A preposition can show position.',
+      explanation: 'Under shows the position.'),
+  _GrammarQuestion(
+      emoji: '🔗',
+      skill: 'Conjunctions',
+      sentence: 'I like apples ___ bananas',
+      prompt: 'Which joining word fits?',
+      spokenPrompt: 'I like apples, blank, bananas. Choose the joining word.',
+      answer: 'AND',
+      distractorOne: 'BUT',
+      distractorTwo: 'BECAUSE',
+      hint: 'Use and to join two things you like.',
+      explanation: 'And joins apples and bananas.'),
+  _GrammarQuestion(
+      emoji: '🌧️',
+      skill: 'Conjunctions',
+      sentence: 'I took an umbrella ___ it was raining',
+      prompt: 'Which joining word explains why?',
+      spokenPrompt:
+          'I took an umbrella, blank, it was raining. Which word gives the reason?',
+      answer: 'BECAUSE',
+      distractorOne: 'AND',
+      distractorTwo: 'OR',
+      hint: 'Because introduces a reason.',
+      explanation: 'Because explains the reason.'),
+  _GrammarQuestion(
+      emoji: '📚',
+      skill: 'Plural nouns',
+      sentence: 'One story, two ___',
+      prompt: 'Choose the correct plural.',
+      spokenPrompt: 'One story, two what? Choose the plural form.',
+      answer: 'STORIES',
+      distractorOne: 'STORYS',
+      distractorTwo: 'STORY',
+      hint: 'Change consonant y to ies.',
+      explanation: 'The plural of story is stories.'),
+];
+
+class _ScienceQuestion {
+  const _ScienceQuestion({
+    required this.emoji,
+    required this.skill,
+    required this.sceneLabel,
+    required this.prompt,
+    required this.spokenPrompt,
+    required this.answer,
+    required this.distractorOne,
+    required this.distractorTwo,
+    required this.hint,
+    required this.explanation,
+  });
+  final String emoji;
+  final String skill;
+  final String sceneLabel;
+  final String prompt;
+  final String spokenPrompt;
+  final String answer;
+  final String distractorOne;
+  final String distractorTwo;
+  final String hint;
+  final String explanation;
+}
+
+const _scienceQuestions = <_ScienceQuestion>[
+  _ScienceQuestion(
+      emoji: '🧊',
+      skill: 'States of matter',
+      sceneLabel: 'Ice warms in the sun',
+      prompt: 'What change happens?',
+      spokenPrompt: 'Ice warms in the sun. What happens to it?',
+      answer: 'IT MELTS',
+      distractorOne: 'IT FREEZES',
+      distractorTwo: 'IT GROWS',
+      hint: 'Heating changes solid ice into liquid water.',
+      explanation: 'The ice melts into water.'),
+  _ScienceQuestion(
+      emoji: '💧',
+      skill: 'States of matter',
+      sceneLabel: 'Water goes into a freezer',
+      prompt: 'What change happens?',
+      spokenPrompt: 'Liquid water is placed in a freezer. What happens?',
+      answer: 'IT FREEZES',
+      distractorOne: 'IT MELTS',
+      distractorTwo: 'IT BURNS',
+      hint: 'Cooling water enough makes it solid.',
+      explanation: 'The water freezes into ice.'),
+  _ScienceQuestion(
+      emoji: '💨',
+      skill: 'States of matter',
+      sceneLabel: 'Steam spreads through the air',
+      prompt: 'Which state is steam?',
+      spokenPrompt:
+          'Steam spreads and fills space. Which state of matter is it?',
+      answer: 'GAS',
+      distractorOne: 'SOLID',
+      distractorTwo: 'LIQUID',
+      hint: 'A gas spreads to fill its container.',
+      explanation: 'Steam is water vapour, a gas.'),
+  _ScienceQuestion(
+      emoji: '🧲',
+      skill: 'Forces and magnets',
+      sceneLabel: 'A magnet nears an iron nail',
+      prompt: 'What will happen?',
+      spokenPrompt: 'A magnet moves close to an iron nail. What will happen?',
+      answer: 'THE NAIL IS ATTRACTED',
+      distractorOne: 'THE NAIL MELTS',
+      distractorTwo: 'NOTHING CAN MOVE',
+      hint: 'Iron is attracted to a magnet.',
+      explanation: 'The magnet attracts the iron nail.'),
+  _ScienceQuestion(
+      emoji: '🛤️',
+      skill: 'Forces and motion',
+      sceneLabel: 'A ball rolls down a slope',
+      prompt: 'Which force pulls it downward?',
+      spokenPrompt: 'Which force pulls the rolling ball toward Earth?',
+      answer: 'GRAVITY',
+      distractorOne: 'MAGNETISM',
+      distractorTwo: 'ELECTRICITY',
+      hint: 'This force pulls objects toward Earth.',
+      explanation: 'Gravity pulls the ball downward.'),
+  _ScienceQuestion(
+      emoji: '💡',
+      skill: 'Electric circuits',
+      sceneLabel: 'Battery, wires and bulb form a closed loop',
+      prompt: 'Why does the bulb light?',
+      spokenPrompt: 'Why does a bulb light in a complete circuit?',
+      answer: 'THE CIRCUIT IS CLOSED',
+      distractorOne: 'THE WIRE IS CUT',
+      distractorTwo: 'THERE IS NO BATTERY',
+      hint: 'Electric current needs an unbroken path.',
+      explanation: 'A closed circuit lets current flow.'),
+  _ScienceQuestion(
+      emoji: '🪝',
+      skill: 'Simple machines',
+      sceneLabel: 'A ramp helps load a heavy box',
+      prompt: 'What simple machine is the ramp?',
+      spokenPrompt: 'A ramp makes lifting easier. What simple machine is it?',
+      answer: 'INCLINED PLANE',
+      distractorOne: 'PULLEY',
+      distractorTwo: 'LEVER',
+      hint: 'It is a flat surface set at an angle.',
+      explanation: 'A ramp is an inclined plane.'),
+  _ScienceQuestion(
+      emoji: '⚖️',
+      skill: 'Simple machines',
+      sceneLabel: 'A seesaw turns around a middle point',
+      prompt: 'What simple machine is it?',
+      spokenPrompt: 'A seesaw moves around a fixed middle point. What is it?',
+      answer: 'LEVER',
+      distractorOne: 'WHEEL',
+      distractorTwo: 'SCREW',
+      hint: 'A lever pivots around a fulcrum.',
+      explanation: 'A seesaw is a lever.'),
+  _ScienceQuestion(
+      emoji: '🌱',
+      skill: 'Plant science',
+      sceneLabel: 'A plant stands near a sunny window',
+      prompt: 'Why does it need light?',
+      spokenPrompt: 'Why does a green plant need sunlight?',
+      answer: 'TO MAKE FOOD',
+      distractorOne: 'TO MAKE NOISE',
+      distractorTwo: 'TO GROW METAL',
+      hint: 'Plants use light during photosynthesis.',
+      explanation: 'Plants use sunlight to make food.'),
+  _ScienceQuestion(
+      emoji: '🫗',
+      skill: 'Human body',
+      sceneLabel: 'We breathe in and out',
+      prompt: 'Which organs help us breathe?',
+      spokenPrompt: 'Which organs take oxygen from the air?',
+      answer: 'LUNGS',
+      distractorOne: 'BONES',
+      distractorTwo: 'TEETH',
+      hint: 'These organs are inside the chest.',
+      explanation: 'Our lungs help us breathe.'),
+  _ScienceQuestion(
+      emoji: '🦴',
+      skill: 'Human body',
+      sceneLabel: 'The skeleton supports the body',
+      prompt: 'What protects the brain?',
+      spokenPrompt: 'Which bone structure protects the brain?',
+      answer: 'SKULL',
+      distractorOne: 'RIBS',
+      distractorTwo: 'SPINE',
+      hint: 'It is the hard case around the head.',
+      explanation: 'The skull protects the brain.'),
+  _ScienceQuestion(
+      emoji: '🌑',
+      skill: 'Earth and space',
+      sceneLabel: 'The Moon seems bright at night',
+      prompt: 'Where does moonlight come from?',
+      spokenPrompt: 'The Moon does not make its own light. Why can we see it?',
+      answer: 'IT REFLECTS SUNLIGHT',
+      distractorOne: 'IT IS ON FIRE',
+      distractorTwo: 'STARS LIGHT IT',
+      hint: 'Light from the Sun bounces off the Moon.',
+      explanation: 'The Moon reflects sunlight.'),
+  _ScienceQuestion(
+      emoji: '🌍',
+      skill: 'Earth and space',
+      sceneLabel: 'Day changes into night',
+      prompt: 'What causes day and night?',
+      spokenPrompt: 'What movement of Earth causes day and night?',
+      answer: 'EARTH ROTATES',
+      distractorOne: 'EARTH STOPS',
+      distractorTwo: 'THE MOON MELTS',
+      hint: 'Earth spins once about every twenty-four hours.',
+      explanation: 'Earth rotating causes day and night.'),
+  _ScienceQuestion(
+      emoji: '🧽',
+      skill: 'Materials',
+      sceneLabel: 'A raincoat must keep water out',
+      prompt: 'Which material property helps?',
+      spokenPrompt: 'Which property should raincoat material have?',
+      answer: 'WATERPROOF',
+      distractorOne: 'ABSORBENT',
+      distractorTwo: 'MAGNETIC',
+      hint: 'Water should not pass through it.',
+      explanation: 'A raincoat needs waterproof material.'),
+  _ScienceQuestion(
+      emoji: '🌊',
+      skill: 'Environment',
+      sceneLabel: 'Plastic floats in the ocean',
+      prompt: 'What is the safest action?',
+      spokenPrompt: 'What should we do to reduce plastic pollution?',
+      answer: 'REUSE AND RECYCLE',
+      distractorOne: 'THROW MORE AWAY',
+      distractorTwo: 'BURN IT OUTSIDE',
+      hint: 'Reduce waste and keep it out of nature.',
+      explanation: 'Reusing and recycling reduces plastic waste.'),
+];
+
+class _DirectionItem {
+  const _DirectionItem(this.name, this.arrow);
+  final String name;
+  final String arrow;
+}
+
+const _directions = <_DirectionItem>[
+  _DirectionItem('NORTH', '⬆️'),
+  _DirectionItem('EAST', '➡️'),
+  _DirectionItem('SOUTH', '⬇️'),
+  _DirectionItem('WEST', '⬅️'),
 ];

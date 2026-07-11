@@ -11,8 +11,8 @@ class LearningWorldItem {
   final String name;
 }
 
-/// Hand-picked, readable rewards. They alternate between Toy Sort and Feed the
-/// Pet so both games visibly improve the same room and garden.
+/// Hand-picked, readable rewards with a distinct starting item for each
+/// learning adventure.
 class LearningWorldCatalog {
   LearningWorldCatalog._();
 
@@ -41,6 +41,17 @@ class LearningWorldCatalog {
     LearningWorldItem(
         id: 'learning_butterflies', emoji: '🦋', name: 'Butterfly garden'),
     LearningWorldItem(id: 'learning_castle', emoji: '🏰', name: 'Shape castle'),
+    LearningWorldItem(
+        id: 'learning_pizza_shop', emoji: '🍕', name: 'Pizza café'),
+    LearningWorldItem(
+        id: 'learning_dragon_tower', emoji: '🐉', name: 'Dragon tower'),
+    LearningWorldItem(
+        id: 'learning_detective_desk', emoji: '🕵️', name: 'Detective desk'),
+    LearningWorldItem(id: 'learning_robot', emoji: '🤖', name: 'Helper robot'),
+    LearningWorldItem(
+        id: 'learning_laboratory', emoji: '🧪', name: 'Garden laboratory'),
+    LearningWorldItem(
+        id: 'learning_map_board', emoji: '🗺️', name: 'Adventure map'),
   ];
 
   static LearningWorldItem? byId(String id) {
@@ -65,6 +76,12 @@ class LearningWorldCatalog {
       'clock-adventure' => 10,
       'nature-detective' => 11,
       'shape-builder' => 12,
+      'fraction-cafe' => 13,
+      'multiplication-kingdom' => 14,
+      'grammar-detective' => 15,
+      'code-the-robot' => 16,
+      'science-machine-lab' => 17,
+      'map-quest' => 18,
       _ => 0,
     };
     final index = ((completedLevel - 1) * 2 + offset) % items.length;

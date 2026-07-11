@@ -96,6 +96,13 @@ for low-end tablets.
   habitats, plus 2D-shape properties and patterns. Catalog cards carry a clear
   Class 1–2 label and every game has voice, Teach-Pip, badges, daily goals, and
   its own first Kid World reward.
+- [x] **M27:** Classes 3–4 Learning Adventures pass: Pizza Fraction Café,
+  Multiplication Kingdom, Grammar Detective, Code the Robot, Science Machine
+  Lab, and Map Quest add 300 persistent levels for fractions, multiplication
+  and division, grammar analysis, algorithms and debugging, scientific
+  reasoning, compass directions, coordinates, and distance. Every generated
+  round is audited and every game carries the Class 3–4 catalog label, voice,
+  Teach-Pip, daily goal, badge, and distinct world reward.
 
 ## Quality rules for Codex follow-up work
 

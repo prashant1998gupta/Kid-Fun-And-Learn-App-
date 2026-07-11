@@ -204,6 +204,12 @@ void main() {
         'clock-adventure',
         'nature-detective',
         'shape-builder',
+        'fraction-cafe',
+        'multiplication-kingdom',
+        'grammar-detective',
+        'code-the-robot',
+        'science-machine-lab',
+        'map-quest',
       ];
       final rewards = {
         for (final id in ids) LearningWorldCatalog.rewardFor(id, 1).id,
@@ -331,7 +337,7 @@ void main() {
   });
 
   testWidgets(
-      'catalog and all seventeen game screens render on a phone viewport',
+      'catalog and all twenty-three game screens render on a phone viewport',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -436,6 +442,30 @@ void main() {
     await render(const ShapeBuilderGame());
     expect(find.textContaining('Level 1/50'), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await render(const FractionCafeGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const MultiplicationKingdomGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const GrammarDetectiveGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const CodeTheRobotGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const ScienceMachineLabGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const MapQuestGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Toy Sort always advances after a correct basket choice',
@@ -518,6 +548,12 @@ void main() {
       'mg_tutorial_clock-adventure': true,
       'mg_tutorial_nature-detective': true,
       'mg_tutorial_shape-builder': true,
+      'mg_tutorial_fraction-cafe': true,
+      'mg_tutorial_multiplication-kingdom': true,
+      'mg_tutorial_grammar-detective': true,
+      'mg_tutorial_code-the-robot': true,
+      'mg_tutorial_science-machine-lab': true,
+      'mg_tutorial_map-quest': true,
     });
     final preferences = await SharedPreferences.getInstance();
     tester.view.physicalSize = const Size(360, 800);
@@ -537,6 +573,12 @@ void main() {
       ('clock-adventure', ClockAdventureGame()),
       ('nature-detective', NatureDetectiveGame()),
       ('shape-builder', ShapeBuilderGame()),
+      ('fraction-cafe', FractionCafeGame()),
+      ('multiplication-kingdom', MultiplicationKingdomGame()),
+      ('grammar-detective', GrammarDetectiveGame()),
+      ('code-the-robot', CodeTheRobotGame()),
+      ('science-machine-lab', ScienceMachineLabGame()),
+      ('map-quest', MapQuestGame()),
     ];
 
     for (final game in games) {

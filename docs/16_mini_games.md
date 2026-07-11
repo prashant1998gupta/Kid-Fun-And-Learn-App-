@@ -7,7 +7,7 @@ breaks from the curriculum. It contains no grading or wrong-answer pressure,
 but it does share the child's wallet and growing pet so every play session has
 an emotionally meaningful reward.
 
-**Implementation status:** Complete. The catalog, seventeen games, deep-linkable
+**Implementation status:** Complete. The catalog, twenty-three games, deep-linkable
 routes, reactive high scores, OpenMoji art, voice tutorials, invisible adaptive
 difficulty, story goals, local co-op, no-loss play, creative mode, wallet/pet
 rewards, daily challenges, badges, physical controls, accessibility behavior,
@@ -20,7 +20,7 @@ and framework-independent rule tests are implemented.
 - First-play animated gesture guidance speaks every instruction aloud and is
   remembered locally after dismissal.
 - Solo and local **Together** modes are available across the four casual games.
-- Thirteen dedicated learning adventures add 650 persistent levels. Toy Sort and
+- Nineteen dedicated learning adventures add 950 persistent levels. Toy Sort and
   Feed the Pet cover classification, food, and counting; Sound Safari covers
   listening and animal sounds; Number Garden covers quantities and early
   addition; Story Train covers sequencing and prediction; Letter Bakery covers
@@ -32,6 +32,13 @@ and framework-independent rule tests are implemented.
   Adventure covers hour/half-hour clocks and routines; Nature Detective covers
   observation and habitats; Shape Builder covers recognition, sides, and
   patterns.
+- Six Class 3–4 adventures add applied reasoning: Pizza Fraction Café covers
+  reading, equivalence, and addition of fractions; Multiplication Kingdom
+  connects equal groups, missing factors, and division; Grammar Detective
+  covers parts of speech, agreement, tense, and conjunctions; Code the Robot
+  covers sequences, loops, and debugging; Science Machine Lab covers matter,
+  forces, circuits, simple machines, bodies, Earth, materials, and environment;
+  Map Quest covers compass directions, grid coordinates, and route distance.
 - Every learning level contains five to nine short prompts. Seeded shuffling and
   rotating themes prevent adjacent rounds from presenting the same sequence.
 - On selected rounds Pip deliberately makes a funny wrong guess. The child
@@ -49,7 +56,7 @@ and framework-independent rule tests are implemented.
 - Optional tilt control in Animal Family and trace gestures in Flower Flow add
   physical, memorable play.
 - One rotating local daily challenge with persistent progress.
-- Twenty local mini-game badges plus persistent coin, XP, high-score, play, and
+- Twenty-six local mini-game badges plus persistent coin, XP, high-score, play, and
   pet-growth progress.
 - Local high scores and play history persist through `SharedPreferences`.
 
@@ -74,6 +81,12 @@ and framework-independent rule tests are implemented.
 | Clock Adventure | 50 Class 1–2 levels; read full and half-hour clock faces; connect times to unique daily routines |
 | Nature Detective | 50 Class 1–2 levels; infer animals/plants from clues and match living things to seven habitats |
 | Shape Builder | 50 Class 1–2 levels; recognise eight shapes, count straight sides, and continue alternating patterns |
+| Pizza Fraction Café | 50 Class 3–4 levels; read served parts, find equivalent fractions, and add fractions with like denominators |
+| Multiplication Kingdom | 50 Class 3–4 levels; equal groups, facts through 12×12, division inverses, and missing factors |
+| Grammar Detective | 50 Class 3–4 levels; nouns, verbs, adjectives, adverbs, pronouns, agreement, tense, punctuation, prepositions, conjunctions, and plurals |
+| Code the Robot | 50 Class 3–4 levels; exact movement sequences, repeated-command loops, result prediction, and one-step debugging |
+| Science Machine Lab | 50 Class 3–4 levels; authored reasoning missions across matter, forces, machines, circuits, life, Earth, materials, and environment |
+| Map Quest | 50 Class 3–4 levels; cardinal directions, A1–C3 coordinate movement, and multi-leg distance problems |
 
 Inspired by: [Infinity Loop Hex](https://poki.com/en/g/infinity-loop-hex),
 [368 Chickens](https://368chickens.com/),
@@ -95,12 +108,12 @@ Home Screen Quick Actions:
 
 ---
 
-## 2. Mini Game Catalog (17 games)
+## 2. Mini Game Catalog (23 games)
 
 Each is a **self-contained stateful widget** with no dependency on `Lesson`,
 `Question`, or curriculum data. They are pure Flutter games.
 
-The first four are casual logic/reaction breaks. The other thirteen are
+The first four are casual logic/reaction breaks. The other nineteen are
 learning-first preschool games whose level and world-reward progress persists
 through `MiniGamesRepository`.
 
@@ -353,7 +366,7 @@ semantic labels and large one-hand-reachable touch targets.
   daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
   Chicken target rules, learning-level persistence, per-child Kid World items,
   full Toy Sort/Feed the Pet progression, and phone-viewport rendering for the
-  catalog and all seventeen game screens.
+  catalog and all twenty-three game screens.
 
 ---
 
@@ -377,3 +390,9 @@ semantic labels and large one-hand-reachable touch targets.
 - `/mini-games/clock-adventure`
 - `/mini-games/nature-detective`
 - `/mini-games/shape-builder`
+- `/mini-games/fraction-cafe`
+- `/mini-games/multiplication-kingdom`
+- `/mini-games/grammar-detective`
+- `/mini-games/code-the-robot`
+- `/mini-games/science-machine-lab`
+- `/mini-games/map-quest`
