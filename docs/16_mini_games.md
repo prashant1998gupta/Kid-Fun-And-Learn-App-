@@ -11,7 +11,8 @@ an emotionally meaningful reward.
 routes, reactive high scores, OpenMoji art, voice tutorials, invisible adaptive
 difficulty, story goals, local co-op, no-loss play, creative mode, wallet/pet
 rewards, daily challenges, badges, physical controls, accessibility behavior,
-and framework-independent rule tests are implemented.
+the rotating Adventure Trail, and framework-independent rule tests are
+implemented.
 
 ### Engagement features now implemented
 
@@ -62,8 +63,17 @@ and framework-independent rule tests are implemented.
   bottom controls are accessibility defaults.
 - Optional tilt control in Animal Family and trace gestures in Flower Flow add
   physical, memorable play.
-- One rotating local daily challenge with persistent progress.
-- Thirty-two local mini-game badges plus persistent coin, XP, high-score, play, and
+- One grade-safe rotating local daily challenge with persistent progress.
+- A daily three-stop **Adventure Trail** mixes games from across the complete
+  catalog. Each finished stop receives a visible stamp; completing all three
+  opens a persistent chest, grants 15 bonus coins and 20 bonus XP, and unlocks
+  the Trail Blazer badge. Trails use the active child's grade band plus the
+  four casual games, so younger children never receive an unsuitable Class 5
+  mission while every game remains part of an age-appropriate rotation.
+- The hub now has All, Learning, Preschool, Class 1–2, Class 3–4, Class 5, and
+  Just Fun filters. **Play Next** follows the unfinished trail, while
+  **Surprise Me** selects an unplayed game or the daily challenge afterward.
+- Thirty-three local mini-game badges plus persistent coin, XP, high-score, play, and
   pet-growth progress.
 - Local high scores and play history persist through `SharedPreferences`.
 
@@ -374,13 +384,16 @@ semantic labels and large one-hand-reachable touch targets.
 ## 10. Verification
 
 - `flutter analyze`: zero issues.
-- `flutter test`: all 108 tests pass at the latest verification.
+- `flutter test`: all 111 tests pass at the latest verification.
 - Mini-game tests cover score persistence, wallet reward delivery, pet growth,
   daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
   Chicken target rules, learning-level persistence, per-child Kid World items,
   full Toy Sort/Feed the Pet progression, and phone-viewport rendering for the
-  catalog and all twenty-nine game screens. The shared content audit validates
-  5,750 generated rounds across every 50-level adventure.
+  catalog and all twenty-nine game screens, grade-band discovery filters,
+  age-eligible Adventure Trail rotation, one-time chest claims, and chest bonus
+  delivery. A separate rotation audit confirms that all 29 catalog games are
+  reachable. The shared content audit validates 5,750 generated rounds across
+  every 50-level adventure.
 
 ---
 

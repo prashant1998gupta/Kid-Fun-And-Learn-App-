@@ -88,6 +88,62 @@ void main() {
           0);
     });
 
+    test('Adventure Trail rotates every catalog game through three stops',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+      final seen = <String>{};
+
+      for (var day = 0; day < kMiniGames.length; day++) {
+        final trail = repository.adventureTrail(
+          DateTime(2026, 1, 1).add(Duration(days: day)),
+        );
+        expect(trail.gameIds.toSet(), hasLength(3));
+        seen.addAll(trail.gameIds);
+      }
+
+      expect(seen, hasLength(kMiniGames.length));
+    });
+
+    test('Adventure Trail chest unlocks once and persists', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+      final day = DateTime(2026, 7, 11);
+      final trail = repository.adventureTrail(day);
+
+      final first = await repository.recordAdventureTrailGame(
+        trail.gameIds[0],
+        day,
+      );
+      final second = await repository.recordAdventureTrailGame(
+        trail.gameIds[1],
+        day,
+      );
+      final finish = await repository.recordAdventureTrailGame(
+        trail.gameIds[2],
+        day,
+      );
+      final replay = await repository.recordAdventureTrailGame(
+        trail.gameIds[2],
+        day,
+      );
+
+      expect(first.chestUnlocked, isFalse);
+      expect(second.chestUnlocked, isFalse);
+      expect(finish.chestUnlocked, isTrue);
+      expect(finish.trail.completed, isTrue);
+      expect(finish.trail.chestsWon, 1);
+      expect(replay.chestUnlocked, isFalse);
+      expect(replay.trail.chestsWon, 1);
+      expect(repository.adventureTrail(day).completed, isTrue);
+      expect(
+        repository.adventureTrail(day.add(const Duration(days: 1))).progress,
+        0,
+      );
+    });
+
     test('result unlocks local badges without curriculum rewards', () async {
       SharedPreferences.setMockInitialValues({});
       final preferences = await SharedPreferences.getInstance();
@@ -155,6 +211,32 @@ void main() {
 
       expect(coins, 5);
       expect(xp, 10);
+    });
+
+    test('finishing the Adventure Trail grants its badge and chest bonus',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      var coins = 0;
+      var xp = 0;
+      final controller = MiniGamesController(
+        MiniGamesRepository(preferences),
+        rewardPlayer: (reward) async {
+          coins += reward.coins;
+          xp += reward.xp;
+        },
+      );
+      Set<String> unlocked = {};
+
+      for (final gameId in controller.state.adventureTrail.gameIds) {
+        unlocked = await controller.recordResult(gameId: gameId, score: 10);
+      }
+
+      expect(unlocked, contains('trail_blazer'));
+      expect(controller.state.adventureTrail.completed, isTrue);
+      expect(controller.state.adventureTrail.chestsWon, 1);
+      expect(coins, 24);
+      expect(xp, 35);
     });
 
     test('learning levels and Kid World items persist per child', () async {
@@ -372,6 +454,13 @@ void main() {
     }
 
     await render(const MiniGamesScreen());
+    expect(find.textContaining('Adventure Trail'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Preschool'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Toy Sort'), findsOneWidget);
+    expect(find.text('Eco City Builder'), findsNothing);
+    expect(tester.takeException(), isNull);
+
     await render(const InfinityLoopGame());
     await tester.tap(find.text('Together'));
     await tester.pump();

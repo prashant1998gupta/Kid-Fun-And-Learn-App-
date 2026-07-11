@@ -14,6 +14,7 @@ class MiniGamesState {
     required this.petXp,
     required this.learningLevels,
     required this.learningWorldItems,
+    required this.adventureTrail,
   });
 
   final Map<String, int> highScores;
@@ -23,6 +24,7 @@ class MiniGamesState {
   final int petXp;
   final Map<String, int> learningLevels;
   final Set<String> learningWorldItems;
+  final MiniGameAdventureTrail adventureTrail;
 
   MiniPet get pet => MiniPet.forXp(petXp);
 
@@ -34,6 +36,7 @@ class MiniGamesState {
     int? petXp,
     Map<String, int>? learningLevels,
     Set<String>? learningWorldItems,
+    MiniGameAdventureTrail? adventureTrail,
   }) {
     return MiniGamesState(
       highScores: highScores ?? this.highScores,
@@ -43,6 +46,7 @@ class MiniGamesState {
       petXp: petXp ?? this.petXp,
       learningLevels: learningLevels ?? this.learningLevels,
       learningWorldItems: learningWorldItems ?? this.learningWorldItems,
+      adventureTrail: adventureTrail ?? this.adventureTrail,
     );
   }
 }
@@ -54,8 +58,10 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
     Future<void> Function(RewardBundle reward)? rewardPlayer,
     Future<int> Function(int targetXp, String memory)? syncCompanion,
     int initialCompanionXp = 0,
+    Iterable<String>? adventureGameIds,
   })  : _rewardPlayer = rewardPlayer,
         _syncCompanion = syncCompanion,
+        _adventureGameIds = adventureGameIds?.toList(growable: false),
         super(
           MiniGamesState(
             highScores: {
@@ -64,7 +70,7 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
             },
             achievements: _repository.achievements(),
             playedGames: _repository.playedGames(),
-            dailyChallenge: _repository.dailyChallenge(),
+            dailyChallenge: _repository.dailyChallenge(null, adventureGameIds),
             petXp: initialCompanionXp > _repository.petXp()
                 ? initialCompanionXp
                 : _repository.petXp(),
@@ -73,12 +79,14 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
                 game.id: _repository.learningLevel(game.id),
             },
             learningWorldItems: _repository.learningWorldItems(),
+            adventureTrail: _repository.adventureTrail(null, adventureGameIds),
           ),
         );
 
   final MiniGamesRepository _repository;
   final Future<void> Function(RewardBundle reward)? _rewardPlayer;
   final Future<int> Function(int targetXp, String memory)? _syncCompanion;
+  final List<String>? _adventureGameIds;
 
   Future<bool> recordScore(String gameId, int score) async {
     final saved = await _repository.saveHighScore(gameId, score);
@@ -106,8 +114,17 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
     final daily = await _repository.recordDailyProgress(
       gameId,
       dailyProgress ?? score,
+      null,
+      _adventureGameIds,
     );
     if (daily.completed) requested.add('daily_challenge');
+
+    final trailUpdate = await _repository.recordAdventureTrailGame(
+      gameId,
+      null,
+      _adventureGameIds,
+    );
+    if (trailUpdate.chestUnlocked) requested.add('trail_blazer');
 
     final newlyUnlocked = requested.difference(state.achievements);
     await _repository.unlockAchievements(newlyUnlocked);
@@ -138,8 +155,9 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
     // Mini games participate in the same visible economy as learning games.
     // Rewards are intentionally modest and always positive.
     final reward = RewardBundle(
-      coins: 3 + (score ~/ 100).clamp(0, 7),
-      xp: 5 + (score ~/ 50).clamp(0, 15),
+      coins:
+          3 + (score ~/ 100).clamp(0, 7) + (trailUpdate.chestUnlocked ? 15 : 0),
+      xp: 5 + (score ~/ 50).clamp(0, 15) + (trailUpdate.chestUnlocked ? 20 : 0),
     );
     await _rewardPlayer?.call(reward);
 
@@ -150,6 +168,7 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
       petXp: newPetXp,
       learningLevels: learningLevels,
       learningWorldItems: learningItems,
+      adventureTrail: trailUpdate.trail,
     );
     return newlyUnlocked;
   }
@@ -178,6 +197,7 @@ final miniGamesControllerProvider =
   final controller = MiniGamesController(
     ref.watch(miniGamesRepositoryProvider),
     initialCompanionXp: child?.companionXp ?? 0,
+    adventureGameIds: _adventureGameIdsForGrade(child?.grade.name),
     rewardPlayer: (reward) async {
       await ref.read(profilesControllerProvider.notifier).applyReward(reward);
     },
@@ -193,3 +213,23 @@ final miniGamesControllerProvider =
   );
   return controller;
 });
+
+Iterable<String>? _adventureGameIdsForGrade(String? gradeName) {
+  final gradeBand = switch (gradeName) {
+    'lkg' || 'ukg' || 'kg' => null,
+    'grade1' || 'grade2' => 'Class 1–2',
+    'grade3' || 'grade4' => 'Class 3–4',
+    'grade5' => 'Class 5',
+    _ => 'all',
+  };
+  if (gradeBand == 'all') return null;
+  return kMiniGames
+      .where(
+        (game) =>
+            !game.learning ||
+            (gradeBand == null
+                ? game.gradeBand == null
+                : game.gradeBand == gradeBand),
+      )
+      .map((game) => game.id);
+}

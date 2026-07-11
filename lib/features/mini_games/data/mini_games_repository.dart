@@ -55,6 +55,44 @@ class DailyMiniGameChallenge {
   bool get completed => progress >= target;
 }
 
+/// A rotating three-stop journey that makes the whole mini-game catalog feel
+/// like one connected adventure. Every catalog game appears in the rotation.
+class MiniGameAdventureTrail {
+  const MiniGameAdventureTrail({
+    required this.dateKey,
+    required this.gameIds,
+    required this.completedGameIds,
+    required this.chestClaimed,
+    required this.chestsWon,
+  });
+
+  final String dateKey;
+  final List<String> gameIds;
+  final Set<String> completedGameIds;
+  final bool chestClaimed;
+  final int chestsWon;
+
+  int get progress => gameIds.where(completedGameIds.contains).length;
+  bool get completed => progress == gameIds.length;
+
+  String? get nextGameId {
+    for (final id in gameIds) {
+      if (!completedGameIds.contains(id)) return id;
+    }
+    return null;
+  }
+}
+
+class MiniGameAdventureUpdate {
+  const MiniGameAdventureUpdate({
+    required this.trail,
+    required this.chestUnlocked,
+  });
+
+  final MiniGameAdventureTrail trail;
+  final bool chestUnlocked;
+}
+
 /// All available mini games.
 const List<MiniGameDef> kMiniGames = [
   MiniGameDef(
@@ -498,6 +536,12 @@ const List<MiniGameAchievement> kMiniGameAchievements = [
     description: 'Complete a daily mini-game challenge',
     icon: '⭐',
   ),
+  MiniGameAchievement(
+    id: 'trail_blazer',
+    title: 'Trail Blazer',
+    description: 'Complete all three Adventure Trail stops',
+    icon: '🧭',
+  ),
 ];
 
 /// Persists high scores for mini games via SharedPreferences.
@@ -519,6 +563,10 @@ class MiniGamesRepository {
   static const _petXpKey = 'mg_pet_xp';
   static const _learningLevelPrefix = 'mg_learning_level_';
   static const _learningItemsKey = 'mg_learning_world_items';
+  static const _trailDateKey = 'mg_trail_date';
+  static const _trailProgressKey = 'mg_trail_progress';
+  static const _trailClaimedKey = 'mg_trail_claimed';
+  static const _trailChestCountKey = 'mg_trail_chests';
 
   String _key(String base) => scope == null ? base : '$base@$scope';
 
@@ -533,6 +581,10 @@ class MiniGamesRepository {
   List<String>? _readStringList(String base) =>
       _prefs.getStringList(_key(base)) ??
       (scope != null && fallbackToLegacy ? _prefs.getStringList(base) : null);
+
+  bool? _readBool(String base) =>
+      _prefs.getBool(_key(base)) ??
+      (scope != null && fallbackToLegacy ? _prefs.getBool(base) : null);
 
   int petXp() => _readInt(_petXpKey) ?? 0;
 
@@ -597,13 +649,97 @@ class MiniGamesRepository {
     await _prefs.setInt(_key(key), (_readInt(key) ?? 0) + 1);
   }
 
-  DailyMiniGameChallenge dailyChallenge([DateTime? now]) {
+  MiniGameAdventureTrail adventureTrail([
+    DateTime? now,
+    Iterable<String>? candidateGameIds,
+  ]) {
+    final date = now ?? DateTime.now();
+    final day = DateTime(date.year, date.month, date.day);
+    final dateKey = _dayKey(day);
+    final dayNumber = day.difference(DateTime(2024)).inDays.abs();
+    final requestedPool = candidateGameIds?.toSet();
+    final pool = requestedPool == null
+        ? kMiniGames
+        : kMiniGames.where((game) => requestedPool.contains(game.id)).toList();
+    final games = pool.length >= 3 ? pool : kMiniGames;
+    final count = games.length;
+
+    // Offsets are deliberately far apart, so each trail mixes different
+    // parts of the catalog. Because the catalog has 29 games, every game
+    // rotates through every stop rather than becoming permanent filler.
+    final start = dayNumber % count;
+    final gameIds = <String>[
+      games[start].id,
+      games[(start + _trailOffset(count, 1)) % count].id,
+      games[(start + _trailOffset(count, 2)) % count].id,
+    ];
+    final isTodayStored = _readString(_trailDateKey) == dateKey;
+    final completed = isTodayStored
+        ? (_readStringList(_trailProgressKey) ?? const <String>[])
+            .where(gameIds.contains)
+            .toSet()
+        : <String>{};
+    return MiniGameAdventureTrail(
+      dateKey: dateKey,
+      gameIds: List.unmodifiable(gameIds),
+      completedGameIds: Set.unmodifiable(completed),
+      chestClaimed: isTodayStored && (_readBool(_trailClaimedKey) ?? false),
+      chestsWon: _readInt(_trailChestCountKey) ?? 0,
+    );
+  }
+
+  Future<MiniGameAdventureUpdate> recordAdventureTrailGame(
+    String gameId, [
+    DateTime? now,
+    Iterable<String>? candidateGameIds,
+  ]) async {
+    final current = adventureTrail(now, candidateGameIds);
+    final completed = {...current.completedGameIds};
+    if (current.gameIds.contains(gameId)) completed.add(gameId);
+    final finished = current.gameIds.every(completed.contains);
+    final chestUnlocked = finished && !current.chestClaimed;
+    final chestsWon = current.chestsWon + (chestUnlocked ? 1 : 0);
+
+    await _prefs.setString(_key(_trailDateKey), current.dateKey);
+    await _prefs.setStringList(
+      _key(_trailProgressKey),
+      completed.toList()..sort(),
+    );
+    await _prefs.setBool(
+      _key(_trailClaimedKey),
+      current.chestClaimed || chestUnlocked,
+    );
+    if (chestUnlocked) {
+      await _prefs.setInt(_key(_trailChestCountKey), chestsWon);
+    }
+
+    return MiniGameAdventureUpdate(
+      trail: MiniGameAdventureTrail(
+        dateKey: current.dateKey,
+        gameIds: current.gameIds,
+        completedGameIds: Set.unmodifiable(completed),
+        chestClaimed: current.chestClaimed || chestUnlocked,
+        chestsWon: chestsWon,
+      ),
+      chestUnlocked: chestUnlocked,
+    );
+  }
+
+  DailyMiniGameChallenge dailyChallenge([
+    DateTime? now,
+    Iterable<String>? candidateGameIds,
+  ]) {
     final date = now ?? DateTime.now();
     final day = DateTime(date.year, date.month, date.day);
     final dayKey = _dayKey(day);
+    final requestedPool = candidateGameIds?.toSet();
+    final pool = requestedPool == null
+        ? kMiniGames
+        : kMiniGames.where((game) => requestedPool.contains(game.id)).toList();
+    final games = pool.isEmpty ? kMiniGames : pool;
     final challengeIndex =
-        day.difference(DateTime(2024)).inDays.abs() % kMiniGames.length;
-    final gameId = kMiniGames[challengeIndex].id;
+        day.difference(DateTime(2024)).inDays.abs() % games.length;
+    final gameId = games[challengeIndex].id;
     final definition = switch (gameId) {
       'toy-sort' => (title: 'Sort 5 toys', target: 5),
       'feed-the-pet' => (title: 'Count 5 pet snacks', target: 5),
@@ -653,8 +789,9 @@ class MiniGamesRepository {
     String gameId,
     int progress, [
     DateTime? now,
+    Iterable<String>? candidateGameIds,
   ]) async {
-    final current = dailyChallenge(now);
+    final current = dailyChallenge(now, candidateGameIds);
     if (current.gameId != gameId) return current;
     final date = now ?? DateTime.now();
     final dayKey = _dayKey(DateTime(date.year, date.month, date.day));
@@ -672,6 +809,13 @@ class MiniGamesRepository {
   String _dayKey(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-'
       '${date.day.toString().padLeft(2, '0')}';
+
+  int _trailOffset(int count, int stop) {
+    if (count == kMiniGames.length) return stop == 1 ? 9 : 19;
+    final first = (count / 3).ceil().clamp(1, count - 1);
+    final second = (first * 2).clamp(2, count - 1);
+    return stop == 1 ? first : second;
+  }
 }
 
 final miniGamesRepositoryProvider = Provider<MiniGamesRepository>((ref) {

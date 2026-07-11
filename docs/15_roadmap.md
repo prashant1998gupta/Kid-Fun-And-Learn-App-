@@ -109,6 +109,12 @@ for low-end tablets.
   financial literacy, experimental design, media literacy, and computational
   thinking. Every game has voice, Teach-Pip, five-round daily goals, a Class 5
   catalog label, its own badge, and a distinct first Kid World reward.
+- [x] **M29:** Out-of-the-box Mini Game World pass: all 29 games participate in
+  a rotating three-stop Adventure Trail with persistent stamps, a one-time
+  daily mystery chest, bonus wallet rewards, and a Trail Blazer badge. The hub
+  adds age-appropriate trail selection, grade-aware discovery filters, and
+  smart Play Next and Surprise Me actions, turning the catalog into a guided
+  daily journey instead of a wall of unrelated game cards.
 
 ## Quality rules for Codex follow-up work
 
