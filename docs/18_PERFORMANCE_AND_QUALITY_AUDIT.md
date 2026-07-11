@@ -3,6 +3,13 @@
 Last audited: 2026-07-06  
 Scope: Flutter app quality, game feel, performance, optimization, maintainability, and production polish.
 
+> **Implementation update (2026-07-11):** the shared mini-game result pipeline,
+> 29-screen compact-phone widget coverage, grade-safe discovery, and persistent
+> Adventure Trail/story/chest flow are implemented and covered by the current
+> 112-test suite. Recommendations below remain the long-term quality plan unless
+> explicitly marked complete; DevTools profiling and physical-device visual
+> sign-off are still required.
+
 ## Executive summary
 
 KidVerse has a strong product direction: a playful learning world with mini
@@ -453,7 +460,9 @@ Tasks:
 - Build `SuccessBeat`.
 - Build `RetryBeat`.
 - Make every learning engine use the same success/retry timing.
-- Make every mini game use the same result pipeline.
+- [x] Make every mini game use the same result pipeline. The controller now
+  centralizes score, wallet, pet/world, badge, daily-goal, trail, and story
+  completion reporting.
 - Ensure every correct answer has:
   - visible selected/correct state;
   - SFX/haptic;

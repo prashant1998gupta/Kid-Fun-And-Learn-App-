@@ -39,6 +39,18 @@ kids can't be blocked from learning by a number.
 - **Season Pass:** free track only for kids (cosmetics), parent-gated premium.
 - **Daily Challenge:** one curated lesson/day with bonus coins.
 
+## Mini-game story rewards (implemented)
+
+- All 29 mini games report through the shared mini-game result pipeline.
+- Each completed Adventure Trail chapter grants a persistent daily relic stamp.
+- Completing all three chapters opens one idempotent mystery chest worth 15
+  coins and 20 XP; it cannot be claimed twice for the same child/day.
+- Trail Blazer rewards trail completion and Story Hero rewards completion of a
+  full interactive story. The mini-game collection currently has 34 badges.
+- Game outcomes can grow the pet, unlock room/world objects, and write a short
+  story memory for the companion without introducing ads, purchases, or
+  punitive loss mechanics.
+
 ## Leaderboards (friends-only, safe)
 - Opt-in, **parent-approved friends** only. No open/global boards for children.
 - Entries are **server-written** via Cloud Functions; expose only display name +

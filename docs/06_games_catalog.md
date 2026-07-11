@@ -63,6 +63,19 @@ Castle Quest, Animal Rescue, Superhero training, Mini Racing, Boss Battle,
 Daily Challenge — all [AdventureMap] wrappers that string core-engine lessons
 into a themed journey with a reward chest at the end.
 
+## Connected Mini Games catalog (implemented)
+
+The separate Mini Games hub contains **29 routed games**. Four are playful
+casual breaks; 25 are curriculum-oriented adventures providing **1,250 levels**
+across preschool, Classes 1–2, Classes 3–4, and Class 5. The hub provides
+grade-aware filters, a safe daily challenge, Play Next, Surprise Me, badges,
+voice guidance, and shared progress/reward reporting.
+
+A daily Adventure Trail selects three age-eligible games and presents them as
+chapters inside one of eight rotating story worlds. Brave, Kind, and Curious
+choices change the mission copy and finale. See `docs/16_mini_games.md` for the
+authoritative game list, routes, progression rules, and verification coverage.
+
 ## Content authoring
 All the above are **data**, not code: a lesson JSON (see
 `assets/data/curriculum_lkg.json`) names the `gameType` and supplies questions.

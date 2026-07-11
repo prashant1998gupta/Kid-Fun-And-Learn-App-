@@ -41,6 +41,16 @@ third-party ads, in-app purchases shown to children.
 9. Accessibility: color-blind mode, voice, subtitles, large text, one-hand use.
 10. Compliance: COPPA + GDPR-K; secure parent gate; no ads to kids.
 
+## Implemented connected mini-game learning package
+
+The current app contains 29 mini games: four playful breaks and 25 learning
+adventures with 1,250 persistent levels spanning preschool through Class 5.
+They are connected by a daily, grade-safe three-chapter Adventure Trail. Eight
+storybook worlds, Brave/Kind/Curious child choices, narrated relic missions,
+companion memory, a mystery chest, and Kid World rewards make the catalog feel
+like one learning universe rather than unrelated activities. Full details are
+maintained in `docs/16_mini_games.md` and `docs/17_living_kidverse.md`.
+
 ## Release phases
 - **P0 (done):** foundation + one complete game loop + parent dashboard.
 - **P1:** 6 core game engines, LKG+UKG full curriculum, Firebase auth+sync, FCM.

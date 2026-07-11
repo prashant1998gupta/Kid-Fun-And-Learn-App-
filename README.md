@@ -30,20 +30,23 @@ reward economy, curriculum data pipeline, routing, and security rules.
 
 ### Kid World mini games
 
-The four mini games are now one story-driven, pre-reader-friendly play world:
+The Mini Games hub is now a connected learning storybook with **29 games**:
 
-- **🌸 Flower Flow:** rotate or trace glowing water paths to bloom flowers.
-- **🐔 Egg Rescue:** catch chickens, count eggs aloud, and meet the giant
-  golden chicken finale.
-- **🌈 Rainbow Rescue:** merge a tower toward the moon, follow adaptive helper
-  hints, or build forever in the no-fail creative sandbox.
-- **🐣 Animal Family:** merge dancing, speaking animals into a dragon using
-  swipes, buttons, or optional device tilt.
+- **4 playful breaks:** Flower Flow, Egg Rescue, Rainbow Rescue, and Animal
+  Family.
+- **25 learning adventures / 1,250 persistent levels:** preschool through
+  Class 5 literacy, maths, science, practical life, media literacy, finance,
+  geography, sustainability, and computational thinking.
+- **Daily Adventure Trail:** a grade-safe three-chapter journey selected from
+  eight original story worlds. Children choose a Brave, Kind, or Curious path,
+  collect named relics, hear narrated chapter transitions, and open a one-time
+  mystery chest at the finale.
+- **A living Kid World:** rewards feed the pet, unlock room/world objects, add
+  companion memories, and award Trail Blazer or Story Hero badges.
 
-Every game includes first-play voice guidance, invisible adaptive difficulty,
-local two-player play, no-loss rescue behavior, haptics/SFX/celebrations, and
-real coin/XP and pet-growth rewards. Color-blind-safe symbols, reduced-motion
-behavior, semantic labels, and one-hand controls are built in. See
+Games use voice guidance, no-loss rescue behavior, haptics/SFX/celebrations,
+accessible controls, grade-aware discovery filters, Play Next, and Surprise Me.
+See
 [`docs/16_mini_games.md`](docs/16_mini_games.md) for the complete specification.
 The connected companion, room rewards, story missions, physical co-play, and
 child-created hero loop are documented in
@@ -56,7 +59,7 @@ The current performance, optimization, and quality-improvement audit is in
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # full unit + widget suite (85 tests at last verification)
+flutter test         # full unit + widget suite (112 tests at last verification)
 flutter analyze      # lints
 ```
 

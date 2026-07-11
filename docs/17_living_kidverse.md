@@ -12,6 +12,13 @@ the companion now change the same persistent child world.
   placed rewards, and the child's hand-drawn hero.
 - **One companion:** mini-games and physical missions feed the profile-level
   companion. It remembers a warm line about the child's most recent activity.
+- **Interactive storybook memory:** the Mini Games hub rotates through eight
+  story worlds. A child's Brave, Kind, or Curious choice changes three relic
+  missions and the narrated finale; completing the trail writes that ending to
+  the companion's memory and awards Story Hero progression.
+- **Guided daily journey:** three age-eligible mini games become a beginning,
+  middle, and finale instead of an unrelated grid. Chapter stamps and the
+  one-time mystery chest persist per child for the day.
 - **Real rewards:** lesson results now grant an actual room decoration, sticker,
   or companion snack. Duplicate prizes become companion XP rather than a fake
   reveal.

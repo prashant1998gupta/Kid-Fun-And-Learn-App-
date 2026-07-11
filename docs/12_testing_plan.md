@@ -1,5 +1,9 @@
 # 12 — Testing & Quality Plan
 
+> **Current verified baseline:** `flutter analyze` is clean and all **112 tests**
+> pass. Release web and Android debug builds also complete. Physical-device
+> visual/accessibility sign-off remains a manual release gate.
+
 ## Layers
 | Layer | Tool | What |
 |---|---|---|
@@ -19,9 +23,12 @@
   force (answer > 1 digit, resets on error).
 - A11y: large-text scaling doesn't overflow cards; color-blind palette applied;
   semantics labels present.
-- Mini games: first-play tutorial dismissal; phone layout for all four games;
-  persistent high scores/pet XP; wallet reward hook; no-loss 2048 and Stack
-  rescues; merge/undo/rainbow rules; Together-mode controls.
+- Mini games: phone layout for the hub and all 29 routed games; score, level,
+  pet, wallet, world-item, daily-goal, and badge persistence; no-loss rescue
+  rules; grade-band discovery; age-eligible daily selection; all-game rotation;
+  story-path persistence and next-day reset; one-time chest claims and exact
+  15-coin/20-XP delivery; companion finale memory; and a 5,750-round generated
+  content audit across the 25 learning adventures.
 
 ## Performance budget
 - 60fps on a 2019-class Android tablet during confetti + background particles.

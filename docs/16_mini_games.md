@@ -214,16 +214,15 @@ color-blind mode is enabled.
 
 ```
 lib/features/mini_games/
-├── mini_games_screen.dart        # Grid listing all mini games
-├── mini_games_controller.dart    # Scores, wallet rewards, pet, badges, daily goal
+├── mini_games_screen.dart        # Story hub, trail, filters, actions, game catalog
+├── mini_games_controller.dart    # Results, grade pool, trails, chest, pet, badges
 ├── data/
-│   ├── mini_games_repository.dart # Persist mini-game progress
+│   ├── mini_games_repository.dart # Scores, levels, paths, stamps, chest persistence
+│   ├── mini_game_story.dart       # Eight worlds, choices, relics, endings
 │   └── mini_pet.dart              # Pet stages, XP, accessories
 ├── games/
-│   ├── infinity_loop_hex_game.dart
-│   ├── chicken_tap_game.dart
-│   ├── stack_merge_game.dart
-│   └── classic_2048_game.dart
+│   ├── ...                        # 29 independently routed game screens
+│   └── learning_adventure_game.dart # Shared engine for learning adventures
 └── widgets/
     ├── game_tutorial.dart        # First-play animated voice tutorial
     └── mini_game_widgets.dart    # Story, play modes, rewards, toolbar, mascot
@@ -241,10 +240,15 @@ lib/features/mini_games/
 | Failure | Rescue and continuation | Protects experimentation and emotional safety for under-6s |
 | Co-op | Same-device Together mode | Enables siblings and parents to play without accounts/controllers |
 | Creative play | Endless Stack sandbox | Supports making and experimentation, not only solving |
+| Hub journey | Daily grade-safe three-chapter trail | Gives the catalog a beginning, middle, and ending |
+| Story agency | Brave, Kind, or Curious path | Child choice changes missions and finale without changing safety |
+| Chest claim | Per-child/per-day idempotent record | Prevents duplicated wallet rewards |
 
 ### Game Widget Interface
 
-Every mini game follows this contract so the listing screen can host them:
+Games are independent routed widgets. They report milestones through the shared
+controller/repository result pipeline; the following is the conceptual contract,
+not a required Dart base class:
 
 ```dart
 abstract class MiniGameWidget extends StatefulWidget {
@@ -265,12 +269,11 @@ typedef OnGameResult = void Function(int score);
 ### Route Structure
 
 ```
-/mini-games              → MiniGamesScreen (grid of game cards)
-/mini-games/infinity-loop → InfinityLoopHexGame
-/mini-games/368-chickens  → ChickenTapGame
-/mini-games/stack-merge   → StackMergeGame
-/mini-games/2048          → Classic2048Game
+/mini-games              → MiniGamesScreen (storybook trail + discovery catalog)
+/mini-games/{game-id}    → one of 29 game screens
 ```
+
+The complete implemented route list is recorded in section 8.
 
 ---
 
@@ -280,22 +283,18 @@ typedef OnGameResult = void Function(int score);
 
 ```
 ┌──────────────────────────────┐
-│  ← Back    🎮 Mini Games     │
-│                              │
+│  ← Back  🎮 Mini Games  🔊   │
+│  Moon Garden: Lost Starlight │
+│  Choose: Brave Kind Curious  │
+│  ● Relic 1 ─ ○ Relic 2 ─ ○  │
+│       [PLAY NEXT CHAPTER]     │
+│  All Learning P–K 1–2 3–4 5 │
+│  [Surprise Me] [Daily Goal]  │
 │  ┌────────┐  ┌────────┐     │
-│  │  🌸    │  │  🐔    │     │
-│  │ Flower │  │  Egg   │     │
-│  │  Flow  │  │ Rescue │     │
-│  │HS: 3/5 │  │HS: 42  │     │
+│  │ Game   │  │ Game   │ ... │
+│  │ level  │  │ badge  │     │
 │  └────────┘  └────────┘     │
-│  ┌────────┐  ┌────────┐     │
-│  │  🌈    │  │  🐣    │     │
-│  │Rainbow │  │ Animal │     │
-│  │ Rescue │  │ Family │     │
-│  │HS: 256 │  │HS: 512 │     │
-│  └────────┘  └────────┘     │
-│                              │
-│  [Animated Background]       │
+│  [Kid World rewards + pet]   │
 └──────────────────────────────┘
 ```
 
@@ -339,17 +338,17 @@ SizedBox(
 
 | Step | Task | Effort | Dependencies |
 |------|------|--------|-------------|
-| 1 | Create `MiniGamesRepository` (high scores via SharedPreferences) | Small | None |
-| 2 | Create `MiniGamesController` (simple notifier) | Small | Step 1 |
-| 3 | Create `mini_games_screen.dart` with grid layout | Medium | Step 2 |
-| 4 | Add `/mini-games` route to `router.dart` | Small | Step 3 |
-| 5 | Add "Mini Games" quick action to Home screen | Small | Step 4 |
-| 6 | Build **Flower Flow** game | Large | None |
-| 7 | Build **Egg Rescue** game | Medium | None |
-| 8 | Build **Rainbow Rescue** game | Large | None |
-| 9 | Build **Animal Family** game | Medium | None |
-| 10 | Add game routes `/mini-games/{id}` | Small | Steps 6-9 |
-| 11 | Wire result persistence, wallet rewards, and pet growth | Small | Steps 1, 6-9 |
+| 1 | Four casual games, routes, scores, rescue play, juice | Done | Foundation |
+| 2 | Toy Sort + Feed the Pet learning progression | Done | 100 levels |
+| 3 | Preschool learning adventures | Done | +250 levels |
+| 4 | Classes 1–2 learning adventures | Done | +300 levels |
+| 5 | Classes 3–4 learning adventures | Done | +300 levels |
+| 6 | Class 5 learning adventures | Done | +300 levels |
+| 7 | Shared rewards, pet/world unlocks, badges, daily goals | Done | Connected world |
+| 8 | Grade-aware filters, Play Next, Surprise Me | Done | Discovery |
+| 9 | Three-stop daily Adventure Trail and mystery chest | Done | Guided journey |
+| 10 | Eight story worlds + Brave/Kind/Curious branching | Done | Storybook layer |
+| 11 | Narration, companion memory, Trail Blazer/Story Hero | Done | Living finale |
 
 ---
 

@@ -39,6 +39,17 @@ Home → subject card → lesson → engine plays questions (voice prompt, tap a
 wrong = wiggle+retry, right = celebrate) → Result reveal → rewards applied →
 Home. Adaptive model updated silently.
 
+### F4 — Play the daily Mini Game Adventure Trail
+
+Home → Mini Games → grade-safe story world → choose Brave, Kind, or Curious →
+play chapter 1/2/3 learning games → receive a relic stamp after each result →
+hear the path-specific finale → open the one-time mystery chest → companion
+remembers the ending and Kid World receives the earned progress. The chosen
+path and chapter stamps persist per child for the calendar day.
+
+Children can also use Learning/grade/Just Fun filters, Play Next, or Surprise
+Me. Discovery and daily challenges only select age-eligible games.
+
 ### F4 — Parent checks progress
 Home → Parents button → Parent Gate (solve `a×b`) → Dashboard → per-subject
 mastery, weak areas, strengths, controls.
