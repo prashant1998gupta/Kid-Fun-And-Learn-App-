@@ -42,7 +42,16 @@ class LearningWorldCatalog {
   }
 
   static LearningWorldItem rewardFor(String gameId, int completedLevel) {
-    final offset = gameId == 'feed-the-pet' ? 1 : 0;
+    final offset = switch (gameId) {
+      'toy-sort' => 0,
+      'feed-the-pet' => 1,
+      'sound-safari' => 2,
+      'number-garden' => 3,
+      'story-train' => 4,
+      'letter-bakery' => 5,
+      'clean-room-helper' => 6,
+      _ => 0,
+    };
     final index = ((completedLevel - 1) * 2 + offset) % items.length;
     return items[index];
   }

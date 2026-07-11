@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kidverse/features/mini_games/data/mini_games_repository.dart';
+import 'package:kidverse/features/mini_games/data/learning_world_item.dart';
 import 'package:kidverse/features/mini_games/data/mini_pet.dart';
 import 'package:kidverse/features/mini_games/games/chicken_tap_game.dart';
 import 'package:kidverse/features/mini_games/games/classic_2048_game.dart';
@@ -11,6 +12,7 @@ import 'package:kidverse/features/mini_games/games/infinity_loop_game.dart';
 import 'package:kidverse/features/mini_games/games/stack_merge_game.dart';
 import 'package:kidverse/features/mini_games/games/toy_sort_game.dart';
 import 'package:kidverse/features/mini_games/games/feed_pet_game.dart';
+import 'package:kidverse/features/mini_games/games/learning_adventure_game.dart';
 import 'package:kidverse/features/mini_games/logic/chicken_tap_rules.dart';
 import 'package:kidverse/features/mini_games/logic/classic_2048_engine.dart';
 import 'package:kidverse/features/mini_games/logic/stack_merge_engine.dart';
@@ -186,6 +188,23 @@ void main() {
       expect(await repository.completeLearningLevel('feed-the-pet', 50), 50);
       expect(repository.learningLevel('feed-the-pet'), 50);
     });
+
+    test('each learning adventure starts with a distinct world reward', () {
+      const ids = [
+        'toy-sort',
+        'feed-the-pet',
+        'sound-safari',
+        'number-garden',
+        'story-train',
+        'letter-bakery',
+        'clean-room-helper',
+      ];
+      final rewards = {
+        for (final id in ids) LearningWorldCatalog.rewardFor(id, 1).id,
+      };
+
+      expect(rewards, hasLength(ids.length));
+    });
   });
 
   group('Classic2048Engine', () {
@@ -301,7 +320,7 @@ void main() {
     });
   });
 
-  testWidgets('catalog and all six game screens render on a phone viewport',
+  testWidgets('catalog and all eleven game screens render on a phone viewport',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -325,6 +344,7 @@ void main() {
         await tester.tap(tutorialButton);
         await tester.pump(const Duration(milliseconds: 300));
       }
+      await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull);
     }
 
@@ -360,6 +380,26 @@ void main() {
     await render(const FeedPetGame());
     expect(find.textContaining('Level 1/50'), findsOneWidget);
     expect(find.byKey(const ValueKey('food-grape')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const SoundSafariGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const NumberGardenGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const StoryTrainGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const LetterBakeryGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const CleanRoomHelperGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -427,5 +467,57 @@ void main() {
     expect(find.byKey(const ValueKey('feed-pet-next-level')), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pump(const Duration(seconds: 4));
+  });
+
+  testWidgets('all shared learning adventures advance and finish a level',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'mg_tutorial_sound-safari': true,
+      'mg_tutorial_number-garden': true,
+      'mg_tutorial_story-train': true,
+      'mg_tutorial_letter-bakery': true,
+      'mg_tutorial_clean-room-helper': true,
+    });
+    final preferences = await SharedPreferences.getInstance();
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const games = <(String, Widget)>[
+      ('sound-safari', SoundSafariGame()),
+      ('number-garden', NumberGardenGame()),
+      ('story-train', StoryTrainGame()),
+      ('letter-bakery', LetterBakeryGame()),
+      ('clean-room-helper', CleanRoomHelperGame()),
+    ];
+
+    for (final game in games) {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(preferences),
+          ],
+          child: MaterialApp(home: game.$2),
+        ),
+      );
+      await tester.pump();
+
+      for (var round = 0; round < 5; round++) {
+        for (var choice = 0; choice < 3; choice++) {
+          final answer = find.byKey(ValueKey('answer-${game.$1}-$choice'));
+          if (answer.evaluate().isNotEmpty) await tester.tap(answer);
+        }
+        await tester.pump(const Duration(milliseconds: 900));
+      }
+
+      expect(find.textContaining('reward!'), findsOneWidget);
+      expect(
+        find.byKey(ValueKey('${game.$1}-next-level')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pump(const Duration(seconds: 4));
+    }
   });
 }

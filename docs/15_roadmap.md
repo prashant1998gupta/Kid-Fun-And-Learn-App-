@@ -83,6 +83,12 @@ for low-end tablets.
   rounds let the child correct the mascot, every completed level unlocks a
   tangible item, and earned objects appear in both the mini-game hub and the
   shared Kid World scene.
+- [x] **M25:** Preschool Learning Adventures pass: Sound Safari, Number Garden,
+  Story Train, Letter Bakery, and Clean Room Helper add 250 persistent levels
+  for listening, animal sounds, counting, early addition, event sequencing,
+  prediction, phonics, letter matching, and practical-life sorting. All five
+  use the shared no-fail voice-guided engine, Teach-Pip confidence rounds,
+  daily challenges, badges, and distinct Kid World reward paths.
 
 ## Quality rules for Codex follow-up work
 

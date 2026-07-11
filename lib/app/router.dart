@@ -14,6 +14,7 @@ import '../features/mini_games/games/infinity_loop_game.dart';
 import '../features/mini_games/games/stack_merge_game.dart';
 import '../features/mini_games/games/toy_sort_game.dart';
 import '../features/mini_games/games/feed_pet_game.dart';
+import '../features/mini_games/games/learning_adventure_game.dart';
 import '../features/curriculum/domain/subject.dart';
 import '../features/home/home_screen.dart';
 import '../features/learning_map/learning_map_screen.dart';
@@ -67,6 +68,11 @@ class AppRoutes {
   static const classic2048 = '/mini-games/2048';
   static const toySort = '/mini-games/toy-sort';
   static const feedThePet = '/mini-games/feed-the-pet';
+  static const soundSafari = '/mini-games/sound-safari';
+  static const numberGarden = '/mini-games/number-garden';
+  static const storyTrain = '/mini-games/story-train';
+  static const letterBakery = '/mini-games/letter-bakery';
+  static const cleanRoomHelper = '/mini-games/clean-room-helper';
   static const kidWorld = '/kid-world';
   static const physicalMission = '/kid-world/move';
 }
@@ -174,6 +180,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.feedThePet,
         pageBuilder: (_, s) => _slide(const FeedPetGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.soundSafari,
+        pageBuilder: (_, s) => _slide(const SoundSafariGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.numberGarden,
+        pageBuilder: (_, s) => _slide(const NumberGardenGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.storyTrain,
+        pageBuilder: (_, s) => _slide(const StoryTrainGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.letterBakery,
+        pageBuilder: (_, s) => _slide(const LetterBakeryGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.cleanRoomHelper,
+        pageBuilder: (_, s) => _slide(const CleanRoomHelperGame(), s),
       ),
       GoRoute(
         path: AppRoutes.kidWorld,

@@ -103,6 +103,11 @@ class MiniGamesScreen extends ConsumerWidget {
     final route = switch (id) {
       'toy-sort' => AppRoutes.toySort,
       'feed-the-pet' => AppRoutes.feedThePet,
+      'sound-safari' => AppRoutes.soundSafari,
+      'number-garden' => AppRoutes.numberGarden,
+      'story-train' => AppRoutes.storyTrain,
+      'letter-bakery' => AppRoutes.letterBakery,
+      'clean-room-helper' => AppRoutes.cleanRoomHelper,
       'infinity-loop' => AppRoutes.infinityLoop,
       '368-chickens' => AppRoutes.chickenTap,
       'stack-merge' => AppRoutes.stackMerge,
