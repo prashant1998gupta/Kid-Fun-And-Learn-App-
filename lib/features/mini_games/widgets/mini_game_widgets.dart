@@ -340,12 +340,18 @@ void showMiniGameReward(BuildContext context, int score) {
           children: [
             const Text('🎉', style: TextStyle(fontSize: 24)),
             const SizedBox(width: 10),
-            Text(
-              '+$coins 🪙   +$xp ⚡   Pet fed! 💖',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '+$coins 🪙   +$xp ⚡   Pet fed! 💖',
+                  maxLines: 1,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
             ),
           ],

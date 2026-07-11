@@ -12,6 +12,8 @@ import '../../core/widgets/bouncy_button.dart';
 import '../art_studio/data/canvas_repository.dart';
 import '../collections/domain/collectible.dart';
 import '../mini_games/data/mini_pet.dart';
+import '../mini_games/data/learning_world_item.dart';
+import '../mini_games/mini_games_controller.dart';
 import '../profiles/domain/child_profile.dart';
 import '../profiles/profiles_controller.dart';
 import 'domain/world_prize.dart';
@@ -26,6 +28,12 @@ class KidWorldScreen extends ConsumerWidget {
     final drawings = ref.read(canvasRepositoryProvider).loadAll();
     final hero = drawings.where((d) => d.id == child.heroDrawingId).firstOrNull;
     final companion = MiniPet.forXp(child.companionXp);
+    final learningItems = ref
+        .watch(miniGamesControllerProvider)
+        .learningWorldItems
+        .map(LearningWorldCatalog.byId)
+        .whereType<LearningWorldItem>()
+        .toList();
     final equipped = child.activePetId == null
         ? null
         : CollectionCatalog.byId(child.activePetId!);
@@ -46,6 +54,7 @@ class KidWorldScreen extends ConsumerWidget {
                         child: child,
                         companionEmoji: equipped?.emoji ?? companion.emoji,
                         hero: hero,
+                        learningItems: learningItems,
                         onCompanionTap: () => _showCompanion(
                           context,
                           ref,
@@ -189,10 +198,8 @@ class KidWorldScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          )
-              .animate()
-              .fadeIn(duration: 240.ms, delay: (i * 80).ms)
-              .slideY(begin: 0.15, end: 0, delay: (i * 80).ms, duration: 300.ms),
+          ).animate().fadeIn(duration: 240.ms, delay: (i * 80).ms).slideY(
+              begin: 0.15, end: 0, delay: (i * 80).ms, duration: 300.ms),
       ],
     );
   }
@@ -337,12 +344,14 @@ class _LivingRoom extends StatelessWidget {
     required this.child,
     required this.companionEmoji,
     required this.hero,
+    required this.learningItems,
     required this.onCompanionTap,
   });
 
   final ChildProfile child;
   final String companionEmoji;
   final SavedDrawing? hero;
+  final List<LearningWorldItem> learningItems;
   final VoidCallback onCompanionTap;
 
   @override
@@ -352,6 +361,7 @@ class _LivingRoom extends StatelessWidget {
         .whereType<WorldPrize>()
         .take(6)
         .toList();
+    final learning = learningItems.take(6).toList();
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -415,6 +425,31 @@ class _LivingRoom extends StatelessWidget {
                         ),
                         child: Text(placed[i].emoji,
                             style: const TextStyle(fontSize: 30)),
+                      ),
+                    ),
+                  ),
+                for (var i = 0; i < learning.length; i++)
+                  Align(
+                    alignment: decorationSpots[
+                        (i + placed.length) % decorationSpots.length],
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFFFFF7D6).withValues(alpha: 0.92),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFFFFC048),
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          learning[i].emoji,
+                          style: const TextStyle(fontSize: 31),
+                        ),
                       ),
                     ),
                   ),

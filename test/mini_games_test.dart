@@ -9,6 +9,8 @@ import 'package:kidverse/features/mini_games/games/chicken_tap_game.dart';
 import 'package:kidverse/features/mini_games/games/classic_2048_game.dart';
 import 'package:kidverse/features/mini_games/games/infinity_loop_game.dart';
 import 'package:kidverse/features/mini_games/games/stack_merge_game.dart';
+import 'package:kidverse/features/mini_games/games/toy_sort_game.dart';
+import 'package:kidverse/features/mini_games/games/feed_pet_game.dart';
 import 'package:kidverse/features/mini_games/logic/chicken_tap_rules.dart';
 import 'package:kidverse/features/mini_games/logic/classic_2048_engine.dart';
 import 'package:kidverse/features/mini_games/logic/stack_merge_engine.dart';
@@ -152,6 +154,38 @@ void main() {
       expect(coins, 5);
       expect(xp, 10);
     });
+
+    test('learning levels and Kid World items persist per child', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final childA = MiniGamesRepository(
+        preferences,
+        scope: 'learner-a',
+        fallbackToLegacy: false,
+      );
+      final childB = MiniGamesRepository(
+        preferences,
+        scope: 'learner-b',
+        fallbackToLegacy: false,
+      );
+
+      expect(await childA.completeLearningLevel('toy-sort', 1), 2);
+      await childA.unlockLearningWorldItem('learning_ball');
+
+      expect(childA.learningLevel('toy-sort'), 2);
+      expect(childA.learningWorldItems(), contains('learning_ball'));
+      expect(childB.learningLevel('toy-sort'), 1);
+      expect(childB.learningWorldItems(), isEmpty);
+    });
+
+    test('learning level is capped at 50', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+
+      expect(await repository.completeLearningLevel('feed-the-pet', 50), 50);
+      expect(repository.learningLevel('feed-the-pet'), 50);
+    });
   });
 
   group('Classic2048Engine', () {
@@ -267,7 +301,7 @@ void main() {
     });
   });
 
-  testWidgets('catalog and all four game screens render on a phone viewport',
+  testWidgets('catalog and all six game screens render on a phone viewport',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -316,5 +350,82 @@ void main() {
     await tester.tap(find.byIcon(Icons.close_rounded));
     await tester.pump();
     expect(tester.takeException(), isNull);
+
+    await render(const ToySortGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(find.text('RED'), findsOneWidget);
+    expect(find.text('YELLOW'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await render(const FeedPetGame());
+    expect(find.textContaining('Level 1/50'), findsOneWidget);
+    expect(find.byKey(const ValueKey('food-grape')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Toy Sort always advances after a correct basket choice',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({'mg_tutorial_toy-sort': true});
+    final preferences = await SharedPreferences.getInstance();
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+        child: const MaterialApp(home: ToySortGame()),
+      ),
+    );
+    await tester.pump();
+
+    for (var round = 0; round < 5; round++) {
+      await tester.tap(find.text('RED'));
+      await tester.tap(find.text('YELLOW'));
+      await tester.pump(const Duration(milliseconds: 850));
+    }
+
+    expect(find.text('World reward!'), findsOneWidget);
+    expect(find.byKey(const ValueKey('toy-sort-next-level')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pump(const Duration(seconds: 4));
+  });
+
+  testWidgets('Feed the Pet completes five counting prompts', (tester) async {
+    SharedPreferences.setMockInitialValues({'mg_tutorial_feed-the-pet': true});
+    final preferences = await SharedPreferences.getInstance();
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+        child: const MaterialApp(home: FeedPetGame()),
+      ),
+    );
+    await tester.pump();
+
+    const rounds = <(String, int)>[
+      ('grape', 1),
+      ('watermelon', 3),
+      ('pear', 2),
+      ('carrot', 1),
+      ('grape', 3),
+    ];
+    for (final round in rounds) {
+      for (var tap = 0; tap < round.$2; tap++) {
+        await tester.tap(find.byKey(ValueKey('food-${round.$1}')));
+        await tester.pump();
+      }
+      await tester.pump(const Duration(milliseconds: 950));
+    }
+
+    expect(find.text('Counting reward!'), findsOneWidget);
+    expect(find.byKey(const ValueKey('feed-pet-next-level')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pump(const Duration(seconds: 4));
   });
 }

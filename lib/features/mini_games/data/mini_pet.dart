@@ -1,5 +1,5 @@
 /// A friendly pet that grows as the child plays mini games — one emotional
-/// through-line that ties four separate puzzles into a world worth returning to.
+/// through-line that ties every mini game into a world worth returning to.
 /// Every win feeds it XP; enough XP evolves it to the next stage.
 class MiniPet {
   const MiniPet({

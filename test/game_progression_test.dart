@@ -122,6 +122,9 @@ void main() {
     expect(find.text('Three plus three?'), findsNothing);
     await tester.pump(const Duration(milliseconds: 150));
     expect(find.text('Three plus three?'), findsOneWidget);
+    // Flush the zero-delay entrance animation scheduled by the new option
+    // cards before the widget test disposes the tree.
+    await tester.pump(const Duration(milliseconds: 400));
   });
 
   testWidgets('mole match holds success feedback before advancing',

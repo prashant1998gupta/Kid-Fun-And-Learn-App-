@@ -12,6 +12,7 @@ class MiniGameDef {
     required this.icon,
     required this.color,
     required this.description,
+    this.learning = false,
   });
 
   final String id;
@@ -19,6 +20,7 @@ class MiniGameDef {
   final String icon;
   final int color;
   final String description;
+  final bool learning;
 }
 
 class MiniGameAchievement {
@@ -53,6 +55,22 @@ class DailyMiniGameChallenge {
 
 /// All available mini games.
 const List<MiniGameDef> kMiniGames = [
+  MiniGameDef(
+    id: 'toy-sort',
+    name: 'Toy Sort',
+    icon: '🧸',
+    color: 0xFFFF8A65,
+    description: 'Teach Pip colors, shapes, sizes and groups!',
+    learning: true,
+  ),
+  MiniGameDef(
+    id: 'feed-the-pet',
+    name: 'Feed the Pet',
+    icon: '🥣',
+    color: 0xFF26A69A,
+    description: 'Count tasty food for a hungry friend!',
+    learning: true,
+  ),
   MiniGameDef(
     id: 'infinity-loop',
     name: 'Flower Flow',
@@ -91,9 +109,21 @@ const List<MiniGameAchievement> kMiniGameAchievements = [
     icon: '🎮',
   ),
   MiniGameAchievement(
+    id: 'toy_teacher',
+    title: 'Toy Teacher',
+    description: 'Teach Pip to sort a full level',
+    icon: '🧸',
+  ),
+  MiniGameAchievement(
+    id: 'pet_feeder',
+    title: 'Pet Chef',
+    description: 'Count every snack in a full level',
+    icon: '🥣',
+  ),
+  MiniGameAchievement(
     id: 'game_explorer',
     title: 'Game Explorer',
-    description: 'Play all four mini games',
+    description: 'Play all six mini games',
     icon: '🗺️',
   ),
   MiniGameAchievement(
@@ -145,6 +175,8 @@ class MiniGamesRepository {
   static const _dailyDateKey = 'mg_daily_date';
   static const _dailyProgressKey = 'mg_daily_progress';
   static const _petXpKey = 'mg_pet_xp';
+  static const _learningLevelPrefix = 'mg_learning_level_';
+  static const _learningItemsKey = 'mg_learning_world_items';
 
   String _key(String base) => scope == null ? base : '$base@$scope';
 
@@ -161,6 +193,28 @@ class MiniGamesRepository {
       (scope != null && fallbackToLegacy ? _prefs.getStringList(base) : null);
 
   int petXp() => _readInt(_petXpKey) ?? 0;
+
+  int learningLevel(String gameId) =>
+      (_readInt('$_learningLevelPrefix$gameId') ?? 1).clamp(1, 50);
+
+  Set<String> learningWorldItems() =>
+      (_readStringList(_learningItemsKey) ?? const <String>[]).toSet();
+
+  Future<int> completeLearningLevel(String gameId, int completedLevel) async {
+    final next = (completedLevel + 1).clamp(1, 50);
+    final unlocked = learningLevel(gameId);
+    final value = next > unlocked ? next : unlocked;
+    await _prefs.setInt(_key('$_learningLevelPrefix$gameId'), value);
+    return value;
+  }
+
+  Future<void> unlockLearningWorldItem(String id) async {
+    final updated = learningWorldItems()..add(id);
+    await _prefs.setStringList(
+      _key(_learningItemsKey),
+      updated.toList()..sort(),
+    );
+  }
 
   /// Feeds the pet and returns its new total XP.
   Future<int> addPetXp(int amount) async {
@@ -209,6 +263,8 @@ class MiniGamesRepository {
         day.difference(DateTime(2024)).inDays.abs() % kMiniGames.length;
     final gameId = kMiniGames[challengeIndex].id;
     final definition = switch (gameId) {
+      'toy-sort' => (title: 'Sort 5 toys', target: 5),
+      'feed-the-pet' => (title: 'Count 5 pet snacks', target: 5),
       'infinity-loop' => (title: 'Solve one loop', target: 1),
       '368-chickens' => (title: 'Score 40 in Chicken Tap', target: 40),
       'stack-merge' => (title: 'Score 128 in Stack Merge', target: 128),

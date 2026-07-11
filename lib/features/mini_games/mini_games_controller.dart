@@ -12,6 +12,8 @@ class MiniGamesState {
     required this.playedGames,
     required this.dailyChallenge,
     required this.petXp,
+    required this.learningLevels,
+    required this.learningWorldItems,
   });
 
   final Map<String, int> highScores;
@@ -19,6 +21,8 @@ class MiniGamesState {
   final Set<String> playedGames;
   final DailyMiniGameChallenge dailyChallenge;
   final int petXp;
+  final Map<String, int> learningLevels;
+  final Set<String> learningWorldItems;
 
   MiniPet get pet => MiniPet.forXp(petXp);
 
@@ -28,6 +32,8 @@ class MiniGamesState {
     Set<String>? playedGames,
     DailyMiniGameChallenge? dailyChallenge,
     int? petXp,
+    Map<String, int>? learningLevels,
+    Set<String>? learningWorldItems,
   }) {
     return MiniGamesState(
       highScores: highScores ?? this.highScores,
@@ -35,6 +41,8 @@ class MiniGamesState {
       playedGames: playedGames ?? this.playedGames,
       dailyChallenge: dailyChallenge ?? this.dailyChallenge,
       petXp: petXp ?? this.petXp,
+      learningLevels: learningLevels ?? this.learningLevels,
+      learningWorldItems: learningWorldItems ?? this.learningWorldItems,
     );
   }
 }
@@ -60,6 +68,11 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
             petXp: initialCompanionXp > _repository.petXp()
                 ? initialCompanionXp
                 : _repository.petXp(),
+            learningLevels: {
+              for (final game in kMiniGames.where((game) => game.learning))
+                game.id: _repository.learningLevel(game.id),
+            },
+            learningWorldItems: _repository.learningWorldItems(),
           ),
         );
 
@@ -80,6 +93,8 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
     required int score,
     int? dailyProgress,
     Iterable<String> achievements = const [],
+    int? completedLearningLevel,
+    String? learningWorldItem,
   }) async {
     await _repository.recordPlay(gameId);
     await recordScore(gameId, score);
@@ -96,6 +111,20 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
 
     final newlyUnlocked = requested.difference(state.achievements);
     await _repository.unlockAchievements(newlyUnlocked);
+
+    var learningLevels = state.learningLevels;
+    if (completedLearningLevel != null) {
+      final nextLevel = await _repository.completeLearningLevel(
+        gameId,
+        completedLearningLevel,
+      );
+      learningLevels = {...learningLevels, gameId: nextLevel};
+    }
+    var learningItems = state.learningWorldItems;
+    if (learningWorldItem != null) {
+      await _repository.unlockLearningWorldItem(learningWorldItem);
+      learningItems = {...learningItems, learningWorldItem};
+    }
 
     // Feed the pet — every game a child plays helps it grow.
     final earnedPetXp = MiniPet.xpForScore(score);
@@ -119,6 +148,8 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
       achievements: {...state.achievements, ...newlyUnlocked},
       dailyChallenge: daily,
       petXp: newPetXp,
+      learningLevels: learningLevels,
+      learningWorldItems: learningItems,
     );
     return newlyUnlocked;
   }

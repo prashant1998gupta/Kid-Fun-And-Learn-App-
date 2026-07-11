@@ -10,6 +10,7 @@ import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/openmoji_view.dart';
 import 'data/mini_pet.dart';
 import 'data/mini_games_repository.dart';
+import 'data/learning_world_item.dart';
 import 'mini_games_controller.dart';
 
 /// Grid listing of all available mini games.
@@ -31,6 +32,10 @@ class MiniGamesScreen extends ConsumerWidget {
               _PetCard(pet: gameState.pet),
               const SizedBox(height: 8),
               _DailyChallengeCard(challenge: gameState.dailyChallenge),
+              if (gameState.learningWorldItems.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _LearningWorldStrip(itemIds: gameState.learningWorldItems),
+              ],
               const SizedBox(height: 8),
               Expanded(
                 child: Padding(
@@ -50,6 +55,7 @@ class MiniGamesScreen extends ConsumerWidget {
                         game: game,
                         index: index,
                         highScore: gameState.highScores[game.id] ?? 0,
+                        learningLevel: gameState.learningLevels[game.id],
                         onTap: () => _openGame(context, game.id),
                       );
                     },
@@ -95,6 +101,8 @@ class MiniGamesScreen extends ConsumerWidget {
 
   void _openGame(BuildContext context, String id) {
     final route = switch (id) {
+      'toy-sort' => AppRoutes.toySort,
+      'feed-the-pet' => AppRoutes.feedThePet,
       'infinity-loop' => AppRoutes.infinityLoop,
       '368-chickens' => AppRoutes.chickenTap,
       'stack-merge' => AppRoutes.stackMerge,
@@ -102,6 +110,59 @@ class MiniGamesScreen extends ConsumerWidget {
       _ => AppRoutes.miniGames,
     };
     context.push(route);
+  }
+}
+
+class _LearningWorldStrip extends StatelessWidget {
+  const _LearningWorldStrip({required this.itemIds});
+
+  final Set<String> itemIds;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = itemIds
+        .map(LearningWorldCatalog.byId)
+        .whereType<LearningWorldItem>()
+        .toList();
+    return Container(
+      height: 62,
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.park_rounded, color: Color(0xFF00A878)),
+          const SizedBox(width: 7),
+          const Text(
+            'My World',
+            style: TextStyle(
+              color: Color(0xFF2D3436),
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 5),
+              itemBuilder: (_, index) => Tooltip(
+                message: items[index].name,
+                child: Center(
+                  child: Text(
+                    items[index].emoji,
+                    style: const TextStyle(fontSize: 29),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -292,12 +353,14 @@ class _GameCard extends StatelessWidget {
     required this.game,
     required this.index,
     required this.highScore,
+    required this.learningLevel,
     required this.onTap,
   });
 
   final MiniGameDef game;
   final int index;
   final int highScore;
+  final int? learningLevel;
   final VoidCallback onTap;
 
   @override
@@ -307,9 +370,11 @@ class _GameCard extends StatelessWidget {
     // so cards pop off the pastel background instead of washing out.
     final deep = Color.lerp(base, Colors.black, 0.22)!;
     final solved = highScore > 0;
-    final status = solved
-        ? (game.id == 'infinity-loop' ? '✓ Solved' : '🏆 $highScore')
-        : 'Play!';
+    final status = game.learning
+        ? 'Level ${learningLevel ?? 1}/50'
+        : solved
+            ? (game.id == 'infinity-loop' ? '✓ Solved' : '🏆 $highScore')
+            : 'Play!';
 
     return BouncyButton(
       borderRadius: AppSpacing.cardRadius,

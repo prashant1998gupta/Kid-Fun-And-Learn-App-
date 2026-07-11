@@ -77,6 +77,12 @@ for low-end tablets.
   cross-mode companion, real placeable lesson prizes, story-framed missions,
   age-aware home navigation, child-drawn story heroes, physical co-play, and
   continue-adventure result flow.
+- [x] **M24:** Learning Mini Games pass: Toy Sort and Feed the Pet each provide
+  50 persistent, voice-guided, no-fail levels; children practise color, shape,
+  size, category, habitat, food recognition, and counting to 10. Teach-Pip
+  rounds let the child correct the mascot, every completed level unlocks a
+  tangible item, and earned objects appear in both the mini-game hub and the
+  shared Kid World scene.
 
 ## Quality rules for Codex follow-up work
 

@@ -12,6 +12,8 @@ import '../features/mini_games/games/chicken_tap_game.dart';
 import '../features/mini_games/games/classic_2048_game.dart';
 import '../features/mini_games/games/infinity_loop_game.dart';
 import '../features/mini_games/games/stack_merge_game.dart';
+import '../features/mini_games/games/toy_sort_game.dart';
+import '../features/mini_games/games/feed_pet_game.dart';
 import '../features/curriculum/domain/subject.dart';
 import '../features/home/home_screen.dart';
 import '../features/learning_map/learning_map_screen.dart';
@@ -63,6 +65,8 @@ class AppRoutes {
   static const chickenTap = '/mini-games/368-chickens';
   static const stackMerge = '/mini-games/stack-merge';
   static const classic2048 = '/mini-games/2048';
+  static const toySort = '/mini-games/toy-sort';
+  static const feedThePet = '/mini-games/feed-the-pet';
   static const kidWorld = '/kid-world';
   static const physicalMission = '/kid-world/move';
 }
@@ -162,6 +166,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.classic2048,
         pageBuilder: (_, s) => _slide(const Classic2048Game(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.toySort,
+        pageBuilder: (_, s) => _slide(const ToySortGame(), s),
+      ),
+      GoRoute(
+        path: AppRoutes.feedThePet,
+        pageBuilder: (_, s) => _slide(const FeedPetGame(), s),
       ),
       GoRoute(
         path: AppRoutes.kidWorld,
