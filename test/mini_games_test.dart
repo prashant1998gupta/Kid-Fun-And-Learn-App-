@@ -144,6 +144,30 @@ void main() {
       );
     });
 
+    test('story path choice persists for today and resets tomorrow', () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+      final day = DateTime(2026, 7, 11);
+
+      expect(repository.adventureTrail(day).storyPath, isNull);
+      final chosen = await repository.chooseAdventureStoryPath('kind', day);
+
+      expect(chosen.storyPath?.label, 'Kind');
+      expect(repository.adventureTrail(day).storyPath?.id, 'kind');
+      expect(
+        repository.adventureTrail(day.add(const Duration(days: 1))).storyPath,
+        isNull,
+      );
+      expect(
+        repository
+            .adventureTrail(day.add(const Duration(days: 1)))
+            .storyWorld
+            .id,
+        isNot(chosen.storyWorld.id),
+      );
+    });
+
     test('result unlocks local badges without curriculum rewards', () async {
       SharedPreferences.setMockInitialValues({});
       final preferences = await SharedPreferences.getInstance();
@@ -219,24 +243,32 @@ void main() {
       final preferences = await SharedPreferences.getInstance();
       var coins = 0;
       var xp = 0;
+      var companionMemory = '';
       final controller = MiniGamesController(
         MiniGamesRepository(preferences),
         rewardPlayer: (reward) async {
           coins += reward.coins;
           xp += reward.xp;
         },
+        syncCompanion: (targetXp, memory) async {
+          companionMemory = memory;
+          return targetXp;
+        },
       );
       Set<String> unlocked = {};
+
+      await controller.chooseStoryPath('brave');
 
       for (final gameId in controller.state.adventureTrail.gameIds) {
         unlocked = await controller.recordResult(gameId: gameId, score: 10);
       }
 
-      expect(unlocked, contains('trail_blazer'));
+      expect(unlocked, containsAll(['trail_blazer', 'story_hero']));
       expect(controller.state.adventureTrail.completed, isTrue);
       expect(controller.state.adventureTrail.chestsWon, 1);
       expect(coins, 24);
       expect(xp, 35);
+      expect(companionMemory, contains('changed the ending'));
     });
 
     test('learning levels and Kid World items persist per child', () async {
@@ -454,7 +486,10 @@ void main() {
     }
 
     await render(const MiniGamesScreen());
-    expect(find.textContaining('Adventure Trail'), findsOneWidget);
+    expect(find.text('Choose your power:'), findsOneWidget);
+    await tester.tap(find.text('💖 Kind'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('💖 Kind ending'), findsOneWidget);
     await tester.tap(find.widgetWithText(ChoiceChip, 'Preschool'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Toy Sort'), findsOneWidget);

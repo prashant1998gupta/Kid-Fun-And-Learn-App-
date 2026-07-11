@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../settings/settings_controller.dart';
 import '../../profiles/profiles_controller.dart';
+import 'mini_game_story.dart';
 
 /// Data for a mini game definition.
 class MiniGameDef {
@@ -64,6 +65,8 @@ class MiniGameAdventureTrail {
     required this.completedGameIds,
     required this.chestClaimed,
     required this.chestsWon,
+    required this.storyWorld,
+    required this.storyPathId,
   });
 
   final String dateKey;
@@ -71,9 +74,12 @@ class MiniGameAdventureTrail {
   final Set<String> completedGameIds;
   final bool chestClaimed;
   final int chestsWon;
+  final MiniGameStoryWorld storyWorld;
+  final String? storyPathId;
 
   int get progress => gameIds.where(completedGameIds.contains).length;
   bool get completed => progress == gameIds.length;
+  MiniGameStoryPath? get storyPath => miniGameStoryPathById(storyPathId);
 
   String? get nextGameId {
     for (final id in gameIds) {
@@ -542,6 +548,12 @@ const List<MiniGameAchievement> kMiniGameAchievements = [
     description: 'Complete all three Adventure Trail stops',
     icon: '🧭',
   ),
+  MiniGameAchievement(
+    id: 'story_hero',
+    title: 'Story Hero',
+    description: 'Choose a path and change a story ending',
+    icon: '📖',
+  ),
 ];
 
 /// Persists high scores for mini games via SharedPreferences.
@@ -567,6 +579,7 @@ class MiniGamesRepository {
   static const _trailProgressKey = 'mg_trail_progress';
   static const _trailClaimedKey = 'mg_trail_claimed';
   static const _trailChestCountKey = 'mg_trail_chests';
+  static const _trailStoryPathKey = 'mg_trail_story_path';
 
   String _key(String base) => scope == null ? base : '$base@$scope';
 
@@ -679,12 +692,45 @@ class MiniGamesRepository {
             .where(gameIds.contains)
             .toSet()
         : <String>{};
+    final storedPath = isTodayStored
+        ? miniGameStoryPathById(_readString(_trailStoryPathKey))
+        : null;
     return MiniGameAdventureTrail(
       dateKey: dateKey,
       gameIds: List.unmodifiable(gameIds),
       completedGameIds: Set.unmodifiable(completed),
       chestClaimed: isTodayStored && (_readBool(_trailClaimedKey) ?? false),
       chestsWon: _readInt(_trailChestCountKey) ?? 0,
+      storyWorld: kMiniGameStoryWorlds[dayNumber % kMiniGameStoryWorlds.length],
+      storyPathId: storedPath?.id,
+    );
+  }
+
+  Future<MiniGameAdventureTrail> chooseAdventureStoryPath(
+    String pathId, [
+    DateTime? now,
+    Iterable<String>? candidateGameIds,
+  ]) async {
+    final path = miniGameStoryPathById(pathId);
+    if (path == null) {
+      throw ArgumentError.value(pathId, 'pathId', 'Unknown story path');
+    }
+    final current = adventureTrail(now, candidateGameIds);
+    final storedToday = _readString(_trailDateKey) == current.dateKey;
+    await _prefs.setString(_key(_trailDateKey), current.dateKey);
+    await _prefs.setString(_key(_trailStoryPathKey), path.id);
+    if (!storedToday) {
+      await _prefs.setStringList(_key(_trailProgressKey), const []);
+      await _prefs.setBool(_key(_trailClaimedKey), false);
+    }
+    return MiniGameAdventureTrail(
+      dateKey: current.dateKey,
+      gameIds: current.gameIds,
+      completedGameIds: current.completedGameIds,
+      chestClaimed: current.chestClaimed,
+      chestsWon: current.chestsWon,
+      storyWorld: current.storyWorld,
+      storyPathId: path.id,
     );
   }
 
@@ -699,6 +745,7 @@ class MiniGamesRepository {
     final finished = current.gameIds.every(completed.contains);
     final chestUnlocked = finished && !current.chestClaimed;
     final chestsWon = current.chestsWon + (chestUnlocked ? 1 : 0);
+    final storyPathId = current.storyPathId ?? 'curious';
 
     await _prefs.setString(_key(_trailDateKey), current.dateKey);
     await _prefs.setStringList(
@@ -709,6 +756,7 @@ class MiniGamesRepository {
       _key(_trailClaimedKey),
       current.chestClaimed || chestUnlocked,
     );
+    await _prefs.setString(_key(_trailStoryPathKey), storyPathId);
     if (chestUnlocked) {
       await _prefs.setInt(_key(_trailChestCountKey), chestsWon);
     }
@@ -720,6 +768,8 @@ class MiniGamesRepository {
         completedGameIds: Set.unmodifiable(completed),
         chestClaimed: current.chestClaimed || chestUnlocked,
         chestsWon: chestsWon,
+        storyWorld: current.storyWorld,
+        storyPathId: storyPathId,
       ),
       chestUnlocked: chestUnlocked,
     );

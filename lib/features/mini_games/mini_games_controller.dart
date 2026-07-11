@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/services/audio_service.dart';
 import '../gamification/domain/wallet.dart';
 import '../profiles/profiles_controller.dart';
 import 'data/mini_games_repository.dart';
@@ -124,7 +125,9 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
       null,
       _adventureGameIds,
     );
-    if (trailUpdate.chestUnlocked) requested.add('trail_blazer');
+    if (trailUpdate.chestUnlocked) {
+      requested.addAll(const ['trail_blazer', 'story_hero']);
+    }
 
     final newlyUnlocked = requested.difference(state.achievements);
     await _repository.unlockAchievements(newlyUnlocked);
@@ -146,10 +149,21 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
     // Feed the pet — every game a child plays helps it grow.
     final earnedPetXp = MiniPet.xpForScore(score);
     var newPetXp = await _repository.addPetXp(earnedPetXp);
-    final sharedXp = await _syncCompanion?.call(
-      newPetXp,
-      'I loved playing ${_gameName(gameId)} with you!',
-    );
+    final trail = trailUpdate.trail;
+    final chapterIndex = trail.gameIds.indexOf(gameId);
+    final storyMemory = chapterIndex < 0
+        ? 'I loved playing ${_gameName(gameId)} with you!'
+        : trailUpdate.chestUnlocked
+            ? trail.storyWorld.finaleFor(trail.storyPath!)
+            : trail.storyWorld.chapterLine(
+                chapterIndex,
+                _gameName(gameId),
+                trail.storyPath!,
+              );
+    if (trailUpdate.chestUnlocked) {
+      AudioService.instance.speak(storyMemory);
+    }
+    final sharedXp = await _syncCompanion?.call(newPetXp, storyMemory);
     if (sharedXp != null) newPetXp = sharedXp;
 
     // Mini games participate in the same visible economy as learning games.
@@ -181,6 +195,15 @@ class MiniGamesController extends StateNotifier<MiniGamesState> {
 
   void syncPetXp(int xp) {
     if (xp != state.petXp) state = state.copyWith(petXp: xp);
+  }
+
+  Future<void> chooseStoryPath(String pathId) async {
+    final trail = await _repository.chooseAdventureStoryPath(
+      pathId,
+      null,
+      _adventureGameIds,
+    );
+    state = state.copyWith(adventureTrail: trail);
   }
 
   String _gameName(String id) {

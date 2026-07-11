@@ -11,8 +11,8 @@ an emotionally meaningful reward.
 routes, reactive high scores, OpenMoji art, voice tutorials, invisible adaptive
 difficulty, story goals, local co-op, no-loss play, creative mode, wallet/pet
 rewards, daily challenges, badges, physical controls, accessibility behavior,
-the rotating Adventure Trail, and framework-independent rule tests are
-implemented.
+the rotating Adventure Trail, interactive storybook journeys, and
+framework-independent rule tests are implemented.
 
 ### Engagement features now implemented
 
@@ -70,10 +70,22 @@ implemented.
   the Trail Blazer badge. Trails use the active child's grade band plus the
   four casual games, so younger children never receive an unsuitable Class 5
   mission while every game remains part of an age-appropriate rotation.
+- Every trail is now one of eight hand-authored rotating story worlds: Moon
+  Garden, Rainbow River, Clockwork Castle, Cloud Zoo, Whispering Library, Coral
+  City, Tiny Planet, or Dream Train. Each has an opening problem, three unique
+  relic chapters, and a full ending instead of generic checklist text.
+- Children choose how the hero solves the story: **Brave**, **Kind**, or
+  **Curious**. The selected path changes every chapter's spoken mission and the
+  final ending, persists per child for the day, and becomes part of the shared
+  companion's memory. Direct trail play waits for a choice; entering a chapter
+  through the catalog safely defaults to Curious.
+- A speaker button reads the current story aloud. Completing the third chapter
+  automatically narrates the ending from any of the 29 game result flows and
+  unlocks the Story Hero badge.
 - The hub now has All, Learning, Preschool, Class 1–2, Class 3–4, Class 5, and
   Just Fun filters. **Play Next** follows the unfinished trail, while
   **Surprise Me** selects an unplayed game or the daily challenge afterward.
-- Thirty-three local mini-game badges plus persistent coin, XP, high-score, play, and
+- Thirty-four local mini-game badges plus persistent coin, XP, high-score, play, and
   pet-growth progress.
 - Local high scores and play history persist through `SharedPreferences`.
 
@@ -384,13 +396,14 @@ semantic labels and large one-hand-reachable touch targets.
 ## 10. Verification
 
 - `flutter analyze`: zero issues.
-- `flutter test`: all 111 tests pass at the latest verification.
+- `flutter test`: all 112 tests pass at the latest verification.
 - Mini-game tests cover score persistence, wallet reward delivery, pet growth,
   daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
   Chicken target rules, learning-level persistence, per-child Kid World items,
   full Toy Sort/Feed the Pet progression, and phone-viewport rendering for the
   catalog and all twenty-nine game screens, grade-band discovery filters,
-  age-eligible Adventure Trail rotation, one-time chest claims, and chest bonus
+  age-eligible Adventure Trail rotation, story-path persistence/reset, choice
+  UI, one-time chest claims, story-ending companion memory, and chest bonus
   delivery. A separate rotation audit confirms that all 29 catalog games are
   reachable. The shared content audit validates 5,750 generated rounds across
   every 50-level adventure.

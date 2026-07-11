@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
+import '../../core/services/audio_service.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/openmoji_view.dart';
 import 'data/mini_pet.dart';
+import 'data/mini_game_story.dart';
 import 'data/mini_games_repository.dart';
 import 'data/learning_world_item.dart';
 import 'mini_games_controller.dart';
@@ -56,8 +58,9 @@ class _MiniGamesScreenState extends ConsumerState<MiniGamesScreen> {
               const SizedBox(height: 8),
               _AdventureTrailCard(
                 trail: gameState.adventureTrail,
-                onPlay: (id) => _openGame(context, id),
-                onSurprise: () => _openGame(
+                onPlay: (id) => _playStoryChapter(context, id),
+                onChoosePath: _chooseStoryPath,
+                onSurprise: () => _playStoryChapter(
                   context,
                   _surpriseGame(gameState),
                 ),
@@ -126,6 +129,38 @@ class _MiniGamesScreenState extends ConsumerState<MiniGamesScreen> {
       if (!state.playedGames.contains(game.id)) return game.id;
     }
     return state.dailyChallenge.gameId;
+  }
+
+  Future<void> _chooseStoryPath(MiniGameStoryPath path) async {
+    await ref
+        .read(miniGamesControllerProvider.notifier)
+        .chooseStoryPath(path.id);
+    if (!mounted) return;
+    final trail = ref.read(miniGamesControllerProvider).adventureTrail;
+    AudioService.instance.speak(
+      '${path.label} path chosen! ${trail.storyWorld.intro}',
+    );
+  }
+
+  void _playStoryChapter(BuildContext context, String gameId) {
+    final trail = ref.read(miniGamesControllerProvider).adventureTrail;
+    final chapter = trail.gameIds.indexOf(gameId);
+    if (chapter >= 0 && trail.storyPath == null) {
+      AudioService.instance.speak(
+        'First choose your story power: brave, kind, or curious.',
+      );
+      return;
+    }
+    if (chapter >= 0) {
+      AudioService.instance.speak(
+        trail.storyWorld.chapterLine(
+          chapter,
+          _miniGameById(gameId).name,
+          trail.storyPath!,
+        ),
+      );
+    }
+    _openGame(context, gameId);
   }
 
   Widget _topBar(BuildContext context) {
@@ -198,15 +233,30 @@ class _AdventureTrailCard extends StatelessWidget {
   const _AdventureTrailCard({
     required this.trail,
     required this.onPlay,
+    required this.onChoosePath,
     required this.onSurprise,
   });
 
   final MiniGameAdventureTrail trail;
   final ValueChanged<String> onPlay;
+  final ValueChanged<MiniGameStoryPath> onChoosePath;
   final VoidCallback onSurprise;
 
   @override
   Widget build(BuildContext context) {
+    final path = trail.storyPath;
+    final currentId = trail.nextGameId;
+    final currentChapter =
+        currentId == null ? 2 : trail.gameIds.indexOf(currentId);
+    final narration = trail.completed
+        ? trail.storyWorld.finaleFor(path ?? kMiniGameStoryPaths.last)
+        : path == null
+            ? trail.storyWorld.intro
+            : trail.storyWorld.chapterLine(
+                currentChapter,
+                _miniGameById(currentId!).name,
+                path,
+              );
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 11),
@@ -227,17 +277,30 @@ class _AdventureTrailCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                trail.completed
-                    ? '🎁 Trail chest opened!'
-                    : '🧭 Adventure Trail',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w900,
+              Expanded(
+                child: Text(
+                  '${trail.storyWorld.icon} ${trail.storyWorld.title}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
-              const Spacer(),
+              BouncyButton(
+                borderRadius: BorderRadius.circular(99),
+                onTap: () => AudioService.instance.speak(narration),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 7),
+                  child: Icon(
+                    Icons.volume_up_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
               Semantics(
                 label: '${trail.chestsWon} trail chests collected',
                 child: Text(
@@ -250,6 +313,83 @@ class _AdventureTrailCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 5),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              narration,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10.5,
+                height: 1.2,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (path == null) ...[
+            const SizedBox(height: 7),
+            Row(
+              children: [
+                const Text(
+                  'Choose your power:',
+                  style: TextStyle(
+                    color: Color(0xFFFFE082),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                for (final storyPath in kMiniGameStoryPaths)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: BouncyButton(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () => onChoosePath(storyPath),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '${storyPath.icon} ${storyPath.label}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Color(0xFF4737A8),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ] else ...[
+            const SizedBox(height: 5),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE082),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+                child: Text(
+                  '${path.icon} ${path.label} ending',
+                  style: const TextStyle(
+                    color: Color(0xFF3B2A78),
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Row(
             children: [

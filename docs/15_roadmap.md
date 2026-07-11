@@ -115,6 +115,12 @@ for low-end tablets.
   adds age-appropriate trail selection, grade-aware discovery filters, and
   smart Play Next and Surprise Me actions, turning the catalog into a guided
   daily journey instead of a wall of unrelated game cards.
+- [x] **M30:** Interactive Storybook pass: Adventure Trails rotate through
+  eight original story worlds with an opening mystery, three named relic
+  chapters, and a narrated finale. Children choose a Brave, Kind, or Curious
+  path that changes the mission language and ending; the choice persists per
+  child, feeds the companion's memory, and unlocks the Story Hero badge when
+  any three-game story is completed.
 
 ## Quality rules for Codex follow-up work
 
