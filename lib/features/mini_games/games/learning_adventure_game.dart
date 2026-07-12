@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
   final _celebration = CelebrationController();
 
   late int _level;
+  late List<int> _roundSeeds;
   int _round = 0;
   int _score = 0;
   int _mistakes = 0;
@@ -57,7 +59,9 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
         _level,
       );
   _AdventureRound get _question =>
-      _AdventureContent.question(widget.type, _contentLevel, _round);
+      _AdventureContent.question(widget.type, _contentLevel, _roundSeed);
+  int get _roundSeed =>
+      _roundSeeds.isEmpty ? _round : _roundSeeds[_round % _roundSeeds.length];
   bool get _teachPip => _round == 2 || _round == 4;
 
   @override
@@ -66,6 +70,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
     _level =
         ref.read(miniGamesControllerProvider).learningLevels[widget.type.id] ??
             1;
+    _prepareRoundSeeds();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       showFirstPlayTutorial(
@@ -81,10 +86,24 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
 
   void _speakPrompt() {
     if (!mounted || _complete) return;
+    unawaited(ref
+        .read(miniGamesRepositoryProvider)
+        .recordQuestionSeen(widget.type.id, _question.identity));
     final spoken = _teachPip
         ? 'Pip chose ${_question.wrongGuess}. Is Pip right? ${_question.spokenPrompt}'
         : _question.spokenPrompt;
     AudioService.instance.speak(spoken);
+  }
+
+  void _prepareRoundSeeds() {
+    final contentLevel = _contentLevel;
+    _roundSeeds = ref.read(miniGamesRepositoryProvider).freshQuestionSeeds(
+          gameId: widget.type.id,
+          count: _roundsPerLevel,
+          questionIdForSeed: (seed) =>
+              _AdventureContent.question(widget.type, contentLevel, seed)
+                  .identity,
+        );
   }
 
   Future<void> _choose(int index) async {
@@ -177,6 +196,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
   void _nextLevel() {
     setState(() {
       if (_level < 50) _level++;
+      _prepareRoundSeeds();
       _round = 0;
       _score = 0;
       _mistakes = 0;

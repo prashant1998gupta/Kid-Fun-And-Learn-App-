@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/openmoji_view.dart';
 import '../data/learning_world_item.dart';
+import '../data/mini_games_repository.dart';
 import '../mini_games_controller.dart';
 import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
@@ -30,6 +32,7 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
   final _celebration = CelebrationController();
 
   late int _level;
+  late List<int> _roundSeeds;
   int _round = 0;
   int _fed = 0;
   int _score = 0;
@@ -50,14 +53,17 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
         <= 30 => 7,
         _ => 10,
       };
-  int get _wanted => 1 + ((_level * 3 + _round * 2) % _maxCount);
-  _Food get _target => _foods[(_level * 5 + _round * 3) % _foods.length];
+  int get _roundSeed =>
+      _roundSeeds.isEmpty ? _round : _roundSeeds[_round % _roundSeeds.length];
+  int get _wanted => _wantedForSeed(_roundSeed);
+  _Food get _target => _targetForSeed(_roundSeed);
   bool get _teachPip => _round == 2 || _round == 4;
 
   @override
   void initState() {
     super.initState();
     _level = ref.read(miniGamesControllerProvider).learningLevels[_gameId] ?? 1;
+    _prepareRoundSeeds();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       showFirstPlayTutorial(
@@ -75,14 +81,30 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
   List<_Food> get _choices {
     final result = <_Food>[_target];
     var cursor =
-        (_foods.indexOf(_target) + _level + _round + 1) % _foods.length;
+        (_foods.indexOf(_target) + _level + _roundSeed + 1) % _foods.length;
     while (result.length < 3) {
       final candidate = _foods[cursor % _foods.length];
       if (!result.contains(candidate)) result.add(candidate);
       cursor++;
     }
-    result.shuffle(math.Random(_level * 1009 + _round));
+    result.shuffle(math.Random(_level * 1009 + _roundSeed));
     return result;
+  }
+
+  int _wantedForSeed(int seed) => 1 + ((_level * 3 + seed * 2) % _maxCount);
+
+  _Food _targetForSeed(int seed) =>
+      _foods[(_level * 5 + seed * 3) % _foods.length];
+
+  String _questionIdForSeed(int seed) =>
+      '${_targetForSeed(seed).name}|${_wantedForSeed(seed)}';
+
+  void _prepareRoundSeeds() {
+    _roundSeeds = ref.read(miniGamesRepositoryProvider).freshQuestionSeeds(
+          gameId: _gameId,
+          count: _roundsPerLevel,
+          questionIdForSeed: _questionIdForSeed,
+        );
   }
 
   String get _prompt => _level >= 11
@@ -97,6 +119,12 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
 
   void _speakPrompt() {
     if (_complete || !mounted) return;
+    unawaited(
+      ref.read(miniGamesRepositoryProvider).recordQuestionSeen(
+            _gameId,
+            _questionIdForSeed(_roundSeed),
+          ),
+    );
     final countLine = [for (var i = 1; i <= _wanted; i++) '$i'].join(', ');
     final text = _teachPip
         ? 'Pip counted ${_pipGuess()}. Pip is being silly! Please feed $_wanted ${_plural(_target.name, _wanted)}.'
@@ -196,6 +224,7 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
   void _nextLevel() {
     setState(() {
       if (_level < 50) _level++;
+      _prepareRoundSeeds();
       _round = 0;
       _fed = 0;
       _score = 0;

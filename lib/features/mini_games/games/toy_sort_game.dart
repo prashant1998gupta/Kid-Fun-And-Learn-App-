@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import '../../../core/widgets/animated_background.dart';
 import '../../../core/widgets/celebration_overlay.dart';
 import '../../../core/widgets/openmoji_view.dart';
 import '../data/learning_world_item.dart';
+import '../data/mini_games_repository.dart';
 import '../mini_games_controller.dart';
 import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
@@ -75,6 +77,18 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
         .where((item) => availableGroups.contains(item.group))
         .toList()
       ..shuffle(math.Random(_level * 7919));
+    final recent = ref.read(miniGamesRepositoryProvider).recentQuestionIds(
+          _gameId,
+        );
+    if (recent.isNotEmpty) {
+      final recentSet = recent.toSet();
+      _deck = [
+        for (final item in _deck)
+          if (!recentSet.contains(item.id)) item,
+        for (final item in _deck)
+          if (recentSet.contains(item.id)) item,
+      ];
+    }
     _round = 0;
     _score = 0;
     _tries = 0;
@@ -87,6 +101,12 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
 
   void _speakPrompt() {
     if (_complete || !mounted) return;
+    unawaited(
+      ref.read(miniGamesRepositoryProvider).recordQuestionSeen(
+            _gameId,
+            _item.id,
+          ),
+    );
     final text = _teachPip
         ? 'Pip made a silly guess. Teach Pip where the ${_item.spokenName} belongs.'
         : 'Put the ${_item.spokenName} in the ${_group(_item.group).label} basket.';

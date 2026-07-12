@@ -633,6 +633,7 @@ class MiniGamesRepository {
   static const _trailClaimedKey = 'mg_trail_claimed';
   static const _trailChestCountKey = 'mg_trail_chests';
   static const _trailStoryPathKey = 'mg_trail_story_path';
+  static const _recentQuestionPrefix = 'mg_recent_questions_';
 
   String _key(String base) => scope == null ? base : '$base@$scope';
 
@@ -666,6 +667,59 @@ class MiniGamesRepository {
     final value = next > unlocked ? next : unlocked;
     await _prefs.setInt(_key('$_learningLevelPrefix$gameId'), value);
     return value;
+  }
+
+  List<String> recentQuestionIds(String gameId) =>
+      _readStringList('$_recentQuestionPrefix$gameId') ?? const <String>[];
+
+  Future<void> recordQuestionSeen(
+    String gameId,
+    String questionId, {
+    int limit = 32,
+  }) async {
+    final updated = [
+      for (final id in recentQuestionIds(gameId))
+        if (id != questionId) id,
+      questionId,
+    ];
+    final start = updated.length > limit ? updated.length - limit : 0;
+    await _prefs.setStringList(
+      _key('$_recentQuestionPrefix$gameId'),
+      updated.sublist(start),
+    );
+  }
+
+  List<int> freshQuestionSeeds({
+    required String gameId,
+    required int count,
+    required String Function(int seed) questionIdForSeed,
+    int searchWindow = 12,
+  }) {
+    final recent = recentQuestionIds(gameId).toSet();
+    final chosenIds = <String>{};
+    final seeds = <int>[];
+    for (var slot = 0; slot < count; slot++) {
+      int? fallbackSeed;
+      String? fallbackId;
+      for (var probe = 0; probe < count * searchWindow; probe++) {
+        final seed = probe == 0 ? slot : count + probe - 1;
+        final id = questionIdForSeed(seed);
+        if (!chosenIds.contains(id)) {
+          fallbackSeed ??= seed;
+          fallbackId ??= id;
+          if (!recent.contains(id)) {
+            seeds.add(seed);
+            chosenIds.add(id);
+            break;
+          }
+        }
+      }
+      if (seeds.length == slot) {
+        seeds.add(fallbackSeed ?? slot);
+        chosenIds.add(fallbackId ?? questionIdForSeed(slot));
+      }
+    }
+    return seeds;
   }
 
   Future<void> unlockLearningWorldItem(String id) async {

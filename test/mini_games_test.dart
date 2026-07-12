@@ -304,6 +304,26 @@ void main() {
       expect(repository.learningLevel('feed-the-pet'), 50);
     });
 
+    test('recent mini-game questions are skipped when fresh seeds exist',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+
+      await repository.recordQuestionSeen('number-garden', 'q0');
+      await repository.recordQuestionSeen('number-garden', 'q1');
+      await repository.recordQuestionSeen('number-garden', 'q2');
+
+      final seeds = repository.freshQuestionSeeds(
+        gameId: 'number-garden',
+        count: 3,
+        questionIdForSeed: (seed) => 'q$seed',
+      );
+
+      expect(seeds, [3, 4, 5]);
+      expect(repository.recentQuestionIds('number-garden'), ['q0', 'q1', 'q2']);
+    });
+
     test('each learning adventure starts with a distinct world reward', () {
       const ids = [
         'toy-sort',
@@ -372,6 +392,55 @@ void main() {
           LearningAdventureGradePolicy.contentLevel(GradeLevel.grade3, 50), 32);
       expect(
           LearningAdventureGradePolicy.contentLevel(GradeLevel.grade4, 50), 50);
+    });
+
+    test('compressed preschool adventures can avoid just-seen questions',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final repository = MiniGamesRepository(preferences);
+      final contentLevel = LearningAdventureGradePolicy.contentLevel(
+        GradeLevel.lkg,
+        4,
+      );
+
+      for (var round = 0; round < 5; round++) {
+        await repository.recordQuestionSeen(
+          'sound-safari',
+          LearningAdventureAudit.questionIdentity(
+            LearningAdventureType.soundSafari,
+            contentLevel,
+            round,
+          ),
+        );
+      }
+
+      final seeds = repository.freshQuestionSeeds(
+        gameId: 'sound-safari',
+        count: 5,
+        questionIdForSeed: (seed) => LearningAdventureAudit.questionIdentity(
+          LearningAdventureType.soundSafari,
+          contentLevel,
+          seed,
+        ),
+      );
+      final selectedIdentities = {
+        for (final seed in seeds)
+          LearningAdventureAudit.questionIdentity(
+            LearningAdventureType.soundSafari,
+            contentLevel,
+            seed,
+          ),
+      };
+
+      expect(seeds, isNot([0, 1, 2, 3, 4]));
+      expect(seeds.toSet(), hasLength(5));
+      expect(
+        selectedIdentities.intersection(
+          repository.recentQuestionIds('sound-safari').toSet(),
+        ),
+        isEmpty,
+      );
     });
   });
 

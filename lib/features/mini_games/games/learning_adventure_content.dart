@@ -23,6 +23,9 @@ class _AdventureRound {
   final String hint;
   final String explanation;
 
+  String get identity => '$skill|$prompt|$sceneLabel|'
+      '${choices[correctIndex].label}|${scene.join()}';
+
   String get wrongGuess =>
       choices[correctIndex == 0 ? 1 : 0].label.toLowerCase();
 }
@@ -70,7 +73,7 @@ class _AdventureContent {
       };
 
   static _AdventureRound _sound(int level, int round) {
-    final targetIndex = (level * 7 + round * 3) % _sounds.length;
+    final targetIndex = (level * 7 + round * 4) % _sounds.length;
     final target = _sounds[targetIndex];
     final reverse = level > 15 && (level + round).isEven;
     final candidates = _candidateIndexes(
@@ -145,7 +148,7 @@ class _AdventureContent {
   }
 
   static _AdventureRound _story(int level, int round) {
-    final index = (level * 3 + round * 2) % _stories.length;
+    final index = (level * 3 + round * 3) % _stories.length;
     final story = _stories[index];
     final candidates = _candidateIndexes(index, _stories.length, level, round);
     final choices = [

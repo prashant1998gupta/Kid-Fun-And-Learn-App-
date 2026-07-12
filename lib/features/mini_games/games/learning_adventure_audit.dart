@@ -8,6 +8,13 @@ class LearningAdventureAudit {
   static int correctIndex(LearningAdventureType type, int level, int round) =>
       _AdventureContent.question(type, level, round).correctIndex;
 
+  static String questionIdentity(
+    LearningAdventureType type,
+    int level,
+    int round,
+  ) =>
+      _AdventureContent.question(type, level, round).identity;
+
   static List<String> validateAll() {
     final errors = <String>[];
     for (final type in LearningAdventureType.values) {
