@@ -101,6 +101,8 @@ void main() {
         heroDrawingId: 'drawing-7',
         heroName: 'Captain Scribble',
         completedAdventures: 9,
+        energyMode: KidEnergyMode.active,
+        siblingCoopEnabled: true,
       );
 
       final restored = ChildProfile.fromMap(profile.toMap());
@@ -113,6 +115,8 @@ void main() {
       expect(restored.heroDrawingId, 'drawing-7');
       expect(restored.heroName, 'Captain Scribble');
       expect(restored.completedAdventures, 9);
+      expect(restored.energyMode, KidEnergyMode.active);
+      expect(restored.siblingCoopEnabled, isTrue);
     });
 
     test('legacy profiles receive safe living-world defaults', () {
@@ -127,6 +131,8 @@ void main() {
       expect(restored.companionXp, 0);
       expect(restored.companionName, 'Spark');
       expect(restored.heroDrawingId, isNull);
+      expect(restored.energyMode, KidEnergyMode.ready);
+      expect(restored.siblingCoopEnabled, isFalse);
     });
   });
 

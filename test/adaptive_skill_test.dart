@@ -61,4 +61,30 @@ void main() {
     expect(restored.conceptMastery('child', 'math.multiplication'),
         model.conceptMastery('child', 'math.multiplication'));
   });
+
+  test('support fades from Watch to Together to Your turn', () {
+    final model = SkillModel();
+    expect(
+      model.supportStage('child', 'math.multiplication'),
+      LearningSupportStage.watch,
+    );
+    const success = LessonResult(
+      lesson: lesson,
+      correct: 1,
+      total: 1,
+      firstTryCorrect: 1,
+      struggledQuestionIds: [],
+      durationSeconds: 10,
+    );
+    model.observe('child', success);
+    expect(
+      model.supportStage('child', 'math.multiplication'),
+      LearningSupportStage.together,
+    );
+    model.observe('child', success);
+    expect(
+      model.supportStage('child', 'math.multiplication'),
+      LearningSupportStage.yourTurn,
+    );
+  });
 }

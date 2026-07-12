@@ -124,7 +124,7 @@ for low-end tablets.
 - [x] **M31:** Documentation synchronization pass: README, PRD, information
   architecture, game catalog, gamification, testing, living-world, performance
   audit, and mini-game architecture now describe the implemented 29-game,
-  1,250-level interactive storybook system and the 112-test verification state.
+  1,250-level interactive storybook system and the 135-test verification state.
 
 ## Quality rules for Codex follow-up work
 

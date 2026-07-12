@@ -223,7 +223,10 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
   }
 
   Widget _options(BuildContext context) {
-    final optionIndexes = rescueOptionIndexes(_question, rescue: _rescue);
+    final optionIndexes = rescueOptionIndexes(
+      _question,
+      rescue: _rescue || LearningSupportScope.stageOf(context).guidedChoices,
+    );
     return GridView.builder(
       padding: const EdgeInsets.all(AppSpacing.md),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(

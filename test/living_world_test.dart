@@ -26,10 +26,20 @@ void main() {
       placedRoomItems: ['room_rainbow'],
       companionXp: 40,
       companionName: 'Spark',
+      completedAdventures: 4,
     );
     SharedPreferences.setMockInitialValues({
       'child_profiles': jsonEncode([child.toMap()]),
       'active_child_id': child.id,
+      'saved_drawings': jsonEncode([
+        {
+          'id': 'garden-art',
+          'name': 'Rainbow Friend',
+          'thumbnail':
+              'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+          'createdAt': '2026-01-01T00:00:00.000Z',
+        }
+      ]),
     });
     final preferences = await SharedPreferences.getInstance();
 
@@ -46,6 +56,9 @@ void main() {
     expect(find.textContaining('Spark'), findsOneWidget);
     expect(find.text('🌈'), findsWidgets);
     expect(find.text('Move!'), findsOneWidget);
+    expect(find.byKey(const ValueKey('memory-garden')), findsOneWidget);
+    expect(find.byKey(const ValueKey('living-drawing-garden-art')),
+        findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

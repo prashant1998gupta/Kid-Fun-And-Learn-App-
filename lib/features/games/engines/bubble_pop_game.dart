@@ -136,7 +136,10 @@ class _BubblePopGameState extends State<BubblePopGame> {
 
   @override
   Widget build(BuildContext context) {
-    final optionIndexes = rescueOptionIndexes(_q, rescue: _rescue);
+    final optionIndexes = rescueOptionIndexes(
+      _q,
+      rescue: _rescue || LearningSupportScope.stageOf(context).guidedChoices,
+    );
     return CelebrationOverlay(
       controller: _celebration,
       child: Scaffold(

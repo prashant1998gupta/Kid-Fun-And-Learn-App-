@@ -14,6 +14,7 @@ import '../data/learning_world_item.dart';
 import '../mini_games_controller.dart';
 import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
+import '../../profiles/profiles_controller.dart';
 
 /// Counting, quantity and food-recognition practice for preschool learners.
 /// Children can hear every prompt and can never lose the round.
@@ -38,6 +39,9 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
   bool _complete = false;
   String _message = 'A hungry friend is waiting!';
   LearningWorldItem? _reward;
+  int _player = 1;
+
+  bool get _coOp => ref.read(activeChildProvider)?.siblingCoopEnabled ?? false;
 
   static const _roundsPerLevel = 5;
   int get _maxCount => switch (_level) {
@@ -154,6 +158,7 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
       } else {
         setState(() {
           _round++;
+          if (_coOp) _player = _player == 1 ? 2 : 1;
           _fed = 0;
           _mistakes = 0;
           _locked = false;
@@ -199,6 +204,7 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
       _complete = false;
       _reward = null;
       _message = 'A new counting picnic begins!';
+      _player = 1;
     });
     _speakPrompt();
   }
@@ -253,6 +259,19 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
               ),
             ),
           ),
+          if (_coOp)
+            Container(
+              key: const ValueKey('feed-pet-coop-turn'),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Text('P$_player 👋',
+                  style: const TextStyle(
+                      color: AppColors.primary, fontWeight: FontWeight.w900)),
+            ),
+          if (_coOp) const SizedBox(width: 6),
           Text(
             '⭐ $_score',
             style: const TextStyle(

@@ -6,6 +6,7 @@ import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../curriculum/domain/lesson.dart';
 import '../curriculum/domain/subject.dart';
+import '../ai/adaptive_engine.dart';
 
 class AdventureMission {
   const AdventureMission(this.emoji, this.title, this.story);
@@ -58,6 +59,7 @@ class AdventureIntro extends StatefulWidget {
     required this.skillName,
     required this.teachingTip,
     required this.isNewSkill,
+    required this.supportStage,
     this.foundationNote,
     required this.onStart,
   });
@@ -67,6 +69,7 @@ class AdventureIntro extends StatefulWidget {
   final String skillName;
   final String teachingTip;
   final bool isNewSkill;
+  final LearningSupportStage supportStage;
   final String? foundationNote;
   final VoidCallback onStart;
 
@@ -134,6 +137,22 @@ class _AdventureIntroState extends State<AdventureIntro> {
                             fontWeight: FontWeight.w700)),
                     const SizedBox(height: 16),
                     Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.sky.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                      child: Text(
+                        '${widget.supportStage.emoji} ${widget.supportStage.label}',
+                        style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -178,8 +197,14 @@ class _AdventureIntroState extends State<AdventureIntro> {
                           color: AppColors.success,
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        child: const Text('Let’s help! 🚀',
-                            style: TextStyle(
+                        child: Text(
+                            widget.supportStage == LearningSupportStage.watch
+                                ? 'Show me first! 👀'
+                                : widget.supportStage ==
+                                        LearningSupportStage.together
+                                    ? 'Let’s do it together! 🤝'
+                                    : 'My turn! 🌟',
+                            style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 21,
                                 fontWeight: FontWeight.w900)),

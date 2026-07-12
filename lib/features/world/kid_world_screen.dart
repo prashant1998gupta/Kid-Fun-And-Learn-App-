@@ -10,7 +10,9 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../art_studio/data/canvas_repository.dart';
+import '../ai/adaptive_engine.dart';
 import '../collections/domain/collectible.dart';
+import '../curriculum/domain/subject.dart';
 import '../mini_games/data/mini_pet.dart';
 import '../mini_games/data/learning_world_item.dart';
 import '../mini_games/mini_games_controller.dart';
@@ -27,6 +29,8 @@ class KidWorldScreen extends ConsumerWidget {
     if (child == null) return const SizedBox.shrink();
     final drawings = ref.read(canvasRepositoryProvider).loadAll();
     final hero = drawings.where((d) => d.id == child.heroDrawingId).firstOrNull;
+    final recentDrawings = drawings.reversed.take(3).toList();
+    final strengths = ref.watch(adaptiveControllerProvider).strengths(child.id);
     final companion = MiniPet.forXp(child.companionXp);
     final learningItems = ref
         .watch(miniGamesControllerProvider)
@@ -61,6 +65,12 @@ class KidWorldScreen extends ConsumerWidget {
                           child,
                           equipped?.emoji ?? companion.emoji,
                         ),
+                      ),
+                      const SizedBox(height: 18),
+                      _MemoryGarden(
+                        child: child,
+                        strengths: strengths,
+                        drawings: recentDrawings,
                       ),
                       const SizedBox(height: 18),
                       _portals(context, child.grade.isPreSchool),
@@ -255,7 +265,14 @@ class KidWorldScreen extends ConsumerWidget {
     ChildProfile child,
     String emoji,
   ) async {
-    AudioService.instance.speak(child.companionMemory);
+    final adaptive = ref.read(adaptiveControllerProvider);
+    final weak = adaptive.weakAreas(child.id);
+    final suggestion = weak.isNotEmpty
+        ? 'I have an idea! Let us help your ${weak.first.label} garden grow.'
+        : child.completedAdventures == 0
+            ? 'Let us begin an adventure and plant our first memory flower!'
+            : 'Your garden is growing beautifully. Choose anything you love!';
+    AudioService.instance.speak('${child.companionMemory} $suggestion');
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -271,9 +288,23 @@ class KidWorldScreen extends ConsumerWidget {
             Text(child.companionMemory,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 17)),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.star.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Text('💡 $suggestion',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
+            ),
             const SizedBox(height: 18),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
+              runSpacing: 10,
               children: [
                 FilledButton.icon(
                   onPressed: () {
@@ -284,7 +315,6 @@ class KidWorldScreen extends ConsumerWidget {
                   icon: const Icon(Icons.music_note_rounded),
                   label: const Text('Dance'),
                 ),
-                const SizedBox(width: 12),
                 OutlinedButton.icon(
                   onPressed: () async {
                     final name = await _askCompanionName(sheetContext, child);
@@ -300,6 +330,16 @@ class KidWorldScreen extends ConsumerWidget {
                   icon: const Icon(Icons.edit_rounded),
                   label: const Text('Rename'),
                 ),
+                if (weak.isNotEmpty) ...[
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      context.push(AppRoutes.learningMap, extra: weak.first);
+                    },
+                    icon: const Icon(Icons.explore_rounded),
+                    label: const Text('Spark’s idea'),
+                  ),
+                ],
               ],
             ),
           ],
@@ -468,7 +508,11 @@ class _LivingRoom extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Image.memory(hero!.thumbnailBytes,
-                              fit: BoxFit.contain),
+                                  fit: BoxFit.contain)
+                              .animate(
+                                  onPlay: (controller) =>
+                                      controller.repeat(reverse: true))
+                              .moveY(begin: 0, end: -5, duration: 1300.ms),
                         ),
                         Container(
                           constraints: const BoxConstraints(maxWidth: 90),
@@ -523,6 +567,137 @@ class _LivingRoom extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _MemoryGarden extends StatelessWidget {
+  const _MemoryGarden({
+    required this.child,
+    required this.strengths,
+    required this.drawings,
+  });
+
+  final ChildProfile child;
+  final List<Subject> strengths;
+  final List<SavedDrawing> drawings;
+
+  @override
+  Widget build(BuildContext context) {
+    final flowers = child.completedAdventures.clamp(0, 12);
+    final fireflies = (child.companionXp ~/ 35).clamp(0, 8);
+    final tree = switch (child.completedAdventures) {
+      >= 20 => '🌳',
+      >= 8 => '🌲',
+      >= 3 => '🌿',
+      _ => '🌱',
+    };
+    final subjectBlooms = {
+      Subject.math: '🔢',
+      Subject.english: '📚',
+      Subject.evs: '🌍',
+      Subject.science: '🔬',
+      Subject.art: '🎨',
+      Subject.logic: '🧩',
+      Subject.rhymes: '🎵',
+    };
+    final message = flowers == 0
+        ? 'Complete an adventure to grow your first memory flower.'
+        : 'Your learning has grown $flowers memory flowers and $fireflies fireflies!';
+    return BouncyButton(
+      onTap: () => AudioService.instance.speak(message),
+      child: Container(
+        key: const ValueKey('memory-garden'),
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFB8F2D0), Color(0xFFFFE8A3)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(color: Color(0x22000000), blurRadius: 14),
+          ],
+        ),
+        child: Column(
+          children: [
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                const Text(
+                  'My Memory Garden',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      color: AppColors.lightText,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900),
+                ),
+                Text('$tree ✨$fireflies', style: const TextStyle(fontSize: 28)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 5,
+              runSpacing: 5,
+              children: [
+                for (var index = 0; index < flowers; index++)
+                  Text(
+                    const ['🌸', '🌻', '🌷', '🌼'][index % 4],
+                    style: const TextStyle(fontSize: 28),
+                  ),
+                for (final subject in strengths)
+                  Text(subjectBlooms[subject] ?? '⭐',
+                      style: const TextStyle(fontSize: 28)),
+              ],
+            ),
+            if (drawings.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var index = 0; index < drawings.length; index++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: ClipOval(
+                        child: Image.memory(
+                          drawings[index].thumbnailBytes,
+                          key: ValueKey('living-drawing-${drawings[index].id}'),
+                          width: 52,
+                          height: 52,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                          .animate(
+                            onPlay: (controller) =>
+                                controller.repeat(reverse: true),
+                          )
+                          .moveY(
+                            begin: 0,
+                            end: index.isEven ? -6 : 6,
+                            duration: (1100 + index * 180).ms,
+                          ),
+                    ),
+                ],
+              ),
+              const Text('Your drawings are alive in the garden! 🎨',
+                  style: TextStyle(
+                      color: AppColors.lightText, fontWeight: FontWeight.w800)),
+            ],
+            const SizedBox(height: 8),
+            Text(message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: AppColors.lightText, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
     );
   }
 }

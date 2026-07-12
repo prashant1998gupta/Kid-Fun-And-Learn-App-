@@ -7,6 +7,19 @@ import '../curriculum/domain/subject.dart';
 import '../gamification/reward_engine.dart';
 import '../settings/settings_controller.dart';
 
+enum LearningSupportStage {
+  watch('Watch me', '👀'),
+  together('Together', '🤝'),
+  yourTurn('Your turn', '🌟');
+
+  const LearningSupportStage(this.label, this.emoji);
+
+  final String label;
+  final String emoji;
+
+  bool get guidedChoices => this != LearningSupportStage.yourTurn;
+}
+
 /// Lightweight on-device adaptive-learning model.
 ///
 /// It maintains a per-(child, subject) *skill estimate* in [0,1] using an
@@ -40,6 +53,14 @@ class SkillModel {
 
   double conceptMastery(String childId, String skillId) =>
       _concepts['$childId|$skillId'] ?? 0.0;
+
+  LearningSupportStage supportStage(String childId, String skillId) {
+    if (!hasSeenConcept(childId, skillId)) return LearningSupportStage.watch;
+    final mastery = conceptMastery(childId, skillId);
+    if (mastery < 0.3) return LearningSupportStage.watch;
+    if (mastery < 0.72) return LearningSupportStage.together;
+    return LearningSupportStage.yourTurn;
+  }
 
   Map<String, double> conceptMasteries(String childId) {
     final prefix = '$childId|';

@@ -395,7 +395,7 @@ semantic labels and large one-hand-reachable touch targets.
 ## 10. Verification
 
 - `flutter analyze`: zero issues.
-- `flutter test`: all 112 tests pass at the latest verification.
+- `flutter test`: all 135 tests pass at the latest verification.
 - Mini-game tests cover score persistence, wallet reward delivery, pet growth,
   daily resets, 2048 merge/undo/rescue rules, Stack chain/rainbow/rescue rules,
   Chicken target rules, learning-level persistence, per-child Kid World items,

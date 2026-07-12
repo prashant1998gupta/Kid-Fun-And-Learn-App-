@@ -1,6 +1,6 @@
 # 12 — Testing & Quality Plan
 
-> **Current verified baseline:** `flutter analyze` is clean and all **112 tests**
+> **Current verified baseline:** `flutter analyze` is clean and all **135 tests**
 > pass. Release web and Android debug builds also complete. Physical-device
 > visual/accessibility sign-off remains a manual release gate.
 

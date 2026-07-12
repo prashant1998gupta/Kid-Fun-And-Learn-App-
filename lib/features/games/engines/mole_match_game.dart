@@ -71,8 +71,9 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
     AudioService.instance.speak(_question.speak ?? _question.prompt);
   }
 
-  int? _optionAtHole(int hole) {
-    final optionIndexes = rescueOptionIndexes(_question, rescue: _rescue);
+  int? _optionAtHole(int hole, {required bool guided}) {
+    final optionIndexes =
+        rescueOptionIndexes(_question, rescue: _rescue || guided);
     for (final option in optionIndexes) {
       if ((option * 2 + _tick) % 6 == hole) return option;
     }
@@ -247,6 +248,7 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
   }
 
   Widget _moleGrid(BuildContext context) {
+    final guided = LearningSupportScope.stageOf(context).guidedChoices;
     return LayoutBuilder(
       builder: (context, constraints) {
         final cellWidth = (constraints.maxWidth - 56) / 3;
@@ -263,7 +265,7 @@ class _MoleMatchGameState extends State<MoleMatchGame> {
           ),
           itemCount: 6,
           itemBuilder: (context, hole) {
-            final option = _optionAtHole(hole);
+            final option = _optionAtHole(hole, guided: guided);
             return _MoleHole(
               key: ValueKey('$_index-$_tick-$hole-$option'),
               option: option == null ? null : _question.options[option],

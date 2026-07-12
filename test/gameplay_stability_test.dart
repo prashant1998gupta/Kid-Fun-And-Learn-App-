@@ -228,9 +228,12 @@ void main() {
     await tester.pump();
     expect(find.text('Repair the Moon Bridge'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Let’s help! 🚀'));
+    await tester.ensureVisible(find.text('Show me first! 👀'));
     await tester.pump();
-    await tester.tap(find.text('Let’s help! 🚀'));
+    await tester.tap(find.text('Show me first! 👀'));
+    await tester.pump();
+    expect(find.text('👀 Watch Spark first'), findsOneWidget);
+    await tester.tap(find.text('Now let’s do it together'));
     await tester.pump();
     await tester.tap(find.text('4'));
     await tester.pump();

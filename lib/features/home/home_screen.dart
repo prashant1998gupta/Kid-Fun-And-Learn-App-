@@ -140,6 +140,19 @@ class _TopBar extends ConsumerWidget {
             ),
           ),
           BouncyButton(
+            onTap: () => _showEnergyPicker(context, ref, child),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                shape: BoxShape.circle,
+              ),
+              child: Text(child.energyMode.emoji,
+                  style: const TextStyle(fontSize: 24)),
+            ),
+          ),
+          const SizedBox(width: 8),
+          BouncyButton(
             sound: Sfx.tap,
             onTap: () => context.push(AppRoutes.settings),
             child: Container(
@@ -152,6 +165,78 @@ class _TopBar extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _showEnergyPicker(
+    BuildContext context,
+    WidgetRef ref,
+    ChildProfile child,
+  ) async {
+    AudioService.instance.speak('How do you feel today?');
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('How do you feel today?',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                for (final mode in KidEnergyMode.values) ...[
+                  Expanded(
+                    child: BouncyButton(
+                      onTap: () async {
+                        await ref
+                            .read(profilesControllerProvider.notifier)
+                            .setEnergyMode(mode);
+                        AudioService.instance.speak(
+                          '${mode.label} mode. ${mode.description}.',
+                        );
+                        if (sheetContext.mounted) {
+                          Navigator.of(sheetContext).pop();
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          color: child.energyMode == mode
+                              ? AppColors.primary.withValues(alpha: 0.16)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(
+                            color: child.energyMode == mode
+                                ? AppColors.primary
+                                : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(mode.emoji,
+                                style: const TextStyle(fontSize: 42)),
+                            Text(mode.label,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w900)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (mode != KidEnergyMode.values.last)
+                    const SizedBox(width: 10),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

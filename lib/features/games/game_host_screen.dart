@@ -28,6 +28,7 @@ import 'engines/speech_game.dart';
 import 'engines/tap_choice_game.dart';
 import 'engines/tracing_game.dart';
 import 'game_result_screen.dart';
+import 'learning_support.dart';
 
 /// Hosts one lesson end-to-end:
 /// 1. Pick the engine widget for the lesson's [GameType].
@@ -187,6 +188,9 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
           child == null || !adaptive.hasSeenConcept(child.id, question.skillId);
       final prerequisitesMet = child == null ||
           adaptive.prerequisitesMet(child.id, question.prerequisiteSkillIds);
+      final supportStage = child == null
+          ? LearningSupportStage.together
+          : adaptive.supportStage(child.id, question.skillId);
       return AdventureIntro(
         mission: AdventureMission.forLesson(
           widget.lesson,
@@ -197,16 +201,40 @@ class _GameHostScreenState extends ConsumerState<GameHostScreen> {
         teachingTip: question.teachingTip ??
             'Listen to the clue, try one step, and use the hint if you need it.',
         isNewSkill: isNewSkill,
+        supportStage: supportStage,
         foundationNote: prerequisitesMet
             ? null
             : 'We will go slowly because an earlier building block still needs practice.',
-        onStart: () => setState(() => _missionStarted = true),
+        onStart: () => _startMission(supportStage, question),
       );
     }
     return _engineFor(widget.lesson);
   }
 
+  Future<void> _startMission(
+    LearningSupportStage stage,
+    Question question,
+  ) async {
+    if (stage == LearningSupportStage.watch) {
+      await showWatchDemonstration(context, question);
+    }
+    if (mounted) setState(() => _missionStarted = true);
+  }
+
   Widget _engineFor(Lesson lesson) {
+    final child = ref.read(activeChildProvider);
+    final question = lesson.questions.first;
+    final adaptive = ref.read(adaptiveControllerProvider);
+    final stage = child == null
+        ? LearningSupportStage.together
+        : adaptive.supportStage(child.id, question.skillId);
+    return LearningSupportScope(
+      stage: stage,
+      child: _rawEngineFor(lesson),
+    );
+  }
+
+  Widget _rawEngineFor(Lesson lesson) {
     switch (lesson.gameType) {
       case GameType.tapChoice:
       case GameType.countCatch:

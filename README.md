@@ -65,12 +65,17 @@ App-wide touch delight, layered sound, narration ducking, success feedback and
 reduced-motion behavior are documented in
 [`docs/21_KID_EXPERIENCE_SYSTEM.md`](docs/21_KID_EXPERIENCE_SYSTEM.md).
 
+The connected learning world pass adds Memory Garden, drawings that reappear in
+the world, Watch/Together/Your Turn support, smarter Spark suggestions, energy
+mode, generated learning tones, and selected-game sibling co-op. See
+[`docs/22_CONNECTED_LEARNING_WORLD.md`](docs/22_CONNECTED_LEARNING_WORLD.md).
+
 ### Run it
 
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # full unit + widget suite (133 tests at last verification)
+flutter test         # full unit + widget suite (135 tests at last verification)
 flutter analyze      # lints
 ```
 

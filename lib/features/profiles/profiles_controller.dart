@@ -238,6 +238,29 @@ class ProfilesController extends StateNotifier<ProfilesState> {
     });
   }
 
+  Future<void> setEnergyMode(KidEnergyMode mode) async {
+    await updateActive((child) => child.copyWith(
+          energyMode: mode,
+          companionMemory: switch (mode) {
+            KidEnergyMode.calm =>
+              'We can learn softly and take our time today.',
+            KidEnergyMode.ready =>
+              'We are ready for a bright learning adventure!',
+            KidEnergyMode.active =>
+              'Zoom! Let us mix learning with movement today!',
+          },
+        ));
+  }
+
+  Future<void> setSiblingCoop(bool enabled) async {
+    await updateActive((child) => child.copyWith(
+          siblingCoopEnabled: enabled,
+          companionMemory: enabled
+              ? 'Team mode is ready. Helping each other is a superpower!'
+              : 'Solo mode is ready. I will be your teammate!',
+        ));
+  }
+
   void _replace(ChildProfile updated) {
     final list = [
       for (final c in state.children)

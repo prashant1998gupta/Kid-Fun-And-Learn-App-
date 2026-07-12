@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:typed_data';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -53,6 +56,9 @@ class AudioService {
     ..setReleaseMode(ReleaseMode.stop);
   late final AudioPlayer _feedbackPlayer = AudioPlayer(playerId: 'feedback-sfx')
     ..setReleaseMode(ReleaseMode.stop);
+  late final AudioPlayer _melodyPlayer =
+      AudioPlayer(playerId: 'learning-melody')
+        ..setReleaseMode(ReleaseMode.stop);
   late final AudioPlayer _musicPlayer = AudioPlayer(playerId: 'music')
     ..setReleaseMode(ReleaseMode.loop);
   late final FlutterTts _tts = FlutterTts();
@@ -65,9 +71,16 @@ class AudioService {
   int _speechGeneration = 0;
   DateTime? _lastUiSoundAt;
   bool _musicStarted = false;
+  int _energyLevel = 1;
+  int _melodyCursor = 0;
+  bool _initialized = false;
 
-  static const _musicVolume = 0.35;
   static const _narrationMusicVolume = 0.09;
+  double get _musicVolume => switch (_energyLevel) {
+        0 => 0.27,
+        2 => 0.38,
+        _ => 0.35,
+      };
 
   Future<void> init() async {
     await _tts.setLanguage('en-US');
@@ -77,7 +90,19 @@ class AudioService {
     await _tts.awaitSpeakCompletion(true);
     await _uiPlayer.setVolume(0.62);
     await _feedbackPlayer.setVolume(0.78);
+    await _melodyPlayer.setVolume(0.2);
     await _musicPlayer.setVolume(_musicVolume);
+    _initialized = true;
+  }
+
+  /// Changes sensory presentation without changing question difficulty.
+  void configureEnergy(int level) {
+    final next = level.clamp(0, 2);
+    if (_energyLevel == next) return;
+    _energyLevel = next;
+    final speechRate = switch (next) { 0 => 0.4, 2 => 0.48, _ => 0.45 };
+    _tts.setSpeechRate(speechRate).ignore();
+    if (_musicStarted) _musicPlayer.setVolume(_musicVolume).ignore();
   }
 
   Future<void> playSfx(Sfx sfx) async {
@@ -100,6 +125,75 @@ class AudioService {
       // Assets may be absent in early builds; fail silently so the UI is
       // never blocked by a missing sound.
     }
+    if (sfx == Sfx.correct || sfx == Sfx.star || sfx == Sfx.puzzleComplete) {
+      await _playLearningTone();
+    } else if (sfx == Sfx.reward ||
+        sfx == Sfx.celebration ||
+        sfx == Sfx.levelUp) {
+      await _playLearningTone(finale: true);
+    }
+  }
+
+  /// A tiny generated pentatonic melody: no tracking, downloads, licences, or
+  /// extra assets. Each success adds the next note; big wins resolve a chord.
+  Future<void> _playLearningTone({bool finale = false}) async {
+    if (!sfxEnabled || !_initialized) return;
+    const notes = [523.25, 587.33, 659.25, 783.99, 880.0];
+    final frequency = notes[_melodyCursor++ % notes.length];
+    try {
+      await _melodyPlayer.stop();
+      await _melodyPlayer.play(
+        BytesSource(_toneWav(frequency, finale: finale)),
+      );
+    } catch (_) {
+      // Some web/audio backends do not support in-memory sources. The normal
+      // success sound remains available, so this enhancement fails safely.
+    }
+  }
+
+  Uint8List _toneWav(double frequency, {required bool finale}) {
+    const sampleRate = 16000;
+    final seconds = finale ? 0.34 : 0.14;
+    final sampleCount = (sampleRate * seconds).round();
+    final dataLength = sampleCount * 2;
+    final bytes = Uint8List(44 + dataLength);
+    final data = ByteData.sublistView(bytes);
+
+    void ascii(int offset, String value) {
+      for (var index = 0; index < value.length; index++) {
+        data.setUint8(offset + index, value.codeUnitAt(index));
+      }
+    }
+
+    ascii(0, 'RIFF');
+    data.setUint32(4, 36 + dataLength, Endian.little);
+    ascii(8, 'WAVE');
+    ascii(12, 'fmt ');
+    data.setUint32(16, 16, Endian.little);
+    data.setUint16(20, 1, Endian.little);
+    data.setUint16(22, 1, Endian.little);
+    data.setUint32(24, sampleRate, Endian.little);
+    data.setUint32(28, sampleRate * 2, Endian.little);
+    data.setUint16(32, 2, Endian.little);
+    data.setUint16(34, 16, Endian.little);
+    ascii(36, 'data');
+    data.setUint32(40, dataLength, Endian.little);
+
+    for (var sample = 0; sample < sampleCount; sample++) {
+      final t = sample / sampleRate;
+      final progress = sample / sampleCount;
+      final envelope =
+          math.min(1.0, progress * 18) * math.min(1.0, (1 - progress) * 9);
+      var wave = math.sin(2 * math.pi * frequency * t);
+      if (finale) {
+        wave += math.sin(2 * math.pi * frequency * 1.25 * t);
+        wave += math.sin(2 * math.pi * frequency * 1.5 * t);
+        wave /= 3;
+      }
+      final value = (wave * envelope * 5200).round().clamp(-32768, 32767);
+      data.setInt16(44 + sample * 2, value, Endian.little);
+    }
+    return bytes;
   }
 
   Future<void> playMusic(MusicTrack track) async {
@@ -162,6 +256,7 @@ class AudioService {
   Future<void> dispose() async {
     await _uiPlayer.dispose();
     await _feedbackPlayer.dispose();
+    await _melodyPlayer.dispose();
     await _musicPlayer.dispose();
   }
 }

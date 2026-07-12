@@ -14,6 +14,7 @@ import '../data/learning_world_item.dart';
 import '../mini_games_controller.dart';
 import '../widgets/game_tutorial.dart';
 import '../widgets/mini_game_widgets.dart';
+import '../../profiles/profiles_controller.dart';
 
 /// A pre-reader-friendly classification game. Every level contains several
 /// short questions, and there are 50 progressively richer levels.
@@ -39,6 +40,9 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
   int _reaction = 0;
   String _message = 'Pip needs a sorting teacher!';
   LearningWorldItem? _reward;
+  int _player = 1;
+
+  bool get _coOp => ref.read(activeChildProvider)?.siblingCoopEnabled ?? false;
 
   int get _goal => 5 + ((_level - 1) ~/ 10).clamp(0, 4);
   _SortItem get _item => _deck[_round % _deck.length];
@@ -77,6 +81,7 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
     _locked = false;
     _complete = false;
     _reward = null;
+    _player = 1;
     _message = 'Look carefully. Where does it belong?';
   }
 
@@ -126,6 +131,7 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
       } else {
         setState(() {
           _round++;
+          if (_coOp) _player = _player == 1 ? 2 : 1;
           _tries = 0;
           _locked = false;
           _message = _teachPip
@@ -210,15 +216,25 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
           ),
           const SizedBox(width: 10),
           const Expanded(
-            child: Text(
-              '🧸 Toy Sort',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+            child: Text('🧸 Toy Sort',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900)),
           ),
+          if (_coOp)
+            Container(
+              key: const ValueKey('toy-sort-coop-turn'),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Text('P$_player 👋',
+                  style: const TextStyle(
+                      color: AppColors.primary, fontWeight: FontWeight.w900)),
+            ),
+          if (_coOp) const SizedBox(width: 6),
           Text(
             '⭐ $_score',
             style: const TextStyle(

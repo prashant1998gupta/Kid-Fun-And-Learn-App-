@@ -3,6 +3,23 @@ import 'package:equatable/equatable.dart';
 import '../../gamification/domain/wallet.dart';
 import 'grade_level.dart';
 
+enum KidEnergyMode {
+  calm('Calm', '🌙', 'Soft and steady'),
+  ready('Ready', '🌞', 'Bright and balanced'),
+  active('Super', '⚡', 'Extra lively');
+
+  const KidEnergyMode(this.label, this.emoji, this.description);
+
+  final String label;
+  final String emoji;
+  final String description;
+
+  static KidEnergyMode fromId(String? id) => KidEnergyMode.values.firstWhere(
+        (mode) => mode.name == id,
+        orElse: () => KidEnergyMode.ready,
+      );
+}
+
 /// A single child under a parent account. KidVerse supports multiple children
 /// per parent, each with independent progress, wallet, and avatar.
 class ChildProfile extends Equatable {
@@ -25,6 +42,8 @@ class ChildProfile extends Equatable {
     this.heroDrawingId,
     this.heroName,
     this.completedAdventures = 0,
+    this.energyMode = KidEnergyMode.ready,
+    this.siblingCoopEnabled = false,
     this.createdAt,
     this.lastActiveAt,
   });
@@ -56,6 +75,8 @@ class ChildProfile extends Equatable {
   final String? heroDrawingId;
   final String? heroName;
   final int completedAdventures;
+  final KidEnergyMode energyMode;
+  final bool siblingCoopEnabled;
   final DateTime? createdAt;
   final DateTime? lastActiveAt;
 
@@ -77,6 +98,8 @@ class ChildProfile extends Equatable {
     String? heroDrawingId,
     String? heroName,
     int? completedAdventures,
+    KidEnergyMode? energyMode,
+    bool? siblingCoopEnabled,
     DateTime? lastActiveAt,
   }) {
     return ChildProfile(
@@ -98,6 +121,8 @@ class ChildProfile extends Equatable {
       heroDrawingId: heroDrawingId ?? this.heroDrawingId,
       heroName: heroName ?? this.heroName,
       completedAdventures: completedAdventures ?? this.completedAdventures,
+      energyMode: energyMode ?? this.energyMode,
+      siblingCoopEnabled: siblingCoopEnabled ?? this.siblingCoopEnabled,
       createdAt: createdAt,
       lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     );
@@ -122,6 +147,8 @@ class ChildProfile extends Equatable {
         'heroDrawingId': heroDrawingId,
         'heroName': heroName,
         'completedAdventures': completedAdventures,
+        'energyMode': energyMode.name,
+        'siblingCoopEnabled': siblingCoopEnabled,
         'createdAt': createdAt?.toIso8601String(),
         'lastActiveAt': lastActiveAt?.toIso8601String(),
       };
@@ -154,6 +181,8 @@ class ChildProfile extends Equatable {
         heroDrawingId: map['heroDrawingId'] as String?,
         heroName: map['heroName'] as String?,
         completedAdventures: (map['completedAdventures'] as num?)?.toInt() ?? 0,
+        energyMode: KidEnergyMode.fromId(map['energyMode'] as String?),
+        siblingCoopEnabled: map['siblingCoopEnabled'] as bool? ?? false,
         createdAt: DateTime.tryParse(map['createdAt'] as String? ?? ''),
         lastActiveAt: DateTime.tryParse(map['lastActiveAt'] as String? ?? ''),
       );
@@ -177,6 +206,8 @@ class ChildProfile extends Equatable {
         heroDrawingId,
         heroName,
         completedAdventures,
+        energyMode,
+        siblingCoopEnabled,
       ];
 }
 

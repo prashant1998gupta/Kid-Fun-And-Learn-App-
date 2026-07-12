@@ -6,7 +6,7 @@ Scope: Flutter app quality, game feel, performance, optimization, maintainabilit
 > **Implementation update (2026-07-11):** the shared mini-game result pipeline,
 > 29-screen compact-phone widget coverage, grade-safe discovery, and persistent
 > Adventure Trail/story/chest flow are implemented and covered by the current
-> 112-test suite. Recommendations below remain the long-term quality plan unless
+> 135-test suite. Recommendations below remain the long-term quality plan unless
 > explicitly marked complete; DevTools profiling and physical-device visual
 > sign-off are still required.
 

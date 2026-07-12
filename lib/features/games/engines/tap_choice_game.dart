@@ -235,7 +235,10 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
 
   Widget _options(BuildContext context) {
     final options = _q.options;
-    final optionIndexes = rescueOptionIndexes(_q, rescue: _rescue);
+    final optionIndexes = rescueOptionIndexes(
+      _q,
+      rescue: _rescue || LearningSupportScope.stageOf(context).guidedChoices,
+    );
     final wide = MediaQuery.of(context).size.width > 600;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),

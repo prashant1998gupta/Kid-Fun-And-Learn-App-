@@ -15,25 +15,27 @@ class KidExperienceLayer extends StatefulWidget {
   const KidExperienceLayer({
     required this.child,
     required this.reducedMotion,
+    this.energyLevel = 1,
     super.key,
   });
 
   final Widget child;
   final bool reducedMotion;
+  final int energyLevel;
 
   @override
   State<KidExperienceLayer> createState() => _KidExperienceLayerState();
 }
 
 class _KidExperienceLayerState extends State<KidExperienceLayer> {
-  static const _maxBursts = 6;
   final List<_TouchBurst> _bursts = [];
   int _nextId = 0;
 
   void _respond(PointerDownEvent event) {
     if (widget.reducedMotion) return;
     setState(() {
-      if (_bursts.length >= _maxBursts) _bursts.removeAt(0);
+      final maxBursts = switch (widget.energyLevel) { 0 => 4, 2 => 8, _ => 6 };
+      if (_bursts.length >= maxBursts) _bursts.removeAt(0);
       _bursts.add(_TouchBurst(_nextId++, event.localPosition));
     });
   }
@@ -62,7 +64,13 @@ class _KidExperienceLayerState extends State<KidExperienceLayer> {
               child: IgnorePointer(
                 child: TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0, end: 1),
-                  duration: const Duration(milliseconds: 480),
+                  duration: Duration(
+                    milliseconds: switch (widget.energyLevel) {
+                      0 => 560,
+                      2 => 400,
+                      _ => 480,
+                    },
+                  ),
                   curve: Curves.easeOutCubic,
                   onEnd: () => _remove(burst.id),
                   builder: (_, progress, __) => CustomPaint(
@@ -70,6 +78,7 @@ class _KidExperienceLayerState extends State<KidExperienceLayer> {
                     painter: _WonderTouchPainter(
                       progress: progress,
                       colorOffset: burst.id,
+                      energyLevel: widget.energyLevel,
                     ),
                   ),
                 ),
@@ -92,10 +101,12 @@ class _WonderTouchPainter extends CustomPainter {
   const _WonderTouchPainter({
     required this.progress,
     required this.colorOffset,
+    required this.energyLevel,
   });
 
   final double progress;
   final int colorOffset;
+  final int energyLevel;
 
   static const _colors = [
     AppColors.star,
@@ -116,8 +127,9 @@ class _WonderTouchPainter extends CustomPainter {
       ..strokeWidth = 3;
     canvas.drawCircle(center, 8 + 23 * progress, halo);
 
-    for (var index = 0; index < 5; index++) {
-      final angle = -math.pi / 2 + (math.pi * 2 * index / 5);
+    final starCount = switch (energyLevel) { 0 => 3, 2 => 7, _ => 5 };
+    for (var index = 0; index < starCount; index++) {
+      final angle = -math.pi / 2 + (math.pi * 2 * index / starCount);
       final distance = 8 + 27 * progress;
       final point = Offset(
         center.dx + math.cos(angle) * distance,
@@ -150,5 +162,6 @@ class _WonderTouchPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _WonderTouchPainter oldDelegate) =>
       oldDelegate.progress != progress ||
-      oldDelegate.colorOffset != colorOffset;
+      oldDelegate.colorOffset != colorOffset ||
+      oldDelegate.energyLevel != energyLevel;
 }

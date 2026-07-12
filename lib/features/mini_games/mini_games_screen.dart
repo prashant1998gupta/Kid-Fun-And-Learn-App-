@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../core/services/audio_service.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
@@ -160,6 +161,8 @@ class _MiniGamesScreenState extends ConsumerState<MiniGamesScreen> {
   }
 
   Widget _topBar(BuildContext context) {
+    final child = ref.watch(activeChildProvider);
+    final coOp = child?.siblingCoopEnabled ?? false;
     return Padding(
       padding:
           const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 8),
@@ -177,11 +180,56 @@ class _MiniGamesScreenState extends ConsumerState<MiniGamesScreen> {
                   color: Color(0xFF6C5CE7), size: 24),
             ),
           ),
-          const SizedBox(width: 12),
-          const Text(
-            '🎮 Mini Games',
-            style: TextStyle(
-                fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              '🎮 Mini Games',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 8),
+          BouncyButton(
+            onTap: child == null
+                ? null
+                : () async {
+                    await ref
+                        .read(profilesControllerProvider.notifier)
+                        .setSiblingCoop(!coOp);
+                    AudioService.instance.speak(!coOp
+                        ? 'Team mode on! Take turns and help each other.'
+                        : 'Solo mode on! Spark will be your teammate.');
+                  },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: coOp
+                    ? const Color(0xFFFFD166)
+                    : Colors.white.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.group_rounded,
+                      color: coOp
+                          ? const Color(0xFF6C5CE7)
+                          : AppColors.lightTextSoft,
+                      size: 21),
+                  if (MediaQuery.sizeOf(context).width >= 380) ...[
+                    const SizedBox(width: 4),
+                    Text(coOp ? 'TEAM' : 'SOLO',
+                        style: const TextStyle(
+                            color: AppColors.lightText,
+                            fontWeight: FontWeight.w900)),
+                  ],
+                ],
+              ),
+            ),
           ),
         ],
       ),
