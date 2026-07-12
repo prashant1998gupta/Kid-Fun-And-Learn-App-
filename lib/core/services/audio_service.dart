@@ -1,7 +1,7 @@
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -74,6 +74,8 @@ class AudioService {
   int _energyLevel = 1;
   int _melodyCursor = 0;
   bool _initialized = false;
+  Set<String>? _availableAudioAssets;
+  Future<Set<String>>? _availableAudioAssetsLoad;
 
   static const _narrationMusicVolume = 0.09;
   double get _musicVolume => switch (_energyLevel) {
@@ -87,12 +89,45 @@ class AudioService {
     await _tts.setSpeechRate(0.45); // slower, clearer for children
     await _tts.setPitch(1.15); // cheerful
     await _tts.setVolume(1.0);
-    await _tts.awaitSpeakCompletion(true);
+    _tts.setErrorHandler((_) {});
+    await _tts.awaitSpeakCompletion(!kIsWeb);
     await _uiPlayer.setVolume(0.62);
     await _feedbackPlayer.setVolume(0.78);
     await _melodyPlayer.setVolume(0.2);
     await _musicPlayer.setVolume(_musicVolume);
+    _availableAudioAssetsLoad = _loadAvailableAudioAssets();
     _initialized = true;
+  }
+
+  @visibleForTesting
+  void debugSetAvailableAudioAssets(Set<String>? assets) {
+    _availableAudioAssets = assets;
+    _availableAudioAssetsLoad = assets == null ? null : Future.value(assets);
+  }
+
+  Future<Set<String>> _loadAvailableAudioAssets() async {
+    try {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      return manifest
+          .listAssets()
+          .where((asset) =>
+              asset.startsWith('assets/audio/') &&
+              !asset.endsWith('/README.md') &&
+              !asset.endsWith('/README'))
+          .toSet();
+    } catch (_) {
+      // If the manifest cannot be loaded (for example in a narrow unit test),
+      // be conservative and skip asset playback. Generated success tones still
+      // keep the app responsive.
+      return const {};
+    }
+  }
+
+  Future<bool> _hasAudioAsset(String relativeAsset) async {
+    final assets = _availableAudioAssets ??
+        await (_availableAudioAssetsLoad ??= _loadAvailableAudioAssets());
+    _availableAudioAssets = assets;
+    return assets.contains('assets/audio/$relativeAsset');
   }
 
   /// Changes sensory presentation without changing question difficulty.
@@ -107,6 +142,7 @@ class AudioService {
 
   Future<void> playSfx(Sfx sfx) async {
     if (!sfxEnabled) return;
+    final assetIsBundled = await _hasAudioAsset(sfx.asset);
     try {
       final isUiSound = sfx == Sfx.tap || sfx == Sfx.whoosh;
       if (isUiSound) {
@@ -118,9 +154,11 @@ class AudioService {
         }
         _lastUiSoundAt = now;
       }
-      final player = isUiSound ? _uiPlayer : _feedbackPlayer;
-      await player.stop();
-      await player.play(AssetSource('audio/${sfx.asset}'));
+      if (assetIsBundled) {
+        final player = isUiSound ? _uiPlayer : _feedbackPlayer;
+        await player.stop();
+        await player.play(AssetSource('audio/${sfx.asset}'));
+      }
     } catch (_) {
       // Assets may be absent in early builds; fail silently so the UI is
       // never blocked by a missing sound.
@@ -198,6 +236,10 @@ class AudioService {
 
   Future<void> playMusic(MusicTrack track) async {
     if (!musicEnabled) return;
+    if (!await _hasAudioAsset(track.asset)) {
+      _musicStarted = false;
+      return;
+    }
     try {
       await _musicPlayer.play(AssetSource('audio/${track.asset}'));
       _musicStarted = true;
@@ -221,7 +263,11 @@ class AudioService {
       if (musicEnabled && _musicStarted) {
         await _musicPlayer.setVolume(_narrationMusicVolume);
       }
-      await _tts.stop();
+      // On web, cancelling the current browser utterance often emits noisy
+      // SpeechSynthesisErrorEvent logs. Let short narration finish naturally;
+      // new speech is still attempted below and explicit stopSpeaking() remains
+      // available for screens that really need cancellation.
+      if (!kIsWeb) await _tts.stop();
       if (_voiceLanguage != language) {
         await _tts.setLanguage(language);
         _voiceLanguage = language;
