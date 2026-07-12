@@ -195,8 +195,8 @@ class PreschoolPracticeCatalog {
   static List<PreschoolPracticeItem> itemsFor(
           PreschoolPracticeCategory category) =>
       switch (category) {
-        PreschoolPracticeCategory.uppercase => _letterItems(category, false),
-        PreschoolPracticeCategory.lowercase => _letterItems(category, true),
+        PreschoolPracticeCategory.uppercase => _uppercaseItems,
+        PreschoolPracticeCategory.lowercase => _lowercaseItems,
         PreschoolPracticeCategory.numbers => _numberItems,
         PreschoolPracticeCategory.hindiVowels => _hindiVowels,
         PreschoolPracticeCategory.hindiConsonants => _hindiConsonants,
@@ -215,14 +215,24 @@ class PreschoolPracticeCatalog {
         ),
   };
 
-  static PreschoolPracticeItem? byId(String id) {
-    for (final category in PreschoolPracticeCategory.values) {
-      for (final item in itemsFor(category)) {
-        if (item.id == id) return item;
-      }
-    }
-    return null;
-  }
+  static final Map<String, PreschoolPracticeItem> _byId =
+      Map<String, PreschoolPracticeItem>.unmodifiable({
+    for (final category in PreschoolPracticeCategory.values)
+      for (final item in itemsFor(category)) item.id: item,
+  });
+
+  static final Map<PreschoolPracticeCategory, List<String>> _idsByCategory =
+      Map<PreschoolPracticeCategory, List<String>>.unmodifiable({
+    for (final category in PreschoolPracticeCategory.values)
+      category: List<String>.unmodifiable(
+        itemsFor(category).map((item) => item.id),
+      ),
+  });
+
+  static PreschoolPracticeItem? byId(String id) => _byId[id];
+
+  static List<String> idsFor(PreschoolPracticeCategory category) =>
+      _idsByCategory[category] ?? const [];
 
   static List<PreschoolPracticeItem> _letterItems(
       PreschoolPracticeCategory category, bool lowercase) {
@@ -310,7 +320,13 @@ class PreschoolPracticeCatalog {
     '8️⃣',
     '9️⃣'
   ];
-  static final _numberItems = [
+  static final _uppercaseItems = List<PreschoolPracticeItem>.unmodifiable(
+    _letterItems(PreschoolPracticeCategory.uppercase, false),
+  );
+  static final _lowercaseItems = List<PreschoolPracticeItem>.unmodifiable(
+    _letterItems(PreschoolPracticeCategory.lowercase, true),
+  );
+  static final _numberItems = List<PreschoolPracticeItem>.unmodifiable([
     for (var number = 0; number <= 9; number++)
       PreschoolPracticeItem(
         id: 'numbers_$number',
@@ -321,7 +337,7 @@ class PreschoolPracticeCatalog {
         example: _numberWords[number],
         spoken: 'Number $number. ${_numberWords[number]}.',
       ),
-  ];
+  ]);
 
   static PreschoolPracticeItem _hindi(
     String id,
@@ -341,7 +357,7 @@ class PreschoolPracticeCatalog {
         voiceLanguage: 'hi-IN',
       );
 
-  static final _hindiVowels = <PreschoolPracticeItem>[
+  static final _hindiVowels = List<PreschoolPracticeItem>.unmodifiable([
     _hindi('hv_a', PreschoolPracticeCategory.hindiVowels, 'अ', 'अनार', '🍎'),
     _hindi('hv_aa', PreschoolPracticeCategory.hindiVowels, 'आ', 'आम', '🥭'),
     _hindi('hv_i', PreschoolPracticeCategory.hindiVowels, 'इ', 'इमली', '🫘'),
@@ -355,9 +371,9 @@ class PreschoolPracticeCatalog {
     _hindi('hv_au', PreschoolPracticeCategory.hindiVowels, 'औ', 'औरत', '👩'),
     _hindi('hv_an', PreschoolPracticeCategory.hindiVowels, 'अं', 'अंगूर', '🍇'),
     _hindi('hv_ah', PreschoolPracticeCategory.hindiVowels, 'अः', '', '✨'),
-  ];
+  ]);
 
-  static final _hindiConsonants = <PreschoolPracticeItem>[
+  static final _hindiConsonants = List<PreschoolPracticeItem>.unmodifiable([
     _hindi('hc_ka', PreschoolPracticeCategory.hindiConsonants, 'क', 'कबूतर',
         '🕊️'),
     _hindi('hc_kha', PreschoolPracticeCategory.hindiConsonants, 'ख', 'खरगोश',
@@ -424,5 +440,5 @@ class PreschoolPracticeCatalog {
         'त्रिशूल', '🔱'),
     _hindi('hc_gya', PreschoolPracticeCategory.hindiConsonants, 'ज्ञ', 'ज्ञान',
         '📚'),
-  ];
+  ]);
 }

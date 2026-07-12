@@ -25,12 +25,18 @@ class OpenMojiView extends StatelessWidget {
   static bool has(String? emoji) =>
       emoji != null && kOpenMojiFiles.containsKey(emoji);
 
+  /// Asset path for the bundled OpenMoji image, when one exists.
+  static String? assetPathFor(String? emoji) {
+    final name = emoji == null ? null : kOpenMojiFiles[emoji];
+    return name == null ? null : 'assets/openmoji/$name.png';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final name = kOpenMojiFiles[emoji];
-    if (name == null) return fallback;
+    final path = assetPathFor(emoji);
+    if (path == null) return fallback;
     return Image.asset(
-      'assets/openmoji/$name.png',
+      path,
       width: size,
       height: size,
       filterQuality: FilterQuality.medium,

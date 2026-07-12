@@ -26,6 +26,14 @@ class IllustratedObjectView extends StatelessWidget {
   final double size;
   final bool selected;
 
+  /// Content-safety guard used by tests: a vocabulary object should either
+  /// have exact bundled OpenMoji art or a named drawn fallback. If this returns
+  /// false, the card would fall back to the generic smiley blob, which is cute
+  /// but too vague for preschool picture-word learning.
+  static bool hasSafeVisual({required String label, String? emoji}) =>
+      OpenMojiView.has(emoji) ||
+      _kindFor(label, emoji) != _IllustrationKind.generic;
+
   @override
   Widget build(BuildContext context) {
     final kind = _kindFor(label, emoji);
@@ -197,7 +205,18 @@ enum _IllustrationKind {
   square,
   triangle,
   rectangle,
+  semicircle,
+  cross,
+  line,
+  plus,
+  zigzag,
   heart,
+  goldSwatch,
+  silverSwatch,
+  beigeSwatch,
+  watch,
+  board,
+  carpet,
   water,
   land,
   generic,
@@ -267,6 +286,21 @@ _IllustrationKind _kindFor(String label, String? emoji) {
   if (value.contains('square')) return _IllustrationKind.square;
   if (value.contains('triangle')) return _IllustrationKind.triangle;
   if (value.contains('rectangle')) return _IllustrationKind.rectangle;
+  if (value.contains('semicircle')) return _IllustrationKind.semicircle;
+  if (value.contains('cross')) return _IllustrationKind.cross;
+  if (value == 'line') return _IllustrationKind.line;
+  if (value == 'plus') return _IllustrationKind.plus;
+  if (value.contains('zigzag')) return _IllustrationKind.zigzag;
+  if (value == 'gold') return _IllustrationKind.goldSwatch;
+  if (value == 'silver') return _IllustrationKind.silverSwatch;
+  if (value == 'beige') return _IllustrationKind.beigeSwatch;
+  if (value.contains('watch')) return _IllustrationKind.watch;
+  if (value.contains('blackboard') || value.contains('board')) {
+    return _IllustrationKind.board;
+  }
+  if (value.contains('floor') || value.contains('carpet')) {
+    return _IllustrationKind.carpet;
+  }
   if (value.contains('heart')) return _IllustrationKind.heart;
   if (value.contains('water') || value.contains('pond')) {
     return _IllustrationKind.water;
@@ -427,8 +461,30 @@ class _ObjectPainter extends CustomPainter {
         _shape(canvas, _IllustrationKind.triangle);
       case _IllustrationKind.rectangle:
         _shape(canvas, _IllustrationKind.rectangle);
+      case _IllustrationKind.semicircle:
+        _semicircle(canvas);
+      case _IllustrationKind.cross:
+        _cross(canvas);
+      case _IllustrationKind.line:
+        _line(canvas);
+      case _IllustrationKind.plus:
+        _plus(canvas);
+      case _IllustrationKind.zigzag:
+        _zigzag(canvas);
       case _IllustrationKind.heart:
         _heart(canvas);
+      case _IllustrationKind.goldSwatch:
+        _colorSwatch(canvas, const Color(0xFFFFD54F));
+      case _IllustrationKind.silverSwatch:
+        _colorSwatch(canvas, const Color(0xFFCFD8DC));
+      case _IllustrationKind.beigeSwatch:
+        _colorSwatch(canvas, const Color(0xFFE8D4B0));
+      case _IllustrationKind.watch:
+        _watch(canvas);
+      case _IllustrationKind.board:
+        _board(canvas);
+      case _IllustrationKind.carpet:
+        _carpet(canvas);
       case _IllustrationKind.water:
         _water(canvas);
       case _IllustrationKind.land:
@@ -942,6 +998,46 @@ class _ObjectPainter extends CustomPainter {
     }
   }
 
+  void _semicircle(Canvas c) {
+    final path = Path()
+      ..moveTo(22, 62)
+      ..arcTo(const Rect.fromLTWH(22, 22, 56, 56), math.pi, math.pi, false)
+      ..close();
+    c.drawPath(path, _paint(AppColors.sky));
+    c.drawPath(path, _stroke(AppColors.primary, 3));
+  }
+
+  void _cross(Canvas c) {
+    c.drawLine(const Offset(28, 28), const Offset(72, 72),
+        _stroke(AppColors.secondary, 11));
+    c.drawLine(const Offset(72, 28), const Offset(28, 72),
+        _stroke(AppColors.secondary, 11));
+  }
+
+  void _line(Canvas c) {
+    c.drawLine(const Offset(20, 54), const Offset(80, 54),
+        _stroke(AppColors.primary, 10));
+    c.drawCircle(const Offset(20, 54), 5, _paint(AppColors.primary));
+    c.drawCircle(const Offset(80, 54), 5, _paint(AppColors.primary));
+  }
+
+  void _plus(Canvas c) {
+    c.drawLine(const Offset(50, 22), const Offset(50, 78),
+        _stroke(AppColors.success, 12));
+    c.drawLine(const Offset(22, 50), const Offset(78, 50),
+        _stroke(AppColors.success, 12));
+  }
+
+  void _zigzag(Canvas c) {
+    final path = Path()
+      ..moveTo(18, 62)
+      ..lineTo(34, 36)
+      ..lineTo(50, 62)
+      ..lineTo(66, 36)
+      ..lineTo(82, 62);
+    c.drawPath(path, _stroke(AppColors.accent, 8));
+  }
+
   void _heart(Canvas c) {
     final path = Path()
       ..moveTo(50, 78)
@@ -949,6 +1045,98 @@ class _ObjectPainter extends CustomPainter {
       ..cubicTo(76, 18, 88, 50, 50, 78)
       ..close();
     c.drawPath(path, _paint(AppColors.secondary));
+  }
+
+  void _colorSwatch(Canvas c, Color color) {
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(20, 22, 60, 56),
+        AppSpacing.radiusMd,
+      ),
+      _paint(color),
+    );
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(29, 31, 42, 15),
+        AppSpacing.radiusSm,
+      ),
+      _paint(Colors.white.withValues(alpha: 0.36)),
+    );
+    c.drawPath(
+      Path()
+        ..moveTo(20, 78)
+        ..lineTo(80, 78)
+        ..lineTo(80, 62)
+        ..quadraticBezierTo(50, 74, 20, 62)
+        ..close(),
+      _paint(Colors.black.withValues(alpha: 0.08)),
+    );
+  }
+
+  void _watch(Canvas c) {
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(41, 11, 18, 78),
+        AppSpacing.radiusPill,
+      ),
+      _paint(const Color(0xFF6C63FF)),
+    );
+    c.drawCircle(const Offset(50, 50), 28, _paint(Colors.white));
+    c.drawCircle(const Offset(50, 50), 22, _paint(AppColors.sky));
+    c.drawLine(const Offset(50, 50), const Offset(50, 36),
+        _stroke(AppColors.lightText, 3));
+    c.drawLine(const Offset(50, 50), const Offset(62, 55),
+        _stroke(AppColors.lightText, 3));
+    c.drawCircle(const Offset(50, 50), 2.8, _paint(AppColors.lightText));
+  }
+
+  void _board(Canvas c) {
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(17, 24, 66, 46),
+        AppSpacing.radiusMd,
+      ),
+      _paint(const Color(0xFF2E7D5B)),
+    );
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(17, 24, 66, 46),
+        AppSpacing.radiusMd,
+      ),
+      _stroke(const Color(0xFF8D6E63), 5),
+    );
+    c.drawLine(
+        const Offset(30, 43), const Offset(55, 43), _stroke(Colors.white70, 2));
+    c.drawLine(
+        const Offset(30, 54), const Offset(70, 54), _stroke(Colors.white70, 2));
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(38, 71, 24, 8),
+        AppSpacing.radiusSm,
+      ),
+      _paint(const Color(0xFF8D6E63)),
+    );
+  }
+
+  void _carpet(Canvas c) {
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(18, 34, 64, 38),
+        AppSpacing.radiusMd,
+      ),
+      _paint(const Color(0xFFC77D4F)),
+    );
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(28, 42, 44, 22),
+        AppSpacing.radiusPill,
+      ),
+      _paint(const Color(0xFFFFD5A8)),
+    );
+    c.drawLine(const Offset(24, 34), const Offset(24, 72),
+        _stroke(const Color(0xFF8D5524), 3));
+    c.drawLine(const Offset(76, 34), const Offset(76, 72),
+        _stroke(const Color(0xFF8D5524), 3));
   }
 
   void _water(Canvas c) {

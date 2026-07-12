@@ -8,6 +8,7 @@ import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/celebration_overlay.dart';
 import '../../core/widgets/illustrated_object.dart';
+import '../../core/widgets/openmoji_view.dart';
 import '../profiles/profiles_controller.dart';
 import 'preschool_practice_catalog.dart';
 import 'preschool_practice_controller.dart';
@@ -21,7 +22,6 @@ class PreschoolPracticeScreen extends ConsumerWidget {
     if (child == null || !PreschoolPracticeCatalog.availableFor(child.grade)) {
       return const _UnavailablePracticeScreen();
     }
-    final state = ref.watch(preschoolPracticeControllerProvider(child.id));
     final tracing = PreschoolPracticeCategory.values
         .where((category) => category.kind == PreschoolPracticeKind.trace);
     final words = PreschoolPracticeCategory.values
@@ -38,9 +38,9 @@ class PreschoolPracticeScreen extends ConsumerWidget {
                 child: _WelcomeCard(),
               ),
               _sectionTitle('✍️ Learn & Trace'),
-              _categoryGrid(context, ref, child.id, state, tracing),
+              _categoryGrid(context, child.id, tracing),
               _sectionTitle('🗣️ Picture Words'),
-              _categoryGrid(context, ref, child.id, state, words),
+              _categoryGrid(context, child.id, words),
               const SliverToBoxAdapter(child: SizedBox(height: 28)),
             ],
           ),
@@ -92,9 +92,7 @@ class PreschoolPracticeScreen extends ConsumerWidget {
 
   Widget _categoryGrid(
     BuildContext context,
-    WidgetRef ref,
     String childId,
-    PreschoolPracticeState state,
     Iterable<PreschoolPracticeCategory> categories,
   ) {
     final list = categories.toList();
@@ -110,14 +108,9 @@ class PreschoolPracticeScreen extends ConsumerWidget {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final category = list[index];
-            final items = PreschoolPracticeCatalog.itemsFor(category);
-            final practised =
-                state.practisedCount(items.map((item) => item.id));
-            return _CategoryCard(
+            return _CategoryProgressCard(
               category: category,
-              progress: items.isEmpty ? 0 : practised / items.length,
-              practised: practised,
-              total: items.length,
+              childId: childId,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => PreschoolCategoryScreen(
@@ -187,6 +180,35 @@ class _WelcomeCardState extends State<_WelcomeCard> {
       );
 }
 
+class _CategoryProgressCard extends ConsumerWidget {
+  const _CategoryProgressCard({
+    required this.category,
+    required this.childId,
+    required this.onTap,
+  });
+
+  final PreschoolPracticeCategory category;
+  final String childId;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ids = PreschoolPracticeCatalog.idsFor(category);
+    final practised = ref.watch(
+      preschoolPracticeControllerProvider(childId).select(
+        (state) => state.practisedCount(ids),
+      ),
+    );
+    return _CategoryCard(
+      category: category,
+      progress: ids.isEmpty ? 0 : practised / ids.length,
+      practised: practised,
+      total: ids.length,
+      onTap: onTap,
+    );
+  }
+}
+
 class _CategoryCard extends StatelessWidget {
   const _CategoryCard({
     required this.category,
@@ -204,6 +226,7 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BouncyButton(
+        key: ValueKey('preschool-category-${category.id}'),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(14),
@@ -249,7 +272,7 @@ class _CategoryCard extends StatelessWidget {
       );
 }
 
-class PreschoolCategoryScreen extends ConsumerWidget {
+class PreschoolCategoryScreen extends ConsumerStatefulWidget {
   const PreschoolCategoryScreen({
     required this.category,
     required this.childId,
@@ -260,19 +283,49 @@ class PreschoolCategoryScreen extends ConsumerWidget {
   final String childId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final items = PreschoolPracticeCatalog.itemsFor(category);
-    final progress = ref.watch(preschoolPracticeControllerProvider(childId));
+  ConsumerState<PreschoolCategoryScreen> createState() =>
+      _PreschoolCategoryScreenState();
+}
+
+class _PreschoolCategoryScreenState
+    extends ConsumerState<PreschoolCategoryScreen> {
+  static const _initialArtPrecacheCount = 12;
+  bool _didPrecacheArt = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didPrecacheArt) return;
+    _didPrecacheArt = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Warm only the first visible-ish batch. Preloading all 30 images at
+      // once makes category entry heavier on low-memory phones; the detail
+      // screen still preloads nearby next/previous words for smooth swiping.
+      final paths = <String>{
+        for (final item in PreschoolPracticeCatalog.itemsFor(widget.category)
+            .take(_initialArtPrecacheCount))
+          if (OpenMojiView.assetPathFor(item.emoji) case final path?) path,
+      };
+      for (final path in paths) {
+        precacheImage(AssetImage(path), context);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = PreschoolPracticeCatalog.itemsFor(widget.category);
     return Scaffold(
       appBar: AppBar(
-        title: Text('${category.emoji} ${category.title}'),
+        title: Text('${widget.category.emoji} ${widget.category.title}'),
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Text(
-              category.description,
+              widget.category.description,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -293,16 +346,15 @@ class PreschoolCategoryScreen extends ConsumerWidget {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
-                final stage = progress.forItem(item.id).stage;
                 return _ItemCard(
                   item: item,
-                  stage: stage,
+                  childId: widget.childId,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => PreschoolLearnScreen(
                         items: items,
                         initialIndex: index,
-                        childId: childId,
+                        childId: widget.childId,
                       ),
                     ),
                   ),
@@ -316,25 +368,31 @@ class PreschoolCategoryScreen extends ConsumerWidget {
   }
 }
 
-class _ItemCard extends StatelessWidget {
+class _ItemCard extends ConsumerWidget {
   const _ItemCard({
     required this.item,
-    required this.stage,
+    required this.childId,
     required this.onTap,
   });
 
   final PreschoolPracticeItem item;
-  final PreschoolPracticeStage stage;
+  final String childId;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stage = ref.watch(
+      preschoolPracticeControllerProvider(childId).select(
+        (state) => state.forItem(item.id).stage,
+      ),
+    );
     final color = switch (stage) {
       PreschoolPracticeStage.newItem => AppColors.info,
       PreschoolPracticeStage.practising => AppColors.warning,
       PreschoolPracticeStage.great => AppColors.success,
     };
     return BouncyButton(
+      key: ValueKey('preschool-item-${item.id}'),
       onTap: onTap,
       child: Card(
         child: Padding(
@@ -413,7 +471,10 @@ class _PreschoolLearnScreenState extends ConsumerState<PreschoolLearnScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _visitAndSpeak());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _precacheNearbyArt();
+      _visitAndSpeak();
+    });
   }
 
   Future<void> _visitAndSpeak() async {
@@ -431,15 +492,32 @@ class _PreschoolLearnScreenState extends ConsumerState<PreschoolLearnScreen> {
       _index = (_index + delta) % widget.items.length;
       if (_index < 0) _index += widget.items.length;
     });
+    _precacheNearbyArt();
     _visitAndSpeak();
+  }
+
+  void _precacheNearbyArt() {
+    if (!mounted || widget.items.isEmpty) return;
+    final paths = <String>{};
+    for (final offset in const [-2, -1, 0, 1, 2]) {
+      final item = widget.items[(_index + offset) % widget.items.length];
+      if (OpenMojiView.assetPathFor(item.emoji) case final path?) {
+        paths.add(path);
+      }
+    }
+    for (final path in paths) {
+      precacheImage(AssetImage(path), context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final item = _item;
-    final progress = ref
-        .watch(preschoolPracticeControllerProvider(widget.childId))
-        .forItem(item.id);
+    final stage = ref.watch(
+      preschoolPracticeControllerProvider(widget.childId).select(
+        (state) => state.forItem(item.id).stage,
+      ),
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text(item.category.title),
@@ -498,7 +576,7 @@ class _PreschoolLearnScreenState extends ConsumerState<PreschoolLearnScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        progress.stage.label,
+                        stage.label,
                         style: const TextStyle(
                             color: AppColors.success,
                             fontWeight: FontWeight.w900),
@@ -607,7 +685,7 @@ class _PreschoolTraceScreenState extends ConsumerState<PreschoolTraceScreen>
   late final AnimationController _guideAnimation = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1100),
-  )..repeat(reverse: true);
+  );
   bool _showGuide = true;
   bool _finishing = false;
   int _points = 0;
@@ -616,11 +694,19 @@ class _PreschoolTraceScreenState extends ConsumerState<PreschoolTraceScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _syncGuideAnimation();
       AudioService.instance.speak(
         '${widget.item.spoken}. Start at the green dot and follow the shape.',
         language: widget.item.voiceLanguage,
       );
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncGuideAnimation();
   }
 
   @override
@@ -632,6 +718,7 @@ class _PreschoolTraceScreenState extends ConsumerState<PreschoolTraceScreen>
   void _start(Offset point) => setState(() {
         _strokes.add([point]);
         _points++;
+        _syncGuideAnimation();
       });
 
   void _draw(Offset point) {
@@ -645,7 +732,19 @@ class _PreschoolTraceScreenState extends ConsumerState<PreschoolTraceScreen>
   void _clear() => setState(() {
         _strokes.clear();
         _points = 0;
+        _syncGuideAnimation();
       });
+
+  void _syncGuideAnimation() {
+    final reducedMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final shouldAnimateGuide = _showGuide && _strokes.isEmpty && !reducedMotion;
+    if (shouldAnimateGuide && !_guideAnimation.isAnimating) {
+      _guideAnimation.repeat(reverse: true);
+    } else if (!shouldAnimateGuide && _guideAnimation.isAnimating) {
+      _guideAnimation.stop();
+    }
+  }
 
   Future<void> _finish() async {
     if (_finishing) return;
@@ -742,7 +841,10 @@ class _PreschoolTraceScreenState extends ConsumerState<PreschoolTraceScreen>
                       key: const ValueKey('free-draw-toggle'),
                       selected: !_showGuide,
                       label: const Text('Free Draw'),
-                      onSelected: (free) => setState(() => _showGuide = !free),
+                      onSelected: (free) => setState(() {
+                        _showGuide = !free;
+                        _syncGuideAnimation();
+                      }),
                     ),
                   ],
                 ),
