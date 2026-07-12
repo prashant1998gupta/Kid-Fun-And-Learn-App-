@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_theme.dart';
+import '../core/widgets/kid_experience_layer.dart';
 import '../features/auth/auth_controller.dart';
 import '../features/settings/settings_controller.dart';
 import '../l10n/app_localizations.dart';
@@ -33,10 +34,18 @@ class KidVerseApp extends ConsumerWidget {
       routerConfig: router,
       builder: (context, child) {
         final scale = settings.largeText ? 1.25 : 1.0;
-        return MediaQuery.withClampedTextScaling(
-          minScaleFactor: scale,
-          maxScaleFactor: scale * 1.3,
-          child: child ?? const SizedBox.shrink(),
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: settings.reducedMotion,
+          ),
+          child: MediaQuery.withClampedTextScaling(
+            minScaleFactor: scale,
+            maxScaleFactor: scale * 1.3,
+            child: KidExperienceLayer(
+              reducedMotion: settings.reducedMotion,
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         );
       },
     );

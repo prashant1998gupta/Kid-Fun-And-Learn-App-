@@ -88,7 +88,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
   }
 
   void _celebrate(bool sound) {
-    _center.play();
+    if (!MediaQuery.disableAnimationsOf(context)) _center.play();
     _playLottie();
     if (sound) {
       AudioService.instance.playSfx(Sfx.celebration);
@@ -97,9 +97,11 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
   }
 
   void _fireworks() {
-    _left.play();
-    _center.play();
-    _right.play();
+    if (!MediaQuery.disableAnimationsOf(context)) {
+      _left.play();
+      _center.play();
+      _right.play();
+    }
     _playLottie();
     AudioService.instance.playSfx(Sfx.reward);
     AudioService.instance.successHaptic();
@@ -120,6 +122,7 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final reducedMotion = MediaQuery.disableAnimationsOf(context);
     return Stack(
       children: [
         widget.child,
@@ -127,13 +130,9 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
           Positioned.fill(
             child: IgnorePointer(
               child: Center(
-                child: LottieView(
+                child: _SuccessMoment(
                   key: ValueKey(_lottieBurst),
-                  asset: 'assets/lottie/celebration_star.json',
-                  width: 240,
-                  height: 240,
-                  repeat: false,
-                  fallback: const Text('⭐', style: TextStyle(fontSize: 96)),
+                  reducedMotion: reducedMotion,
                 ),
               ),
             ),
@@ -161,7 +160,99 @@ class _CelebrationOverlayState extends State<CelebrationOverlay> {
         minBlastForce: 8,
         gravity: 0.25,
         colors: _colors,
+        createParticlePath: _starParticle,
       ),
+    );
+  }
+
+  Path _starParticle(Size size) {
+    final center = size.center(Offset.zero);
+    final outer = size.shortestSide / 2;
+    final inner = outer * 0.44;
+    final path = Path();
+    for (var point = 0; point < 10; point++) {
+      final angle = -math.pi / 2 + point * math.pi / 5;
+      final radius = point.isEven ? outer : inner;
+      final x = center.dx + math.cos(angle) * radius;
+      final y = center.dy + math.sin(angle) * radius;
+      if (point == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    return path..close();
+  }
+}
+
+class _SuccessMoment extends StatelessWidget {
+  const _SuccessMoment({required this.reducedMotion, super.key});
+
+  final bool reducedMotion;
+
+  @override
+  Widget build(BuildContext context) {
+    final moment = SizedBox(
+      width: 250,
+      height: 250,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (!reducedMotion)
+            const LottieView(
+              asset: 'assets/lottie/celebration_star.json',
+              width: 240,
+              height: 240,
+              repeat: false,
+              fallback: SizedBox.shrink(),
+            ),
+          Container(
+            width: 104,
+            height: 104,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.96),
+              shape: BoxShape.circle,
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x44000000),
+                  blurRadius: 22,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Text('⭐', style: TextStyle(fontSize: 66)),
+          ),
+          const Positioned(
+            bottom: 42,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.success,
+                borderRadius: BorderRadius.all(Radius.circular(999)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                child: Text(
+                  'You did it!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (reducedMotion) return moment;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.55, end: 1),
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutBack,
+      builder: (_, scale, child) => Transform.scale(scale: scale, child: child),
+      child: moment,
     );
   }
 }

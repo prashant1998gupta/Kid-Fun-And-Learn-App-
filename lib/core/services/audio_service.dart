@@ -49,7 +49,9 @@ class AudioService {
   AudioService._();
   static final AudioService instance = AudioService._();
 
-  late final AudioPlayer _sfxPlayer = AudioPlayer(playerId: 'sfx')
+  late final AudioPlayer _uiPlayer = AudioPlayer(playerId: 'ui-sfx')
+    ..setReleaseMode(ReleaseMode.stop);
+  late final AudioPlayer _feedbackPlayer = AudioPlayer(playerId: 'feedback-sfx')
     ..setReleaseMode(ReleaseMode.stop);
   late final AudioPlayer _musicPlayer = AudioPlayer(playerId: 'music')
     ..setReleaseMode(ReleaseMode.loop);
@@ -60,21 +62,40 @@ class AudioService {
   bool voiceEnabled = true;
   bool hapticsEnabled = true;
   String _voiceLanguage = 'en-US';
+  int _speechGeneration = 0;
+  DateTime? _lastUiSoundAt;
+  bool _musicStarted = false;
+
+  static const _musicVolume = 0.35;
+  static const _narrationMusicVolume = 0.09;
 
   Future<void> init() async {
     await _tts.setLanguage('en-US');
     await _tts.setSpeechRate(0.45); // slower, clearer for children
     await _tts.setPitch(1.15); // cheerful
     await _tts.setVolume(1.0);
-    await _sfxPlayer.setVolume(0.8);
-    await _musicPlayer.setVolume(0.35);
+    await _tts.awaitSpeakCompletion(true);
+    await _uiPlayer.setVolume(0.62);
+    await _feedbackPlayer.setVolume(0.78);
+    await _musicPlayer.setVolume(_musicVolume);
   }
 
   Future<void> playSfx(Sfx sfx) async {
     if (!sfxEnabled) return;
     try {
-      await _sfxPlayer.stop();
-      await _sfxPlayer.play(AssetSource('audio/${sfx.asset}'));
+      final isUiSound = sfx == Sfx.tap || sfx == Sfx.whoosh;
+      if (isUiSound) {
+        final now = DateTime.now();
+        if (_lastUiSoundAt != null &&
+            now.difference(_lastUiSoundAt!) <
+                const Duration(milliseconds: 45)) {
+          return;
+        }
+        _lastUiSoundAt = now;
+      }
+      final player = isUiSound ? _uiPlayer : _feedbackPlayer;
+      await player.stop();
+      await player.play(AssetSource('audio/${sfx.asset}'));
     } catch (_) {
       // Assets may be absent in early builds; fail silently so the UI is
       // never blocked by a missing sound.
@@ -85,26 +106,50 @@ class AudioService {
     if (!musicEnabled) return;
     try {
       await _musicPlayer.play(AssetSource('audio/${track.asset}'));
-    } catch (_) {}
+      _musicStarted = true;
+    } catch (_) {
+      _musicStarted = false;
+    }
   }
 
-  Future<void> stopMusic() => _musicPlayer.stop();
+  Future<void> stopMusic() async {
+    if (!_musicStarted) return;
+    _musicStarted = false;
+    await _musicPlayer.stop();
+  }
 
   /// Cheerful voice guidance / narration. Used for praise ("Excellent!"),
   /// instructions, and reading practice.
   Future<void> speak(String text, {String language = 'en-US'}) async {
     if (!voiceEnabled) return;
+    final generation = ++_speechGeneration;
     try {
+      if (musicEnabled && _musicStarted) {
+        await _musicPlayer.setVolume(_narrationMusicVolume);
+      }
       await _tts.stop();
       if (_voiceLanguage != language) {
         await _tts.setLanguage(language);
         _voiceLanguage = language;
       }
       await _tts.speak(text);
-    } catch (_) {}
+    } catch (_) {
+      // TTS availability varies by device. The visual experience remains
+      // usable, and music is restored below.
+    } finally {
+      if (generation == _speechGeneration && musicEnabled && _musicStarted) {
+        await _musicPlayer.setVolume(_musicVolume);
+      }
+    }
   }
 
-  Future<void> stopSpeaking() => _tts.stop();
+  Future<void> stopSpeaking() async {
+    _speechGeneration++;
+    await _tts.stop();
+    if (musicEnabled && _musicStarted) {
+      await _musicPlayer.setVolume(_musicVolume);
+    }
+  }
 
   void lightHaptic() {
     if (hapticsEnabled) HapticFeedback.lightImpact();
@@ -115,7 +160,8 @@ class AudioService {
   }
 
   Future<void> dispose() async {
-    await _sfxPlayer.dispose();
+    await _uiPlayer.dispose();
+    await _feedbackPlayer.dispose();
     await _musicPlayer.dispose();
   }
 }

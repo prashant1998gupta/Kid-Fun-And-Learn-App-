@@ -42,6 +42,7 @@ class _BouncyButtonState extends State<BouncyButton>
   );
 
   bool get _enabled => widget.onTap != null;
+  bool _reducedMotion = false;
 
   @override
   void dispose() {
@@ -51,6 +52,7 @@ class _BouncyButtonState extends State<BouncyButton>
 
   void _down(_) {
     if (!_enabled) return;
+    if (_reducedMotion) return;
     _controller.forward();
   }
 
@@ -68,6 +70,7 @@ class _BouncyButtonState extends State<BouncyButton>
 
   @override
   Widget build(BuildContext context) {
+    _reducedMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final scale = Tween<double>(begin: 1, end: widget.scaleTo)
         .chain(CurveTween(curve: Curves.easeOut))
         .animate(_controller);

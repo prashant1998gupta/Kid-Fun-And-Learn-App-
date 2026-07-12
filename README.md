@@ -61,12 +61,16 @@ Preschool learners also have an always-open, voice-guided library for A–Z,
 a–z, 0–9, Hindi letters and picture vocabulary. See
 [`docs/20_PRESCHOOL_LEARN_AND_TRACE.md`](docs/20_PRESCHOOL_LEARN_AND_TRACE.md).
 
+App-wide touch delight, layered sound, narration ducking, success feedback and
+reduced-motion behavior are documented in
+[`docs/21_KID_EXPERIENCE_SYSTEM.md`](docs/21_KID_EXPERIENCE_SYSTEM.md).
+
 ### Run it
 
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # full unit + widget suite (130 tests at last verification)
+flutter test         # full unit + widget suite (133 tests at last verification)
 flutter analyze      # lints
 ```
 
