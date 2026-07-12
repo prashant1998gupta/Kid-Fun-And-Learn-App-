@@ -101,6 +101,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     data: (repo) => _SubjectGrid(repo: repo),
                   ),
                 ),
+                if (child.grade.isPreSchool)
+                  const SliverToBoxAdapter(
+                    child: _PreschoolPracticeInvitation(),
+                  ),
               ],
             ),
           ),
@@ -427,6 +431,82 @@ class _WorldInvitation extends StatelessWidget {
       ),
     );
   }
+}
+
+class _PreschoolPracticeInvitation extends StatelessWidget {
+  const _PreschoolPracticeInvitation();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.md,
+        ),
+        child: BouncyButton(
+          onTap: () {
+            AudioService.instance.speak(
+              'Choose a letter, number, Hindi sound, or picture word!',
+            );
+            context.push(AppRoutes.preschoolPractice);
+          },
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF8FB1), Color(0xFF9B8CFF)],
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x339B8CFF),
+                  blurRadius: 16,
+                  offset: Offset(0, 7),
+                ),
+              ],
+            ),
+            child: const Row(
+              children: [
+                Text('A a\nअ 1',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      height: 1.05,
+                      fontWeight: FontWeight.w900,
+                    )),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Learn & Trace Anytime',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 21,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Letters, numbers, Hindi and picture words',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_rounded,
+                    color: Colors.white, size: 32),
+              ],
+            ),
+          ),
+        ),
+      );
 }
 
 class _QuickActions extends ConsumerWidget {

@@ -28,6 +28,7 @@ import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/parent/parent_dashboard_screen.dart';
 import '../features/parent/parent_gate.dart';
+import '../features/preschool_library/preschool_practice_screen.dart';
 import '../features/profiles/profile_create_screen.dart';
 import '../features/profiles/profile_picker_screen.dart';
 import '../features/profiles/profiles_controller.dart';
@@ -46,6 +47,7 @@ class AppRoutes {
   static const profileCreate = '/profiles/create';
   static const home = '/home';
   static const learningMap = '/learning-map';
+  static const preschoolPractice = '/preschool-practice';
   static const achievements = '/achievements';
   static const shop = '/shop';
   static const collection = '/collection';
@@ -128,6 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           }
           return _slide(LearningMapScreen(subject: subject), s);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.preschoolPractice,
+        pageBuilder: (_, s) => _slide(const PreschoolPracticeScreen(), s),
       ),
       GoRoute(
         path: AppRoutes.achievements,

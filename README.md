@@ -57,12 +57,16 @@ The class-by-class content progression, defects found, automated grade-fit
 guards, and educator-review checklist are in
 [`docs/19_CURRICULUM_AND_GRADE_FIT.md`](docs/19_CURRICULUM_AND_GRADE_FIT.md).
 
+Preschool learners also have an always-open, voice-guided library for A–Z,
+a–z, 0–9, Hindi letters and picture vocabulary. See
+[`docs/20_PRESCHOOL_LEARN_AND_TRACE.md`](docs/20_PRESCHOOL_LEARN_AND_TRACE.md).
+
 ### Run it
 
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # full unit + widget suite (126 tests at last verification)
+flutter test         # full unit + widget suite (130 tests at last verification)
 flutter analyze      # lints
 ```
 

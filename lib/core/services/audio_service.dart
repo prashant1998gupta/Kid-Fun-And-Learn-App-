@@ -59,6 +59,7 @@ class AudioService {
   bool musicEnabled = true;
   bool voiceEnabled = true;
   bool hapticsEnabled = true;
+  String _voiceLanguage = 'en-US';
 
   Future<void> init() async {
     await _tts.setLanguage('en-US');
@@ -91,10 +92,14 @@ class AudioService {
 
   /// Cheerful voice guidance / narration. Used for praise ("Excellent!"),
   /// instructions, and reading practice.
-  Future<void> speak(String text) async {
+  Future<void> speak(String text, {String language = 'en-US'}) async {
     if (!voiceEnabled) return;
     try {
       await _tts.stop();
+      if (_voiceLanguage != language) {
+        await _tts.setLanguage(language);
+        _voiceLanguage = language;
+      }
       await _tts.speak(text);
     } catch (_) {}
   }
