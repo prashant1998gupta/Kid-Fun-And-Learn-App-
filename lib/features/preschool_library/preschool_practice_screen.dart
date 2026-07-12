@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/animated_background.dart';
 import '../../core/widgets/bouncy_button.dart';
 import '../../core/widgets/celebration_overlay.dart';
+import '../../core/widgets/illustrated_object.dart';
 import '../profiles/profiles_controller.dart';
 import 'preschool_practice_catalog.dart';
 import 'preschool_practice_controller.dart';
@@ -341,14 +342,25 @@ class _ItemCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(item.glyph ?? item.emoji,
-                  style: TextStyle(
-                    fontSize: item.glyph == null ? 48 : 54,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.primary,
-                  )),
-              if (item.glyph != null)
-                Text(item.emoji, style: const TextStyle(fontSize: 28)),
+              if (item.glyph == null)
+                IllustratedObjectView(
+                  label: item.name,
+                  emoji: item.emoji,
+                  size: 62,
+                )
+              else ...[
+                Text(item.glyph!,
+                    style: const TextStyle(
+                      fontSize: 54,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                    )),
+                IllustratedObjectView(
+                  label: item.example ?? item.name,
+                  emoji: item.emoji,
+                  size: 30,
+                ),
+              ],
               Text(
                 item.example ?? item.name,
                 maxLines: 1,
@@ -457,15 +469,27 @@ class _PreschoolLearnScreenState extends ConsumerState<PreschoolLearnScreen> {
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     children: [
-                      Text(
-                        item.glyph ?? item.name,
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: item.glyph == null ? 54 : 116,
-                          fontWeight: FontWeight.w900,
+                      if (item.glyph == null)
+                        IllustratedObjectView(
+                          label: item.name,
+                          emoji: item.emoji,
+                          size: 148,
+                        )
+                      else ...[
+                        Text(
+                          item.glyph!,
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 116,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                      ),
-                      Text(item.emoji, style: const TextStyle(fontSize: 92)),
+                        IllustratedObjectView(
+                          label: item.example ?? item.name,
+                          emoji: item.emoji,
+                          size: 92,
+                        ),
+                      ],
                       const SizedBox(height: 10),
                       Text(
                         item.example ?? item.name,

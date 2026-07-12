@@ -40,11 +40,52 @@ class IllustratedObjectView extends StatelessWidget {
             ),
           );
     // Real OpenMoji art wins for objects; letters/numbers keep their tile.
-    if (kind != _IllustrationKind.text && OpenMojiView.has(emoji)) {
+    // For object words that do not have an exact emoji, avoid misleading
+    // generic cues. A drawn fruit is better than showing "Papaya" as a heart
+    // or "Pomegranate" as a red dot.
+    if (kind != _IllustrationKind.text &&
+        !_preferDrawnArt(kind, emoji) &&
+        OpenMojiView.has(emoji)) {
       return OpenMojiView(emoji: emoji!, size: size, fallback: drawn);
     }
     return drawn;
   }
+}
+
+bool _preferDrawnArt(_IllustrationKind kind, String? emoji) {
+  if (emoji == null) return false;
+  const genericCues = {
+    '🔴',
+    '🟠',
+    '🟡',
+    '🟢',
+    '🔵',
+    '🟣',
+    '🟤',
+    '⚪',
+    '⚫',
+    '⭐',
+    '💚',
+    '🧡',
+    '💜',
+    '🤍',
+    '🐉',
+  };
+  const fruitFallbackKinds = {
+    _IllustrationKind.fruit,
+    _IllustrationKind.papaya,
+    _IllustrationKind.pomegranate,
+    _IllustrationKind.purpleFruit,
+    _IllustrationKind.orangeFruit,
+    _IllustrationKind.brownFruit,
+    _IllustrationKind.lychee,
+    _IllustrationKind.dragonFruit,
+    _IllustrationKind.starFruit,
+    _IllustrationKind.jackfruit,
+  };
+  return (fruitFallbackKinds.contains(kind) ||
+          kind == _IllustrationKind.vegetable) &&
+      genericCues.contains(emoji);
 }
 
 class _TextTile extends StatelessWidget {
@@ -117,7 +158,18 @@ enum _IllustrationKind {
   text,
   apple,
   banana,
+  fruit,
+  papaya,
+  pomegranate,
+  purpleFruit,
+  orangeFruit,
+  brownFruit,
+  lychee,
+  dragonFruit,
+  starFruit,
+  jackfruit,
   carrot,
+  vegetable,
   strawberry,
   grapes,
   cookie,
@@ -158,9 +210,22 @@ _IllustrationKind _kindFor(String label, String? emoji) {
   }
   if (value.contains('apple')) return _IllustrationKind.apple;
   if (value.contains('banana')) return _IllustrationKind.banana;
+  if (value.contains('papaya')) return _IllustrationKind.papaya;
+  if (value.contains('pomegranate')) return _IllustrationKind.pomegranate;
+  if (value.contains('plum') || value.contains('fig')) {
+    return _IllustrationKind.purpleFruit;
+  }
+  if (value.contains('apricot')) return _IllustrationKind.orangeFruit;
+  if (value.contains('date')) return _IllustrationKind.brownFruit;
+  if (value.contains('lychee')) return _IllustrationKind.lychee;
+  if (value.contains('dragon fruit')) return _IllustrationKind.dragonFruit;
+  if (value.contains('star fruit')) return _IllustrationKind.starFruit;
+  if (value.contains('jackfruit')) return _IllustrationKind.jackfruit;
+  if (_fruitWords.any(value.contains)) return _IllustrationKind.fruit;
   if (value.contains('carrot') || value.contains('veggie')) {
     return _IllustrationKind.carrot;
   }
+  if (_vegetableWords.any(value.contains)) return _IllustrationKind.vegetable;
   if (value.contains('berry') || value.contains('strawberry')) {
     return _IllustrationKind.strawberry;
   }
@@ -210,6 +275,59 @@ _IllustrationKind _kindFor(String label, String? emoji) {
   return emoji == null ? _IllustrationKind.text : _IllustrationKind.generic;
 }
 
+const _fruitWords = {
+  'mango',
+  'pear',
+  'cherry',
+  'coconut',
+  'lemon',
+  'kiwi',
+  'papaya',
+  'guava',
+  'pomegranate',
+  'plum',
+  'apricot',
+  'fig',
+  'date',
+  'lychee',
+  'dragon fruit',
+  'custard apple',
+  'muskmelon',
+  'star fruit',
+  'jackfruit',
+};
+
+const _vegetableWords = {
+  'tomato',
+  'potato',
+  'onion',
+  'broccoli',
+  'corn',
+  'peas',
+  'cucumber',
+  'brinjal',
+  'capsicum',
+  'mushroom',
+  'spinach',
+  'pumpkin',
+  'garlic',
+  'sweet potato',
+  'cabbage',
+  'cauliflower',
+  'radish',
+  'beetroot',
+  'okra',
+  'beans',
+  'ginger',
+  'turnip',
+  'gourd',
+  'ladyfinger',
+  'lettuce',
+  'celery',
+  'chilli',
+  'coriander',
+};
+
 class _ObjectPainter extends CustomPainter {
   const _ObjectPainter({required this.kind, required this.selected});
 
@@ -231,8 +349,30 @@ class _ObjectPainter extends CustomPainter {
         _fruit(canvas, const Color(0xFFFF5E57), leaf: true);
       case _IllustrationKind.banana:
         _banana(canvas);
+      case _IllustrationKind.fruit:
+        _fruit(canvas, const Color(0xFFFFA726), leaf: true);
+      case _IllustrationKind.papaya:
+        _papaya(canvas);
+      case _IllustrationKind.pomegranate:
+        _pomegranate(canvas);
+      case _IllustrationKind.purpleFruit:
+        _ovalFruit(canvas, const Color(0xFF8E44AD));
+      case _IllustrationKind.orangeFruit:
+        _ovalFruit(canvas, const Color(0xFFFFA726));
+      case _IllustrationKind.brownFruit:
+        _ovalFruit(canvas, const Color(0xFF8D6E63), leaf: false);
+      case _IllustrationKind.lychee:
+        _lychee(canvas);
+      case _IllustrationKind.dragonFruit:
+        _dragonFruit(canvas);
+      case _IllustrationKind.starFruit:
+        _starFruit(canvas);
+      case _IllustrationKind.jackfruit:
+        _jackfruit(canvas);
       case _IllustrationKind.carrot:
         _carrot(canvas);
+      case _IllustrationKind.vegetable:
+        _leafyVegetable(canvas);
       case _IllustrationKind.strawberry:
         _fruit(canvas, AppColors.bubblegum, seeds: true, leaf: true);
       case _IllustrationKind.grapes:
@@ -353,6 +493,119 @@ class _ObjectPainter extends CustomPainter {
     _smile(c);
   }
 
+  void _ovalFruit(Canvas c, Color color, {bool leaf = true}) {
+    c.drawOval(const Rect.fromLTWH(28, 28, 44, 54), _paint(color));
+    c.drawOval(const Rect.fromLTWH(38, 34, 14, 20), _paint(Colors.white24));
+    if (leaf) {
+      c.drawOval(const Rect.fromLTWH(54, 17, 18, 10), _paint(AppColors.mint));
+      c.drawLine(const Offset(51, 28), const Offset(56, 18),
+          _stroke(const Color(0xFF6D4C41), 3));
+    }
+    _eye(c, 43, 52);
+    _eye(c, 57, 52);
+    _smile(c);
+  }
+
+  void _papaya(Canvas c) {
+    c.drawOval(
+        const Rect.fromLTWH(25, 27, 50, 56), _paint(const Color(0xFFFFA726)));
+    c.drawOval(
+        const Rect.fromLTWH(37, 35, 26, 38), _paint(const Color(0xFFFFE082)));
+    for (final p in const [Offset(47, 48), Offset(54, 54), Offset(49, 61)]) {
+      c.drawCircle(p, 2.2, _paint(const Color(0xFF5D4037)));
+    }
+    c.drawOval(const Rect.fromLTWH(55, 16, 18, 10), _paint(AppColors.mint));
+    _eye(c, 38, 55);
+    _eye(c, 62, 55);
+    _smile(c);
+  }
+
+  void _pomegranate(Canvas c) {
+    _fruit(c, const Color(0xFFE53935), leaf: true);
+    for (final p in const [
+      Offset(43, 40),
+      Offset(54, 43),
+      Offset(47, 54),
+      Offset(59, 58),
+    ]) {
+      c.drawCircle(p, 2.4, _paint(const Color(0xFFFFCDD2)));
+    }
+  }
+
+  void _lychee(Canvas c) {
+    _fruit(c, const Color(0xFFFF6F91), leaf: true);
+    for (final p in const [
+      Offset(39, 39),
+      Offset(54, 36),
+      Offset(64, 49),
+      Offset(44, 64),
+    ]) {
+      c.drawCircle(p, 1.8, _paint(Colors.white70));
+    }
+  }
+
+  void _dragonFruit(Canvas c) {
+    c.drawOval(
+        const Rect.fromLTWH(26, 25, 48, 58), _paint(const Color(0xFFE91E63)));
+    for (final p in const [
+      Offset(30, 36),
+      Offset(70, 39),
+      Offset(32, 62),
+      Offset(68, 66),
+    ]) {
+      c.drawPath(
+        Path()
+          ..moveTo(p.dx, p.dy)
+          ..lineTo(p.dx + (p.dx < 50 ? -10 : 10), p.dy + 6)
+          ..lineTo(p.dx + (p.dx < 50 ? 2 : -2), p.dy + 14)
+          ..close(),
+        _paint(AppColors.mint),
+      );
+    }
+    c.drawOval(const Rect.fromLTWH(38, 36, 24, 34), _paint(Colors.white));
+    _eye(c, 44, 52);
+    _eye(c, 56, 52);
+    _smile(c);
+  }
+
+  void _starFruit(Canvas c) {
+    _star(c);
+    c.drawPath(
+      Path()
+        ..moveTo(50, 22)
+        ..lineTo(55, 45)
+        ..lineTo(78, 44)
+        ..lineTo(58, 56)
+        ..lineTo(66, 78)
+        ..lineTo(50, 63)
+        ..lineTo(34, 78)
+        ..lineTo(42, 56)
+        ..lineTo(22, 44)
+        ..lineTo(45, 45)
+        ..close(),
+      _stroke(const Color(0xFFD99000), 2.5),
+    );
+  }
+
+  void _jackfruit(Canvas c) {
+    c.drawOval(
+        const Rect.fromLTWH(25, 28, 50, 54), _paint(const Color(0xFF9CCC65)));
+    for (final p in const [
+      Offset(38, 41),
+      Offset(51, 38),
+      Offset(63, 45),
+      Offset(43, 56),
+      Offset(58, 61),
+      Offset(48, 71),
+    ]) {
+      c.drawCircle(p, 1.8, _paint(const Color(0xFF558B2F)));
+    }
+    c.drawOval(const Rect.fromLTWH(55, 18, 18, 10), _paint(AppColors.mint));
+    _eye(c, 43, 53);
+    _eye(c, 57, 53);
+    _smile(c);
+  }
+
   void _carrot(Canvas c) {
     final body = Path()
       ..moveTo(50, 84)
@@ -365,6 +618,26 @@ class _ObjectPainter extends CustomPainter {
     c.drawOval(const Rect.fromLTWH(48, 10, 16, 25), _paint(AppColors.mint));
     _eye(c, 45, 44);
     _eye(c, 56, 44);
+    _smile(c);
+  }
+
+  void _leafyVegetable(Canvas c) {
+    c.drawOval(
+        const Rect.fromLTWH(24, 42, 28, 34), _paint(const Color(0xFF66BB6A)));
+    c.drawOval(
+        const Rect.fromLTWH(48, 42, 28, 34), _paint(const Color(0xFF43A047)));
+    c.drawOval(
+        const Rect.fromLTWH(34, 26, 32, 42), _paint(const Color(0xFF81C784)));
+    c.drawPath(
+      Path()
+        ..moveTo(50, 32)
+        ..quadraticBezierTo(44, 50, 42, 74)
+        ..moveTo(50, 32)
+        ..quadraticBezierTo(56, 50, 58, 74),
+      _stroke(const Color(0xFF2E7D32), 2.4),
+    );
+    _eye(c, 43, 54);
+    _eye(c, 57, 54);
     _smile(c);
   }
 
