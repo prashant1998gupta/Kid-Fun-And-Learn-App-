@@ -34,6 +34,7 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
   final _celebration = CelebrationController();
   final _stopwatch = Stopwatch()..start();
   final List<String> _struggled = [];
+  final List<String> _rescued = [];
 
   int _index = 0;
   int _correct = 0;
@@ -74,6 +75,7 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
       setState(() => _selected = null);
       if (_mistakes >= 2 && !_rescue) {
         setState(() => _rescue = true);
+        _rescued.add(_question.id);
         await showLearningRescue(context, _question);
       }
       return;
@@ -100,6 +102,7 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
           total: _total,
           firstTryCorrect: _firstTry,
           struggledQuestionIds: _struggled,
+          rescuedQuestionIds: _rescued,
           durationSeconds: _stopwatch.elapsed.inSeconds,
         ),
       );

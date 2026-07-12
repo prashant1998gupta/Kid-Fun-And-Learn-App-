@@ -32,6 +32,7 @@ void main() {
         total: 1,
         firstTryCorrect: 1,
         struggledQuestionIds: [],
+        rescuedQuestionIds: ['multiply-1'],
         durationSeconds: 10,
       ),
     );
@@ -39,6 +40,8 @@ void main() {
     expect(model.conceptMastery('child', 'math.multiplication'),
         greaterThan(0.35));
     expect(model.prerequisitesMet('child', ['math.addition']), isFalse);
+    expect(model.rescueCount('child', 'math.multiplication'), 1);
+    expect(model.totalRescues('child'), 1);
   });
 
   test('concept mastery survives persistence migration', () {

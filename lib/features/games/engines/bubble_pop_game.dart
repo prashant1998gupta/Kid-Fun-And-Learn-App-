@@ -46,6 +46,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
   bool _rescue = false;
   final Set<int> _popped = {};
   final List<String> _struggled = [];
+  final List<String> _rescued = [];
   final _stopwatch = Stopwatch()..start();
 
   Question get _q => widget.lesson.questions[_index];
@@ -99,6 +100,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
       setState(() => _wrong = null);
       if (_mistakes >= 2 && !_rescue) {
         setState(() => _rescue = true);
+        _rescued.add(_q.id);
         await showLearningRescue(context, _q);
       }
     }
@@ -114,6 +116,7 @@ class _BubblePopGameState extends State<BubblePopGame> {
           total: _total,
           firstTryCorrect: _firstTry,
           struggledQuestionIds: _struggled,
+          rescuedQuestionIds: _rescued,
           durationSeconds: _stopwatch.elapsed.inSeconds,
         ),
       );

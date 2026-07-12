@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/services/messaging_service.dart';
 import '../ai/adaptive_engine.dart';
+import '../ai/adaptive_learning_service.dart';
 import '../auth/auth_controller.dart';
 import '../curriculum/domain/subject.dart';
 import '../profiles/profiles_controller.dart';
@@ -50,6 +51,8 @@ class ParentDashboardScreen extends ConsumerWidget {
                   _TrendsCard(childId: child.id),
                   const SizedBox(height: 16),
                   _SubjectMastery(childId: child.id, model: model),
+                  const SizedBox(height: 16),
+                  _SkillMasteryCard(childId: child.id, model: model),
                   const SizedBox(height: 16),
                   _InsightCard(
                     title: 'Needs practice',
@@ -376,6 +379,154 @@ class _SubjectMastery extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SkillMasteryCard extends StatelessWidget {
+  const _SkillMasteryCard({required this.childId, required this.model});
+
+  final String childId;
+  final SkillModel model;
+
+  @override
+  Widget build(BuildContext context) {
+    final concepts = model.conceptMasteries(childId).entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+    final mastered = concepts
+        .where((entry) => conceptStage(entry.value) == ConceptStage.mastered)
+        .length;
+    final developing = concepts
+        .where((entry) => conceptStage(entry.value) == ConceptStage.developing)
+        .length;
+    final needsHelp = concepts.length - mastered - developing;
+
+    Color stageColor(ConceptStage stage) => switch (stage) {
+          ConceptStage.mastered => AppColors.success,
+          ConceptStage.developing => AppColors.info,
+          ConceptStage.needsHelp => AppColors.warning,
+        };
+
+    return Card(
+      key: ValueKey('skill-mastery-$childId'),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.psychology_alt_rounded,
+                    color: AppColors.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Skill mastery',
+                      style: Theme.of(context).textTheme.titleLarge),
+                ),
+                Chip(
+                  avatar:
+                      const Icon(Icons.volunteer_activism_rounded, size: 18),
+                  label: Text('${model.totalRescues(childId)} rescues'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'A rescue means the app explained a concept after two attempts. It is a learning signal, not a failure.',
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                _StageChip(
+                    label: 'Mastered',
+                    count: mastered,
+                    color: AppColors.success),
+                _StageChip(
+                    label: 'Developing',
+                    count: developing,
+                    color: AppColors.info),
+                _StageChip(
+                    label: 'Needs help',
+                    count: needsHelp,
+                    color: AppColors.warning),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (concepts.isEmpty)
+              const Text('Play a learning mission to begin the skill report.')
+            else
+              for (final entry in concepts.take(10)) ...[
+                Builder(builder: (context) {
+                  final stage = conceptStage(entry.value);
+                  final rescues = model.rescueCount(childId, entry.key);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(skillLabel(entry.key),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w800)),
+                              Text(
+                                rescues == 0
+                                    ? stage.label
+                                    : '${stage.label} • $rescues ${rescues == 1 ? 'rescue' : 'rescues'}',
+                                style: TextStyle(
+                                    color: stageColor(stage), fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 100,
+                          child: LinearProgressIndicator(
+                            value: entry.value,
+                            minHeight: 10,
+                            borderRadius:
+                                const BorderRadius.all(AppSpacing.radiusPill),
+                            color: stageColor(stage),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('${(entry.value * 100).round()}%'),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StageChip extends StatelessWidget {
+  const _StageChip({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  final String label;
+  final int count;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      side: BorderSide(color: color),
+      avatar: CircleAvatar(
+        backgroundColor: color,
+        child: Text('$count',
+            style: const TextStyle(color: Colors.white, fontSize: 11)),
+      ),
+      label: Text(label),
     );
   }
 }

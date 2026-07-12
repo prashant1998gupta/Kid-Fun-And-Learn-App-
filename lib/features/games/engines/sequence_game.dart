@@ -44,6 +44,7 @@ class _SequenceGameState extends State<SequenceGame> {
   bool _rescue = false;
   late List<int> _order; // scrambled display order (original indices)
   final List<String> _struggled = [];
+  final List<String> _rescued = [];
   final _stopwatch = Stopwatch()..start();
 
   Question get _q => widget.lesson.questions[_index];
@@ -96,6 +97,7 @@ class _SequenceGameState extends State<SequenceGame> {
       setState(() => _wrongTile = null);
       if (_mistakes >= 2 && !_rescue) {
         setState(() => _rescue = true);
+        _rescued.add(_q.id);
         await showLearningRescue(context, _q);
       }
     }
@@ -111,6 +113,7 @@ class _SequenceGameState extends State<SequenceGame> {
           total: _total,
           firstTryCorrect: _firstTry,
           struggledQuestionIds: _struggled,
+          rescuedQuestionIds: _rescued,
           durationSeconds: _stopwatch.elapsed.inSeconds,
         ),
       );

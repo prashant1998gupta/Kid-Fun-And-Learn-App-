@@ -62,7 +62,7 @@ guards, and educator-review checklist are in
 ```bash
 flutter pub get
 flutter run          # any connected device / simulator / Chrome
-flutter test         # full unit + widget suite (122 tests at last verification)
+flutter test         # full unit + widget suite (126 tests at last verification)
 flutter analyze      # lints
 ```
 

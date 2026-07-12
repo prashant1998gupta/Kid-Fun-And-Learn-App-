@@ -48,6 +48,7 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
   int _mistakes = 0;
   bool _rescue = false;
   final List<String> _struggled = [];
+  final List<String> _rescued = [];
   final _stopwatch = Stopwatch()..start();
 
   Question get _q => widget.lesson.questions[_index];
@@ -93,6 +94,7 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
       setState(() => _selected = null);
       if (_mistakes >= 2 && !_rescue) {
         setState(() => _rescue = true);
+        _rescued.add(_q.id);
         await showLearningRescue(context, _q);
       }
     }
@@ -108,6 +110,7 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
           total: _total,
           firstTryCorrect: _firstTryCorrect,
           struggledQuestionIds: _struggled,
+          rescuedQuestionIds: _rescued,
           durationSeconds: _stopwatch.elapsed.inSeconds,
         ),
       );

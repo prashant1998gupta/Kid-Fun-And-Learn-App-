@@ -156,6 +156,24 @@ question to two choices or highlight the next correct step. This behavior is
 shared by tap choice, listen-and-tap, boss battle, feed-the-pet, bubble pop,
 mole match, drag/sort, sequence and the 23 learning adventures.
 
+## Closed-loop recommendations and revision
+
+The mastery model now changes what the child is offered next:
+
+- **Smart Play Next** checks the next unlocked lesson and its prerequisites.
+  When a foundation is below 60% mastery, it recommends a short replay of that
+  prerequisite before advancing.
+- **Daily Smart Revision** builds a grade-safe five-question mission from one
+  subject: one familiar confidence question, three questions for the target
+  skill, and one gentle challenge no more than one unlocked step ahead.
+- Revision missions use the normal reward, teaching, rescue and persistence
+  flow; they do not bypass child-safety or grade filters.
+- The parent dashboard reports each observed skill as Mastered, Developing or
+  Needs help and explains how often the two-attempt learning rescue was used.
+
+The recommendation service is pure and offline-first, so its decisions are
+deterministic, testable and do not require sending child data to a server.
+
 ## Automated guardrails
 
 `test/curriculum_grade_fit_test.dart` now prevents regressions by checking:
@@ -165,6 +183,11 @@ mole match, drag/sort, sequence and the 23 learning adventures.
 - LCM, HCF, percentages and volume unlock only at the intended stage;
 - EVS/science pools are not identical across classes;
 - age-based session lengths remain intentional.
+
+`test/adaptive_learning_service_test.dart` verifies prerequisite routing,
+confidence-first revision structure, five-question mission size and
+parent-friendly mastery stages. Adaptive persistence tests also cover rescue
+counts and backward-compatible restoration.
 
 Existing audits continue to verify valid answer indexes, non-empty choices,
 unique visible options, complete engine data and no repeated question inside a
@@ -187,12 +210,13 @@ but it cannot certify a curriculum alone. Before store release:
    changes sharply from the previous level.
 6. Add a content manifest containing `skillId`, prerequisite, grade range,
    reading load, expected time, source/reviewer and review date.
-7. Add teach cards or worked examples before a new abstract concept. Feedback
-   after a wrong answer should explain the idea, not only reveal correctness.
+7. Expand the current teach cards into richer manipulatives for carrying,
+   borrowing, fractions, geometry and grammar.
 
 ## Recommended next implementation
 
-The next step is teacher-facing mastery reporting and prerequisite routing. The
-skill graph and mastery data now exist; the learning map should recommend a
-short prerequisite mission when mastery is below threshold and show parents
-which skills are secure, developing or repeatedly rescued.
+The next step is educator validation plus richer visual teaching tools. The
+engineering loop now recommends, teaches, rescues, revises and reports; subject
+experts should validate its skill prerequisites and worked explanations, while
+child playtests should verify that recommendations feel helpful rather than
+repetitive.

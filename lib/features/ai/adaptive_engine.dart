@@ -19,13 +19,16 @@ class SkillModel {
     Map<String, double>? skills,
     Map<String, double>? concepts,
     Map<String, int>? struggles,
+    Map<String, int>? rescues,
   })  : _skills = skills ?? {},
         _concepts = concepts ?? {},
-        _struggles = struggles ?? {};
+        _struggles = struggles ?? {},
+        _rescues = rescues ?? {};
 
   final Map<String, double> _skills; // key: "childId|subject"
   final Map<String, double> _concepts; // key: "childId|skillId"
   final Map<String, int> _struggles; // key: "childId|questionId"
+  final Map<String, int> _rescues; // key: "childId|skillId"
 
   static const _alpha = 0.35; // EMA responsiveness
 
@@ -37,6 +40,25 @@ class SkillModel {
 
   double conceptMastery(String childId, String skillId) =>
       _concepts['$childId|$skillId'] ?? 0.0;
+
+  Map<String, double> conceptMasteries(String childId) {
+    final prefix = '$childId|';
+    return {
+      for (final entry in _concepts.entries)
+        if (entry.key.startsWith(prefix))
+          entry.key.substring(prefix.length): entry.value,
+    };
+  }
+
+  int rescueCount(String childId, String skillId) =>
+      _rescues['$childId|$skillId'] ?? 0;
+
+  int totalRescues(String childId) {
+    final prefix = '$childId|';
+    return _rescues.entries
+        .where((entry) => entry.key.startsWith(prefix))
+        .fold(0, (sum, entry) => sum + entry.value);
+  }
 
   bool prerequisitesMet(String childId, List<String> prerequisiteSkillIds,
           {double threshold = 0.6}) =>
@@ -60,6 +82,15 @@ class SkillModel {
       final previous = _concepts[conceptKey] ?? 0.35;
       final observation = struggled.contains(question.id) ? 0.35 : 1.0;
       _concepts[conceptKey] = previous * (1 - _alpha) + observation * _alpha;
+    }
+    final questionsById = {
+      for (final question in result.lesson.questions) question.id: question,
+    };
+    for (final questionId in result.rescuedQuestionIds.toSet()) {
+      final skillId = questionsById[questionId]?.skillId;
+      if (skillId == null) continue;
+      final rescueKey = '$childId|$skillId';
+      _rescues[rescueKey] = (_rescues[rescueKey] ?? 0) + 1;
     }
   }
 
@@ -106,6 +137,7 @@ class SkillModel {
         'skills': _skills,
         'concepts': _concepts,
         'struggles': _struggles,
+        'rescues': _rescues,
       };
 
   factory SkillModel.fromMap(Map<String, dynamic> m) => SkillModel(
@@ -116,6 +148,9 @@ class SkillModel {
                 ?.map((k, v) => MapEntry(k as String, (v as num).toDouble())) ??
             {},
         struggles: (m['struggles'] as Map?)
+                ?.map((k, v) => MapEntry(k as String, (v as num).toInt())) ??
+            {},
+        rescues: (m['rescues'] as Map?)
                 ?.map((k, v) => MapEntry(k as String, (v as num).toInt())) ??
             {},
       );

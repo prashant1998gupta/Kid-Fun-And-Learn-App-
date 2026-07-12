@@ -14,6 +14,8 @@ import '../../core/widgets/bouncy_button.dart';
 import '../curriculum/data/curriculum_repository.dart';
 import '../curriculum/domain/lesson.dart';
 import '../curriculum/domain/subject.dart';
+import '../ai/adaptive_engine.dart';
+import '../ai/adaptive_learning_service.dart';
 import '../profiles/domain/grade_level.dart';
 import '../profiles/profiles_controller.dart';
 import '../progress/progress_controller.dart';
@@ -32,6 +34,7 @@ class LearningMapScreen extends ConsumerWidget {
     final repoAsync = ref.watch(curriculumLoadProvider);
     final child = ref.watch(activeChildProvider);
     final progress = ref.watch(progressControllerProvider);
+    final adaptive = ref.watch(adaptiveControllerProvider);
 
     return Scaffold(
       body: AnimatedBackground(
@@ -43,9 +46,28 @@ class LearningMapScreen extends ConsumerWidget {
             data: (repo) {
               if (child == null) return const SizedBox.shrink();
               final lessons = _orderedLessons(repo, child.grade);
+              const learningService = AdaptiveLearningService();
+              final recommendation = learningService.recommend(
+                childId: child.id,
+                orderedLessons: lessons,
+                progress: progress,
+                model: adaptive,
+              );
+              final revision = learningService.buildRevision(
+                childId: child.id,
+                orderedLessons: lessons,
+                progress: progress,
+                model: adaptive,
+              );
               return Column(
                 children: [
                   _TopBar(subject: subject),
+                  if (recommendation != null)
+                    _SmartNextCard(
+                      recommendation: recommendation,
+                      revision: revision,
+                      color: subject.color,
+                    ),
                   Expanded(
                     child: lessons.isEmpty
                         ? const Center(
@@ -82,6 +104,96 @@ class LearningMapScreen extends ConsumerWidget {
         Subject.logic => WorldTheme.night,
         Subject.rhymes => WorldTheme.candy,
       };
+}
+
+class _SmartNextCard extends StatelessWidget {
+  const _SmartNextCard({
+    required this.recommendation,
+    required this.revision,
+    required this.color,
+  });
+
+  final LearningRecommendation recommendation;
+  final SmartRevisionPlan? revision;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final stage = conceptStage(recommendation.mastery);
+    return Container(
+      key: const ValueKey('smart-play-next'),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(color: Color(0x33000000), blurRadius: 12),
+        ],
+      ),
+      child: Row(
+        children: [
+          Text(recommendation.foundation ? '🧱' : '✨',
+              style: const TextStyle(fontSize: 40)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  recommendation.foundation
+                      ? 'Build a foundation first'
+                      : 'Smart Play Next',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: AppColors.lightText),
+                ),
+                Text(
+                  '${skillLabel(recommendation.skillId)} • ${stage.label}',
+                  style: TextStyle(color: color, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  recommendation.reason,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: AppColors.lightTextSoft),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    FilledButton.icon(
+                      key: const ValueKey('play-recommended-lesson'),
+                      style: FilledButton.styleFrom(backgroundColor: color),
+                      onPressed: () => context.push(
+                        AppRoutes.game,
+                        extra: recommendation.lesson,
+                      ),
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      label: const Text('Play Next'),
+                    ),
+                    if (revision != null)
+                      OutlinedButton.icon(
+                        key: const ValueKey('play-smart-revision'),
+                        onPressed: () => context.push(
+                          AppRoutes.game,
+                          extra: revision!.lesson,
+                        ),
+                        icon: const Icon(Icons.auto_fix_high_rounded),
+                        label: const Text('5-Step Revision'),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _TopBar extends StatelessWidget {

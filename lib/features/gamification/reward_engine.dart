@@ -10,6 +10,7 @@ class LessonResult {
     required this.total,
     required this.firstTryCorrect,
     this.struggledQuestionIds = const [],
+    this.rescuedQuestionIds = const [],
     this.durationSeconds = 0,
   });
 
@@ -18,6 +19,7 @@ class LessonResult {
   final int total;
   final int firstTryCorrect;
   final List<String> struggledQuestionIds;
+  final List<String> rescuedQuestionIds;
   final int durationSeconds;
 
   double get accuracy => total == 0 ? 0 : correct / total;

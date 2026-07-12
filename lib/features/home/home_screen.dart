@@ -15,12 +15,15 @@ import '../../core/widgets/lottie_view.dart';
 import '../../core/widgets/mascot.dart';
 import '../../l10n/app_localizations.dart';
 import '../collections/domain/collectible.dart';
+import '../ai/adaptive_engine.dart';
+import '../ai/adaptive_learning_service.dart';
 import '../curriculum/data/curriculum_repository.dart';
 import '../curriculum/domain/subject.dart';
 import '../mini_games/data/mini_pet.dart';
 import '../profiles/domain/child_profile.dart';
 import '../profiles/profiles_controller.dart';
 import '../profiles/widgets/avatar_view.dart';
+import '../progress/progress_controller.dart';
 import '../rewards/daily_reward_controller.dart';
 import '../rewards/daily_reward_sheet.dart';
 import '../spin/lucky_spin_controller.dart';
@@ -69,8 +72,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 SliverToBoxAdapter(child: _TopBar(child: child)),
                 SliverToBoxAdapter(child: _Greeting(child: child)),
                 SliverToBoxAdapter(child: _WorldInvitation(child: child)),
-                if (!child.grade.isPreSchool)
-                  SliverToBoxAdapter(child: _DailyMission()),
+                SliverToBoxAdapter(
+                  child: curriculumAsync.when(
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                    data: (repo) => _DailyMission(repo: repo),
+                  ),
+                ),
                 SliverToBoxAdapter(
                   child: _QuickActions(preschool: child.grade.isPreSchool),
                 ),
@@ -242,9 +250,35 @@ class _Greeting extends StatelessWidget {
   }
 }
 
-class _DailyMission extends StatelessWidget {
+class _DailyMission extends ConsumerWidget {
+  const _DailyMission({required this.repo});
+  final CurriculumRepository repo;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final child = ref.watch(activeChildProvider)!;
+    final model = ref.watch(adaptiveControllerProvider);
+    final progress = ref.watch(progressControllerProvider);
+    final subjects = repo.subjectsForGrade(child.grade).toList()
+      ..sort((a, b) =>
+          model.skillFor(child.id, a).compareTo(model.skillFor(child.id, b)));
+    const service = AdaptiveLearningService();
+    SmartRevisionPlan? plan;
+    for (final subject in subjects) {
+      final lessons = [
+        for (final unit in repo.unitsForGradeSubject(child.grade, subject))
+          ...repo.lessonsForUnit(unit),
+      ];
+      plan = service.buildRevision(
+        childId: child.id,
+        orderedLessons: lessons,
+        progress: progress,
+        model: model,
+      );
+      if (plan != null) break;
+    }
+    if (plan == null) return const SizedBox.shrink();
+    final revision = plan;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Container(
@@ -271,22 +305,28 @@ class _DailyMission extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Today's Mission",
+                    "Today's Smart Revision",
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge
                         ?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Complete 3 games to earn a treasure chest!',
-                    style: TextStyle(color: Colors.white70, fontSize: 15),
+                  Text(
+                    '${skillLabel(revision.focusSkillId)} • 5 confidence-building steps',
+                    style: const TextStyle(color: Colors.white70, fontSize: 15),
                   ),
                   const SizedBox(height: 10),
-                  const ProgressBarKid(
-                    progress: 0.33,
-                    color: Colors.white,
-                    height: 14,
+                  FilledButton.icon(
+                    key: const ValueKey('home-smart-revision'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                    ),
+                    onPressed: () =>
+                        context.push(AppRoutes.game, extra: revision.lesson),
+                    icon: const Icon(Icons.auto_fix_high_rounded),
+                    label: const Text('Start 5-Step Mission'),
                   ),
                 ],
               ),
@@ -346,46 +386,46 @@ class _WorldInvitation extends StatelessWidget {
             ],
           ),
           child: Row(
-              children: [
-                Text(pet?.emoji ?? growingPet.emoji,
-                        style: TextStyle(
-                            fontSize: child.grade.isPreSchool ? 82 : 68))
-                    .animate(onPlay: (c) => c.repeat(reverse: true))
-                    .moveY(begin: 0, end: -6, duration: 1100.ms),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Enter My World',
-                        style: TextStyle(
-                          color: AppColors.lightText,
-                          fontSize: child.grade.isPreSchool ? 25 : 21,
-                          fontWeight: FontWeight.w900,
-                        ),
+            children: [
+              Text(pet?.emoji ?? growingPet.emoji,
+                      style: TextStyle(
+                          fontSize: child.grade.isPreSchool ? 82 : 68))
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .moveY(begin: 0, end: -6, duration: 1100.ms),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Enter My World',
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontSize: child.grade.isPreSchool ? 25 : 21,
+                        fontWeight: FontWeight.w900,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        child.companionMemory,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.lightText,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      child.companionMemory,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.w700,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const Icon(Icons.arrow_forward_rounded,
-                    color: AppColors.lightText, size: 34),
-              ],
-            ),
+              ),
+              const Icon(Icons.arrow_forward_rounded,
+                  color: AppColors.lightText, size: 34),
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
 
