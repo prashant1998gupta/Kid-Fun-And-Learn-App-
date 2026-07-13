@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kidverse/core/widgets/celebration_overlay.dart';
 import 'package:kidverse/core/widgets/kid_experience_layer.dart';
+import 'package:kidverse/core/widgets/mascot.dart';
 
 void main() {
   testWidgets('Wonder Touch responds briefly without blocking child input',
@@ -77,5 +78,23 @@ void main() {
     expect(find.text('⭐'), findsOneWidget);
     expect(find.text('You did it!'), findsOneWidget);
     await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('mascot breathing is static when reduced motion is enabled',
+      (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: Center(child: MascotView()),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+    expect(find.byType(MascotView), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

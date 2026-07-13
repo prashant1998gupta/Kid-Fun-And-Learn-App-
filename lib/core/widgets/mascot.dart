@@ -51,7 +51,7 @@ class _MascotViewState extends State<MascotView> with TickerProviderStateMixin {
   late final AnimationController _breath = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2400),
-  )..repeat(reverse: true);
+  );
 
   late final AnimationController _bounce = AnimationController(
     vsync: this,
@@ -67,6 +67,15 @@ class _MascotViewState extends State<MascotView> with TickerProviderStateMixin {
     Mascot.penguin: '🐧',
   };
 
+  bool get _reducedMotion =>
+      MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBreathingAnimation();
+  }
+
   @override
   void dispose() {
     _breath.dispose();
@@ -74,14 +83,26 @@ class _MascotViewState extends State<MascotView> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  void _syncBreathingAnimation() {
+    final shouldBreathe = !_reducedMotion;
+    if (shouldBreathe && !_breath.isAnimating) {
+      _breath.repeat(reverse: true);
+    } else if (!shouldBreathe && _breath.isAnimating) {
+      _breath.stop();
+    }
+  }
+
   void _handleTap() {
-    _bounce.forward(from: 0);
+    if (!_reducedMotion) {
+      _bounce.forward(from: 0);
+    }
     AudioService.instance.playSfx(Sfx.pop);
     widget.onTap?.call();
   }
 
   @override
   Widget build(BuildContext context) {
+    final reducedMotion = _reducedMotion;
     final breathe = Tween<double>(begin: 0.98, end: 1.03)
         .chain(CurveTween(curve: Curves.easeInOut))
         .animate(_breath);
@@ -94,8 +115,11 @@ class _MascotViewState extends State<MascotView> with TickerProviderStateMixin {
       child: AnimatedBuilder(
         animation: Listenable.merge([_breath, _bounce]),
         builder: (context, child) => Transform.translate(
-          offset: Offset(0, bounce.value),
-          child: Transform.scale(scale: breathe.value, child: child),
+          offset: reducedMotion ? Offset.zero : Offset(0, bounce.value),
+          child: Transform.scale(
+            scale: reducedMotion ? 1 : breathe.value,
+            child: child,
+          ),
         ),
         child: _art(),
       ),
