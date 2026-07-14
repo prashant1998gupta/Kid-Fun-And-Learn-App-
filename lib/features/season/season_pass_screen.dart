@@ -30,34 +30,56 @@ class SeasonPassScreen extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
-                child: Row(
-                  children: [
-                    BouncyButton(
-                      onTap: () => Navigator.of(context).maybePop(),
-                      child: const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.arrow_back_rounded,
-                          color: AppColors.primary,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compact = constraints.maxWidth < 360;
+                    return Row(
+                      children: [
+                        BouncyButton(
+                          onTap: () => Navigator.of(context).maybePop(),
+                          child: CircleAvatar(
+                            radius: compact ? 18 : 20,
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.arrow_back_rounded,
+                              color: AppColors.primary,
+                              size: compact ? 22 : 24,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        SeasonPass.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(color: Colors.white),
-                      ),
-                    ),
-                    Text('✨ $xp XP',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18)),
-                  ],
+                        SizedBox(width: compact ? 8 : 12),
+                        Expanded(
+                          child: Text(
+                            SeasonPass.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: (compact
+                                    ? Theme.of(context).textTheme.titleLarge
+                                    : Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium)
+                                ?.copyWith(color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              '✨ $xp XP',
+                              maxLines: 1,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: compact ? 15 : 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               Padding(
@@ -154,53 +176,86 @@ class _TierCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final canEquip = tier.rewardKind == SeasonRewardKind.theme ||
         tier.rewardKind == SeasonRewardKind.pet;
-    return Container(
-      padding: AppSpacing.cardPadding,
-      decoration: BoxDecoration(
-        color: unlocked ? Colors.white : Colors.white.withValues(alpha: 0.18),
-        borderRadius: AppSpacing.cardRadius,
-        border: Border.all(color: Colors.white54, width: 2),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: unlocked ? AppColors.primary : Colors.white24,
-            child: Text('${tier.level}',
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w900)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return Container(
+          padding: compact ? const EdgeInsets.all(14) : AppSpacing.cardPadding,
+          decoration: BoxDecoration(
+            color:
+                unlocked ? Colors.white : Colors.white.withValues(alpha: 0.18),
+            borderRadius: AppSpacing.cardRadius,
+            border: Border.all(color: Colors.white54, width: 2),
           ),
-          const SizedBox(width: 14),
-          Text(tier.emoji, style: const TextStyle(fontSize: 38)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(tier.title,
-                    style: TextStyle(
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: compact ? 22 : 26,
+                backgroundColor: unlocked ? AppColors.primary : Colors.white24,
+                child: Text(
+                  '${tier.level}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              SizedBox(width: compact ? 10 : 14),
+              Text(tier.emoji, style: TextStyle(fontSize: compact ? 32 : 38)),
+              SizedBox(width: compact ? 9 : 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tier.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
                         color: unlocked ? AppColors.lightText : Colors.white,
                         fontWeight: FontWeight.w800,
-                        fontSize: 17)),
-                Text('${tier.requiredXp} XP',
-                    style: TextStyle(
-                        color: unlocked
-                            ? AppColors.lightTextSoft
-                            : Colors.white70)),
-              ],
-            ),
+                        fontSize: compact ? 15 : 17,
+                      ),
+                    ),
+                    Text(
+                      '${tier.requiredXp} XP',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color:
+                            unlocked ? AppColors.lightTextSoft : Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: compact ? 6 : 8),
+              if (!unlocked)
+                Icon(
+                  Icons.lock_rounded,
+                  color: Colors.white70,
+                  size: compact ? 22 : 24,
+                )
+              else if (canEquip)
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: TextButton(
+                      onPressed: equipped ? null : onEquip,
+                      child: Text(equipped ? 'Equipped' : 'Equip'),
+                    ),
+                  ),
+                )
+              else if (tier.hasCosmetic)
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.success,
+                  size: compact ? 22 : 24,
+                ),
+            ],
           ),
-          if (!unlocked)
-            const Icon(Icons.lock_rounded, color: Colors.white70)
-          else if (canEquip)
-            TextButton(
-              onPressed: equipped ? null : onEquip,
-              child: Text(equipped ? 'Equipped' : 'Equip'),
-            )
-          else if (tier.hasCosmetic)
-            const Icon(Icons.check_circle_rounded, color: AppColors.success),
-        ],
-      ),
+        );
+      },
     );
   }
 }

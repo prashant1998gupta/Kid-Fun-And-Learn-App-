@@ -89,16 +89,19 @@ class _AdventureIntroState extends State<AdventureIntro> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 || media.textScaler.scale(1) > 1.2;
+
     return Scaffold(
       body: AnimatedBackground(
         theme: WorldTheme.night,
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(28),
+              padding: EdgeInsets.all(compact ? 18 : 28),
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 520),
-                padding: const EdgeInsets.all(28),
+                padding: EdgeInsets.all(compact ? 18 : 28),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(32),
@@ -110,7 +113,7 @@ class _AdventureIntroState extends State<AdventureIntro> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(widget.mission.emoji,
-                        style: const TextStyle(fontSize: 92)),
+                        style: TextStyle(fontSize: compact ? 70 : 92)),
                     const Text('YOUR MISSION',
                         style: TextStyle(
                             color: AppColors.primary,
@@ -125,9 +128,9 @@ class _AdventureIntroState extends State<AdventureIntro> {
                     const SizedBox(height: 12),
                     Text(widget.mission.story,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.lightText,
-                            fontSize: 18,
+                            fontSize: compact ? 16 : 18,
                             height: 1.35,
                             fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
@@ -145,9 +148,10 @@ class _AdventureIntroState extends State<AdventureIntro> {
                       ),
                       child: Text(
                         '${widget.supportStage.emoji} ${widget.supportStage.label}',
-                        style: const TextStyle(
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
                             color: AppColors.primary,
-                            fontSize: 17,
+                            fontSize: compact ? 15 : 17,
                             fontWeight: FontWeight.w900),
                       ),
                     ),
@@ -170,9 +174,9 @@ class _AdventureIntroState extends State<AdventureIntro> {
                           const SizedBox(height: 6),
                           Text(widget.teachingTip,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: AppColors.lightText,
-                                  fontSize: 16,
+                                  fontSize: compact ? 14 : 16,
                                   height: 1.35,
                                   fontWeight: FontWeight.w700)),
                           if (widget.foundationNote != null) ...[
@@ -190,24 +194,31 @@ class _AdventureIntroState extends State<AdventureIntro> {
                     BouncyButton(
                       onTap: widget.onStart,
                       child: Container(
-                        width: 260,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        constraints: const BoxConstraints(maxWidth: 260),
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: compact ? 14 : 16,
+                        ),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: AppColors.success,
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        child: Text(
-                            widget.supportStage == LearningSupportStage.watch
-                                ? 'Show me first! 👀'
-                                : widget.supportStage ==
-                                        LearningSupportStage.together
-                                    ? 'Let’s do it together! 🤝'
-                                    : 'My turn! 🌟',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 21,
-                                fontWeight: FontWeight.w900)),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                              widget.supportStage == LearningSupportStage.watch
+                                  ? 'Show me first! 👀'
+                                  : widget.supportStage ==
+                                          LearningSupportStage.together
+                                      ? 'Let’s do it together! 🤝'
+                                      : 'My turn! 🌟',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: compact ? 18 : 21,
+                                  fontWeight: FontWeight.w900)),
+                        ),
                       ),
                     ),
                   ],

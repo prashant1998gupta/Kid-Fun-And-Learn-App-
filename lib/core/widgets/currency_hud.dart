@@ -41,36 +41,52 @@ class CurrencyChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label: '${label ?? ''} $value',
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.25),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final constrained = constraints.hasBoundedWidth;
+          final compact = constrained && constraints.maxWidth < 120;
+          final number = _RollingNumber(value: value, color: color);
+          return Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? AppSpacing.sm : AppSpacing.md,
+              vertical: AppSpacing.sm,
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 26)
-                .animate(onPlay: (c) => c.repeat(reverse: true))
-                .scale(
-                  duration: 1600.ms,
-                  begin: const Offset(1, 1),
-                  end: const Offset(1.12, 1.12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-            const SizedBox(width: AppSpacing.xs),
-            _RollingNumber(value: value, color: color),
-          ],
-        ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: compact ? 22 : 26)
+                    .animate(onPlay: (c) => c.repeat(reverse: true))
+                    .scale(
+                      duration: 1600.ms,
+                      begin: const Offset(1, 1),
+                      end: const Offset(1.12, 1.12),
+                    ),
+                const SizedBox(width: AppSpacing.xs),
+                if (constrained)
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: number,
+                    ),
+                  )
+                else
+                  number,
+              ],
+            ),
+          );
+        },
       ),
     );
   }

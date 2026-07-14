@@ -327,20 +327,34 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
         child: AnimatedBackground(
           theme: WorldTheme.space,
           child: SafeArea(
-            child: Column(
-              children: [
-                _topBar(),
-                MascotMessage(message: _message),
-                StoryGoalCard(
-                  emoji: '💧🌸',
-                  goal: 'Fix the water path so the flowers bloom!',
-                  progress:
-                      _pathTileCount == 0 ? 0 : _alignedCount / _pathTileCount,
-                  progressColor: const Color(0xFF00CEC9),
-                ),
-                const SizedBox(height: 6),
-                if (_won) _winScreen() else _gridArea(),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact =
+                    constraints.maxHeight < 620 || constraints.maxWidth < 340;
+                return Column(
+                  children: [
+                    _topBar(compact: compact),
+                    if (compact)
+                      _compactGoal()
+                    else ...[
+                      MascotMessage(message: _message),
+                      StoryGoalCard(
+                        emoji: '💧🌸',
+                        goal: 'Fix the water path so the flowers bloom!',
+                        progress: _pathTileCount == 0
+                            ? 0
+                            : _alignedCount / _pathTileCount,
+                        progressColor: const Color(0xFF00CEC9),
+                      ),
+                    ],
+                    SizedBox(height: compact ? 3 : 6),
+                    if (_won)
+                      _winScreen(compact: compact)
+                    else
+                      _gridArea(compact: compact),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -348,9 +362,9 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     );
   }
 
-  Widget _topBar() {
+  Widget _topBar({required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 6 : AppSpacing.sm),
       child: Row(
         children: [
           GameCircleButton(
@@ -395,13 +409,52 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     );
   }
 
-  Widget _gridArea() {
+  Widget _compactGoal() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Text('💧', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 6),
+          const Expanded(
+            child: Text(
+              'Fix the path so flowers bloom!',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.lightText,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: _pathTileCount == 0 ? 0 : _alignedCount / _pathTileCount,
+              minHeight: 5,
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFF00CEC9),
+              backgroundColor: Colors.black.withValues(alpha: 0.08),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gridArea({required bool compact}) {
     return Expanded(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final availableWidth = constraints.maxWidth - 20;
           final tileSize = math.min(
-            54.0,
+            compact ? 45.0 : 54.0,
             availableWidth / (_gridSize * 1.5 - 0.5),
           );
           final boardWidth = tileSize * (_gridSize * 1.5 - 0.5);
@@ -420,15 +473,17 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
                   const SizedBox(height: 6),
                   PlayerTurnBadge(player: _currentPlayer),
                 ],
-                const SizedBox(height: 8),
+                SizedBox(height: compact ? 4 : 8),
                 Text(
                   'Level $_level  •  Moves $_moves  •  Best path $_optimalMoves',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: compact ? 6 : 10),
                 SizedBox(
                   width: boardWidth,
                   height: boardHeight,
@@ -511,19 +566,20 @@ class _InfinityLoopGameState extends ConsumerState<InfinityLoopGame> {
     );
   }
 
-  Widget _winScreen() {
+  Widget _winScreen({required bool compact}) {
     return Expanded(
       child: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('⭐' * _starCount, style: const TextStyle(fontSize: 48)),
-              const Text(
+              Text('⭐' * _starCount,
+                  style: TextStyle(fontSize: compact ? 36 : 48)),
+              Text(
                 'Perfect Loop!',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 28,
+                  fontSize: compact ? 23 : 28,
                   fontWeight: FontWeight.w900,
                 ),
               ),

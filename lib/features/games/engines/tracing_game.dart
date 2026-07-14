@@ -173,102 +173,121 @@ class _TracingGameState extends State<TracingGame> {
         body: AnimatedBackground(
           theme: WorldTheme.candy,
           child: SafeArea(
-            child: Column(
-              children: [
-                _header(context),
-                const SizedBox(height: 4),
-                Text(
-                  'Trace the ${_glyph.toUpperCase()}',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        _canvas =
-                            Size(constraints.maxWidth, constraints.maxHeight);
-                        // Compute the glyph bounding box for hit-testing.
-                        final tp = TextPainter(
-                          text: TextSpan(
-                            text: _glyph.toUpperCase(),
-                            style: TextStyle(
-                              fontSize: _canvas.height * 0.72,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          textDirection: TextDirection.ltr,
-                        )..layout();
-                        _glyphRect = Rect.fromLTWH(
-                          (_canvas.width - tp.width) / 2,
-                          (_canvas.height - tp.height) / 2,
-                          tp.width,
-                          tp.height,
-                        );
-                        return GestureDetector(
-                          onPanStart: (d) => _startStroke(d.localPosition),
-                          onPanUpdate: (d) => _extend(d.localPosition),
-                          onPanEnd: (_) => _checkComplete(),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.92),
-                              borderRadius: AppSpacing.cardRadius,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 8),
+            child: LayoutBuilder(
+              builder: (context, outer) {
+                final compact = outer.maxHeight < 620;
+                return Column(
+                  children: [
+                    _header(context),
+                    SizedBox(height: compact ? 2 : 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Trace the ${_glyph.toUpperCase()}',
+                          maxLines: 1,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: compact ? 4 : 8),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(
+                            compact ? AppSpacing.md : AppSpacing.lg),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            _canvas = Size(
+                              constraints.maxWidth,
+                              constraints.maxHeight,
+                            );
+                            // Compute the glyph bounding box for hit-testing.
+                            final tp = TextPainter(
+                              text: TextSpan(
+                                text: _glyph.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: _canvas.height * 0.72,
+                                  fontWeight: FontWeight.w900,
                                 ),
-                              ],
-                            ),
-                            child: CustomPaint(
-                              painter: _TracePainter(
-                                glyph: _glyph,
-                                strokes: _strokes,
-                                revision: _inkPoints,
-                                done: _done,
                               ),
-                              child: const SizedBox.expand(),
-                            ),
+                              textDirection: TextDirection.ltr,
+                            )..layout();
+                            _glyphRect = Rect.fromLTWH(
+                              (_canvas.width - tp.width) / 2,
+                              (_canvas.height - tp.height) / 2,
+                              tp.width,
+                              tp.height,
+                            );
+                            return GestureDetector(
+                              onPanStart: (d) => _startStroke(d.localPosition),
+                              onPanUpdate: (d) => _extend(d.localPosition),
+                              onPanEnd: (_) => _checkComplete(),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.92),
+                                  borderRadius: AppSpacing.cardRadius,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.1),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: CustomPaint(
+                                  painter: _TracePainter(
+                                    glyph: _glyph,
+                                    strokes: _strokes,
+                                    revision: _inkPoints,
+                                    done: _done,
+                                  ),
+                                  child: const SizedBox.expand(),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(
+                          compact ? AppSpacing.sm : AppSpacing.md),
+                      child: BouncyButton(
+                        onTap: _clear,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: compact ? 18 : 24,
+                            vertical: compact ? 9 : 12,
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: BouncyButton(
-                    onTap: _clear,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(AppSpacing.radiusPill),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.refresh_rounded, color: AppColors.primary),
-                          SizedBox(width: 6),
-                          Text('Clear',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.lightText,
-                              )),
-                        ],
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.all(AppSpacing.radiusPill),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.refresh_rounded,
+                                  color: AppColors.primary),
+                              SizedBox(width: 6),
+                              Text('Clear',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.lightText,
+                                  )),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
         ),

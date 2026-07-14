@@ -135,16 +135,21 @@ class _FeedPetGameState extends State<FeedPetGame> {
           theme: WorldTheme.sunrise,
           particleCount: 14,
           child: SafeArea(
-            child: Column(
-              children: [
-                _header(context),
-                const SizedBox(height: 8),
-                _prompt(context),
-                const SizedBox(height: 10),
-                _PetStage(happy: _petHappy),
-                const SizedBox(height: 8),
-                Expanded(child: _foodTray(context)),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxHeight < 620;
+                return Column(
+                  children: [
+                    _header(context),
+                    SizedBox(height: compact ? 4 : 8),
+                    _prompt(context, compact: compact),
+                    SizedBox(height: compact ? 6 : 10),
+                    _PetStage(happy: _petHappy, compact: compact),
+                    SizedBox(height: compact ? 4 : 8),
+                    Expanded(child: _foodTray(context, compact: compact)),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -184,12 +189,15 @@ class _FeedPetGameState extends State<FeedPetGame> {
     );
   }
 
-  Widget _prompt(BuildContext context) {
+  Widget _prompt(BuildContext context, {required bool compact}) {
     return BouncyButton(
       onTap: _speak,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 14 : 18,
+          vertical: compact ? 9 : 12,
+        ),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(AppSpacing.radiusPill),
@@ -197,17 +205,19 @@ class _FeedPetGameState extends State<FeedPetGame> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.volume_up_rounded,
-                color: AppColors.primary, size: 30),
+            Icon(Icons.volume_up_rounded,
+                color: AppColors.primary, size: compact ? 24 : 30),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 _question.prompt,
+                maxLines: compact ? 2 : 3,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(color: AppColors.lightText),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.lightText,
+                      fontSize: compact ? 18 : null,
+                    ),
               ),
             ),
           ],
@@ -216,89 +226,100 @@ class _FeedPetGameState extends State<FeedPetGame> {
     );
   }
 
-  Widget _foodTray(BuildContext context) {
+  Widget _foodTray(BuildContext context, {required bool compact}) {
     final optionIndexes = rescueOptionIndexes(
       _question,
       rescue: _rescue || LearningSupportScope.stageOf(context).guidedChoices,
     );
-    return GridView.builder(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 180,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 0.95,
-      ),
-      itemCount: optionIndexes.length,
-      itemBuilder: (context, index) {
-        final originalIndex = optionIndexes[index];
-        final option = _question.options[originalIndex];
-        final selected = _selected == originalIndex;
-        final correct = originalIndex == _question.correctIndex;
-        final bg = !selected
-            ? Colors.white
-            : correct
-                ? AppColors.success
-                : AppColors.error;
-        Widget card = BouncyButton(
-          key: ValueKey('feed-$originalIndex'),
-          borderRadius: AppSpacing.cardRadius,
-          onTap: () => _choose(originalIndex),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: AppSpacing.cardRadius,
-              border: Border.all(color: Colors.white, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.16),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IllustratedObjectView(
-                  label: option.label,
-                  emoji: option.emoji,
-                  size: 82,
-                  selected: selected,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  option.label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: selected ? Colors.white : AppColors.lightText,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18,
-                  ),
-                ),
-              ],
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final shortTray = constraints.maxHeight < 250;
+        return GridView.builder(
+          padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: compact ? 155 : 180,
+            mainAxisSpacing: compact ? AppSpacing.sm : AppSpacing.md,
+            crossAxisSpacing: compact ? AppSpacing.sm : AppSpacing.md,
+            childAspectRatio: shortTray ? 1.14 : 0.95,
           ),
+          itemCount: optionIndexes.length,
+          itemBuilder: (context, index) {
+            final originalIndex = optionIndexes[index];
+            final option = _question.options[originalIndex];
+            final selected = _selected == originalIndex;
+            final correct = originalIndex == _question.correctIndex;
+            final bg = !selected
+                ? Colors.white
+                : correct
+                    ? AppColors.success
+                    : AppColors.error;
+            Widget card = BouncyButton(
+              key: ValueKey('feed-$originalIndex'),
+              borderRadius: AppSpacing.cardRadius,
+              onTap: () => _choose(originalIndex),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: AppSpacing.cardRadius,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.16),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IllustratedObjectView(
+                      label: option.label,
+                      emoji: option.emoji,
+                      size: compact ? 60 : 82,
+                      selected: selected,
+                    ),
+                    SizedBox(height: compact ? 4 : 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        option.label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: selected ? Colors.white : AppColors.lightText,
+                          fontWeight: FontWeight.w900,
+                          fontSize: compact ? 15 : 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+            if (selected && !correct) {
+              card = card.animate().shake(
+                    hz: 6,
+                    offset: const Offset(12, 0),
+                    rotation: 0.05,
+                    duration: 450.ms,
+                  );
+            }
+            return card;
+          },
         );
-        if (selected && !correct) {
-          card = card.animate().shake(
-                hz: 6,
-                offset: const Offset(12, 0),
-                rotation: 0.05,
-                duration: 450.ms,
-              );
-        }
-        return card;
       },
     );
   }
 }
 
 class _PetStage extends StatelessWidget {
-  const _PetStage({required this.happy});
+  const _PetStage({required this.happy, required this.compact});
 
   final bool happy;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -307,8 +328,8 @@ class _PetStage extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         Container(
-          width: 190,
-          height: 116,
+          width: compact ? 142 : 190,
+          height: compact ? 86 : 116,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.9),
             borderRadius: AppSpacing.cardRadius,
@@ -325,14 +346,14 @@ class _PetStage extends StatelessWidget {
           top: -18,
           child: IllustratedObjectView(
             label: happy ? 'Happy puppy' : 'Puppy',
-            size: 108,
+            size: compact ? 76 : 108,
           ),
         ),
         Positioned(
-          bottom: 10,
+          bottom: compact ? 7 : 10,
           child: Container(
-            width: 78,
-            height: 28,
+            width: compact ? 58 : 78,
+            height: compact ? 20 : 28,
             decoration: BoxDecoration(
               color: AppColors.secondary,
               borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
@@ -341,17 +362,17 @@ class _PetStage extends StatelessWidget {
           ),
         ),
         if (happy)
-          const Positioned(
-            right: 18,
-            top: 8,
-            child: Text('❤', style: TextStyle(fontSize: 34)),
+          Positioned(
+            right: compact ? 12 : 18,
+            top: compact ? 4 : 8,
+            child: Text('❤', style: TextStyle(fontSize: compact ? 24 : 34)),
           ).animate().scale(curve: Curves.elasticOut).moveY(begin: 8, end: -4),
       ],
     );
     return Column(
       children: [
-        const MascotView(mascot: Mascot.panda, size: 64),
-        const SizedBox(height: 4),
+        MascotView(mascot: Mascot.panda, size: compact ? 42 : 64),
+        SizedBox(height: compact ? 2 : 4),
         happy
             ? pet.animate(key: const ValueKey('happy_pet')).shake(
                   hz: 3,

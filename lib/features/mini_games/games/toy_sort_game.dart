@@ -201,22 +201,62 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
         child: AnimatedBackground(
           theme: WorldTheme.candy,
           child: SafeArea(
-            child: Column(
-              children: [
-                _topBar(),
-                MascotMessage(message: _message, icon: '🐧'),
-                const SizedBox(height: 6),
-                StoryGoalCard(
-                  emoji: '🧸',
-                  goal: 'Level $_level/50 • ${_pack.title}',
-                  progress: _complete ? 1 : _round / _goal,
-                  progressColor: const Color(0xFFFF7043),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: _complete ? _completionCard() : _playArea(),
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final textScale = MediaQuery.textScalerOf(context).scale(1);
+                final compact = constraints.maxHeight < 620 ||
+                    constraints.maxWidth < 360 ||
+                    textScale > 1.25;
+                return Column(
+                  children: [
+                    _topBar(compact: compact),
+                    if (compact)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            '🐧 $_message',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      MascotMessage(message: _message, icon: '🐧'),
+                    SizedBox(height: compact ? 3 : 6),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 12 : 0,
+                      ),
+                      child: StoryGoalCard(
+                        emoji: '🧸',
+                        goal: 'Level $_level/50 • ${_pack.title}',
+                        progress: _complete ? 1 : _round / _goal,
+                        progressColor: const Color(0xFFFF7043),
+                      ),
+                    ),
+                    SizedBox(height: compact ? 4 : 8),
+                    Expanded(
+                      child: _complete ? _completionCard() : _playArea(),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -224,9 +264,9 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
     );
   }
 
-  Widget _topBar() {
+  Widget _topBar({bool compact = false}) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 6 : AppSpacing.sm),
       child: Row(
         children: [
           GameCircleButton(
@@ -234,12 +274,12 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
             tooltip: 'Close game',
             onTap: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(width: 10),
-          const Expanded(
+          SizedBox(width: compact ? 6 : 10),
+          Expanded(
             child: Text('🧸 Toy Sort',
                 style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: compact ? 18 : 20,
                     fontWeight: FontWeight.w900)),
           ),
           if (_coOp)
@@ -257,13 +297,13 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
           if (_coOp) const SizedBox(width: 6),
           Text(
             '⭐ $_score',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 17,
+              fontSize: compact ? 15 : 17,
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: compact ? 5 : 8),
           GameCircleButton(
             icon: Icons.volume_up_rounded,
             tooltip: 'Hear the question',
@@ -277,79 +317,106 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
   Widget _playArea() {
     final groups = _level <= 8 ? _pack.groups.take(2).toList() : _pack.groups;
     return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              if (_teachPip)
-                Container(
-                  key: ValueKey('teach-$_round'),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3CD),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Text(
-                    '🐧 Pip says: "Maybe ${_wrongGuess().label}?"  Teach Pip!',
-                    style: const TextStyle(
-                      color: Color(0xFF5D4037),
-                      fontWeight: FontWeight.w900,
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final compact = constraints.maxHeight < 360 ||
+            constraints.maxWidth < 360 ||
+            textScale > 1.25;
+        final toySize = compact ? 90.0 : 112.0;
+        final basketHeight = compact ? 98.0 : 116.0;
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, compact ? 12 : 18),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                if (_teachPip)
+                  Container(
+                    key: ValueKey('teach-$_round'),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF3CD),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      '🐧 Pip says: "Maybe ${_wrongGuess().label}?"  Teach Pip!',
+                      maxLines: compact ? 1 : 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: const Color(0xFF5D4037),
+                        fontSize: compact ? 12 : null,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-                ),
-              const SizedBox(height: 6),
-              Text(
-                _item.prompt,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 21,
-                  fontWeight: FontWeight.w900,
-                  shadows: [Shadow(color: Color(0x55000000), blurRadius: 4)],
-                ),
-              ),
-              const SizedBox(height: 6),
-              Draggable<String>(
-                data: _item.id,
-                feedback: Material(
-                  color: Colors.transparent,
-                  child: _toyCard(_item, size: 112),
-                ),
-                childWhenDragging: Opacity(
-                  opacity: 0.25,
-                  child: _toyCard(_item, size: 112),
-                ),
-                child: _toyCard(_item, size: 112),
-              )
-                  .animate(key: ValueKey('toy-${_item.id}-$_round-$_reaction'))
-                  .scale(
-                    begin: const Offset(0.8, 0.8),
-                    end: const Offset(1, 1),
-                    duration: 260.ms,
+                SizedBox(height: compact ? 4 : 6),
+                Text(
+                  _item.prompt,
+                  textAlign: TextAlign.center,
+                  maxLines: compact ? 2 : 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: compact ? 17 : 21,
+                    fontWeight: FontWeight.w900,
+                    shadows: const [
+                      Shadow(color: Color(0x55000000), blurRadius: 4)
+                    ],
                   ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  for (var i = 0; i < groups.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 8),
-                    Expanded(child: _basket(groups[i])),
+                ),
+                SizedBox(height: compact ? 4 : 6),
+                Draggable<String>(
+                  data: _item.id,
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: _toyCard(_item, size: toySize),
+                  ),
+                  childWhenDragging: Opacity(
+                    opacity: 0.25,
+                    child: _toyCard(_item, size: toySize),
+                  ),
+                  child: _toyCard(_item, size: toySize),
+                )
+                    .animate(
+                        key: ValueKey('toy-${_item.id}-$_round-$_reaction'))
+                    .scale(
+                      begin: const Offset(0.8, 0.8),
+                      end: const Offset(1, 1),
+                      duration: 260.ms,
+                    ),
+                SizedBox(height: compact ? 7 : 10),
+                Row(
+                  children: [
+                    for (var i = 0; i < groups.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 8),
+                      Expanded(
+                        child: _basket(
+                          groups[i],
+                          compact: compact,
+                          height: basketHeight,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Tap a basket or drag the toy',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
-              ),
-            ],
+                ),
+                SizedBox(height: compact ? 4 : 6),
+                Text(
+                  'Tap a basket or drag the toy',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: compact ? 12 : null,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -379,7 +446,11 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
     );
   }
 
-  Widget _basket(_SortGroup group) {
+  Widget _basket(
+    _SortGroup group, {
+    bool compact = false,
+    double height = 116,
+  }) {
     return DragTarget<String>(
       onWillAcceptWithDetails: (details) => details.data == _item.id,
       onAcceptWithDetails: (_) => _choose(group.id),
@@ -392,8 +463,8 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
             onTap: () => _choose(group.id),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 160),
-              height: 116,
-              padding: const EdgeInsets.all(8),
+              height: height,
+              padding: EdgeInsets.all(compact ? 6 : 8),
               decoration: BoxDecoration(
                 color: hovering
                     ? group.color
@@ -410,14 +481,20 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(group.emoji, style: const TextStyle(fontSize: 34)),
-                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      group.emoji,
+                      style: TextStyle(fontSize: compact ? 26 : 34),
+                    ),
+                  ),
+                  SizedBox(height: compact ? 2 : 4),
                   FittedBox(
                     child: Text(
                       group.label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.lightText,
-                        fontSize: 16,
+                        fontSize: compact ? 13 : 16,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -434,54 +511,66 @@ class _ToySortGameState extends ConsumerState<ToySortGame> {
   Widget _completionCard() {
     final reward = _reward!;
     return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(22),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 440),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🎁', style: TextStyle(fontSize: 48)),
-              const Text(
-                'World reward!',
-                style: TextStyle(
-                  color: AppColors.lightText,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(compact ? 16 : 22),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 440),
+              padding: EdgeInsets.all(compact ? 18 : 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
               ),
-              const SizedBox(height: 10),
-              OpenMojiView(
-                emoji: reward.emoji,
-                size: 82,
-                fallback:
-                    Text(reward.emoji, style: const TextStyle(fontSize: 70)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🎁', style: TextStyle(fontSize: compact ? 38 : 48)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'World reward!',
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontSize: compact ? 22 : 25,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  OpenMojiView(
+                    emoji: reward.emoji,
+                    size: compact ? 66 : 82,
+                    fallback: Text(
+                      reward.emoji,
+                      style: TextStyle(fontSize: compact ? 56 : 70),
+                    ),
+                  ),
+                  Text(
+                    '${reward.name} is now in Kid World!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.lightText,
+                      fontSize: compact ? 15 : 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  FilledButton.icon(
+                    key: const ValueKey('toy-sort-next-level'),
+                    onPressed: _nextLevel,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(
+                      _level >= 50 ? 'Play again' : 'Level ${_level + 1}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                '${reward.name} is now in Kid World!',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.lightText,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 18),
-              FilledButton.icon(
-                key: const ValueKey('toy-sort-next-level'),
-                onPressed: _nextLevel,
-                icon: const Icon(Icons.arrow_forward_rounded),
-                label:
-                    Text(_level >= 50 ? 'Play again' : 'Level ${_level + 1}'),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -325,19 +325,30 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
         child: AnimatedBackground(
           theme: WorldTheme.aurora,
           child: SafeArea(
-            child: Column(
-              children: [
-                _topBar(),
-                MascotMessage(message: _message, icon: '🦉'),
-                StoryGoalCard(
-                  emoji: '🐣➡️🐉',
-                  goal: 'Grow the baby dragon family!',
-                  progress: (_engine.highestTile / _targetTile).clamp(0, 1),
-                ),
-                const SizedBox(height: 6),
-                Expanded(child: _gameBoard()),
-                _controls(),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact =
+                    constraints.maxHeight < 620 || constraints.maxWidth < 340;
+                return Column(
+                  children: [
+                    _topBar(compact: compact),
+                    if (compact)
+                      _compactGoal()
+                    else ...[
+                      MascotMessage(message: _message, icon: '🦉'),
+                      StoryGoalCard(
+                        emoji: '🐣➡️🐉',
+                        goal: 'Grow the baby dragon family!',
+                        progress:
+                            (_engine.highestTile / _targetTile).clamp(0, 1),
+                      ),
+                    ],
+                    SizedBox(height: compact ? 3 : 6),
+                    Expanded(child: _gameBoard(compact: compact)),
+                    _controls(compact: compact),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -345,9 +356,9 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     );
   }
 
-  Widget _topBar() {
+  Widget _topBar({required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 6 : AppSpacing.sm),
       child: Row(
         children: [
           GameCircleButton(
@@ -409,10 +420,50 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     );
   }
 
-  Widget _gameBoard() {
+  Widget _compactGoal() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Text('🐣', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 6),
+          const Expanded(
+            child: Text(
+              'Grow the baby dragon family!',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.lightText,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: (_engine.highestTile / _targetTile).clamp(0, 1),
+              minHeight: 5,
+              borderRadius: BorderRadius.circular(8),
+              color: AppColors.star,
+              backgroundColor: Colors.black.withValues(alpha: 0.08),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gameBoard({required bool compact}) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final boardWidth = (constraints.maxWidth - 24).clamp(220.0, 390.0);
+        final availableWidth = math.max(0.0, constraints.maxWidth - 24);
+        final boardWidth = math.min(390.0, availableWidth);
         final tileSize = (boardWidth - 12 - (_engine.size * 6)) / _engine.size;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -674,24 +725,28 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     );
   }
 
-  Widget _controls() {
+  Widget _controls({required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14, top: 4),
+      padding: EdgeInsets.only(bottom: compact ? 8 : 14, top: compact ? 2 : 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _arrowButton(Icons.arrow_back_rounded, SwipeDirection.left),
-          const SizedBox(width: 8),
+          _arrowButton(Icons.arrow_back_rounded, SwipeDirection.left,
+              compact: compact),
+          SizedBox(width: compact ? 6 : 8),
           Column(
             children: [
-              _arrowButton(Icons.arrow_upward_rounded, SwipeDirection.up),
-              const SizedBox(height: 4),
-              _arrowButton(Icons.arrow_downward_rounded, SwipeDirection.down),
+              _arrowButton(Icons.arrow_upward_rounded, SwipeDirection.up,
+                  compact: compact),
+              SizedBox(height: compact ? 3 : 4),
+              _arrowButton(Icons.arrow_downward_rounded, SwipeDirection.down,
+                  compact: compact),
             ],
           ),
-          const SizedBox(width: 8),
-          _arrowButton(Icons.arrow_forward_rounded, SwipeDirection.right),
-          const SizedBox(width: 10),
+          SizedBox(width: compact ? 6 : 8),
+          _arrowButton(Icons.arrow_forward_rounded, SwipeDirection.right,
+              compact: compact),
+          SizedBox(width: compact ? 7 : 10),
           GameCircleButton(
             icon: Icons.refresh_rounded,
             tooltip: 'New board',
@@ -702,16 +757,20 @@ class _Classic2048GameState extends ConsumerState<Classic2048Game> {
     );
   }
 
-  Widget _arrowButton(IconData icon, SwipeDirection direction) {
+  Widget _arrowButton(
+    IconData icon,
+    SwipeDirection direction, {
+    required bool compact,
+  }) {
     return BouncyButton(
       onTap: () => _swipe(direction),
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(compact ? 8 : 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(13),
         ),
-        child: Icon(icon, color: AppColors.primary, size: 24),
+        child: Icon(icon, color: AppColors.primary, size: compact ? 21 : 24),
       ),
     );
   }

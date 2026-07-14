@@ -192,23 +192,32 @@ class _SuccessMoment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final popupSize = math
+        .min(250.0, math.min(media.size.width * 0.68, media.size.height * 0.36))
+        .clamp(132.0, 250.0)
+        .toDouble();
+    final lottieSize = popupSize * 0.96;
+    final badgeSize = popupSize * 0.42;
+    final starSize = badgeSize * 0.63;
+    final pillBottom = popupSize * 0.17;
     final moment = SizedBox(
-      width: 250,
-      height: 250,
+      width: popupSize,
+      height: popupSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
           if (!reducedMotion)
-            const LottieView(
+            LottieView(
               asset: 'assets/lottie/celebration_star.json',
-              width: 240,
-              height: 240,
+              width: lottieSize,
+              height: lottieSize,
               repeat: false,
-              fallback: SizedBox.shrink(),
+              fallback: const SizedBox.shrink(),
             ),
           Container(
-            width: 104,
-            height: 104,
+            width: badgeSize,
+            height: badgeSize,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.96),
               shape: BoxShape.circle,
@@ -221,22 +230,25 @@ class _SuccessMoment extends StatelessWidget {
               ],
             ),
             alignment: Alignment.center,
-            child: const Text('⭐', style: TextStyle(fontSize: 66)),
+            child: Text('⭐', style: TextStyle(fontSize: starSize)),
           ),
-          const Positioned(
-            bottom: 42,
+          Positioned(
+            bottom: pillBottom,
             child: DecoratedBox(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.success,
                 borderRadius: BorderRadius.all(Radius.circular(999)),
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                padding: EdgeInsets.symmetric(
+                  horizontal: popupSize < 180 ? 12 : 16,
+                  vertical: popupSize < 180 ? 5 : 7,
+                ),
                 child: Text(
                   'You did it!',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 17,
+                    fontSize: popupSize < 180 ? 14 : 17,
                     fontWeight: FontWeight.w900,
                   ),
                 ),

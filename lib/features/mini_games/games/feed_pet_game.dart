@@ -246,20 +246,98 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
         child: AnimatedBackground(
           theme: WorldTheme.jungle,
           child: SafeArea(
-            child: Column(
-              children: [
-                _topBar(),
-                MascotMessage(message: _message, icon: '🐶'),
-                const SizedBox(height: 6),
-                StoryGoalCard(
-                  emoji: '🥣',
-                  goal: 'Level $_level/50 • Count 1 to $_maxCount',
-                  progress: _complete ? 1 : _round / _roundsPerLevel,
-                  progressColor: const Color(0xFF00B894),
-                ),
-                const SizedBox(height: 8),
-                Expanded(child: _complete ? _completionCard() : _playArea()),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final textScale = MediaQuery.textScalerOf(context).scale(1);
+                final compact = constraints.maxHeight < 620 ||
+                    constraints.maxWidth < 360 ||
+                    textScale > 1.25;
+                return Column(
+                  children: [
+                    _topBar(compact: compact),
+                    if (compact)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            '🐶 $_message',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      MascotMessage(message: _message, icon: '🐶'),
+                    SizedBox(height: compact ? 3 : 6),
+                    if (compact)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              const Text('🥣', style: TextStyle(fontSize: 16)),
+                              const SizedBox(width: 7),
+                              Expanded(
+                                child: LinearProgressIndicator(
+                                  value:
+                                      (_complete ? 1 : _round / _roundsPerLevel)
+                                          .clamp(0.0, 1.0)
+                                          .toDouble(),
+                                  minHeight: 5,
+                                  borderRadius: BorderRadius.circular(8),
+                                  backgroundColor: const Color(0xFFE9E6F7),
+                                  color: const Color(0xFF00B894),
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                '$_level/50',
+                                style: const TextStyle(
+                                  color: AppColors.lightText,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      StoryGoalCard(
+                        emoji: '🥣',
+                        goal: 'Level $_level/50 • Count 1 to $_maxCount',
+                        progress: _complete ? 1 : _round / _roundsPerLevel,
+                        progressColor: const Color(0xFF00B894),
+                      ),
+                    SizedBox(height: compact ? 4 : 8),
+                    Expanded(
+                        child: _complete ? _completionCard() : _playArea()),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -267,9 +345,9 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
     );
   }
 
-  Widget _topBar() {
+  Widget _topBar({bool compact = false}) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 6 : AppSpacing.sm),
       child: Row(
         children: [
           GameCircleButton(
@@ -277,13 +355,13 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
             tooltip: 'Close game',
             onTap: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(width: 10),
-          const Expanded(
+          SizedBox(width: compact ? 6 : 10),
+          Expanded(
             child: Text(
               '🥣 Feed the Pet',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: compact ? 18 : 20,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -303,13 +381,13 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
           if (_coOp) const SizedBox(width: 6),
           Text(
             '⭐ $_score',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 17,
+              fontSize: compact ? 15 : 17,
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: compact ? 5 : 8),
           GameCircleButton(
             icon: Icons.volume_up_rounded,
             tooltip: 'Hear the question',
@@ -323,79 +401,115 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
   Widget _playArea() {
     final choices = _choices;
     return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              if (_teachPip)
-                Container(
-                  key: ValueKey('pip-count-$_round'),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3CD),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Text(
-                    '🐧 Pip says "${_pipGuess()}". Is Pip right?',
-                    style: const TextStyle(
-                      color: Color(0xFF5D4037),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final compact = constraints.maxHeight < 360 ||
+            constraints.maxWidth < 360 ||
+            textScale > 1.25;
+        final content = Column(
+          mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+          mainAxisAlignment:
+              compact ? MainAxisAlignment.start : MainAxisAlignment.spaceEvenly,
+          children: [
+            if (_teachPip) ...[
+              Container(
+                key: ValueKey('pip-count-$_round'),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3CD),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-              Text(
-                _prompt,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                  shadows: [Shadow(color: Color(0x55000000), blurRadius: 4)],
+                child: Text(
+                  '🐧 Pip says "${_pipGuess()}". Is Pip right?',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: const Color(0xFF5D4037),
+                    fontSize: compact ? 12 : null,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
-              _petAndBowl(),
-              Row(
-                children: [
-                  for (var i = 0; i < choices.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 9),
-                    Expanded(child: _foodButton(choices[i])),
-                  ],
+              if (compact) const SizedBox(height: 6),
+            ],
+            Text(
+              _prompt,
+              textAlign: TextAlign.center,
+              maxLines: compact ? 2 : 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: compact ? 16 : 25,
+                fontWeight: FontWeight.w900,
+                shadows: const [
+                  Shadow(color: Color(0x55000000), blurRadius: 4)
                 ],
               ),
-              const Text(
-                'Tap the food to count it into the bowl',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+            ),
+            if (compact) const SizedBox(height: 5),
+            _petAndBowl(compact: compact),
+            if (compact) const SizedBox(height: 5),
+            Row(
+              children: [
+                for (var i = 0; i < choices.length; i++) ...[
+                  if (i > 0) SizedBox(width: compact ? 6 : 9),
+                  Expanded(
+                    child: _foodButton(choices[i], compact: compact),
+                  ),
+                ],
+              ],
+            ),
+            if (compact) const SizedBox(height: 6),
+            Text(
+              'Tap the food to count it into the bowl',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: compact ? 10.5 : null,
+                fontWeight: FontWeight.w800,
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          ],
+        );
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, compact ? 12 : 18),
+          child: compact
+              ? content
+              : ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: content,
+                ),
+        );
+      },
     );
   }
 
-  Widget _petAndBowl() {
+  Widget _petAndBowl({bool compact = false}) {
+    final petSize = compact ? 50.0 : 90.0;
+    final bowlWidth = compact ? 106.0 : 150.0;
+    final bowlMinHeight = compact ? 58.0 : 104.0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         OpenMojiView(
           key: ValueKey('pet-$_reaction'),
           emoji: '🐶',
-          size: 90,
-          fallback: const Text('🐶', style: TextStyle(fontSize: 76)),
+          size: petSize,
+          fallback: Text(
+            '🐶',
+            style: TextStyle(fontSize: compact ? 42 : 76),
+          ),
         ).animate(key: ValueKey('pet-bounce-$_reaction')).scaleXY(
             begin: 0.88, end: 1, duration: 260.ms, curve: Curves.elasticOut),
-        const SizedBox(width: 12),
+        SizedBox(width: compact ? 6 : 12),
         GestureDetector(
           onTap: _removeOne,
           child: Container(
-            width: 150,
-            constraints: const BoxConstraints(minHeight: 104),
-            padding: const EdgeInsets.all(10),
+            width: bowlWidth,
+            constraints: BoxConstraints(minHeight: bowlMinHeight),
+            padding: EdgeInsets.all(compact ? 5 : 10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(28),
@@ -404,21 +518,24 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('🥣', style: TextStyle(fontSize: 34)),
+                Text('🥣', style: TextStyle(fontSize: compact ? 19 : 34)),
                 Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 1,
                   runSpacing: 1,
                   children: [
                     for (var i = 0; i < _fed; i++)
-                      Text(_target.emoji, style: const TextStyle(fontSize: 20)),
+                      Text(
+                        _target.emoji,
+                        style: TextStyle(fontSize: compact ? 12 : 20),
+                      ),
                   ],
                 ),
                 Text(
                   '$_fed / $_wanted',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.lightText,
-                    fontSize: 18,
+                    fontSize: compact ? 12 : 18,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -430,7 +547,7 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
     );
   }
 
-  Widget _foodButton(_Food food) {
+  Widget _foodButton(_Food food, {bool compact = false}) {
     final target = food == _target;
     return Semantics(
       button: true,
@@ -440,8 +557,8 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
         borderRadius: BorderRadius.circular(24),
         onTap: () => _tapFood(food),
         child: Container(
-          height: 112,
-          padding: const EdgeInsets.all(8),
+          height: compact ? 68 : 112,
+          padding: EdgeInsets.all(compact ? 5 : 8),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.96),
             borderRadius: BorderRadius.circular(24),
@@ -457,18 +574,21 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
             children: [
               OpenMojiView(
                 emoji: food.emoji,
-                size: 58,
-                fallback:
-                    Text(food.emoji, style: const TextStyle(fontSize: 48)),
+                size: compact ? 30 : 58,
+                fallback: Text(
+                  food.emoji,
+                  style: TextStyle(fontSize: compact ? 25 : 48),
+                ),
               ),
               Text(
                 food.name.toUpperCase(),
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: target && _fed > 0
                       ? const Color(0xFF00796B)
                       : AppColors.lightText,
-                  fontSize: 13,
+                  fontSize: compact ? 9 : 13,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -482,54 +602,66 @@ class _FeedPetGameState extends ConsumerState<FeedPetGame> {
   Widget _completionCard() {
     final reward = _reward!;
     return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(22),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 440),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🎁', style: TextStyle(fontSize: 48)),
-              const Text(
-                'Counting reward!',
-                style: TextStyle(
-                  color: AppColors.lightText,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(compact ? 16 : 22),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 440),
+              padding: EdgeInsets.all(compact ? 18 : 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
               ),
-              const SizedBox(height: 10),
-              OpenMojiView(
-                emoji: reward.emoji,
-                size: 82,
-                fallback:
-                    Text(reward.emoji, style: const TextStyle(fontSize: 70)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🎁', style: TextStyle(fontSize: compact ? 38 : 48)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Counting reward!',
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontSize: compact ? 22 : 25,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  OpenMojiView(
+                    emoji: reward.emoji,
+                    size: compact ? 66 : 82,
+                    fallback: Text(
+                      reward.emoji,
+                      style: TextStyle(fontSize: compact ? 56 : 70),
+                    ),
+                  ),
+                  Text(
+                    '${reward.name} is now in Kid World!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.lightText,
+                      fontSize: compact ? 15 : 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  FilledButton.icon(
+                    key: const ValueKey('feed-pet-next-level'),
+                    onPressed: _nextLevel,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(
+                      _level >= 50 ? 'Play again' : 'Level ${_level + 1}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                '${reward.name} is now in Kid World!',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.lightText,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 18),
-              FilledButton.icon(
-                key: const ValueKey('feed-pet-next-level'),
-                onPressed: _nextLevel,
-                icon: const Icon(Icons.arrow_forward_rounded),
-                label:
-                    Text(_level >= 50 ? 'Play again' : 'Level ${_level + 1}'),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

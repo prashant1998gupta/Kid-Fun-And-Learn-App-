@@ -125,23 +125,38 @@ class _DragDropGameState extends State<DragDropGame> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 ||
+        media.size.height < 620 ||
+        media.textScaler.scale(1) > 1.2;
+
     return CelebrationOverlay(
       controller: _celebration,
       child: Scaffold(
         body: AnimatedBackground(
           theme: WorldTheme.jungle,
           child: SafeArea(
-            child: Column(
-              children: [
-                _header(context),
-                const SizedBox(height: 8),
-                _prompt(context),
-                const Spacer(),
-                _draggable(context),
-                const Spacer(),
-                _baskets(context),
-                const SizedBox(height: 24),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Column(
+                      children: [
+                        _header(context),
+                        SizedBox(height: compact ? 4 : 8),
+                        _prompt(context, compact: compact),
+                        SizedBox(height: compact ? 14 : 36),
+                        _draggable(context),
+                        SizedBox(height: compact ? 16 : 36),
+                        _baskets(context),
+                        SizedBox(height: compact ? 14 : 24),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -189,33 +204,38 @@ class _DragDropGameState extends State<DragDropGame> {
     );
   }
 
-  Widget _prompt(BuildContext context) {
+  Widget _prompt(BuildContext context, {required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? AppSpacing.md : AppSpacing.lg,
+      ),
       child: BouncyButton(
         onTap: _speak,
         borderRadius: AppSpacing.cardRadius,
         child: Container(
-          padding: AppSpacing.cardPadding,
+          padding: EdgeInsets.all(compact ? 14 : AppSpacing.lg),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: AppSpacing.cardRadius,
           ),
           child: Row(
             children: [
-              const MascotView(mascot: Mascot.lion, size: 56),
-              const SizedBox(width: 12),
+              MascotView(mascot: Mascot.lion, size: compact ? 42 : 56),
+              SizedBox(width: compact ? 8 : 12),
               Expanded(
                 child: Text(
                   _q.prompt,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(color: AppColors.lightText),
+                  maxLines: compact ? 3 : 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.lightText,
+                        fontSize: compact ? 18 : null,
+                        height: 1.15,
+                      ),
                 ),
               ),
-              const Icon(Icons.volume_up_rounded,
-                  color: AppColors.primary, size: 28),
+              Icon(Icons.volume_up_rounded,
+                  color: AppColors.primary, size: compact ? 24 : 28),
             ],
           ),
         ),
@@ -244,8 +264,10 @@ class _DragDropGameState extends State<DragDropGame> {
     final options = _q.options;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: AppSpacing.md,
+        runSpacing: AppSpacing.md,
         children: [
           for (int i = 0; i < options.length; i++)
             DragTarget<int>(
@@ -281,11 +303,14 @@ class _ItemChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 360 ||
+        MediaQuery.textScalerOf(context).scale(1) > 1.2;
+    final size = compact ? 78.0 : 96.0;
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: 96,
-        height: 96,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
@@ -298,7 +323,11 @@ class _ItemChip extends StatelessWidget {
           ],
         ),
         alignment: Alignment.center,
-        child: IllustratedObjectView(label: artLabel, emoji: label, size: 66),
+        child: IllustratedObjectView(
+          label: artLabel,
+          emoji: label,
+          size: compact ? 52 : 66,
+        ),
       ),
     );
   }
@@ -319,6 +348,8 @@ class _Basket extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 360 ||
+        MediaQuery.textScalerOf(context).scale(1) > 1.2;
     final active = highlight || landed;
     final gradient = wrong
         ? LinearGradient(
@@ -345,8 +376,8 @@ class _Basket extends StatelessWidget {
 
     Widget basket = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 110,
-      height: 120,
+      width: compact ? 92 : 110,
+      height: compact ? 100 : 120,
       decoration: BoxDecoration(
         gradient: gradient,
         borderRadius: AppSpacing.cardRadius,
@@ -362,29 +393,39 @@ class _Basket extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (option.emoji != null)
-            IllustratedObjectView(
-              label: option.label,
-              emoji: option.emoji,
-              size: 48,
-              selected: active || wrong,
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              option.label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 15,
-                color: (active || wrong) ? Colors.white : AppColors.lightText,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (option.emoji != null)
+                IllustratedObjectView(
+                  label: option.label,
+                  emoji: option.emoji,
+                  size: compact ? 38 : 48,
+                  selected: active || wrong,
+                ),
+              SizedBox(
+                width: compact ? 76 : 92,
+                child: Text(
+                  option.label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: compact ? 13 : 15,
+                    height: 1.05,
+                    color:
+                        (active || wrong) ? Colors.white : AppColors.lightText,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 

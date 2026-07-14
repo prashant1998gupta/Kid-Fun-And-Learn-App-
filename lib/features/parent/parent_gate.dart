@@ -48,119 +48,155 @@ class _ParentGateScreenState extends State<ParentGateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.height < 620 || media.textScaler.scale(1) > 1.2;
+
     return Scaffold(
       body: AnimatedBackground(
         theme: WorldTheme.night,
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: BouncyButton(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: BouncyButton(
+                          onTap: () => context.pop(),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.arrow_back_rounded),
+                          ),
+                        ),
                       ),
-                      child: const Icon(Icons.arrow_back_rounded),
-                    ),
+                      SizedBox(height: compact ? 20 : 48),
+                      Icon(
+                        Icons.lock_rounded,
+                        color: Colors.white,
+                        size: compact ? 44 : 56,
+                      ),
+                      const SizedBox(height: 16),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Parents Only',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: compact ? 26 : 30,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'What is $_a × $_b ?',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: compact ? 19 : 22,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 14 : 20),
+                      Container(
+                        height: compact ? 56 : 64,
+                        width: 160,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              const BorderRadius.all(AppSpacing.radiusMd),
+                          border: _error
+                              ? Border.all(color: AppColors.error, width: 3)
+                              : null,
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _entry.isEmpty ? '?' : _entry,
+                            style: TextStyle(
+                              fontSize: compact ? 28 : 32,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (_error)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Try again',
+                            style:
+                                TextStyle(color: AppColors.error, fontSize: 16),
+                          ),
+                        ),
+                      SizedBox(height: compact ? 18 : 36),
+                      _keypad(compact: compact),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
-                const Spacer(),
-                const Icon(Icons.lock_rounded, color: Colors.white, size: 56),
-                const SizedBox(height: 16),
-                const Text(
-                  'Parents Only',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'What is $_a × $_b ?',
-                  style: const TextStyle(color: Colors.white70, fontSize: 22),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  height: 64,
-                  width: 160,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.all(AppSpacing.radiusMd),
-                    border: _error
-                        ? Border.all(color: AppColors.error, width: 3)
-                        : null,
-                  ),
-                  child: Text(
-                    _entry.isEmpty ? '?' : _entry,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                if (_error)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Try again',
-                      style: TextStyle(color: AppColors.error, fontSize: 16),
-                    ),
-                  ),
-                const Spacer(),
-                _keypad(),
-                const SizedBox(height: 20),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _keypad() {
+  Widget _keypad({required bool compact}) {
     const keys = [
       '1', '2', '3', //
       '4', '5', '6', //
       '7', '8', '9', //
       '', '0', '⌫', //
     ];
-    return GridView.count(
-      shrinkWrap: true,
-      crossAxisCount: 3,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.6,
-      physics: const NeverScrollableScrollPhysics(),
-      children: [
-        for (final k in keys)
-          k.isEmpty
-              ? const SizedBox.shrink()
-              : BouncyButton(
-                  onTap: () => _press(k),
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      borderRadius: const BorderRadius.all(AppSpacing.radiusMd),
-                    ),
-                    child: Text(
-                      k,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cellWidth = (constraints.maxWidth - 24) / 3;
+        final cellHeight = compact ? 48.0 : 58.0;
+        return GridView.count(
+          shrinkWrap: true,
+          crossAxisCount: 3,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: cellWidth / cellHeight,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            for (final k in keys)
+              k.isEmpty
+                  ? const SizedBox.shrink()
+                  : BouncyButton(
+                      onTap: () => _press(k),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          borderRadius:
+                              const BorderRadius.all(AppSpacing.radiusMd),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            k,
+                            style: TextStyle(
+                              fontSize: compact ? 24 : 28,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

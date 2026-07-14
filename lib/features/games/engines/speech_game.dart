@@ -143,62 +143,94 @@ class _SpeechGameState extends State<SpeechGame> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 ||
+        media.size.height < 620 ||
+        media.textScaler.scale(1) > 1.2;
+
     return CelebrationOverlay(
       controller: _celebration,
       child: Scaffold(
         body: AnimatedBackground(
           theme: WorldTheme.ocean,
           child: SafeArea(
-            child: Column(
-              children: [
-                _header(context),
-                const Spacer(),
-                Text(
-                  'Say this word!',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 12),
-                // Tap the word to hear it.
-                BouncyButton(
-                  onTap: () => AudioService.instance.speak(_target),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 20),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: AppSpacing.cardRadius,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Column(
                       children: [
+                        _header(context),
+                        SizedBox(height: compact ? 24 : 54),
                         Text(
-                          _target,
-                          style: const TextStyle(
-                            fontSize: 44,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                          'Say this word!',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontSize: compact ? 19 : null,
+                                  ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Tap the word to hear it.
+                        BouncyButton(
+                          onTap: () => AudioService.instance.speak(_target),
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  constraints.maxWidth - AppSpacing.lg * 2,
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: compact ? 18 : 32,
+                              vertical: compact ? 16 : 20,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: AppSpacing.cardRadius,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      _target,
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        fontSize: compact ? 34 : 44,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Icon(Icons.volume_up_rounded,
+                                    color: AppColors.primary,
+                                    size: compact ? 24 : 28),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        const Icon(Icons.volume_up_rounded,
-                            color: AppColors.primary),
+                        SizedBox(height: compact ? 16 : 24),
+                        if (_heard.isNotEmpty)
+                          Text(
+                            '“$_heard”',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 20),
+                          ),
+                        SizedBox(height: compact ? 24 : 54),
+                        _controls(),
+                        SizedBox(height: compact ? 18 : 32),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                if (_heard.isNotEmpty)
-                  Text(
-                    '“$_heard”',
-                    style: const TextStyle(color: Colors.white70, fontSize: 20),
-                  ),
-                const Spacer(),
-                _controls(),
-                const SizedBox(height: 32),
-              ],
+                );
+              },
             ),
           ),
         ),

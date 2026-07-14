@@ -191,18 +191,25 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
   }
 
   Widget _prompt(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 ||
+        media.size.height < 620 ||
+        media.textScaler.scale(1) > 1.2;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? AppSpacing.md : AppSpacing.lg,
+      ),
       child: Row(
         children: [
-          const MascotView(mascot: Mascot.owl, size: 72),
-          const SizedBox(width: 12),
+          MascotView(mascot: Mascot.owl, size: compact ? 50 : 72),
+          SizedBox(width: compact ? 8 : 12),
           Expanded(
             child: BouncyButton(
               onTap: _speakPrompt,
               borderRadius: AppSpacing.cardRadius,
               child: Container(
-                padding: AppSpacing.cardPadding,
+                padding: EdgeInsets.all(compact ? 14 : AppSpacing.lg),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: AppSpacing.cardRadius,
@@ -212,16 +219,19 @@ class _TapChoiceGameState extends State<TapChoiceGame> {
                     Expanded(
                       child: Text(
                         _q.prompt,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(color: AppColors.lightText),
+                        maxLines: compact ? 3 : 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.lightText,
+                              fontSize: compact ? 18 : null,
+                              height: 1.15,
+                            ),
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.volume_up_rounded,
                       color: AppColors.primary,
-                      size: 28,
+                      size: compact ? 24 : 28,
                     ),
                   ],
                 ),

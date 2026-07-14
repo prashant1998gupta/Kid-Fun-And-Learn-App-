@@ -122,42 +122,56 @@ class SettingsScreen extends ConsumerWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            for (final entry in {
-              ThemeMode.light: Icons.wb_sunny_rounded,
-              ThemeMode.dark: Icons.nightlight_round,
-              ThemeMode.system: Icons.brightness_auto_rounded,
-            }.entries)
-              GestureDetector(
-                onTap: () => c.setThemeMode(entry.key),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: s.themeMode == entry.key
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                      ),
-                      child: Icon(
-                        entry.value,
-                        size: 32,
-                        color: s.themeMode == entry.key
-                            ? Colors.white
-                            : Theme.of(context).colorScheme.onSurface,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            return Wrap(
+              alignment: WrapAlignment.spaceAround,
+              spacing: compact ? 14 : 24,
+              runSpacing: 14,
+              children: [
+                for (final entry in {
+                  ThemeMode.light: Icons.wb_sunny_rounded,
+                  ThemeMode.dark: Icons.nightlight_round,
+                  ThemeMode.system: Icons.brightness_auto_rounded,
+                }.entries)
+                  SizedBox(
+                    width: compact ? 74 : 90,
+                    child: GestureDetector(
+                      onTap: () => c.setThemeMode(entry.key),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(compact ? 13 : 16),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: s.themeMode == entry.key
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                            ),
+                            child: Icon(
+                              entry.value,
+                              size: compact ? 28 : 32,
+                              color: s.themeMode == entry.key
+                                  ? Colors.white
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            entry.key.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(entry.key.name),
-                  ],
-                ),
-              ),
-          ],
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

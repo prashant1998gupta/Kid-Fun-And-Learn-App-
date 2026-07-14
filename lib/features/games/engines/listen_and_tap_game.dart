@@ -128,54 +128,65 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
           theme: WorldTheme.candy,
           particleCount: 12,
           child: SafeArea(
-            child: Column(
-              children: [
-                _header(context),
-                const SizedBox(height: 8),
-                const MascotView(mascot: Mascot.panda, size: 82),
-                const SizedBox(height: 8),
-                BouncyButton(
-                  onTap: _speak,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 14,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(AppSpacing.radiusPill),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.volume_up_rounded,
-                          size: 34,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            _question.prompt,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(color: AppColors.lightText),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(child: _options(context)),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxHeight < 620;
+                return Column(
+                  children: [
+                    _header(context),
+                    SizedBox(height: compact ? 4 : 8),
+                    MascotView(mascot: Mascot.panda, size: compact ? 52 : 82),
+                    SizedBox(height: compact ? 4 : 8),
+                    _promptButton(context, compact: compact),
+                    SizedBox(height: compact ? 8 : 16),
+                    Expanded(child: _options(context, compact: compact)),
+                  ],
+                );
+              },
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _promptButton(BuildContext context, {required bool compact}) {
+    return BouncyButton(
+      onTap: _speak,
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          horizontal: compact ? AppSpacing.md : AppSpacing.lg,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 16 : 22,
+          vertical: compact ? 10 : 14,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(AppSpacing.radiusPill),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.volume_up_rounded,
+              size: compact ? 26 : 34,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                _question.prompt,
+                maxLines: compact ? 2 : 3,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.lightText,
+                      fontSize: compact ? 18 : null,
+                    ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -222,31 +233,36 @@ class _ListenAndTapGameState extends State<ListenAndTapGame> {
     );
   }
 
-  Widget _options(BuildContext context) {
+  Widget _options(BuildContext context, {required bool compact}) {
     final optionIndexes = rescueOptionIndexes(
       _question,
       rescue: _rescue || LearningSupportScope.stageOf(context).guidedChoices,
     );
-    return GridView.builder(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 240,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1,
-      ),
-      itemCount: optionIndexes.length,
-      itemBuilder: (context, index) {
-        final originalIndex = optionIndexes[index];
-        final option = _question.options[originalIndex];
-        return PlayOptionCard(
-          key: ValueKey('$_index-$originalIndex'),
-          index: originalIndex,
-          label: option.label,
-          emoji: option.emoji,
-          artSize: 86,
-          state: _stateFor(originalIndex),
-          onTap: () => _choose(originalIndex),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final shortTray = constraints.maxHeight < 260;
+        return GridView.builder(
+          padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: compact ? 190 : 240,
+            mainAxisSpacing: compact ? AppSpacing.sm : AppSpacing.md,
+            crossAxisSpacing: compact ? AppSpacing.sm : AppSpacing.md,
+            childAspectRatio: shortTray ? 1.18 : 1,
+          ),
+          itemCount: optionIndexes.length,
+          itemBuilder: (context, index) {
+            final originalIndex = optionIndexes[index];
+            final option = _question.options[originalIndex];
+            return PlayOptionCard(
+              key: ValueKey('$_index-$originalIndex'),
+              index: originalIndex,
+              label: option.label,
+              emoji: option.emoji,
+              artSize: compact ? 66 : 86,
+              state: _stateFor(originalIndex),
+              onTap: () => _choose(originalIndex),
+            );
+          },
         );
       },
     );

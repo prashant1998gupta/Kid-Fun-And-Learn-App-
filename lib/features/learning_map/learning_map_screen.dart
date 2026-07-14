@@ -59,29 +59,62 @@ class LearningMapScreen extends ConsumerWidget {
                 progress: progress,
                 model: adaptive,
               );
-              return Column(
-                children: [
-                  _TopBar(subject: subject),
-                  if (recommendation != null)
-                    _SmartNextCard(
+              final path = lessons.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'More adventures coming soon! 🚀',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                    )
+                  : _Path(
+                      lessons: lessons,
+                      childId: child.id,
+                      progress: progress,
+                      subject: subject,
+                    );
+              final smartCard = recommendation == null
+                  ? null
+                  : _SmartNextCard(
                       recommendation: recommendation,
                       revision: revision,
                       color: subject.color,
-                    ),
-                  Expanded(
-                    child: lessons.isEmpty
-                        ? const Center(
-                            child: Text('More adventures coming soon! 🚀',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20)))
-                        : _Path(
-                            lessons: lessons,
-                            childId: child.id,
-                            progress: progress,
-                            subject: subject,
-                          ),
-                  ),
-                ],
+                    );
+
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final textScale = MediaQuery.textScalerOf(context).scale(1);
+                  final compact = constraints.maxHeight < 420 ||
+                      constraints.maxWidth < 360 ||
+                      textScale > 1.25;
+                  if (compact) {
+                    return SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(minHeight: constraints.maxHeight),
+                        child: Column(
+                          children: [
+                            _TopBar(subject: subject),
+                            if (smartCard != null) smartCard,
+                            SizedBox(
+                              height: math.max(
+                                220,
+                                constraints.maxHeight * 0.68,
+                              ),
+                              child: path,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      _TopBar(subject: subject),
+                      if (smartCard != null) smartCard,
+                      Expanded(child: path),
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -204,33 +237,45 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          BouncyButton(
-            onTap: () =>
-                context.canPop() ? context.pop() : context.go(AppRoutes.home),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                  color: Colors.white, shape: BoxShape.circle),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.primary,
-                size: 26,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return Row(
+            children: [
+              BouncyButton(
+                onTap: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.home),
+                child: Container(
+                  padding: EdgeInsets.all(compact ? 8 : 10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color: AppColors.primary,
+                    size: compact ? 23 : 26,
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Icon(subject.icon, color: Colors.white, size: 30),
-          const SizedBox(width: 8),
-          Text(
-            subject.label,
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(color: Colors.white),
-          ),
-        ],
+              SizedBox(width: compact ? 8 : 12),
+              Icon(subject.icon, color: Colors.white, size: compact ? 26 : 30),
+              SizedBox(width: compact ? 6 : 8),
+              Expanded(
+                child: Text(
+                  subject.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: (compact
+                          ? Theme.of(context).textTheme.titleLarge
+                          : Theme.of(context).textTheme.headlineMedium)
+                      ?.copyWith(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -249,21 +294,24 @@ class _Path extends StatelessWidget {
   final ProgressState progress;
   final Subject subject;
 
-  static const _rowHeight = LearningMapScreen._rowHeight;
-  static const _nodeSize = 84.0;
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
+        final short = constraints.maxHeight < 360;
+        final rowHeight = short ? 104.0 : LearningMapScreen._rowHeight;
+        final nodeSize = short ? 64.0 : 84.0;
+        final chestSize = short ? 48.0 : 64.0;
+        final chestLabelWidth = short ? 100.0 : 132.0;
         final centerX = width / 2;
-        final amplitude = (width / 2) - _nodeSize / 2 - AppSpacing.lg;
-        final totalHeight = (lessons.length + 1) * _rowHeight + 40;
+        final amplitude = (width / 2) - nodeSize / 2 - AppSpacing.lg;
+        final totalHeight =
+            lessons.length * rowHeight + chestSize + 96 + (short ? 16 : 40);
 
         Offset centerOf(int i) => Offset(
               centerX + amplitude * math.sin(i * 0.9),
-              i * _rowHeight + _rowHeight / 2 + 20,
+              i * rowHeight + rowHeight / 2 + (short ? 12 : 20),
             );
 
         // Determine unlock: node i is unlocked if i==0 or lesson i-1 completed.
@@ -272,7 +320,8 @@ class _Path extends StatelessWidget {
         final allDone =
             lessons.every((l) => progress.isCompleted(childId, l.id));
 
-        final chestCenter = Offset(centerX, lessons.length * _rowHeight + 60);
+        final chestCenter =
+            Offset(centerX, lessons.length * rowHeight + (short ? 42 : 60));
 
         return SingleChildScrollView(
           child: SizedBox(
@@ -294,21 +343,30 @@ class _Path extends StatelessWidget {
                 // Lesson nodes.
                 for (int i = 0; i < lessons.length; i++)
                   Positioned(
-                    left: centerOf(i).dx - _nodeSize / 2,
-                    top: centerOf(i).dy - _nodeSize / 2,
+                    left: centerOf(i).dx - nodeSize / 2,
+                    top: centerOf(i).dy - nodeSize / 2,
                     child: _Node(
                       index: i,
                       lesson: lessons[i],
                       stars: progress.starsFor(childId, lessons[i].id),
                       unlocked: unlocked(i),
                       color: subject.color,
+                      size: nodeSize,
+                      compact: short,
                     ),
                   ),
                 // Reward chest.
                 Positioned(
-                  left: chestCenter.dx - 40,
-                  top: chestCenter.dy - 40,
-                  child: _Chest(open: allDone),
+                  left: chestCenter.dx - chestLabelWidth / 2,
+                  top: chestCenter.dy - chestSize / 2,
+                  child: SizedBox(
+                    width: chestLabelWidth,
+                    child: _Chest(
+                      open: allDone,
+                      iconSize: chestSize,
+                      compact: short,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -326,6 +384,8 @@ class _Node extends StatelessWidget {
     required this.stars,
     required this.unlocked,
     required this.color,
+    required this.size,
+    required this.compact,
   });
 
   final int index;
@@ -333,6 +393,8 @@ class _Node extends StatelessWidget {
   final int stars;
   final bool unlocked;
   final Color color;
+  final double size;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -351,8 +413,8 @@ class _Node extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 84,
-            height: 84,
+            width: size,
+            height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: unlocked
@@ -372,12 +434,13 @@ class _Node extends StatelessWidget {
             ),
             child: Center(
               child: unlocked
-                  ? Text(lesson.emoji, style: const TextStyle(fontSize: 34))
+                  ? Text(lesson.emoji,
+                      style: TextStyle(fontSize: compact ? 27 : 34))
                   : const Icon(Icons.lock_rounded,
                       color: Colors.white, size: 30),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: compact ? 2 : 4),
           if (done)
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -386,7 +449,7 @@ class _Node extends StatelessWidget {
                   Icon(
                     s < stars ? Icons.star_rounded : Icons.star_outline_rounded,
                     color: s < stars ? AppColors.star : Colors.white54,
-                    size: 16,
+                    size: compact ? 13 : 16,
                   ),
               ],
             ),
@@ -407,21 +470,32 @@ class _Node extends StatelessWidget {
 }
 
 class _Chest extends StatelessWidget {
-  const _Chest({required this.open});
+  const _Chest({
+    required this.open,
+    required this.iconSize,
+    required this.compact,
+  });
   final bool open;
+  final double iconSize;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(open ? '🎉' : '🎁', style: const TextStyle(fontSize: 64))
+        Text(open ? '🎉' : '🎁', style: TextStyle(fontSize: iconSize))
             .animate(onPlay: (c) => c.repeat(reverse: true))
             .moveY(begin: -4, end: 4, duration: 1200.ms),
         Text(
           open ? 'You did it!' : 'Finish all to open!',
-          style: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: compact ? 12 : 16),
         ),
       ],
     );

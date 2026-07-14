@@ -36,78 +36,99 @@ class _DailyRewardSheetState extends ConsumerState<DailyRewardSheet> {
     final canClaim = controller.canClaimToday;
     const ladder = DailyRewardController.ladder;
     final nextIndex = (_pendingStreak(controller) - 1) % 7;
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 || media.textScaler.scale(1) > 1.2;
+    final columns = media.size.width < 360 ? 3 : 4;
 
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('🎁', style: TextStyle(fontSize: 56))
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .moveY(begin: -4, end: 4, duration: 1000.ms),
-          const SizedBox(height: 8),
-          Text('Daily Gift', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 4),
-          Text(
-            canClaim ? 'Tap to claim your reward!' : 'Come back tomorrow! 🌙',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 4,
-            mainAxisSpacing: AppSpacing.sm,
-            crossAxisSpacing: AppSpacing.sm,
-            childAspectRatio: 0.9,
-            children: [
-              for (int i = 0; i < ladder.length; i++)
-                _DayTile(
-                  day: i + 1,
-                  reward: ladder[i],
-                  isNext: canClaim && i == nextIndex,
-                  claimed: !canClaim && i == nextIndex,
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg + media.viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('🎁', style: TextStyle(fontSize: compact ? 42 : 56))
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .moveY(begin: -4, end: 4, duration: 1000.ms),
+            const SizedBox(height: 8),
+            Text(
+              'Daily Gift',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              canClaim ? 'Tap to claim your reward!' : 'Come back tomorrow! 🌙',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: columns,
+              mainAxisSpacing: AppSpacing.sm,
+              crossAxisSpacing: AppSpacing.sm,
+              childAspectRatio: compact ? 1.05 : 0.9,
+              children: [
+                for (int i = 0; i < ladder.length; i++)
+                  _DayTile(
+                    day: i + 1,
+                    reward: ladder[i],
+                    isNext: canClaim && i == nextIndex,
+                    claimed: !canClaim && i == nextIndex,
+                    compact: compact,
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            BouncyButton(
+              onTap: (canClaim && !_claimedNow)
+                  ? () async {
+                      final reward = await controller.claim();
+                      if (reward == null) return;
+                      setState(() => _claimedNow = true);
+                      AudioService.instance.playSfx(Sfx.reward);
+                      AudioService.instance.speak('You got a daily gift!');
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 900),
+                      );
+                      if (context.mounted) Navigator.of(context).pop();
+                    }
+                  : null,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: compact ? 13 : 16),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: canClaim
+                        ? [AppColors.success, AppColors.mint]
+                        : [Colors.grey, Colors.grey.shade400],
+                  ),
+                  borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
                 ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          BouncyButton(
-            onTap: (canClaim && !_claimedNow)
-                ? () async {
-                    final reward = await controller.claim();
-                    if (reward == null) return;
-                    setState(() => _claimedNow = true);
-                    AudioService.instance.playSfx(Sfx.reward);
-                    AudioService.instance.speak('You got a daily gift!');
-                    await Future<void>.delayed(
-                        const Duration(milliseconds: 900));
-                    if (context.mounted) Navigator.of(context).pop();
-                  }
-                : null,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: canClaim
-                      ? [AppColors.success, AppColors.mint]
-                      : [Colors.grey, Colors.grey.shade400],
-                ),
-                borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
-              ),
-              child: Text(
-                canClaim ? 'Claim Gift!' : 'Claimed Today',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    canClaim ? 'Claim Gift!' : 'Claimed Today',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: compact ? 18 : 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
       ),
     );
   }
@@ -126,12 +147,14 @@ class _DayTile extends StatelessWidget {
     required this.reward,
     required this.isNext,
     required this.claimed,
+    required this.compact,
   });
 
   final int day;
   final DailyReward reward;
   final bool isNext;
   final bool claimed;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -145,25 +168,50 @@ class _DayTile extends StatelessWidget {
         border:
             highlight ? Border.all(color: AppColors.accent, width: 3) : null,
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
         children: [
-          Text('Day $day',
-              style:
-                  const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-          const SizedBox(height: 2),
-          Text(reward.gems > 0 ? '💎' : '🪙',
-              style: const TextStyle(fontSize: 22)),
-          Text(
-            reward.gems > 0 ? '${reward.gems}' : '${reward.coins}',
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              color: AppColors.coinDark,
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(compact ? 4 : 6),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Day $day',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: compact ? 10 : 12,
+                      ),
+                    ),
+                    SizedBox(height: compact ? 1 : 2),
+                    Text(
+                      reward.gems > 0 ? '💎' : '🪙',
+                      style: TextStyle(fontSize: compact ? 17 : 22),
+                    ),
+                    Text(
+                      reward.gems > 0 ? '${reward.gems}' : '${reward.coins}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.coinDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           if (claimed)
-            const Icon(Icons.check_circle_rounded,
-                color: AppColors.success, size: 16),
+            Positioned(
+              top: compact ? 2 : 4,
+              right: compact ? 2 : 4,
+              child: Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.success,
+                size: compact ? 13 : 16,
+              ),
+            ),
         ],
       ),
     );

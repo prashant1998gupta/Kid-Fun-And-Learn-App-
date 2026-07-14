@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -47,6 +49,8 @@ class GameResultScreen extends StatefulWidget {
 }
 
 class _GameResultScreenState extends State<GameResultScreen> {
+  Timer? _rewardVoiceTimer;
+
   @override
   void initState() {
     super.initState();
@@ -56,12 +60,18 @@ class _GameResultScreenState extends State<GameResultScreen> {
           ? 'Level up! You reached level ${widget.newLevel}!'
           : PraiseLines.nextSuccess();
       AudioService.instance.speak(line);
-      Future<void>.delayed(const Duration(milliseconds: 900), () {
+      _rewardVoiceTimer = Timer(const Duration(milliseconds: 900), () {
         if (!mounted) return;
         AudioService.instance.playSfx(Sfx.reward);
         AudioService.instance.speak(PraiseLines.nextRewardReveal());
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _rewardVoiceTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -71,104 +81,130 @@ class _GameResultScreenState extends State<GameResultScreen> {
       body: AnimatedBackground(
         theme: WorldTheme.candy,
         child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                      AppSpacing.md,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact =
+                  constraints.maxWidth < 360 || constraints.maxHeight < 620;
+              return Column(
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(
+                          compact ? AppSpacing.md : AppSpacing.lg,
+                          compact ? AppSpacing.md : AppSpacing.lg,
+                          compact ? AppSpacing.md : AppSpacing.lg,
+                          AppSpacing.md,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            MascotView(
+                                    mascot: Mascot.unicorn,
+                                    size: compact ? 112 : 150)
+                                .animate()
+                                .scale(
+                                    curve: Curves.elasticOut, duration: 700.ms),
+                            const SizedBox(height: 12),
+                            Text(
+                              widget.leveledUp ? 'LEVEL UP!' : 'Great Job!',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: (compact
+                                      ? Theme.of(context)
+                                          .textTheme
+                                          .headlineMedium
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .displayMedium)
+                                  ?.copyWith(color: Colors.white),
+                            ).animate().fadeIn().slideY(begin: 0.3, end: 0),
+                            SizedBox(height: compact ? 12 : 16),
+                            _Stars(stars: stars),
+                            SizedBox(height: compact ? 16 : 24),
+                            _RewardRow(reward: widget.reward),
+                            SizedBox(height: compact ? 14 : 18),
+                            _RewardMoment(
+                              prize: widget.prize,
+                              isNew: widget.prizeWasNew,
+                            ),
+                            if (widget.newBadges.isNotEmpty) ...[
+                              const SizedBox(height: 20),
+                              _BadgeBanner(badges: widget.newBadges),
+                            ],
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      compact ? 8 : 10,
+                      16,
+                      compact ? 10 : 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.94),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 14,
+                          offset: Offset(0, -4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const MascotView(mascot: Mascot.unicorn, size: 150)
-                            .animate()
-                            .scale(curve: Curves.elasticOut, duration: 700.ms),
-                        const SizedBox(height: 12),
-                        Text(
-                          widget.leveledUp ? 'LEVEL UP!' : 'Great Job!',
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayMedium
-                              ?.copyWith(color: Colors.white),
-                        ).animate().fadeIn().slideY(begin: 0.3, end: 0),
-                        const SizedBox(height: 16),
-                        _Stars(stars: stars),
-                        const SizedBox(height: 24),
-                        _RewardRow(reward: widget.reward),
-                        const SizedBox(height: 18),
-                        _RewardMoment(
-                          prize: widget.prize,
-                          isNew: widget.prizeWasNew,
+                        BouncyButton(
+                          onTap: widget.onContinue,
+                          child: _pill(
+                            'Continue Adventure 🚀',
+                            AppColors.success,
+                            compact: compact,
+                          ),
                         ),
-                        if (widget.newBadges.isNotEmpty) ...[
-                          const SizedBox(height: 20),
-                          _BadgeBanner(badges: widget.newBadges),
-                        ],
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 8,
+                          runSpacing: 0,
+                          children: [
+                            TextButton(
+                              onPressed: widget.onVisitWorld,
+                              child: const Text('Place reward 🏡'),
+                            ),
+                            TextButton(
+                              onPressed: widget.onReplay,
+                              child: const Text('Play again'),
+                            ),
+                            IconButton(
+                              tooltip: 'Home',
+                              onPressed: widget.onHome,
+                              icon: const Icon(Icons.home_rounded),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.94),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 14,
-                      offset: Offset(0, -4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    BouncyButton(
-                      onTap: widget.onContinue,
-                      child: _pill('Continue Adventure 🚀', AppColors.success),
-                    ),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 8,
-                      runSpacing: 0,
-                      children: [
-                        TextButton(
-                          onPressed: widget.onVisitWorld,
-                          child: const Text('Place reward 🏡'),
-                        ),
-                        TextButton(
-                          onPressed: widget.onReplay,
-                          child: const Text('Play again'),
-                        ),
-                        IconButton(
-                          tooltip: 'Home',
-                          onPressed: widget.onHome,
-                          icon: const Icon(Icons.home_rounded),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _pill(String label, Color color) => Container(
-        width: 240,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+  Widget _pill(String label, Color color, {required bool compact}) => Container(
+        constraints: BoxConstraints(maxWidth: compact ? 230 : 260),
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: compact ? 14 : 16),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: color,
@@ -183,9 +219,11 @@ class _GameResultScreenState extends State<GameResultScreen> {
         ),
         child: Text(
           label,
-          style: const TextStyle(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 22,
+            fontSize: compact ? 18 : 22,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -200,66 +238,83 @@ class _RewardMoment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 420),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: AppSpacing.cardRadius,
-        border: Border.all(color: prize.color, width: 3),
-        boxShadow: [
-          BoxShadow(
-            color: prize.color.withValues(alpha: 0.35),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return Container(
+          constraints: const BoxConstraints(maxWidth: 420),
+          padding: EdgeInsets.all(compact ? 12 : AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: AppSpacing.cardRadius,
+            border: Border.all(color: prize.color, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: prize.color.withValues(alpha: 0.35),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 86,
-            height: 86,
-            decoration: BoxDecoration(
-              color: prize.color.withValues(alpha: 0.16),
-              borderRadius: AppSpacing.cardRadius,
-            ),
-            alignment: Alignment.center,
-            child: Text(prize.emoji, style: const TextStyle(fontSize: 58)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isNew ? 'NEW WORLD REWARD' : 'COMPANION BONUS',
-                  style: const TextStyle(
-                    color: AppColors.lightTextSoft,
-                    fontWeight: FontWeight.w800,
-                  ),
+          child: Row(
+            children: [
+              Container(
+                width: compact ? 68 : 86,
+                height: compact ? 68 : 86,
+                decoration: BoxDecoration(
+                  color: prize.color.withValues(alpha: 0.16),
+                  borderRadius: AppSpacing.cardRadius,
                 ),
-                Text(
-                  prize.title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.lightText,
-                        fontWeight: FontWeight.w900,
-                      ),
+                alignment: Alignment.center,
+                child: Text(
+                  prize.emoji,
+                  style: TextStyle(fontSize: compact ? 46 : 58),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  isNew
-                      ? prize.revealLine
-                      : 'You already own this, so your companion gained extra sparkle!',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              ),
+              SizedBox(width: compact ? 10 : 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isNew ? 'NEW WORLD REWARD' : 'COMPANION BONUS',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
                         color: AppColors.lightTextSoft,
+                        fontWeight: FontWeight.w800,
+                        fontSize: compact ? 11 : 13,
                       ),
+                    ),
+                    Text(
+                      prize.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: AppColors.lightText,
+                            fontWeight: FontWeight.w900,
+                            fontSize: compact ? 18 : null,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isNew
+                          ? prize.revealLine
+                          : 'You already own this, so your companion gained extra sparkle!',
+                      maxLines: compact ? 2 : 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.lightTextSoft,
+                            fontSize: compact ? 12 : null,
+                          ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     ).animate().fadeIn(delay: 650.ms).scale(
           begin: const Offset(0.85, 0.85),
           end: const Offset(1, 1),
@@ -274,25 +329,30 @@ class _Stars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (int i = 0; i < 3; i++)
-          Icon(
-            i < stars ? Icons.star_rounded : Icons.star_outline_rounded,
-            size: 64,
-            color: i < stars ? AppColors.star : Colors.white54,
-          )
-              .animate(delay: (250 * i).ms)
-              .scale(
-                curve: Curves.elasticOut,
-                duration: 600.ms,
-                begin: const Offset(0, 0),
-                end: const Offset(1, 1),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.maxWidth < 360 ? 52.0 : 64.0;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int i = 0; i < 3; i++)
+              Icon(
+                i < stars ? Icons.star_rounded : Icons.star_outline_rounded,
+                size: size,
+                color: i < stars ? AppColors.star : Colors.white54,
               )
-              .then()
-              .shake(hz: 4, rotation: 0.1, duration: 300.ms),
-      ],
+                  .animate(delay: (250 * i).ms)
+                  .scale(
+                    curve: Curves.elasticOut,
+                    duration: 600.ms,
+                    begin: const Offset(0, 0),
+                    end: const Offset(1, 1),
+                  )
+                  .then()
+                  .shake(hz: 4, rotation: 0.1, duration: 300.ms),
+          ],
+        );
+      },
     );
   }
 }
@@ -307,7 +367,7 @@ class _RewardRow extends StatelessWidget {
       if (value <= 0) return const SizedBox.shrink();
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(AppSpacing.radiusPill),
@@ -315,13 +375,13 @@ class _RewardRow extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 28),
+            Icon(icon, color: color, size: 25),
             const SizedBox(width: 6),
             Text(
               '+$value',
               style: TextStyle(
                 color: color,
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w800,
               ),
             ),

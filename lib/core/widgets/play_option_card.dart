@@ -41,6 +41,7 @@ class PlayOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isIdle = state == PlayCardState.idle;
     final fg = isIdle ? AppColors.lightText : Colors.white;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
 
     final gradient = switch (state) {
       PlayCardState.correct => const LinearGradient(
@@ -65,6 +66,8 @@ class PlayOptionCard extends StatelessWidget {
       PlayCardState.idle => AppColors.primary.withValues(alpha: 0.16),
     };
     final size = artSize ?? (emoji == null ? 58 : 72);
+    final effectiveArtSize =
+        (textScale > 1.25 ? size * 0.82 : size).clamp(42.0, size).toDouble();
 
     Widget inner = Container(
       decoration: BoxDecoration(
@@ -89,18 +92,24 @@ class PlayOptionCard extends StatelessWidget {
             IllustratedObjectView(
               label: label,
               emoji: emoji,
-              size: size,
+              size: effectiveArtSize,
               selected: !isIdle,
             ),
             if (emoji != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineMedium
-                    ?.copyWith(color: fg),
+              SizedBox(height: textScale > 1.25 ? 4 : 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(color: fg),
+                  ),
+                ),
               ),
             ],
           ],
@@ -109,9 +118,7 @@ class PlayOptionCard extends StatelessWidget {
     );
 
     if (isIdle && !MediaQuery.disableAnimationsOf(context)) {
-      inner = inner
-          .animate(onPlay: (c) => c.repeat(reverse: true))
-          .moveY(
+      inner = inner.animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
             begin: 0,
             end: -6,
             duration: (1500 + index * 130).ms,
@@ -139,16 +146,14 @@ class PlayOptionCard extends StatelessWidget {
           .then()
           .scale(begin: const Offset(1.08, 1.08), end: const Offset(1, 1));
     } else {
-      card = card
-          .animate()
-          .fadeIn(duration: 260.ms, delay: (index * 70).ms)
-          .scale(
-            begin: const Offset(0.82, 0.82),
-            end: const Offset(1, 1),
-            delay: (index * 70).ms,
-            duration: 320.ms,
-            curve: Curves.easeOutBack,
-          );
+      card =
+          card.animate().fadeIn(duration: 260.ms, delay: (index * 70).ms).scale(
+                begin: const Offset(0.82, 0.82),
+                end: const Offset(1, 1),
+                delay: (index * 70).ms,
+                duration: 320.ms,
+                curve: Curves.easeOutBack,
+              );
     }
     return card;
   }

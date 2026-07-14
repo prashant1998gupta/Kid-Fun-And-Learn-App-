@@ -30,61 +30,68 @@ class ProfilePickerScreen extends ConsumerWidget {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Text(
-                  "Who's playing today?",
-                  style: Theme.of(context)
-                      .textTheme
-                      .displayMedium
-                      ?.copyWith(color: Colors.white),
-                  textAlign: TextAlign.center,
-                ).animate().fadeIn().slideY(begin: -0.2, end: 0),
-                const SizedBox(height: 40),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount:
-                        MediaQuery.of(context).size.width > 600 ? 4 : 2,
-                    mainAxisSpacing: AppSpacing.lg,
-                    crossAxisSpacing: AppSpacing.lg,
-                    children: [
-                      for (final child in profiles.children)
-                        _ProfileTile(child: child, ref: ref),
-                      _AddTile(),
-                    ],
-                  ),
-                ),
-                BouncyButton(
-                  onTap: () => context.push(AppRoutes.parentGate),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 28,
-                      vertical: 14,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 360;
+                final gridSpacing = compact ? AppSpacing.md : AppSpacing.lg;
+                return Column(
+                  children: [
+                    SizedBox(height: compact ? 8 : 20),
+                    Text(
+                      "Who's playing today?",
+                      style:
+                          Theme.of(context).textTheme.displayMedium?.copyWith(
+                                color: Colors.white,
+                                fontSize: compact ? 30 : null,
+                              ),
+                      textAlign: TextAlign.center,
+                    ).animate().fadeIn().slideY(begin: -0.2, end: 0),
+                    SizedBox(height: compact ? 22 : 40),
+                    Expanded(
+                      child: GridView.count(
+                        crossAxisCount: constraints.maxWidth > 600 ? 4 : 2,
+                        childAspectRatio: compact ? 0.86 : 1,
+                        mainAxisSpacing: gridSpacing,
+                        crossAxisSpacing: gridSpacing,
+                        children: [
+                          for (final child in profiles.children)
+                            _ProfileTile(child: child, ref: ref),
+                          const _AddTile(),
+                        ],
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.25),
-                      borderRadius:
-                          const BorderRadius.all(AppSpacing.radiusPill),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.lock_rounded, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text(
-                          'Parents',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
+                    BouncyButton(
+                      onTap: () => context.push(AppRoutes.parentGate),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 22 : 28,
+                          vertical: compact ? 12 : 14,
                         ),
-                      ],
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          borderRadius:
+                              const BorderRadius.all(AppSpacing.radiusPill),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.lock_rounded, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              'Parents',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -111,6 +118,7 @@ class _ProfileTile extends StatelessWidget {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         title: const Text('Remove profile?'),
         content: Text(
           'All progress for "${child.name}" will be permanently deleted.',
@@ -143,26 +151,41 @@ class _ProfileTile extends StatelessWidget {
       child: BouncyButton(
         borderRadius: AppSpacing.cardRadius,
         onTap: () => _select(context),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AvatarView(config: child.avatar, size: 102),
-            const SizedBox(height: 7),
-            Text(
-              child.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(color: Colors.white),
-            ),
-            Text(
-              child.grade.label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final tight = constraints.maxHeight < 150;
+            final avatarSize = (constraints.maxHeight * (tight ? 0.52 : 0.58))
+                .clamp(64.0, 102.0);
+            final nameStyle = (tight
+                    ? Theme.of(context).textTheme.titleMedium
+                    : Theme.of(context).textTheme.titleLarge)
+                ?.copyWith(color: Colors.white);
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AvatarView(config: child.avatar, size: avatarSize),
+                SizedBox(height: tight ? 4 : 7),
+                Flexible(
+                  child: Text(
+                    child.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: nameStyle,
+                  ),
+                ),
+                Text(
+                  child.grade.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: tight ? 12 : 14,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ).animate().scale(curve: Curves.easeOutBack, duration: 400.ms),
     );
@@ -170,26 +193,39 @@ class _ProfileTile extends StatelessWidget {
 }
 
 class _AddTile extends StatelessWidget {
+  const _AddTile();
+
   @override
   Widget build(BuildContext context) {
     return BouncyButton(
       borderRadius: AppSpacing.cardRadius,
       onTap: () => context.push(AppRoutes.profileCreate),
-      child: const DottedCircle(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_rounded, color: Colors.white, size: 56),
-            SizedBox(height: 8),
-            Text(
-              'Add Kid',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
+      child: DottedCircle(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final tight = constraints.maxHeight < 150;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.add_rounded,
+                  color: Colors.white,
+                  size: tight ? 42 : 56,
+                ),
+                SizedBox(height: tight ? 4 : 8),
+                Text(
+                  'Add Kid',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: tight ? 16 : 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -146,100 +146,145 @@ class _PhysicalMissionScreenState extends ConsumerState<PhysicalMissionScreen> {
 
   Widget _header(BuildContext context) => Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            BouncyButton(
-              onTap: () => Navigator.of(context).pop(),
-              child: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.close_rounded),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text('🏃 Move Together!',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900)),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            return Row(
+              children: [
+                BouncyButton(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: CircleAvatar(
+                    radius: compact ? 18 : 20,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.close_rounded, size: compact ? 21 : 24),
+                  ),
+                ),
+                SizedBox(width: compact ? 8 : 12),
+                Expanded(
+                  child: Text(
+                    '🏃 Move Together!',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: compact ? 21 : 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       );
 
   Widget _mission(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(24),
-      constraints: const BoxConstraints(maxWidth: 520),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: switch (_step) {
-        0 => _centered(
-            '✨',
-            'Shake the stars awake!',
-            Column(
-              children: [
-                LinearProgressIndicator(value: _shakes / 5),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: _completeStep,
-                  child: const Text('No motion sensor? Tap here'),
-                ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact =
+            constraints.maxWidth < 360 || constraints.maxHeight < 430;
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(compact ? AppSpacing.md : 24),
+          child: Center(
+            child: Container(
+              padding: EdgeInsets.all(compact ? AppSpacing.md : 24),
+              constraints: const BoxConstraints(maxWidth: 520),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(compact ? 24 : 30),
+              ),
+              child: switch (_step) {
+                0 => _centered(
+                    '✨',
+                    'Shake the stars awake!',
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LinearProgressIndicator(value: _shakes / 5),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: _completeStep,
+                          child: const Text('No motion sensor? Tap here'),
+                        ),
+                      ],
+                    ),
+                    compact: compact,
+                  ),
+                1 => _centered(
+                    '🗣️',
+                    'Say “We are a great team!”',
+                    BouncyButton(
+                      onTap: _listen,
+                      child: _pill(_listening ? 'Listening…' : 'Tap and speak'),
+                    ),
+                    compact: compact,
+                  ),
+                2 => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('🙌', style: TextStyle(fontSize: compact ? 62 : 80)),
+                      Text(
+                        'Partner high-five!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: compact ? 20 : 24,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 14 : 18),
+                      Row(children: [
+                        Expanded(
+                            child: GestureDetector(
+                          onTap: () => _familyTap(true),
+                          child:
+                              _hand('LEFT', _leftTap != null, compact: compact),
+                        )),
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: GestureDetector(
+                          onTap: () => _familyTap(false),
+                          child: _hand('RIGHT', _rightTap != null,
+                              compact: compact),
+                        )),
+                      ]),
+                    ],
+                  ),
+                _ => _centered(
+                    '🚀',
+                    'Teamwork mission complete!',
+                    BouncyButton(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: _pill('Put rocket in my world'),
+                    ),
+                    compact: compact,
+                  ),
+              },
             ),
           ),
-        1 => _centered(
-            '🗣️',
-            'Say “We are a great team!”',
-            BouncyButton(
-              onTap: _listen,
-              child: _pill(_listening ? 'Listening…' : 'Tap and speak'),
-            ),
-          ),
-        2 => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🙌', style: TextStyle(fontSize: 80)),
-              const Text('Partner high-five!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 18),
-              Row(children: [
-                Expanded(
-                    child: GestureDetector(
-                  onTap: () => _familyTap(true),
-                  child: _hand('LEFT', _leftTap != null),
-                )),
-                const SizedBox(width: 12),
-                Expanded(
-                    child: GestureDetector(
-                  onTap: () => _familyTap(false),
-                  child: _hand('RIGHT', _rightTap != null),
-                )),
-              ]),
-            ],
-          ),
-        _ => _centered(
-            '🚀',
-            'Teamwork mission complete!',
-            BouncyButton(
-              onTap: () => Navigator.of(context).pop(),
-              child: _pill('Put rocket in my world'),
-            ),
-          ),
+        );
       },
     );
   }
 
-  Widget _centered(String emoji, String title, Widget action) => Column(
+  Widget _centered(
+    String emoji,
+    String title,
+    Widget action, {
+    required bool compact,
+  }) =>
+      Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 88)),
-          Text(title,
-              textAlign: TextAlign.center,
-              style:
-                  const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 24),
+          Text(emoji, style: TextStyle(fontSize: compact ? 64 : 88)),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: compact ? 20 : 24,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(height: compact ? 16 : 24),
           action,
         ],
       );
@@ -254,8 +299,8 @@ class _PhysicalMissionScreenState extends ConsumerState<PhysicalMissionScreen> {
                 color: Colors.white, fontWeight: FontWeight.w900)),
       );
 
-  Widget _hand(String label, bool active) => Container(
-        height: 120,
+  Widget _hand(String label, bool active, {required bool compact}) => Container(
+        height: compact ? 96 : 120,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: active ? AppColors.star : AppColors.sky,
@@ -263,6 +308,9 @@ class _PhysicalMissionScreenState extends ConsumerState<PhysicalMissionScreen> {
         ),
         child: Text('✋\n$label',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w900)),
+            style: TextStyle(
+              fontSize: compact ? 21 : 25,
+              fontWeight: FontWeight.w900,
+            )),
       );
 }

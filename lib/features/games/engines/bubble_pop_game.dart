@@ -222,26 +222,38 @@ class _BubblePopGameState extends State<BubblePopGame> {
               ),
             ),
             Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (option.emoji != null)
-                    IllustratedObjectView(
-                      label: option.label,
-                      emoji: option.emoji,
-                      size: 42,
-                      selected: true,
-                    ),
-                  Text(
-                    option.label,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                    ),
+              child: Padding(
+                padding: const EdgeInsets.all(13),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (option.emoji != null)
+                        IllustratedObjectView(
+                          label: option.label,
+                          emoji: option.emoji,
+                          size: 42,
+                          selected: true,
+                        ),
+                      SizedBox(
+                        width: 78,
+                        child: Text(
+                          option.label,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                            height: 1.05,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ],

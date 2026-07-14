@@ -87,102 +87,146 @@ class _FlashcardGameState extends State<FlashcardGame> {
         body: AnimatedBackground(
           theme: WorldTheme.candy,
           child: SafeArea(
-            child: Column(
-              children: [
-                _header(context),
-                const Spacer(),
-                // The big tappable learning card.
-                BouncyButton(
-                  onTap: _say,
-                  borderRadius: AppSpacing.cardRadius,
-                  child: Container(
-                    key: ValueKey(_index),
-                    width: 300,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: AppSpacing.cardRadius,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 22,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final textScale = MediaQuery.textScalerOf(context).scale(1);
+                final compact = constraints.maxWidth < 360 ||
+                    constraints.maxHeight < 620 ||
+                    textScale > 1.2;
+                final cardWidth = (constraints.maxWidth - AppSpacing.lg * 2)
+                    .clamp(220.0, 300.0)
+                    .toDouble();
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          card.prompt,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 72,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
-                            height: 1.0,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        if (card.promptEmoji != null)
-                          IllustratedObjectView(
-                            label: card.answer ?? '',
-                            emoji: card.promptEmoji,
-                            size: 96,
-                          ),
-                        if (card.answer != null) ...[
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            card.answer!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.lightText,
+                        _header(context),
+                        SizedBox(height: compact ? 12 : 36),
+                        // The big tappable learning card.
+                        BouncyButton(
+                          onTap: _say,
+                          borderRadius: AppSpacing.cardRadius,
+                          child: Container(
+                            key: ValueKey(_index),
+                            width: cardWidth,
+                            padding: EdgeInsets.symmetric(
+                              vertical: compact ? AppSpacing.lg : AppSpacing.xl,
+                              horizontal:
+                                  compact ? AppSpacing.md : AppSpacing.lg,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: AppSpacing.cardRadius,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 22,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    card.prompt,
+                                    maxLines: 1,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: compact ? 54 : 72,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.primary,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height:
+                                      compact ? AppSpacing.sm : AppSpacing.md,
+                                ),
+                                if (card.promptEmoji != null)
+                                  IllustratedObjectView(
+                                    label: card.answer ?? '',
+                                    emoji: card.promptEmoji,
+                                    size: compact ? 76 : 96,
+                                  ),
+                                if (card.answer != null) ...[
+                                  const SizedBox(height: AppSpacing.sm),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      card.answer!,
+                                      maxLines: 1,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: compact ? 24 : 30,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.lightText,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: AppSpacing.sm),
+                                Icon(
+                                  Icons.volume_up_rounded,
+                                  color: AppColors.primary,
+                                  size: compact ? 26 : 30,
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                        const SizedBox(height: AppSpacing.sm),
-                        const Icon(Icons.volume_up_rounded,
-                            color: AppColors.primary, size: 30),
+                        )
+                            .animate(key: ValueKey('card$_index'))
+                            .fadeIn(duration: 250.ms)
+                            .scale(
+                              begin: const Offset(0.85, 0.85),
+                              end: const Offset(1, 1),
+                              curve: Curves.easeOutBack,
+                            ),
+                        SizedBox(height: compact ? 16 : 36),
+                        Padding(
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          child: BouncyButton(
+                            onTap: _next,
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                vertical: compact ? 15 : 18,
+                              ),
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(colors: [
+                                  AppColors.success,
+                                  AppColors.mint
+                                ]),
+                                borderRadius:
+                                    BorderRadius.all(AppSpacing.radiusPill),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  _index + 1 >= _total
+                                      ? 'Finish! 🎉'
+                                      : 'Next ➜',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: compact ? 19 : 22,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                )
-                    .animate(key: ValueKey('card$_index'))
-                    .fadeIn(duration: 250.ms)
-                    .scale(
-                      begin: const Offset(0.85, 0.85),
-                      end: const Offset(1, 1),
-                      curve: Curves.easeOutBack,
-                    ),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: BouncyButton(
-                    onTap: _next,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                            colors: [AppColors.success, AppColors.mint]),
-                        borderRadius: BorderRadius.all(AppSpacing.radiusPill),
-                      ),
-                      child: Text(
-                        _index + 1 >= _total ? 'Finish! 🎉' : 'Next ➜',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),

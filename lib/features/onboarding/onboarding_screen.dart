@@ -74,74 +74,93 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _controller,
-            itemCount: _pages.length,
-            onPageChanged: (i) {
-              setState(() => _page = i);
-              AudioService.instance.speak(_pages[i].voice);
-            },
-            itemBuilder: (_, i) => _OnboardingPage(data: _pages[i]),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 40,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (int i = 0; i < _pages.length; i++)
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 5),
-                        width: i == _page ? 28 : 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: Colors.white
-                              .withValues(alpha: i == _page ? 1 : 0.5),
-                          borderRadius:
-                              const BorderRadius.all(AppSpacing.radiusPill),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact =
+              constraints.maxWidth < 360 || constraints.maxHeight < 620;
+          return Stack(
+            children: [
+              PageView.builder(
+                controller: _controller,
+                itemCount: _pages.length,
+                onPageChanged: (i) {
+                  setState(() => _page = i);
+                  AudioService.instance.speak(_pages[i].voice);
+                },
+                itemBuilder: (_, i) => _OnboardingPage(data: _pages[i]),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: compact ? 18 : 40,
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (int i = 0; i < _pages.length; i++)
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              width: i == _page ? 28 : 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(
+                                  alpha: i == _page ? 1 : 0.5,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                  AppSpacing.radiusPill,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: compact ? 14 : 24),
+                      BouncyButton(
+                        onTap: _next,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: compact ? 36 : 48,
+                            vertical: compact ? 15 : 18,
+                          ),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: AppSpacing.buttonRadius,
+                          ),
+                          child: Text(
+                            _page == _pages.length - 1 ? "Let's Go!" : 'Next',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 24),
-                BouncyButton(
-                  onTap: _next,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 48,
-                      vertical: 18,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: AppSpacing.buttonRadius,
-                    ),
+              ),
+              Positioned(
+                top: compact ? 24 : 50,
+                right: 14,
+                child: SafeArea(
+                  child: TextButton(
+                    onPressed: () => context.go(AppRoutes.profileCreate),
                     child: Text(
-                      _page == _pages.length - 1 ? "Let's Go!" : 'Next',
-                      style: Theme.of(context).textTheme.labelLarge,
+                      'Skip',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: compact ? 16 : 18,
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 50,
-            right: 20,
-            child: TextButton(
-              onPressed: () => context.go(AppRoutes.profileCreate),
-              child: const Text(
-                'Skip',
-                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -170,34 +189,50 @@ class _OnboardingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBackground(
       theme: data.theme,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            MascotView(mascot: data.mascot, size: 200)
-                .animate()
-                .scale(curve: Curves.elasticOut, duration: 600.ms),
-            const SizedBox(height: 40),
-            Text(
-              data.title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .displayMedium
-                  ?.copyWith(color: Colors.white),
-            ).animate().fadeIn().slideY(begin: 0.3, end: 0),
-            const SizedBox(height: 16),
-            Text(
-              data.body,
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: Colors.white),
-            ).animate().fadeIn(delay: 200.ms),
-          ],
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact =
+              constraints.maxWidth < 360 || constraints.maxHeight < 620;
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              compact ? AppSpacing.lg : AppSpacing.xl,
+              AppSpacing.xl,
+              compact ? AppSpacing.lg : AppSpacing.xl,
+              compact ? 128 : 160,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - (compact ? 128 : 160),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  MascotView(mascot: data.mascot, size: compact ? 145 : 200)
+                      .animate()
+                      .scale(curve: Curves.elasticOut, duration: 600.ms),
+                  SizedBox(height: compact ? 24 : 40),
+                  Text(
+                    data.title,
+                    textAlign: TextAlign.center,
+                    style: (compact
+                            ? Theme.of(context).textTheme.headlineMedium
+                            : Theme.of(context).textTheme.displayMedium)
+                        ?.copyWith(color: Colors.white),
+                  ).animate().fadeIn().slideY(begin: 0.3, end: 0),
+                  const SizedBox(height: 16),
+                  Text(
+                    data.body,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(color: Colors.white),
+                  ).animate().fadeIn(delay: 200.ms),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

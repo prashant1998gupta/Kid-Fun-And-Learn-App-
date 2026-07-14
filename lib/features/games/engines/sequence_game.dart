@@ -133,23 +133,38 @@ class _SequenceGameState extends State<SequenceGame> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 ||
+        media.size.height < 620 ||
+        media.textScaler.scale(1) > 1.2;
+
     return CelebrationOverlay(
       controller: _celebration,
       child: Scaffold(
         body: AnimatedBackground(
           theme: WorldTheme.night,
           child: SafeArea(
-            child: Column(
-              children: [
-                _header(context),
-                const SizedBox(height: 8),
-                _prompt(context),
-                const SizedBox(height: 8),
-                _slots(context),
-                const Spacer(),
-                _tiles(context),
-                const Spacer(),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Column(
+                      children: [
+                        _header(context),
+                        SizedBox(height: compact ? 4 : 8),
+                        _prompt(context, compact: compact),
+                        SizedBox(height: compact ? 8 : 12),
+                        _slots(context, compact: compact),
+                        SizedBox(height: compact ? 16 : 34),
+                        _tiles(context),
+                        SizedBox(height: compact ? 16 : 34),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -158,15 +173,16 @@ class _SequenceGameState extends State<SequenceGame> {
   }
 
   /// The ordered "answer" row that fills in as the child taps correctly.
-  Widget _slots(BuildContext context) {
+  Widget _slots(BuildContext context, {required bool compact}) {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
+      runSpacing: 8,
       children: [
         for (int pos = 0; pos < _q.options.length; pos++)
           Container(
-            width: 54,
-            height: 54,
+            width: compact ? 44 : 54,
+            height: compact ? 44 : 54,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: pos < _nextExpected
@@ -176,13 +192,18 @@ class _SequenceGameState extends State<SequenceGame> {
               border: Border.all(color: Colors.white, width: 2),
             ),
             child: pos < _nextExpected
-                ? Text(_optionShort(_q.options[pos]),
-                    style: const TextStyle(fontSize: 24))
+                ? FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      _optionShort(_q.options[pos]),
+                      style: TextStyle(fontSize: compact ? 20 : 24),
+                    ),
+                  )
                 : Text('${pos + 1}',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: Colors.white70,
                         fontWeight: FontWeight.w800,
-                        fontSize: 20)),
+                        fontSize: compact ? 17 : 20)),
           ),
       ],
     );
@@ -248,33 +269,38 @@ class _SequenceGameState extends State<SequenceGame> {
     );
   }
 
-  Widget _prompt(BuildContext context) {
+  Widget _prompt(BuildContext context, {required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? AppSpacing.md : AppSpacing.lg,
+      ),
       child: BouncyButton(
         onTap: _speak,
         borderRadius: AppSpacing.cardRadius,
         child: Container(
-          padding: AppSpacing.cardPadding,
+          padding: EdgeInsets.all(compact ? 14 : AppSpacing.lg),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: AppSpacing.cardRadius,
           ),
           child: Row(
             children: [
-              const MascotView(mascot: Mascot.robot, size: 56),
-              const SizedBox(width: 12),
+              MascotView(mascot: Mascot.robot, size: compact ? 42 : 56),
+              SizedBox(width: compact ? 8 : 12),
               Expanded(
                 child: Text(
                   _q.prompt,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(color: AppColors.lightText),
+                  maxLines: compact ? 3 : 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.lightText,
+                        fontSize: compact ? 18 : null,
+                        height: 1.15,
+                      ),
                 ),
               ),
-              const Icon(Icons.volume_up_rounded,
-                  color: AppColors.primary, size: 28),
+              Icon(Icons.volume_up_rounded,
+                  color: AppColors.primary, size: compact ? 24 : 28),
             ],
           ),
         ),
@@ -300,6 +326,8 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 360 ||
+        MediaQuery.textScalerOf(context).scale(1) > 1.2;
     Widget tile = BouncyButton(
       onTap: placed ? null : onTap,
       borderRadius: AppSpacing.cardRadius,
@@ -307,8 +335,8 @@ class _Tile extends StatelessWidget {
         opacity: placed ? 0.35 : 1,
         duration: const Duration(milliseconds: 250),
         child: Container(
-          width: 92,
-          height: 92,
+          width: compact ? 82 : 92,
+          height: compact ? 82 : 92,
           decoration: BoxDecoration(
             color: wrong
                 ? AppColors.error
@@ -325,25 +353,38 @@ class _Tile extends StatelessWidget {
             ],
           ),
           child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (option.emoji != null)
-                  IllustratedObjectView(
-                    label: option.label,
-                    emoji: option.emoji,
-                    size: 42,
-                    selected: wrong,
-                  ),
-                Text(
-                  option.label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                    color: wrong ? Colors.white : AppColors.lightText,
-                  ),
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (option.emoji != null)
+                      IllustratedObjectView(
+                        label: option.label,
+                        emoji: option.emoji,
+                        size: compact ? 34 : 42,
+                        selected: wrong,
+                      ),
+                    SizedBox(
+                      width: compact ? 70 : 80,
+                      child: Text(
+                        option.label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: compact ? 13 : 16,
+                          height: 1.05,
+                          color: wrong ? Colors.white : AppColors.lightText,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

@@ -151,66 +151,89 @@ class KidWorldScreen extends ConsumerWidget {
         () => context.push(AppRoutes.physicalMission)
       ),
     ];
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      childAspectRatio: preschool ? 1.35 : 1.7,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      children: [
-        for (var i = 0; i < portals.length; i++)
-          BouncyButton(
-            onTap: portals[i].$4,
-            // Clean gradient card — no white outline. A soft shadow in the
-            // tile's own colour gives depth instead of a hard white border.
-            child: Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    portals[i].$3,
-                    portals[i].$3.withValues(alpha: 0.72),
-                  ],
-                ),
-                borderRadius: AppSpacing.cardRadius,
-                boxShadow: [
-                  BoxShadow(
-                    color: portals[i].$3.withValues(alpha: 0.38),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: preschool ? 64 : 52,
-                    height: preschool ? 64 : 52,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.25),
-                      shape: BoxShape.circle,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        final iconBox = compact ? 48.0 : (preschool ? 64.0 : 52.0);
+        final iconSize = compact ? 27.0 : (preschool ? 36.0 : 28.0);
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          childAspectRatio: compact ? 1.05 : (preschool ? 1.35 : 1.7),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          children: [
+            for (var i = 0; i < portals.length; i++)
+              BouncyButton(
+                onTap: portals[i].$4,
+                // Clean gradient card — no white outline. A soft shadow in the
+                // tile's own colour gives depth instead of a hard white border.
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  padding: EdgeInsets.all(compact ? 8 : 10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        portals[i].$3,
+                        portals[i].$3.withValues(alpha: 0.72),
+                      ],
                     ),
-                    child: Icon(portals[i].$1,
-                        color: Colors.white, size: preschool ? 36 : 28),
+                    borderRadius: AppSpacing.cardRadius,
+                    boxShadow: [
+                      BoxShadow(
+                        color: portals[i].$3.withValues(alpha: 0.38),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(portals[i].$2,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: iconBox,
+                        height: iconBox,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          portals[i].$1,
                           color: Colors.white,
-                          fontSize: preschool ? 20 : 16,
-                          fontWeight: FontWeight.w900)),
-                ],
-              ),
-            ),
-          ).animate().fadeIn(duration: 240.ms, delay: (i * 80).ms).slideY(
-              begin: 0.15, end: 0, delay: (i * 80).ms, duration: 300.ms),
-      ],
+                          size: iconSize,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 6 : 8),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            portals[i].$2,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: compact ? 16 : (preschool ? 20 : 16),
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ).animate().fadeIn(duration: 240.ms, delay: (i * 80).ms).slideY(
+                    begin: 0.15,
+                    end: 0,
+                    delay: (i * 80).ms,
+                    duration: 300.ms,
+                  ),
+          ],
+        );
+      },
     );
   }
 
@@ -276,73 +299,97 @@ class KidWorldScreen extends ConsumerWidget {
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 72)),
-            Text(child.companionName,
-                style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            Text(child.companionMemory,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 17)),
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.star.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(18),
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 520;
+            return SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                compact ? 16 : 24,
+                24,
+                24 + MediaQuery.of(sheetContext).viewInsets.bottom,
               ),
-              child: Text('💡 $suggestion',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
-            ),
-            const SizedBox(height: 18),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                FilledButton.icon(
-                  onPressed: () {
-                    AudioService.instance.playSfx(Sfx.celebration);
-                    AudioService.instance.speak(
-                        '${child.companionName} loves dancing with you!');
-                  },
-                  icon: const Icon(Icons.music_note_rounded),
-                  label: const Text('Dance'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final name = await _askCompanionName(sheetContext, child);
-                    if (name != null) {
-                      await ref
-                          .read(profilesControllerProvider.notifier)
-                          .renameCompanion(name);
-                      if (sheetContext.mounted) {
-                        Navigator.of(sheetContext).pop();
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.edit_rounded),
-                  label: const Text('Rename'),
-                ),
-                if (weak.isNotEmpty) ...[
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(sheetContext).pop();
-                      context.push(AppRoutes.learningMap, extra: weak.first);
-                    },
-                    icon: const Icon(Icons.explore_rounded),
-                    label: const Text('Spark’s idea'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(emoji, style: TextStyle(fontSize: compact ? 54 : 72)),
+                  Text(
+                    child.companionName,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    child.companionMemory,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: compact ? 15 : 17),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.star.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      '💡 $suggestion',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: () {
+                          AudioService.instance.playSfx(Sfx.celebration);
+                          AudioService.instance.speak(
+                              '${child.companionName} loves dancing with you!');
+                        },
+                        icon: const Icon(Icons.music_note_rounded),
+                        label: const Text('Dance'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final name =
+                              await _askCompanionName(sheetContext, child);
+                          if (name != null) {
+                            await ref
+                                .read(profilesControllerProvider.notifier)
+                                .renameCompanion(name);
+                            if (sheetContext.mounted) {
+                              Navigator.of(sheetContext).pop();
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.edit_rounded),
+                        label: const Text('Rename'),
+                      ),
+                      if (weak.isNotEmpty) ...[
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop();
+                            context.push(AppRoutes.learningMap,
+                                extra: weak.first);
+                          },
+                          icon: const Icon(Icons.explore_rounded),
+                          label: const Text('Spark’s idea'),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
-              ],
-            ),
-          ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -356,6 +403,7 @@ class KidWorldScreen extends ConsumerWidget {
     final result = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: const Text('Name your companion'),
         content: TextField(
           controller: controller,

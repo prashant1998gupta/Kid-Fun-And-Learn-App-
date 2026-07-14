@@ -53,28 +53,36 @@ Future<void> showWatchDemonstration(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => AlertDialog(
+      scrollable: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       title: const Text('👀 Watch Spark first', textAlign: TextAlign.center),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(explanation,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 17, height: 1.35)),
-          const SizedBox(height: 14),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text('✨ $answer',
-                textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.48,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(explanation,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 17, height: 1.35)),
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('✨ $answer',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.w900)),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       actionsAlignment: MainAxisAlignment.center,
       actions: [
@@ -98,6 +106,7 @@ Future<void> showLearningRescue(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => AlertDialog(
+      scrollable: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       title: const Row(
         children: [
@@ -106,9 +115,16 @@ Future<void> showLearningRescue(
           Expanded(child: Text('Let’s learn it together')),
         ],
       ),
-      content: Text(
-        explanation,
-        style: const TextStyle(fontSize: 18, height: 1.4),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.46,
+        ),
+        child: SingleChildScrollView(
+          child: Text(
+            explanation,
+            style: const TextStyle(fontSize: 18, height: 1.4),
+          ),
+        ),
       ),
       actionsAlignment: MainAxisAlignment.center,
       actions: [

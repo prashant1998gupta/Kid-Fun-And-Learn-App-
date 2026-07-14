@@ -128,6 +128,11 @@ class _BossBattleGameState extends State<BossBattleGame> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 ||
+        media.size.height < 620 ||
+        media.textScaler.scale(1) > 1.2;
+
     return CelebrationOverlay(
       controller: _celebration,
       child: Scaffold(
@@ -137,23 +142,23 @@ class _BossBattleGameState extends State<BossBattleGame> {
             child: Column(
               children: [
                 _header(context),
-                const SizedBox(height: 8),
+                SizedBox(height: compact ? 2 : 8),
                 Text(
                   '👾',
                   key: ValueKey(_attack),
-                  style: const TextStyle(fontSize: 86),
+                  style: TextStyle(fontSize: compact ? 52 : 86),
                 ).animate().shake(hz: 3, rotation: 0.08),
                 Text(
                   'Knowledge Guardian',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(color: Colors.white),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontSize: compact ? 17 : null,
+                      ),
                 ),
-                const SizedBox(height: 18),
-                _prompt(context),
-                const SizedBox(height: 18),
-                Expanded(child: _options(context)),
+                SizedBox(height: compact ? 8 : 18),
+                _prompt(context, compact: compact),
+                SizedBox(height: compact ? 8 : 18),
+                Expanded(child: _options(context, compact: compact)),
               ],
             ),
           ),
@@ -206,43 +211,48 @@ class _BossBattleGameState extends State<BossBattleGame> {
     );
   }
 
-  Widget _prompt(BuildContext context) {
+  Widget _prompt(BuildContext context, {required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? AppSpacing.md : AppSpacing.lg,
+      ),
       child: BouncyButton(
         onTap: _speakPrompt,
         child: Container(
           width: double.infinity,
-          padding: AppSpacing.cardPadding,
+          padding: EdgeInsets.all(compact ? 14 : AppSpacing.lg),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: AppSpacing.cardRadius,
           ),
           child: Text(
             _question.prompt,
+            maxLines: compact ? 3 : 4,
+            overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(color: AppColors.lightText),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.lightText,
+                  fontSize: compact ? 18 : null,
+                  height: 1.15,
+                ),
           ),
         ),
       ),
     );
   }
 
-  Widget _options(BuildContext context) {
+  Widget _options(BuildContext context, {required bool compact}) {
     final optionIndexes = rescueOptionIndexes(
       _question,
       rescue: _rescue || LearningSupportScope.stageOf(context).guidedChoices,
     );
     return GridView.builder(
       padding: const EdgeInsets.all(AppSpacing.md),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 260,
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: compact ? 210 : 260,
         mainAxisSpacing: AppSpacing.md,
         crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1.7,
+        childAspectRatio: compact ? 1.5 : 1.7,
       ),
       itemCount: optionIndexes.length,
       itemBuilder: (context, index) {
@@ -264,13 +274,21 @@ class _BossBattleGameState extends State<BossBattleGame> {
               borderRadius: AppSpacing.cardRadius,
               border: Border.all(color: Colors.white, width: 2),
             ),
-            child: Text(
-              _question.options[originalIndex].display,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: isSelected ? Colors.white : AppColors.lightText,
-                    fontWeight: FontWeight.w800,
-                  ),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  _question.options[originalIndex].display,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: isSelected ? Colors.white : AppColors.lightText,
+                        fontWeight: FontWeight.w800,
+                        fontSize: compact ? 20 : null,
+                      ),
+                ),
+              ),
             ),
           ),
         );

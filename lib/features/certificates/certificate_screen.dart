@@ -109,55 +109,65 @@ class _Certificate extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('🏅', style: TextStyle(fontSize: 64))
-              .animate()
-              .scale(curve: Curves.elasticOut, duration: 700.ms),
-          const SizedBox(height: 8),
-          Text(
-            'Certificate of Achievement',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: 16),
-          const Text('Proudly awarded to', style: TextStyle(fontSize: 14)),
-          const SizedBox(height: 6),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .displaySmall
-                ?.copyWith(color: AppColors.secondary),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'for earning $stars ⭐ this week!',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 340;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _stat('$lessons', 'Lessons'),
-              _stat('$stars', 'Stars'),
-              _stat('$activeDays/7', 'Days'),
+              Text('🏅', style: TextStyle(fontSize: compact ? 52 : 64))
+                  .animate()
+                  .scale(curve: Curves.elasticOut, duration: 700.ms),
+              const SizedBox(height: 8),
+              Text(
+                'Certificate of Achievement',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Proudly awarded to', style: TextStyle(fontSize: 14)),
+              const SizedBox(height: 6),
+              Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: (compact
+                        ? Theme.of(context).textTheme.headlineMedium
+                        : Theme.of(context).textTheme.displaySmall)
+                    ?.copyWith(color: AppColors.secondary),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'for earning $stars ⭐ this week!',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: compact ? 14 : 28,
+                runSpacing: 10,
+                children: [
+                  _stat('$lessons', 'Lessons', compact: compact),
+                  _stat('$stars', 'Stars', compact: compact),
+                  _stat('$activeDays/7', 'Days', compact: compact),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              Text(
+                'KidVerse • Keep learning, superstar! 🌟',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
             ],
-          ),
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 8),
-          Text(
-            'KidVerse • Keep learning, superstar! 🌟',
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
-        ],
+          );
+        },
       ),
     ).animate().fadeIn().scale(
           begin: const Offset(0.9, 0.9),
@@ -166,19 +176,31 @@ class _Certificate extends StatelessWidget {
         );
   }
 
-  Widget _stat(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            color: AppColors.primary,
+  Widget _stat(String value, String label, {required bool compact}) {
+    return SizedBox(
+      width: compact ? 68 : 82,
+      child: Column(
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: compact ? 23 : 26,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primary,
+              ),
+            ),
           ),
-        ),
-        Text(label, style: const TextStyle(fontSize: 13)),
-      ],
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ],
+      ),
     );
   }
 }

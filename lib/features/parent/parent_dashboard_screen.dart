@@ -99,12 +99,24 @@ class _ChildHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(name, style: Theme.of(context).textTheme.headlineMedium),
-            Text(grade, style: Theme.of(context).textTheme.bodyMedium),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              Text(
+                grade,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -123,41 +135,69 @@ class _StatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget stat(String label, String value, IconData icon, Color color) {
-      return Expanded(
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              children: [
-                Icon(icon, color: color, size: 30),
-                const SizedBox(height: 6),
-                Text(
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 30),
+              const SizedBox(height: 6),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
                   value,
+                  maxLines: 1,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
-                Text(label, style: Theme.of(context).textTheme.labelMedium),
-              ],
-            ),
+              ),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ],
           ),
         ),
       );
     }
 
-    return Row(
-      children: [
-        stat('Level', '$level', Icons.military_tech_rounded, AppColors.xp),
-        const SizedBox(width: 8),
-        stat('XP', '$xp', Icons.auto_awesome_rounded, AppColors.primary),
-        const SizedBox(width: 8),
-        stat('Coins', '$coins', Icons.monetization_on_rounded, AppColors.coin),
-        const SizedBox(width: 8),
-        stat(
-          'Streak',
-          '$streak',
-          Icons.local_fire_department_rounded,
-          AppColors.energy,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth < 520
+            ? (constraints.maxWidth - 8) / 2
+            : (constraints.maxWidth - 24) / 4;
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              child: stat(
+                  'Level', '$level', Icons.military_tech_rounded, AppColors.xp),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: stat(
+                  'XP', '$xp', Icons.auto_awesome_rounded, AppColors.primary),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: stat('Coins', '$coins', Icons.monetization_on_rounded,
+                  AppColors.coin),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: stat(
+                'Streak',
+                '$streak',
+                Icons.local_fire_department_rounded,
+                AppColors.energy,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -179,29 +219,50 @@ class _SharingCard extends StatelessWidget {
                 const Icon(Icons.celebration_rounded,
                     color: AppColors.secondary),
                 const SizedBox(width: 8),
-                Text('Sharing & Friends',
-                    style: Theme.of(context).textTheme.titleLarge),
+                Expanded(
+                  child: Text(
+                    'Sharing & Friends',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stacked = constraints.maxWidth < 360;
+                final buttons = [
+                  OutlinedButton.icon(
                     onPressed: () => context.push(AppRoutes.certificate),
                     icon: const Icon(Icons.workspace_premium_rounded),
                     label: const Text('Certificate'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
+                  OutlinedButton.icon(
                     onPressed: () => context.push(AppRoutes.leaderboard),
                     icon: const Icon(Icons.leaderboard_rounded),
                     label: const Text('Leaderboard'),
                   ),
-                ),
-              ],
+                ];
+                if (stacked) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      buttons[0],
+                      const SizedBox(height: 8),
+                      buttons[1],
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: buttons[0]),
+                    const SizedBox(width: 8),
+                    Expanded(child: buttons[1]),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -244,33 +305,54 @@ class _TrendsCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                _MiniStat(
-                  label: 'Lessons',
-                  value: '${log.weeklyLessons(childId, today)}',
-                  icon: Icons.school_rounded,
-                  color: AppColors.primary,
-                ),
-                _MiniStat(
-                  label: 'Stars',
-                  value: '${log.weeklyStars(childId, today)}',
-                  icon: Icons.star_rounded,
-                  color: AppColors.star,
-                ),
-                _MiniStat(
-                  label: 'Active days',
-                  value: '${log.activeDays(childId, today)}/7',
-                  icon: Icons.calendar_today_rounded,
-                  color: AppColors.success,
-                ),
-                _MiniStat(
-                  label: 'Streak',
-                  value: '${log.currentStreak(childId, today)}',
-                  icon: Icons.local_fire_department_rounded,
-                  color: AppColors.energy,
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth < 420
+                    ? (constraints.maxWidth - 8) / 2
+                    : (constraints.maxWidth - 24) / 4;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 10,
+                  children: [
+                    SizedBox(
+                      width: width,
+                      child: _MiniStat(
+                        label: 'Lessons',
+                        value: '${log.weeklyLessons(childId, today)}',
+                        icon: Icons.school_rounded,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: _MiniStat(
+                        label: 'Stars',
+                        value: '${log.weeklyStars(childId, today)}',
+                        icon: Icons.star_rounded,
+                        color: AppColors.star,
+                      ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: _MiniStat(
+                        label: 'Active days',
+                        value: '${log.activeDays(childId, today)}/7',
+                        icon: Icons.calendar_today_rounded,
+                        color: AppColors.success,
+                      ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: _MiniStat(
+                        label: 'Streak',
+                        value: '${log.currentStreak(childId, today)}',
+                        icon: Icons.local_fire_department_rounded,
+                        color: AppColors.energy,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 16),
             Text('Lessons per day',
@@ -311,19 +393,22 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 26),
-          const SizedBox(height: 4),
-          Text(value, style: Theme.of(context).textTheme.titleLarge),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 26),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(value, style: Theme.of(context).textTheme.titleLarge),
+        ),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
     );
   }
 }
@@ -349,31 +434,61 @@ class _SubjectMastery extends StatelessWidget {
             for (final s in Subject.values)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    Icon(s.icon, color: s.color, size: 22),
-                    const SizedBox(width: 10),
-                    SizedBox(width: 120, child: Text(s.label)),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(AppSpacing.radiusPill),
-                        child: LinearProgressIndicator(
-                          value: model.skillFor(childId, s),
-                          minHeight: 12,
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                          color: s.color,
-                        ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compact = constraints.maxWidth < 360;
+                    final percent =
+                        '${(model.skillFor(childId, s) * 100).round()}%';
+                    final progress = ClipRRect(
+                      borderRadius:
+                          const BorderRadius.all(AppSpacing.radiusPill),
+                      child: LinearProgressIndicator(
+                        value: model.skillFor(childId, s),
+                        minHeight: 12,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        color: s.color,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${(model.skillFor(childId, s) * 100).round()}%',
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                  ],
+                    );
+                    if (compact) {
+                      return Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(s.icon, color: s.color, size: 22),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  s.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(percent,
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          progress,
+                        ],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Icon(s.icon, color: s.color, size: 22),
+                        const SizedBox(width: 10),
+                        SizedBox(width: 120, child: Text(s.label)),
+                        Expanded(child: progress),
+                        const SizedBox(width: 8),
+                        Text(
+                          percent,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
           ],
@@ -606,8 +721,14 @@ class _AccountCard extends ConsumerWidget {
                   color: signedIn ? AppColors.success : AppColors.info,
                 ),
                 const SizedBox(width: 8),
-                Text('Account & Sync',
-                    style: Theme.of(context).textTheme.titleLarge),
+                Expanded(
+                  child: Text(
+                    'Account & Sync',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -622,10 +743,11 @@ class _AccountCard extends ConsumerWidget {
               Text(_syncLine(sync),
                   style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final stacked = constraints.maxWidth < 360;
+                  final buttons = [
+                    OutlinedButton.icon(
                       onPressed: sync.status == SyncStatus.syncing
                           ? null
                           : () => ref
@@ -634,17 +756,31 @@ class _AccountCard extends ConsumerWidget {
                       icon: const Icon(Icons.sync_rounded),
                       label: const Text('Sync now'),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
+                    OutlinedButton.icon(
                       onPressed: () =>
                           ref.read(authControllerProvider.notifier).signOut(),
                       icon: const Icon(Icons.logout_rounded),
                       label: const Text('Sign out'),
                     ),
-                  ),
-                ],
+                  ];
+                  if (stacked) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        buttons[0],
+                        const SizedBox(height: 8),
+                        buttons[1],
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(child: buttons[0]),
+                      const SizedBox(width: 8),
+                      Expanded(child: buttons[1]),
+                    ],
+                  );
+                },
               ),
             ] else ...[
               Text(
@@ -759,6 +895,7 @@ class _ControlsCard extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
+            scrollable: true,
             title: const Text('Delete cloud account?'),
             content: const Text(
               'This permanently deletes the parent sign-in, cloud backup, and shared leaderboard entry. This cannot be undone.',

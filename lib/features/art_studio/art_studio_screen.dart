@@ -137,63 +137,104 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
     return Padding(
       padding:
           const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
-      child: Row(
-        children: [
-          BouncyButton(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return Row(
+            children: [
+              BouncyButton(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Container(
+                  padding: EdgeInsets.all(compact ? 7 : 8),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: AppColors.primary,
+                    size: compact ? 22 : 24,
+                  ),
+                ),
               ),
-              child: const Icon(Icons.close_rounded,
-                  color: AppColors.primary, size: 24),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '🎨 Art Studio',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(color: Colors.white),
-          ),
-          const Spacer(),
-          // Undo
-          _iconBtn(Icons.undo_rounded, 'Undo', _undo,
-              disabled: _strokes.isEmpty),
-          const SizedBox(width: 6),
-          // Clear
-          _iconBtn(Icons.delete_sweep_rounded, 'Clear', _confirmClear),
-          const SizedBox(width: 6),
-          // Save
-          _iconBtn(Icons.save_rounded, 'Save', _save),
-          const SizedBox(width: 6),
-          // Gallery
-          _iconBtn(
-              Icons.photo_library_rounded,
-              'Gallery',
-              () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const _GalleryScreen()),
-                  )),
-        ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '🎨 Art Studio',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: (compact
+                          ? Theme.of(context).textTheme.titleMedium
+                          : Theme.of(context).textTheme.titleLarge)
+                      ?.copyWith(color: Colors.white),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: compact ? 150 : 214,
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  child: Row(
+                    children: [
+                      _iconBtn(
+                        Icons.undo_rounded,
+                        'Undo',
+                        _undo,
+                        disabled: _strokes.isEmpty,
+                        compact: compact,
+                      ),
+                      const SizedBox(width: 6),
+                      _iconBtn(
+                        Icons.delete_sweep_rounded,
+                        'Clear',
+                        _confirmClear,
+                        compact: compact,
+                      ),
+                      const SizedBox(width: 6),
+                      _iconBtn(
+                        Icons.save_rounded,
+                        'Save',
+                        _save,
+                        compact: compact,
+                      ),
+                      const SizedBox(width: 6),
+                      _iconBtn(
+                        Icons.photo_library_rounded,
+                        'Gallery',
+                        () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const _GalleryScreen(),
+                          ),
+                        ),
+                        compact: compact,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Widget _iconBtn(IconData icon, String label, VoidCallback onTap,
-      {bool disabled = false}) {
+      {bool disabled = false, bool compact = false}) {
     return BouncyButton(
       onTap: disabled ? null : onTap,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: EdgeInsets.all(compact ? 7 : 8),
         decoration: BoxDecoration(
           color: disabled ? Colors.white38 : Colors.white,
           shape: BoxShape.circle,
         ),
         child: Icon(icon,
-            color: disabled ? Colors.grey : AppColors.primary, size: 22),
+            color: disabled ? Colors.grey : AppColors.primary,
+            size: compact ? 20 : 22),
       ),
     );
   }
@@ -339,6 +380,7 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
+          scrollable: true,
           title: const Text('✨ Bring your drawing to life?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -514,15 +556,20 @@ class _ArtStudioState extends ConsumerState<ArtStudioScreen> {
         color: Colors.white.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _toolBtn(Icons.draw_rounded, 'Pen',
-              !_isEraser && !_fillMode && !_showTracePicker),
-          _toolBtn(Icons.format_paint_rounded, 'Fill', _fillMode),
-          _toolBtn(Icons.auto_fix_high_rounded, 'Trace', _showTracePicker),
-          _toolBtn(Icons.auto_fix_high_rounded, 'Eraser', _isEraser),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _toolBtn(Icons.draw_rounded, 'Pen',
+                !_isEraser && !_fillMode && !_showTracePicker),
+            const SizedBox(width: 6),
+            _toolBtn(Icons.format_paint_rounded, 'Fill', _fillMode),
+            const SizedBox(width: 6),
+            _toolBtn(Icons.auto_fix_high_rounded, 'Trace', _showTracePicker),
+            const SizedBox(width: 6),
+            _toolBtn(Icons.auto_fix_high_rounded, 'Eraser', _isEraser),
+          ],
+        ),
       ),
     );
   }

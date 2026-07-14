@@ -258,22 +258,33 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
         child: AnimatedBackground(
           theme: WorldTheme.candy,
           child: SafeArea(
-            child: Column(
-              children: [
-                _topBar(),
-                MascotMessage(message: _message, icon: '🤖'),
-                StoryGoalCard(
-                  emoji: '🏗️🚀🌙',
-                  goal: _playMode == MiniGamePlayMode.creative
-                      ? 'Build anything—nothing can fail!'
-                      : 'Free the rainbow and reach the moon!',
-                  progress: (_engine.highestTile / 512).clamp(0, 1),
-                  progressColor: const Color(0xFF00CEC9),
-                ),
-                const SizedBox(height: 5),
-                Expanded(child: _gameArea()),
-                _controls(),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact =
+                    constraints.maxHeight < 620 || constraints.maxWidth < 340;
+                final goal = _playMode == MiniGamePlayMode.creative
+                    ? 'Build anything—nothing can fail!'
+                    : 'Free the rainbow and reach the moon!';
+                return Column(
+                  children: [
+                    _topBar(compact: compact),
+                    if (compact)
+                      _compactGoal(goal)
+                    else ...[
+                      MascotMessage(message: _message, icon: '🤖'),
+                      StoryGoalCard(
+                        emoji: '🏗️🚀🌙',
+                        goal: goal,
+                        progress: (_engine.highestTile / 512).clamp(0, 1),
+                        progressColor: const Color(0xFF00CEC9),
+                      ),
+                    ],
+                    SizedBox(height: compact ? 3 : 5),
+                    Expanded(child: _gameArea(compact: compact)),
+                    _controls(compact: compact),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -281,9 +292,9 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     );
   }
 
-  Widget _topBar() {
+  Widget _topBar({required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 6 : AppSpacing.sm),
       child: Row(
         children: [
           GameCircleButton(
@@ -331,11 +342,58 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     );
   }
 
-  Widget _gameArea() {
+  Widget _compactGoal(String goal) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Text('🏗️', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              goal,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.lightText,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: (_engine.highestTile / 512).clamp(0, 1),
+              minHeight: 5,
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFF00CEC9),
+              backgroundColor: Colors.black.withValues(alpha: 0.08),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gameArea({required bool compact}) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final boardHeight = (constraints.maxHeight - 110).clamp(260.0, 430.0);
+        final reserved = compact ? 78.0 : 110.0;
+        final minBoard = compact ? 150.0 : 260.0;
+        final boardHeight =
+            (constraints.maxHeight - reserved).clamp(minBoard, 430.0);
         final cellHeight = (boardHeight - 8) / _maxRows;
+        final availableWidth = math.max(0.0, constraints.maxWidth - 24);
+        final boardWidth = math.min(260.0, availableWidth);
+        final columnWidth = boardWidth / _columns;
+        final tileSize =
+            math.max(16.0, math.min(columnWidth - 8, cellHeight - 3));
         return SingleChildScrollView(
           child: Column(
             children: [
@@ -372,9 +430,10 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
               const SizedBox(height: 7),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTapDown: (d) => _dropAt((d.localPosition.dx / 52).floor()),
+                onTapDown: (d) =>
+                    _dropAt((d.localPosition.dx / columnWidth).floor()),
                 child: Container(
-                  width: 260,
+                  width: boardWidth,
                   height: boardHeight,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.16),
@@ -387,8 +446,8 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                     child: Stack(
                       clipBehavior: Clip.hardEdge,
                       children: [
-                        _columnGlow(),
-                        _landingShadow(cellHeight),
+                        _columnGlow(columnWidth),
+                        _landingShadow(cellHeight, columnWidth),
                         for (var column = 0;
                             column < _engine.columns.length;
                             column++)
@@ -397,18 +456,19 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                               row++)
                             AnimatedPositioned(
                               duration: const Duration(milliseconds: 180),
-                              left: column * 52.0 + 5,
+                              left: column * columnWidth +
+                                  (columnWidth - tileSize) / 2,
                               bottom: row * cellHeight + 4,
                               child: _tile(
                                 _engine.columns[column][row],
-                                size: math.min(44, cellHeight - 3),
+                                size: tileSize,
                                 bounceKey: column == _lastDropColumn &&
                                         row == _lastDropRow
                                     ? _dropPulse
                                     : null,
                               ),
                             ),
-                        _mergeBurst(cellHeight),
+                        _mergeBurst(cellHeight, columnWidth, tileSize),
                         AnimatedPositioned(
                           duration: Duration(
                             milliseconds: _dropping ? 260 : 140,
@@ -416,16 +476,19 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
                           curve: _dropping
                               ? Curves.easeInCubic
                               : Curves.easeOutBack,
-                          left: _dropColumn * 52.0 + 5,
-                          top: _activeTop(boardHeight, cellHeight),
+                          left: _dropColumn * columnWidth +
+                              (columnWidth - tileSize) / 2,
+                          top: _activeTop(boardHeight, cellHeight, tileSize),
                           child: _tile(
                             _activeValue,
-                            size: math.min(44, cellHeight - 3),
+                            size: tileSize,
                             floating: true,
                           ),
                         ),
                         Positioned(
-                          left: _bestColumn * 52.0 + 14,
+                          left: _bestColumn * columnWidth +
+                              (columnWidth / 2) -
+                              12,
                           top: 50,
                           child: IgnorePointer(
                             child: Text(
@@ -449,21 +512,20 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     );
   }
 
-  double _activeTop(double boardHeight, double cellHeight) {
+  double _activeTop(double boardHeight, double cellHeight, double tileSize) {
     if (!_dropping) return 7;
-    final tileSize = math.min(44.0, cellHeight - 3);
     final targetTop =
         boardHeight - ((_engine.columns[_dropColumn].length + 1) * cellHeight);
     return targetTop.clamp(7.0, boardHeight - tileSize - 4);
   }
 
-  Widget _columnGlow() {
+  Widget _columnGlow(double columnWidth) {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 150),
-      left: _dropColumn * 52.0 + 2,
+      left: _dropColumn * columnWidth + 2,
       top: 0,
       bottom: 0,
-      width: 48,
+      width: math.max(24, columnWidth - 4),
       child: IgnorePointer(
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -483,16 +545,16 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     );
   }
 
-  Widget _landingShadow(double cellHeight) {
+  Widget _landingShadow(double cellHeight, double columnWidth) {
     final stackHeight = _engine.columns[_dropColumn].length;
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 160),
-      left: _dropColumn * 52.0 + 13,
+      left: _dropColumn * columnWidth + columnWidth * 0.25,
       bottom: stackHeight * cellHeight + 5,
       child: IgnorePointer(
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          width: _dropping ? 31 : 26,
+          width: math.max(18, columnWidth * (_dropping ? 0.6 : 0.5)),
           height: _dropping ? 10 : 7,
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: _dropping ? 0.24 : 0.14),
@@ -503,12 +565,14 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     );
   }
 
-  Widget _mergeBurst(double cellHeight) {
+  Widget _mergeBurst(double cellHeight, double columnWidth, double tileSize) {
     if (_lastMergeCount == 0) return const SizedBox.shrink();
-    final tileSize = math.min(44.0, cellHeight - 3);
+    final tileLeft = _lastDropColumn * columnWidth +
+        (columnWidth - tileSize) / 2 +
+        tileSize / 2;
     return Positioned(
       key: ValueKey(_mergePulse),
-      left: _lastDropColumn * 52.0 + 5 + tileSize / 2 - 42,
+      left: tileLeft - 42,
       bottom: _lastDropRow * cellHeight + 4 + tileSize / 2 - 42,
       child: IgnorePointer(
         child: TweenAnimationBuilder<double>(
@@ -631,18 +695,20 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     );
   }
 
-  Widget _controls() {
+  Widget _controls({required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 14),
+      padding: EdgeInsets.fromLTRB(12, compact ? 3 : 6, 12, compact ? 8 : 14),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _control(Icons.arrow_back_rounded, () => _move(-1)),
-          const SizedBox(width: 8),
-          _control(Icons.arrow_downward_rounded, _drop, emphasized: true),
-          const SizedBox(width: 8),
-          _control(Icons.arrow_forward_rounded, () => _move(1)),
-          const SizedBox(width: 8),
+          _control(Icons.arrow_back_rounded, () => _move(-1), compact: compact),
+          SizedBox(width: compact ? 6 : 8),
+          _control(Icons.arrow_downward_rounded, _drop,
+              emphasized: true, compact: compact),
+          SizedBox(width: compact ? 6 : 8),
+          _control(Icons.arrow_forward_rounded, () => _move(1),
+              compact: compact),
+          SizedBox(width: compact ? 6 : 8),
           GameCircleButton(
             icon: Icons.refresh_rounded,
             tooltip: 'Restart',
@@ -657,19 +723,20 @@ class _StackMergeGameState extends ConsumerState<StackMergeGame> {
     IconData icon,
     VoidCallback onTap, {
     bool emphasized = false,
+    required bool compact,
   }) {
     return BouncyButton(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: emphasized ? 20 : 16,
-          vertical: 13,
+          horizontal: compact ? (emphasized ? 16 : 13) : (emphasized ? 20 : 16),
+          vertical: compact ? 10 : 13,
         ),
         decoration: BoxDecoration(
           color: emphasized ? const Color(0xFFFFD93D) : Colors.white,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Icon(icon, color: AppColors.primary, size: 28),
+        child: Icon(icon, color: AppColors.primary, size: compact ? 24 : 28),
       ),
     );
   }

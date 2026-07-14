@@ -18,27 +18,41 @@ class AboutScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           Center(
-            child: Column(
-              children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.bubblegum],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 360;
+                return Column(
+                  children: [
+                    Container(
+                      width: compact ? 72 : 88,
+                      height: compact ? 72 : 88,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primary, AppColors.bubblegum],
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Icon(
+                        Icons.star_rounded,
+                        color: AppColors.star,
+                        size: compact ? 42 : 52,
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Icon(Icons.star_rounded,
-                      color: AppColors.star, size: 52),
-                ),
-                const SizedBox(height: 12),
-                Text('KidVerse', style: text.headlineMedium),
-                Text('A joyful learning universe for kids',
-                    style: text.bodyMedium),
-                const SizedBox(height: 4),
-                Text('Version 1.0.0', style: text.labelMedium),
-              ],
+                    const SizedBox(height: 12),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('KidVerse', style: text.headlineMedium),
+                    ),
+                    Text(
+                      'A joyful learning universe for kids',
+                      textAlign: TextAlign.center,
+                      style: text.bodyMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Version 1.0.0', style: text.labelMedium),
+                  ],
+                );
+              },
             ),
           ),
           const SizedBox(height: 24),
@@ -86,22 +100,45 @@ class _CreditCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: AppColors.primary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 300;
+            final textBlock = Column(
+              crossAxisAlignment: compact
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  textAlign: compact ? TextAlign.center : TextAlign.start,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  body,
+                  textAlign: compact ? TextAlign.center : TextAlign.start,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            );
+            if (compact) {
+              return Column(
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 4),
-                  Text(body, style: Theme.of(context).textTheme.bodyMedium),
+                  Icon(icon, color: AppColors.primary),
+                  const SizedBox(height: 10),
+                  textBlock,
                 ],
-              ),
-            ),
-          ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: AppColors.primary),
+                const SizedBox(width: 12),
+                Expanded(child: textBlock),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -216,24 +216,51 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
         kMiniGames.firstWhere((game) => game.id == widget.type.id);
     if (grade != null && !definition.supportsGrade(grade)) {
       return Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('🧭', style: TextStyle(fontSize: 72)),
-                const SizedBox(height: 12),
-                Text('This adventure is saved for ${definition.gradeBand}.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  child: const Text('Choose my adventures'),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 360 ||
+                  constraints.maxHeight < 620 ||
+                  MediaQuery.textScalerOf(context).scale(1) > 1.25;
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(compact ? 18 : 28),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: math.max(
+                      0,
+                      constraints.maxHeight - (compact ? 36 : 56),
+                    ),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '🧭',
+                          style: TextStyle(fontSize: compact ? 48 : 72),
+                        ),
+                        SizedBox(height: compact ? 8 : 12),
+                        Text(
+                          'This adventure is saved for ${definition.gradeBand}.',
+                          textAlign: TextAlign.center,
+                          style: compact
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.w900)
+                              : Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        SizedBox(height: compact ? 12 : 16),
+                        FilledButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          child: const Text('Choose my adventures'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       );
@@ -244,23 +271,102 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
         child: AnimatedBackground(
           theme: widget.type.worldTheme,
           child: SafeArea(
-            child: Column(
-              children: [
-                _topBar(),
-                MascotMessage(
-                  message: _message,
-                  icon: widget.type.mascot,
-                ),
-                const SizedBox(height: 6),
-                StoryGoalCard(
-                  emoji: widget.type.icon,
-                  goal: 'Level $_level/50 • ${_question.skill}',
-                  progress: _complete ? 1 : _round / _roundsPerLevel,
-                  progressColor: widget.type.accent,
-                ),
-                const SizedBox(height: 8),
-                Expanded(child: _complete ? _completionCard() : _playArea()),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final textScale = MediaQuery.textScalerOf(context).scale(1);
+                final compact = constraints.maxHeight < 620 ||
+                    constraints.maxWidth < 360 ||
+                    textScale > 1.25;
+                return Column(
+                  children: [
+                    _topBar(compact: compact),
+                    if (compact)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            '${widget.type.mascot} $_message',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      MascotMessage(
+                        message: _message,
+                        icon: widget.type.mascot,
+                      ),
+                    SizedBox(height: compact ? 3 : 6),
+                    if (compact)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(widget.type.icon,
+                                  style: const TextStyle(fontSize: 16)),
+                              const SizedBox(width: 7),
+                              Expanded(
+                                child: LinearProgressIndicator(
+                                  value:
+                                      (_complete ? 1 : _round / _roundsPerLevel)
+                                          .clamp(0.0, 1.0)
+                                          .toDouble(),
+                                  minHeight: 5,
+                                  borderRadius: BorderRadius.circular(8),
+                                  backgroundColor: const Color(0xFFE9E6F7),
+                                  color: widget.type.accent,
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                '$_level/50',
+                                style: const TextStyle(
+                                  color: AppColors.lightText,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      StoryGoalCard(
+                        emoji: widget.type.icon,
+                        goal: 'Level $_level/50 • ${_question.skill}',
+                        progress: _complete ? 1 : _round / _roundsPerLevel,
+                        progressColor: widget.type.accent,
+                      ),
+                    SizedBox(height: compact ? 4 : 8),
+                    Expanded(
+                        child: _complete ? _completionCard() : _playArea()),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -268,9 +374,9 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
     );
   }
 
-  Widget _topBar() {
+  Widget _topBar({bool compact = false}) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 6 : AppSpacing.sm),
       child: Row(
         children: [
           GameCircleButton(
@@ -278,28 +384,28 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
             tooltip: 'Close game',
             onTap: () => Navigator.of(context).maybePop(),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: compact ? 6 : 10),
           Expanded(
             child: Text(
               '${widget.type.icon} ${widget.type.title}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 19,
+                fontSize: compact ? 17 : 19,
                 fontWeight: FontWeight.w900,
               ),
             ),
           ),
           Text(
             '⭐ $_score',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 17,
+              fontSize: compact ? 15 : 17,
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: compact ? 5 : 8),
           GameCircleButton(
             icon: Icons.volume_up_rounded,
             tooltip: 'Hear the question',
@@ -322,49 +428,75 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
     );
     final optionIndexes = rescueOptionIndexes(supportQuestion, rescue: _rescue);
     return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              if (_teachPip) _pipGuess(),
-              Text(
-                _question.prompt,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 23,
-                  height: 1.05,
-                  fontWeight: FontWeight.w900,
-                  shadows: [Shadow(color: Color(0x55000000), blurRadius: 4)],
-                ),
-              ),
-              _sceneCard(),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: optionIndexes.length,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 0.9,
-                ),
-                itemCount: optionIndexes.length,
-                itemBuilder: (_, index) => _choiceCard(optionIndexes[index]),
-              ),
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final compact = constraints.maxHeight < 360 ||
+            constraints.maxWidth < 360 ||
+            textScale > 1.25;
+        final content = Column(
+          mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+          mainAxisAlignment:
+              compact ? MainAxisAlignment.start : MainAxisAlignment.spaceEvenly,
+          children: [
+            if (_teachPip) ...[
+              _pipGuess(compact: compact),
+              if (compact) const SizedBox(height: 6),
             ],
-          ),
-        ),
-      ),
+            Text(
+              _question.prompt,
+              textAlign: TextAlign.center,
+              maxLines: compact ? 3 : null,
+              overflow: compact ? TextOverflow.ellipsis : null,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: compact ? 17 : 23,
+                height: 1.05,
+                fontWeight: FontWeight.w900,
+                shadows: const [
+                  Shadow(color: Color(0x55000000), blurRadius: 4)
+                ],
+              ),
+            ),
+            if (compact) const SizedBox(height: 7),
+            _sceneCard(compact: compact),
+            if (compact) const SizedBox(height: 7),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: optionIndexes.length,
+                mainAxisSpacing: compact ? 6 : 8,
+                crossAxisSpacing: compact ? 6 : 8,
+                childAspectRatio: compact ? 1.12 : 0.9,
+              ),
+              itemCount: optionIndexes.length,
+              itemBuilder: (_, index) => _choiceCard(
+                optionIndexes[index],
+                compact: compact,
+              ),
+            ),
+          ],
+        );
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, compact ? 12 : 18),
+          child: compact
+              ? content
+              : ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: content,
+                ),
+        );
+      },
     );
   }
 
-  Widget _pipGuess() {
+  Widget _pipGuess({bool compact = false}) {
     return Container(
       key: ValueKey('teach-pip-$_round'),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 12 : 14,
+        vertical: compact ? 6 : 7,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF3CD),
         borderRadius: BorderRadius.circular(18),
@@ -372,21 +504,24 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
       child: Text(
         '🐧 Pip chose "${_question.wrongGuess}". Teach Pip!',
         textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Color(0xFF5D4037),
+        maxLines: compact ? 1 : 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: const Color(0xFF5D4037),
+          fontSize: compact ? 12 : null,
           fontWeight: FontWeight.w900,
         ),
       ),
     );
   }
 
-  Widget _sceneCard() {
+  Widget _sceneCard({bool compact = false}) {
     return Container(
       key: ValueKey('scene-${widget.type.id}-$_level-$_round-$_reaction'),
-      constraints: const BoxConstraints(minHeight: 118),
+      constraints: BoxConstraints(minHeight: compact ? 76 : 118),
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.symmetric(vertical: compact ? 0 : 8),
+      padding: EdgeInsets.all(compact ? 8 : 12),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(28),
@@ -408,7 +543,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
             runSpacing: 2,
             children: [
               for (final emoji in _question.scene)
-                Text(emoji, style: const TextStyle(fontSize: 38)),
+                Text(emoji, style: TextStyle(fontSize: compact ? 26 : 38)),
             ],
           ),
           if (_question.sceneLabel.isNotEmpty) ...[
@@ -416,9 +551,9 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
             Text(
               _question.sceneLabel,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.lightText,
-                fontSize: 16,
+                fontSize: compact ? 13 : 16,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -431,7 +566,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
         );
   }
 
-  Widget _choiceCard(int index) {
+  Widget _choiceCard(int index, {bool compact = false}) {
     final choice = _question.choices[index];
     final selectedCorrect = _locked && index == _question.correctIndex;
     return Semantics(
@@ -443,7 +578,7 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
         onTap: () => _choose(index),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.all(7),
+          padding: EdgeInsets.all(compact ? 5 : 7),
           decoration: BoxDecoration(
             color: selectedCorrect ? AppColors.success : Colors.white,
             borderRadius: BorderRadius.circular(22),
@@ -465,10 +600,10 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
               if (choice.emoji != null)
                 OpenMojiView(
                   emoji: choice.emoji!,
-                  size: 48,
+                  size: compact ? 32 : 48,
                   fallback: Text(
                     choice.emoji!,
-                    style: const TextStyle(fontSize: 42),
+                    style: TextStyle(fontSize: compact ? 27 : 42),
                   ),
                 ),
               FittedBox(
@@ -478,7 +613,9 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
                   maxLines: 1,
                   style: TextStyle(
                     color: selectedCorrect ? Colors.white : AppColors.lightText,
-                    fontSize: choice.emoji == null ? 29 : 14,
+                    fontSize: compact
+                        ? (choice.emoji == null ? 22 : 11)
+                        : (choice.emoji == null ? 29 : 14),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -493,58 +630,67 @@ class _LearningAdventureGameState extends ConsumerState<LearningAdventureGame> {
   Widget _completionCard() {
     final reward = _reward!;
     return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(22),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 440),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🎁', style: TextStyle(fontSize: 48)),
-              Text(
-                '${widget.type.title} reward!',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.lightText,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(compact ? 16 : 22),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 440),
+              padding: EdgeInsets.all(compact ? 18 : 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
               ),
-              const SizedBox(height: 10),
-              OpenMojiView(
-                emoji: reward.emoji,
-                size: 82,
-                fallback: Text(
-                  reward.emoji,
-                  style: const TextStyle(fontSize: 70),
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🎁', style: TextStyle(fontSize: compact ? 38 : 48)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '${widget.type.title} reward!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontSize: compact ? 21 : 24,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  OpenMojiView(
+                    emoji: reward.emoji,
+                    size: compact ? 66 : 82,
+                    fallback: Text(
+                      reward.emoji,
+                      style: TextStyle(fontSize: compact ? 56 : 70),
+                    ),
+                  ),
+                  Text(
+                    '${reward.name} is now in Kid World!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.lightText,
+                      fontSize: compact ? 15 : 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  FilledButton.icon(
+                    key: ValueKey('${widget.type.id}-next-level'),
+                    onPressed: _nextLevel,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(
+                      _level >= 50 ? 'Play again' : 'Level ${_level + 1}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                '${reward.name} is now in Kid World!',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.lightText,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 18),
-              FilledButton.icon(
-                key: ValueKey('${widget.type.id}-next-level'),
-                onPressed: _nextLevel,
-                icon: const Icon(Icons.arrow_forward_rounded),
-                label: Text(
-                  _level >= 50 ? 'Play again' : 'Level ${_level + 1}',
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -352,26 +352,36 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
         child: AnimatedBackground(
           theme: WorldTheme.jungle,
           child: SafeArea(
-            child: Column(
-              children: [
-                _topBar(),
-                MascotMessage(message: _message, icon: '🦁'),
-                StoryGoalCard(
-                  emoji: '🐔🥚',
-                  goal: 'Help Mama Chicken collect the eggs!',
-                  progress: _started
-                      ? 1 - (_timeLeft / (_roundSeconds + _bonusSeconds))
-                      : 0,
-                  progressColor: const Color(0xFFFFD93D),
-                ),
-                const SizedBox(height: 5),
-                if (_gameOver)
-                  _gameOverScreen()
-                else if (!_started)
-                  _startScreen()
-                else
-                  Expanded(child: _gameArea()),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact =
+                    constraints.maxHeight < 620 || constraints.maxWidth < 340;
+                return Column(
+                  children: [
+                    _topBar(compact: compact),
+                    if (compact)
+                      _compactGoal()
+                    else ...[
+                      MascotMessage(message: _message, icon: '🦁'),
+                      StoryGoalCard(
+                        emoji: '🐔🥚',
+                        goal: 'Help Mama Chicken collect the eggs!',
+                        progress: _started
+                            ? 1 - (_timeLeft / (_roundSeconds + _bonusSeconds))
+                            : 0,
+                        progressColor: const Color(0xFFFFD93D),
+                      ),
+                    ],
+                    SizedBox(height: compact ? 3 : 5),
+                    if (_gameOver)
+                      _gameOverScreen(compact: compact)
+                    else if (!_started)
+                      _startScreen(compact: compact)
+                    else
+                      Expanded(child: _gameArea()),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -379,9 +389,9 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     );
   }
 
-  Widget _topBar() {
+  Widget _topBar({required bool compact}) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 6 : AppSpacing.sm),
       child: Row(
         children: [
           GameCircleButton(
@@ -445,38 +455,86 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     );
   }
 
-  Widget _startScreen() {
+  Widget _compactGoal() {
+    final progress =
+        _started ? 1 - (_timeLeft / (_roundSeconds + _bonusSeconds)) : 0.0;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Text('🐔', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 6),
+          const Expanded(
+            child: Text(
+              'Help Mama Chicken collect eggs!',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.lightText,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: progress.clamp(0, 1),
+              minHeight: 5,
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFFFFD93D),
+              backgroundColor: Colors.black.withValues(alpha: 0.08),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _startScreen({required bool compact}) {
     return Expanded(
       child: Center(
         child: SingleChildScrollView(
+          padding:
+              EdgeInsets.symmetric(horizontal: 12, vertical: compact ? 6 : 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const OpenMojiView(
+              OpenMojiView(
                 emoji: '🐔',
-                size: 94,
-                fallback: Text('🐔', style: TextStyle(fontSize: 80)),
+                size: compact ? 68 : 94,
+                fallback: Text(
+                  '🐔',
+                  style: TextStyle(fontSize: compact ? 58 : 80),
+                ),
               ),
-              const SizedBox(height: 12),
-              const Text(
+              SizedBox(height: compact ? 7 : 12),
+              Text(
                 'Catch the chickens!',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
+                  fontSize: compact ? 22 : 26,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: compact ? 7 : 12),
               PlayModePicker(
                 value: _playMode,
                 onChanged: (value) => setState(() => _playMode = value),
               ),
-              const SizedBox(height: 22),
+              SizedBox(height: compact ? 12 : 22),
               BouncyButton(
                 onTap: _startGame,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 42, vertical: 16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 32 : 42,
+                    vertical: compact ? 12 : 16,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD93D),
                     borderRadius: BorderRadius.circular(30),
@@ -718,19 +776,21 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
     );
   }
 
-  Widget _gameOverScreen() {
+  Widget _gameOverScreen({required bool compact}) {
     return Expanded(
       child: Center(
         child: SingleChildScrollView(
+          padding:
+              EdgeInsets.symmetric(horizontal: 12, vertical: compact ? 6 : 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('🐔👑', style: TextStyle(fontSize: 72)),
-              const Text(
+              Text('🐔👑', style: TextStyle(fontSize: compact ? 52 : 72)),
+              Text(
                 'Round complete!',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 30,
+                  fontSize: compact ? 24 : 30,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -747,7 +807,7 @@ class _ChickenTapGameState extends ConsumerState<ChickenTapGame> {
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 24),
               ),
-              const SizedBox(height: 22),
+              SizedBox(height: compact ? 12 : 22),
               FilledButton.icon(
                 onPressed: _startGame,
                 icon: const Icon(Icons.refresh_rounded),

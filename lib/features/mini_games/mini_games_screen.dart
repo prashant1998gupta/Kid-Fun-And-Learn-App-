@@ -46,59 +46,74 @@ class _MiniGamesScreenState extends ConsumerState<MiniGamesScreen> {
       body: AnimatedBackground(
         theme: WorldTheme.candy,
         child: SafeArea(
-          child: Column(
-            children: [
-              _topBar(context),
-              const SizedBox(height: 8),
-              _PetCard(pet: gameState.pet),
-              const SizedBox(height: 8),
-              _DailyChallengeCard(challenge: gameState.dailyChallenge),
-              const SizedBox(height: 8),
-              _AdventureTrailCard(
-                trail: gameState.adventureTrail,
-                onPlay: (id) => _playStoryChapter(context, id),
-                onChoosePath: _chooseStoryPath,
-                onSurprise: () => _playStoryChapter(
-                  context,
-                  _surpriseGame(gameState),
-                ),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: _topBar(context)),
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              SliverToBoxAdapter(child: _PetCard(pet: gameState.pet)),
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              SliverToBoxAdapter(
+                child: _DailyChallengeCard(challenge: gameState.dailyChallenge),
               ),
-              if (gameState.learningWorldItems.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                _LearningWorldStrip(itemIds: gameState.learningWorldItems),
-              ],
-              const SizedBox(height: 8),
-              _GameFilterBar(
-                selected: _filter,
-                onSelected: (filter) => setState(() => _filter = filter),
-              ),
-              const SizedBox(height: 4),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:
-                          MediaQuery.sizeOf(context).width >= 700 ? 4 : 2,
-                      crossAxisSpacing: AppSpacing.md,
-                      mainAxisSpacing: AppSpacing.md,
-                      childAspectRatio: 0.66,
-                    ),
-                    itemCount: visibleGames.length,
-                    itemBuilder: (context, index) {
-                      final game = visibleGames[index];
-                      return _GameCard(
-                        game: game,
-                        index: index,
-                        highScore: gameState.highScores[game.id] ?? 0,
-                        learningLevel: gameState.learningLevels[game.id],
-                        onTap: () => _openGame(context, game.id),
-                      );
-                    },
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              SliverToBoxAdapter(
+                child: _AdventureTrailCard(
+                  trail: gameState.adventureTrail,
+                  onPlay: (id) => _playStoryChapter(context, id),
+                  onChoosePath: _chooseStoryPath,
+                  onSurprise: () => _playStoryChapter(
+                    context,
+                    _surpriseGame(gameState),
                   ),
                 ),
               ),
-              _AchievementStrip(unlocked: gameState.achievements),
+              if (gameState.learningWorldItems.isNotEmpty) ...[
+                const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                SliverToBoxAdapter(
+                  child: _LearningWorldStrip(
+                    itemIds: gameState.learningWorldItems,
+                  ),
+                ),
+              ],
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              SliverToBoxAdapter(
+                child: _GameFilterBar(
+                  selected: _filter,
+                  onSelected: (filter) => setState(() => _filter = filter),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                sliver: SliverLayoutBuilder(
+                  builder: (context, constraints) {
+                    final compact = constraints.crossAxisExtent < 360;
+                    return SliverGrid(
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: compact ? 190 : 220,
+                        crossAxisSpacing: AppSpacing.md,
+                        mainAxisSpacing: AppSpacing.md,
+                        childAspectRatio: compact ? 0.62 : 0.66,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final game = visibleGames[index];
+                          return _GameCard(
+                            game: game,
+                            index: index,
+                            highScore: gameState.highScores[game.id] ?? 0,
+                            learningLevel: gameState.learningLevels[game.id],
+                            onTap: () => _openGame(context, game.id),
+                          );
+                        },
+                        childCount: visibleGames.length,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _AchievementStrip(unlocked: gameState.achievements),
+              ),
             ],
           ),
         ),
@@ -166,72 +181,89 @@ class _MiniGamesScreenState extends ConsumerState<MiniGamesScreen> {
     return Padding(
       padding:
           const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 8),
-      child: Row(
-        children: [
-          BouncyButton(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return Row(
+            children: [
+              BouncyButton(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Container(
+                  padding: EdgeInsets.all(compact ? 7 : 8),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color: const Color(0xFF6C5CE7),
+                    size: compact ? 22 : 24,
+                  ),
+                ),
               ),
-              child: const Icon(Icons.arrow_back_rounded,
-                  color: Color(0xFF6C5CE7), size: 24),
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Expanded(
-            child: Text(
-              '🎮 Mini Games',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white),
-            ),
-          ),
-          const SizedBox(width: 8),
-          BouncyButton(
-            onTap: child == null
-                ? null
-                : () async {
-                    await ref
-                        .read(profilesControllerProvider.notifier)
-                        .setSiblingCoop(!coOp);
-                    AudioService.instance.speak(!coOp
-                        ? 'Team mode on! Take turns and help each other.'
-                        : 'Solo mode on! Spark will be your teammate.');
-                  },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: coOp
-                    ? const Color(0xFFFFD166)
-                    : Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(20),
+              SizedBox(width: compact ? 7 : 10),
+              Expanded(
+                child: Text(
+                  '🎮 Mini Games',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: compact ? 21 : 24,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.group_rounded,
-                      color: coOp
-                          ? const Color(0xFF6C5CE7)
-                          : AppColors.lightTextSoft,
-                      size: 21),
-                  if (MediaQuery.sizeOf(context).width >= 380) ...[
-                    const SizedBox(width: 4),
-                    Text(coOp ? 'TEAM' : 'SOLO',
-                        style: const TextStyle(
+              const SizedBox(width: 8),
+              BouncyButton(
+                onTap: child == null
+                    ? null
+                    : () async {
+                        await ref
+                            .read(profilesControllerProvider.notifier)
+                            .setSiblingCoop(!coOp);
+                        AudioService.instance.speak(!coOp
+                            ? 'Team mode on! Take turns and help each other.'
+                            : 'Solo mode on! Spark will be your teammate.');
+                      },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 8 : 10,
+                    vertical: compact ? 7 : 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: coOp
+                        ? const Color(0xFFFFD166)
+                        : Colors.white.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.group_rounded,
+                        color: coOp
+                            ? const Color(0xFF6C5CE7)
+                            : AppColors.lightTextSoft,
+                        size: compact ? 19 : 21,
+                      ),
+                      if (constraints.maxWidth >= 380) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          coOp ? 'TEAM' : 'SOLO',
+                          style: const TextStyle(
                             color: AppColors.lightText,
-                            fontWeight: FontWeight.w900)),
-                  ],
-                ],
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -374,39 +406,45 @@ class _AdventureTrailCard extends StatelessWidget {
           ),
           if (path == null) ...[
             const SizedBox(height: 7),
-            Row(
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Text(
-                  'Choose your power:',
-                  style: TextStyle(
-                    color: Color(0xFFFFE082),
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w900,
+                const Padding(
+                  padding: EdgeInsets.only(right: 2),
+                  child: Text(
+                    'Choose your power:',
+                    style: TextStyle(
+                      color: Color(0xFFFFE082),
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 6),
                 for (final storyPath in kMiniGameStoryPaths)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: BouncyButton(
+                  BouncyButton(
+                    borderRadius: BorderRadius.circular(999),
+                    onTap: () => onChoosePath(storyPath),
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 72),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(999),
-                        onTap: () => onChoosePath(storyPath),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            '${storyPath.icon} ${storyPath.label}',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Color(0xFF4737A8),
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
+                      ),
+                      child: Text(
+                        '${storyPath.icon} ${storyPath.label}',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF4737A8),
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
@@ -691,69 +729,81 @@ class _PetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFF7D6), Color(0xFFFFE4F2)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 8,
-            offset: Offset(0, 3),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 11 : 14,
+            vertical: compact ? 9 : 10,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Semantics(
-            label: '${pet.name} wearing ${pet.accessory}',
-            child: Text(
-              '${pet.emoji}${pet.accessory}',
-              style: const TextStyle(fontSize: 38),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFF7D6), Color(0xFFFFE4F2)],
             ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 8,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${pet.name} • ${pet.xp} pet stars',
-                  style: const TextStyle(
-                    color: Color(0xFF4A3B52),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
+          child: Row(
+            children: [
+              Semantics(
+                label: '${pet.name} wearing ${pet.accessory}',
+                child: Text(
+                  '${pet.emoji}${pet.accessory}',
+                  style: TextStyle(fontSize: compact ? 32 : 38),
                 ),
-                const SizedBox(height: 6),
-                LinearProgressIndicator(
-                  value: pet.isMax ? 1 : pet.progress,
-                  minHeight: 9,
-                  borderRadius: BorderRadius.circular(10),
-                  backgroundColor: Colors.white,
-                  color: const Color(0xFFFF8AB3),
+              ),
+              SizedBox(width: compact ? 9 : 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${pet.name} • ${pet.xp} pet stars',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: const Color(0xFF4A3B52),
+                        fontSize: compact ? 13.5 : 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    LinearProgressIndicator(
+                      value: pet.isMax ? 1 : pet.progress,
+                      minHeight: compact ? 8 : 9,
+                      borderRadius: BorderRadius.circular(10),
+                      backgroundColor: Colors.white,
+                      color: const Color(0xFFFF8AB3),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      pet.isMax
+                          ? 'Your pet is fully grown! ✨'
+                          : '${pet.xpToNext} stars to grow • '
+                              '${pet.unlockedAccessories.join(' ')}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: const Color(0xFF725B7A),
+                        fontSize: compact ? 10 : 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  pet.isMax
-                      ? 'Your pet is fully grown! ✨'
-                      : '${pet.xpToNext} stars to grow • '
-                          '${pet.unlockedAccessories.join(' ')}',
-                  style: const TextStyle(
-                    color: Color(0xFF725B7A),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -766,53 +816,63 @@ class _DailyChallengeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = (challenge.progress / challenge.target).clamp(0.0, 1.0);
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          Text(challenge.completed ? '🏆' : '⭐',
-              style: const TextStyle(fontSize: 30)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  challenge.completed
-                      ? 'Daily challenge complete!'
-                      : challenge.title,
-                  style: const TextStyle(
-                    color: Color(0xFF2D3436),
-                    fontWeight: FontWeight.w900,
-                  ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: EdgeInsets.all(compact ? 10 : 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              Text(
+                challenge.completed ? '🏆' : '⭐',
+                style: TextStyle(fontSize: compact ? 26 : 30),
+              ),
+              SizedBox(width: compact ? 8 : 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      challenge.completed
+                          ? 'Daily challenge complete!'
+                          : challenge.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF2D3436),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    LinearProgressIndicator(
+                      value: progress,
+                      minHeight: compact ? 6 : 7,
+                      borderRadius: BorderRadius.circular(8),
+                      backgroundColor: const Color(0xFFE8E5FF),
+                      color: const Color(0xFF6C5CE7),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 5),
-                LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 7,
-                  borderRadius: BorderRadius.circular(8),
-                  backgroundColor: const Color(0xFFE8E5FF),
+              ),
+              SizedBox(width: compact ? 6 : 8),
+              Text(
+                '${challenge.progress.clamp(0, challenge.target)}/'
+                '${challenge.target}',
+                style: TextStyle(
                   color: const Color(0xFF6C5CE7),
+                  fontWeight: FontWeight.w900,
+                  fontSize: compact ? 12 : 14,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Text(
-            '${challenge.progress.clamp(0, challenge.target)}/'
-            '${challenge.target}',
-            style: const TextStyle(
-              color: Color(0xFF6C5CE7),
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -896,94 +956,114 @@ class _GameCard extends StatelessWidget {
             ? (game.id == 'infinity-loop' ? '✓ Solved' : '🏆 $highScore')
             : 'Play!';
 
+    final card = LayoutBuilder(
+      builder: (context, constraints) {
+        final tight = constraints.maxWidth < 165 || constraints.maxHeight < 245;
+        final iconSize = tight ? 38.0 : 46.0;
+        return Container(
+          padding: EdgeInsets.all(tight ? 9 : 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [base, deep],
+            ),
+            borderRadius: AppSpacing.cardRadius,
+            boxShadow: [
+              BoxShadow(
+                color: base.withValues(alpha: 0.5),
+                blurRadius: tight ? 12 : 18,
+                offset: Offset(0, tight ? 5 : 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icon nestled in a soft glossy bubble so the illustration pops.
+              Container(
+                padding: EdgeInsets.all(tight ? 9 : 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: OpenMojiView(
+                  emoji: game.icon,
+                  size: iconSize,
+                  fallback: Text(
+                    game.icon,
+                    style: TextStyle(fontSize: tight ? 34 : 40),
+                  ),
+                ),
+              ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
+                  begin: 0,
+                  end: tight ? -3 : -5,
+                  duration: 1600.ms,
+                  curve: Curves.easeInOut),
+              SizedBox(height: tight ? 7 : 10),
+              Text(
+                game.name,
+                maxLines: tight ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: tight ? 14.5 : 17,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                game.description,
+                maxLines: tight ? 2 : 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: tight ? 10.5 : 11.5,
+                  height: 1.12,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: tight ? 7 : 10),
+              // Status pill: bright when solved, soft "Play!" otherwise.
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: tight ? 10 : 14,
+                  vertical: tight ? 5 : 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  status,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: tight ? 11.5 : 13,
+                    fontWeight: FontWeight.w900,
+                    color: deep,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
     return BouncyButton(
       borderRadius: AppSpacing.cardRadius,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [base, deep],
-          ),
-          borderRadius: AppSpacing.cardRadius,
-          boxShadow: [
-            BoxShadow(
-              color: base.withValues(alpha: 0.5),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icon nestled in a soft glossy bubble so the illustration pops.
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.92),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: OpenMojiView(
-                emoji: game.icon,
-                size: 46,
-                fallback: Text(game.icon, style: const TextStyle(fontSize: 40)),
-              ),
-            ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
-                begin: 0, end: -5, duration: 1600.ms, curve: Curves.easeInOut),
-            const SizedBox(height: 10),
-            Text(
-              game.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              game.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11.5,
-                height: 1.15,
-                color: Colors.white.withValues(alpha: 0.9),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-            // Status pill: bright when solved, soft "Play!" otherwise.
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                status,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                  color: deep,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: card,
     )
         .animate()
         .fadeIn(delay: (60 * index).ms, duration: 300.ms)

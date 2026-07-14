@@ -128,34 +128,43 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          BouncyButton(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return Row(
+            children: [
+              BouncyButton(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Container(
+                  padding: EdgeInsets.all(compact ? 8 : 10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color: AppColors.primary,
+                    size: compact ? 23 : 26,
+                  ),
+                ),
               ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.primary,
-                size: 26,
+              SizedBox(width: compact ? 8 : 12),
+              Expanded(
+                child: Text(
+                  'Collection',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: (compact
+                          ? Theme.of(context).textTheme.titleLarge
+                          : Theme.of(context).textTheme.headlineMedium)
+                      ?.copyWith(color: Colors.white),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Collection',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(color: Colors.white),
-          ),
-          const Spacer(),
-          CurrencyChip.coins(coins),
-        ],
+              const SizedBox(width: 8),
+              Flexible(child: CurrencyChip.coins(coins)),
+            ],
+          );
+        },
       ),
     );
   }
@@ -178,79 +187,102 @@ class _EggCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final egg = Text('🥚', style: TextStyle(fontSize: opening ? 64 : 58));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.primary, AppColors.bubblegum],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: AppSpacing.cardRadius,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.4),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          final egg = Text(
+            '🥚',
+            style: TextStyle(fontSize: compact ? 48 : (opening ? 64 : 58)),
+          );
+          return Container(
+            padding: compact
+                ? const EdgeInsets.all(AppSpacing.md)
+                : AppSpacing.cardPadding,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.primary, AppColors.bubblegum],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: AppSpacing.cardRadius,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.4),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            opening
-                ? egg
-                    .animate(onPlay: (c) => c.repeat())
-                    .shake(hz: 6, duration: 500.ms)
-                : egg,
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Surprise Egg',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Collected $collectedCount / $total',
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  const SizedBox(height: 10),
-                  BouncyButton(
-                    onTap: opening ? null : onOpen,
-                    borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: canAfford ? Colors.white : Colors.white54,
-                        borderRadius:
-                            const BorderRadius.all(AppSpacing.radiusPill),
+            child: Row(
+              children: [
+                opening
+                    ? egg
+                        .animate(onPlay: (c) => c.repeat())
+                        .shake(hz: 6, duration: 500.ms)
+                    : egg,
+                SizedBox(width: compact ? 10 : 16),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Surprise Egg',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: (compact
+                                ? Theme.of(context).textTheme.titleMedium
+                                : Theme.of(context).textTheme.titleLarge)
+                            ?.copyWith(color: Colors.white),
                       ),
-                      child: Text(
-                        opening
-                            ? 'Opening…'
-                            : 'Open  🪙 ${CollectionCatalog.eggCost}',
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
+                      const SizedBox(height: 2),
+                      Text(
+                        'Collected $collectedCount / $total',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: compact ? 12 : 14,
                         ),
                       ),
-                    ),
+                      SizedBox(height: compact ? 8 : 10),
+                      BouncyButton(
+                        onTap: opening ? null : onOpen,
+                        borderRadius:
+                            const BorderRadius.all(AppSpacing.radiusPill),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: compact ? 13 : 18,
+                            vertical: compact ? 9 : 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: canAfford ? Colors.white : Colors.white54,
+                            borderRadius:
+                                const BorderRadius.all(AppSpacing.radiusPill),
+                          ),
+                          child: Text(
+                            opening
+                                ? 'Opening…'
+                                : 'Open  🪙 ${CollectionCatalog.eggCost}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: compact ? 14 : 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     ).animate().fadeIn().scale(
           begin: const Offset(0.96, 0.96),
@@ -279,15 +311,17 @@ class _SectionHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(
             AppSpacing.md, AppSpacing.lg, AppSpacing.md, AppSpacing.sm),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white, fontWeight: FontWeight.w800),
+              ),
             ),
+            const SizedBox(width: 8),
             Text(
               '$have / ${items.length}',
               style: const TextStyle(color: Colors.white70, fontSize: 14),
@@ -317,11 +351,13 @@ class _CollectibleGrid extends StatelessWidget {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 120,
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent:
+              MediaQuery.sizeOf(context).width < 360 ? 138 : 120,
           mainAxisSpacing: AppSpacing.md,
           crossAxisSpacing: AppSpacing.md,
-          childAspectRatio: 0.82,
+          childAspectRatio:
+              MediaQuery.sizeOf(context).width < 360 ? 0.72 : 0.82,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, i) {
@@ -367,71 +403,81 @@ class _CollectibleTile extends StatelessWidget {
     final rarity = item.rarity.color;
     // Locked tiles become exciting rarity-tinted "mystery" cards (not sad grey
     // blanks); owned tiles are bright white so the real OpenMoji art pops.
-    final tile = Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        gradient: owned
-            ? null
-            : LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [rarity, Color.lerp(rarity, Colors.black, 0.28)!],
+    final tile = LayoutBuilder(
+      builder: (context, constraints) {
+        final tight = constraints.maxHeight < 145;
+        return Container(
+          padding: EdgeInsets.all(tight ? 5 : 6),
+          decoration: BoxDecoration(
+            gradient: owned
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [rarity, Color.lerp(rarity, Colors.black, 0.28)!],
+                  ),
+            color: owned ? Colors.white : null,
+            borderRadius: AppSpacing.cardRadius,
+            border: Border.all(
+              color: activePet ? AppColors.success : rarity,
+              width: activePet ? 4 : 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: rarity.withValues(alpha: owned ? 0.22 : 0.4),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-        color: owned ? Colors.white : null,
-        borderRadius: AppSpacing.cardRadius,
-        border: Border.all(
-          color: activePet ? AppColors.success : rarity,
-          width: activePet ? 4 : 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: rarity.withValues(alpha: owned ? 0.22 : 0.4),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (owned)
-            OpenMojiView(
-              emoji: item.emoji,
-              size: 46,
-              fallback: Text(item.emoji, style: const TextStyle(fontSize: 40)),
-            )
-          else
-            Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
-              ),
-              child: const Text(
-                '?',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (owned)
+                OpenMojiView(
+                  emoji: item.emoji,
+                  size: tight ? 38 : 46,
+                  fallback: Text(
+                    item.emoji,
+                    style: TextStyle(fontSize: tight ? 34 : 40),
+                  ),
+                )
+              else
+                Container(
+                  padding: EdgeInsets.all(tight ? 7 : 9),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '?',
+                    style: TextStyle(
+                      fontSize: tight ? 22 : 26,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              SizedBox(height: tight ? 3 : 4),
+              Flexible(
+                child: Text(
+                  owned ? item.name : '???',
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: tight ? 11 : 12,
+                    color: owned ? Colors.black87 : Colors.white,
+                  ),
                 ),
               ),
-            ),
-          const SizedBox(height: 4),
-          Text(
-            owned ? item.name : '???',
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-              color: owned ? Colors.black87 : Colors.white,
-            ),
+              SizedBox(height: tight ? 3 : 4),
+              _pill(compact: tight),
+            ],
           ),
-          const SizedBox(height: 4),
-          _pill(),
-        ],
-      ),
+        );
+      },
     );
     return onTap == null
         ? tile
@@ -442,7 +488,7 @@ class _CollectibleTile extends StatelessWidget {
           );
   }
 
-  Widget _pill() {
+  Widget _pill({required bool compact}) {
     final (label, color) = activePet
         ? ('Buddy', AppColors.success)
         : owned && item.isPet
@@ -451,17 +497,22 @@ class _CollectibleTile extends StatelessWidget {
     // Owned: filled rarity chip. Locked: crisp white chip so the label stays
     // readable on the colored mystery gradient.
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 6 : 8,
+        vertical: 2,
+      ),
       decoration: BoxDecoration(
         color: owned ? color : Colors.white,
         borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: owned ? Colors.white : color,
           fontWeight: FontWeight.w800,
-          fontSize: 10,
+          fontSize: compact ? 9 : 10,
         ),
       ),
     );
@@ -475,62 +526,75 @@ class _RevealDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = result.collectible;
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 || media.size.height < 620;
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: AppSpacing.cardRadius,
-          border: Border.all(color: c.rarity.color, width: 4),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              decoration: BoxDecoration(
-                color: c.rarity.color,
-                borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
-              ),
-              child: Text(
-                c.rarity.label.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: media.size.height * 0.82),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(compact ? AppSpacing.md : AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: AppSpacing.cardRadius,
+              border: Border.all(color: c.rarity.color, width: 4),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: c.rarity.color,
+                    borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
+                  ),
+                  child: Text(
+                    c.rarity.label.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(c.emoji, style: const TextStyle(fontSize: 96)).animate().scale(
-                  begin: const Offset(0.3, 0.3),
-                  end: const Offset(1, 1),
-                  duration: 500.ms,
-                  curve: Curves.elasticOut,
+                SizedBox(height: compact ? 10 : 16),
+                Text(
+                  c.emoji,
+                  style: TextStyle(fontSize: compact ? 72 : 96),
+                ).animate().scale(
+                      begin: const Offset(0.3, 0.3),
+                      end: const Offset(1, 1),
+                      duration: 500.ms,
+                      curve: Curves.elasticOut,
+                    ),
+                SizedBox(height: compact ? 8 : 12),
+                Text(
+                  result.isNew ? c.name : 'Duplicate ${c.name}',
+                  style: compact
+                      ? Theme.of(context).textTheme.headlineSmall
+                      : Theme.of(context).textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
                 ),
-            const SizedBox(height: 12),
-            Text(
-              result.isNew ? c.name : 'Duplicate ${c.name}',
-              style: Theme.of(context).textTheme.headlineMedium,
-              textAlign: TextAlign.center,
+                const SizedBox(height: 6),
+                Text(
+                  result.isNew
+                      ? (result.autoEquippedPet
+                          ? 'Added to your collection — and equipped as your buddy!'
+                          : 'Added to your collection!')
+                      : 'You already had this — here are 🪙 ${result.coinsRefunded} coins back!',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                SizedBox(height: compact ? 12 : 18),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  child: const Text('Yay!'),
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              result.isNew
-                  ? (result.autoEquippedPet
-                      ? 'Added to your collection — and equipped as your buddy!'
-                      : 'Added to your collection!')
-                  : 'You already had this — here are 🪙 ${result.coinsRefunded} coins back!',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 18),
-            FilledButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text('Yay!'),
-            ),
-          ],
+          ),
         ),
       ),
     ).animate().fadeIn(duration: 200.ms);

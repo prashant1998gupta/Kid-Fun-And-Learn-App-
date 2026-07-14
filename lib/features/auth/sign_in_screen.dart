@@ -185,6 +185,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         title: Text(title),
         content: TextField(
           controller: controller,
@@ -277,13 +278,24 @@ class _ProviderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
+    return OutlinedButton(
       onPressed: onTap == null ? null : () => onTap!(),
-      icon: Icon(icon, color: color),
-      label: Text(label),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(52),
         alignment: Alignment.centerLeft,
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -326,7 +338,13 @@ class _ErrorBanner extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline_rounded, color: AppColors.error),
           const SizedBox(width: 12),
-          Expanded(child: Text(message)),
+          Expanded(
+            child: Text(
+              message,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.close_rounded),
             onPressed: onDismiss,

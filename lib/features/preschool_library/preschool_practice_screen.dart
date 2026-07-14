@@ -51,28 +51,40 @@ class PreschoolPracticeScreen extends ConsumerWidget {
 
   Widget _header(BuildContext context) => Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            BouncyButton(
-              onTap: () => Navigator.of(context).maybePop(),
-              child: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.arrow_back_rounded, color: AppColors.primary),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'My Learn & Trace Library',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 23,
-                  fontWeight: FontWeight.w900,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            return Row(
+              children: [
+                BouncyButton(
+                  onTap: () => Navigator.of(context).maybePop(),
+                  child: CircleAvatar(
+                    radius: compact ? 18 : 20,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.primary,
+                      size: compact ? 22 : 24,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const Text('🖍️', style: TextStyle(fontSize: 40)),
-          ],
+                SizedBox(width: compact ? 8 : 12),
+                Expanded(
+                  child: Text(
+                    'My Learn & Trace Library',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: compact ? 20 : 23,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                Text('🖍️', style: TextStyle(fontSize: compact ? 32 : 40)),
+              ],
+            );
+          },
         ),
       );
 
@@ -81,6 +93,8 @@ class PreschoolPracticeScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(18, 20, 18, 10),
           child: Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 21,
@@ -98,31 +112,36 @@ class PreschoolPracticeScreen extends ConsumerWidget {
     final list = categories.toList();
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 240,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.15,
-        ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final category = list[index];
-            return _CategoryProgressCard(
-              category: category,
-              childId: childId,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => PreschoolCategoryScreen(
-                    category: category,
-                    childId: childId,
+      sliver: SliverLayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.crossAxisExtent < 360;
+          return SliverGrid(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: compact ? 190 : 240,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: compact ? 0.78 : 1.15,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final category = list[index];
+                return _CategoryProgressCard(
+                  category: category,
+                  childId: childId,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => PreschoolCategoryScreen(
+                        category: category,
+                        childId: childId,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-          childCount: list.length,
-        ),
+                );
+              },
+              childCount: list.length,
+            ),
+          );
+        },
       ),
     );
   }
@@ -148,35 +167,44 @@ class _WelcomeCardState extends State<_WelcomeCard> {
   }
 
   @override
-  Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.96),
-          borderRadius: BorderRadius.circular(26),
-        ),
-        child: Row(
-          children: [
-            const Text('🦉', style: TextStyle(fontSize: 52)),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                message,
-                style: TextStyle(
-                  color: AppColors.lightText,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: EdgeInsets.all(compact ? 13 : 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.96),
+              borderRadius: BorderRadius.circular(26),
+            ),
+            child: Row(
+              children: [
+                Text('🦉', style: TextStyle(fontSize: compact ? 40 : 52)),
+                SizedBox(width: compact ? 9 : 12),
+                Expanded(
+                  child: Text(
+                    message,
+                    maxLines: compact ? 3 : 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.lightText,
+                      fontWeight: FontWeight.w800,
+                      fontSize: compact ? 14 : 16,
+                    ),
+                  ),
                 ),
-              ),
+                IconButton(
+                  tooltip: 'Hear this',
+                  onPressed: () => AudioService.instance.speak(message),
+                  icon: const Icon(
+                    Icons.volume_up_rounded,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
             ),
-            IconButton(
-              tooltip: 'Hear this',
-              onPressed: () => AudioService.instance.speak(message),
-              icon:
-                  const Icon(Icons.volume_up_rounded, color: AppColors.primary),
-            ),
-          ],
-        ),
+          );
+        },
       );
 }
 
@@ -225,50 +253,62 @@ class _CategoryCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => BouncyButton(
-        key: ValueKey('preschool-category-${category.id}'),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: AppSpacing.cardRadius,
-            boxShadow: [
-              BoxShadow(color: Color(0x22000000), blurRadius: 10),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(category.emoji, style: const TextStyle(fontSize: 38)),
-              const SizedBox(height: 5),
-              Text(
-                category.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppColors.lightText,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 17,
-                ),
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final compact =
+              constraints.maxHeight < 170 || constraints.maxWidth < 170;
+          return BouncyButton(
+            key: ValueKey('preschool-category-${category.id}'),
+            onTap: onTap,
+            child: Container(
+              padding: EdgeInsets.all(compact ? 9 : 14),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: AppSpacing.cardRadius,
+                boxShadow: [
+                  BoxShadow(color: Color(0x22000000), blurRadius: 10),
+                ],
               ),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: progress,
-                minHeight: 8,
-                borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
-                color: AppColors.success,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(category.emoji,
+                      style: TextStyle(fontSize: compact ? 28 : 38)),
+                  SizedBox(height: compact ? 3 : 5),
+                  Text(
+                    category.title,
+                    maxLines: compact ? 2 : 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.lightText,
+                      fontWeight: FontWeight.w900,
+                      fontSize: compact ? 14 : 17,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 5 : 8),
+                  LinearProgressIndicator(
+                    value: progress,
+                    minHeight: compact ? 6 : 8,
+                    borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
+                    color: AppColors.success,
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                  ),
+                  SizedBox(height: compact ? 3 : 4),
+                  Text(
+                    '$practised of $total explored',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.lightTextSoft,
+                      fontSize: compact ? 10 : 11,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                '$practised of $total explored',
-                style: const TextStyle(
-                    color: AppColors.lightTextSoft, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
 }
 
@@ -760,48 +800,67 @@ class _PreschoolTraceScreenState extends ConsumerState<PreschoolTraceScreen>
     await showModalBottomSheet<void>(
       context: context,
       isDismissible: false,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🌟', style: TextStyle(fontSize: 58)),
-            const Text('Beautiful practice!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 16),
-            Row(
+      builder: (sheetContext) {
+        final media = MediaQuery.of(sheetContext);
+        final compact = media.size.width < 360 ||
+            media.size.height < 620 ||
+            media.textScaler.scale(1) > 1.25;
+        return SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              compact ? 18 : 24,
+              compact ? 18 : 24,
+              compact ? 18 : 24,
+              (compact ? 18 : 24) + media.viewInsets.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: const ValueKey('trace-again'),
-                    onPressed: () {
-                      Navigator.of(sheetContext).pop();
-                      _clear();
-                    },
-                    icon: const Icon(Icons.replay_rounded),
-                    label: const Text('Again'),
+                Text('🌟', style: TextStyle(fontSize: compact ? 44 : 58)),
+                Text(
+                  'Beautiful practice!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: compact ? 21 : 24,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    key: const ValueKey('trace-choose-another'),
-                    onPressed: () {
-                      Navigator.of(sheetContext).pop();
-                      Navigator.of(context).pop();
-                    },
-                    icon: const Icon(Icons.grid_view_rounded),
-                    label: const Text('Another'),
-                  ),
+                const SizedBox(height: 16),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 10,
+                  children: [
+                    OutlinedButton.icon(
+                      key: const ValueKey('trace-again'),
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop();
+                        _clear();
+                      },
+                      icon: const Icon(Icons.replay_rounded),
+                      label: const Text('Again'),
+                    ),
+                    FilledButton.icon(
+                      key: const ValueKey('trace-choose-another'),
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop();
+                        Navigator.of(context).pop();
+                      },
+                      icon: const Icon(Icons.grid_view_rounded),
+                      label: const Text('Another'),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
     if (mounted) setState(() => _finishing = false);
   }

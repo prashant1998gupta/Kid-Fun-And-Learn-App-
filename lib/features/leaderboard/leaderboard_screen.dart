@@ -89,48 +89,68 @@ class _Header extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          BouncyButton(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.primary,
-                size: 26,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Friends',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(color: Colors.white),
-          ),
-          const Spacer(),
-          if ((code ?? '').isNotEmpty)
-            BouncyButton(
-              onTap: () =>
-                  ref.read(leaderboardControllerProvider.notifier).leaveGroup(),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(AppSpacing.radiusPill),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return Row(
+            children: [
+              BouncyButton(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Container(
+                  padding: EdgeInsets.all(compact ? 8 : 10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color: AppColors.primary,
+                    size: compact ? 23 : 26,
+                  ),
                 ),
-                child: const Text('Leave',
-                    style: TextStyle(fontWeight: FontWeight.w800)),
               ),
-            ),
-        ],
+              SizedBox(width: compact ? 8 : 12),
+              Expanded(
+                child: Text(
+                  'Friends',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: (compact
+                          ? Theme.of(context).textTheme.titleLarge
+                          : Theme.of(context).textTheme.headlineMedium)
+                      ?.copyWith(color: Colors.white),
+                ),
+              ),
+              if ((code ?? '').isNotEmpty) ...[
+                const SizedBox(width: 8),
+                BouncyButton(
+                  onTap: () => ref
+                      .read(leaderboardControllerProvider.notifier)
+                      .leaveGroup(),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 11 : 14,
+                      vertical: compact ? 7 : 8,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(AppSpacing.radiusPill),
+                    ),
+                    child: Text(
+                      'Leave',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: compact ? 12 : 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -384,35 +404,47 @@ class _Info extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(color: Colors.white),
-              textAlign: TextAlign.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact =
+            constraints.maxWidth < 360 || constraints.maxHeight < 470;
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(compact ? AppSpacing.md : AppSpacing.lg),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: Colors.white, size: compact ? 48 : 64),
+                  SizedBox(height: compact ? 10 : 16),
+                  Text(
+                    title,
+                    style: (compact
+                            ? Theme.of(context).textTheme.titleLarge
+                            : Theme.of(context).textTheme.headlineMedium)
+                        ?.copyWith(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    message,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: compact ? 13 : 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (action != null) ...[
+                    SizedBox(height: compact ? 14 : 20),
+                    action!,
+                  ],
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: const TextStyle(color: Colors.white70),
-              textAlign: TextAlign.center,
-            ),
-            if (action != null) ...[
-              const SizedBox(height: 20),
-              action!,
-            ],
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

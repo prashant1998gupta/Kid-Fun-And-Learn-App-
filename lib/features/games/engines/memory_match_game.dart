@@ -172,7 +172,6 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.of(context).size.width > 600;
     return CelebrationOverlay(
       controller: _celebration,
       child: Scaffold(
@@ -186,20 +185,32 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.md),
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: wide ? 6 : 4,
-                        mainAxisSpacing: AppSpacing.sm,
-                        crossAxisSpacing: AppSpacing.sm,
-                      ),
-                      itemCount: _cards.length,
-                      itemBuilder: (context, i) => _CardTile(
-                        label: _cards[i].label,
-                        emoji: _cards[i].emoji,
-                        faceUp: _faceUp(i),
-                        matched: _cards[i].matched,
-                        onTap: () => _onTap(i),
-                      ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final columns = _memoryColumns(
+                          constraints.maxWidth,
+                          constraints.maxHeight,
+                        );
+                        final compact = constraints.maxHeight < 380 ||
+                            constraints.maxWidth < 360;
+                        return GridView.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: columns,
+                            mainAxisSpacing: compact ? 6 : AppSpacing.sm,
+                            crossAxisSpacing: compact ? 6 : AppSpacing.sm,
+                          ),
+                          itemCount: _cards.length,
+                          itemBuilder: (context, i) => _CardTile(
+                            label: _cards[i].label,
+                            emoji: _cards[i].emoji,
+                            faceUp: _faceUp(i),
+                            matched: _cards[i].matched,
+                            compact: compact,
+                            onTap: () => _onTap(i),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -209,6 +220,13 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
         ),
       ),
     );
+  }
+
+  int _memoryColumns(double width, double height) {
+    if (width > 720) return 6;
+    if (width > 520) return 5;
+    if (height < 360 && width >= 420) return 6;
+    return 4;
   }
 
   Widget _header(BuildContext context) {
@@ -239,7 +257,13 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
             ),
           ),
           const SizedBox(width: 12),
-          const MascotView(mascot: Mascot.penguin, size: 56),
+          const SizedBox(
+            width: 56,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: MascotView(mascot: Mascot.penguin, size: 56),
+            ),
+          ),
         ],
       ),
     );
@@ -252,6 +276,7 @@ class _CardTile extends StatelessWidget {
     required this.emoji,
     required this.faceUp,
     required this.matched,
+    required this.compact,
     required this.onTap,
   });
 
@@ -259,6 +284,7 @@ class _CardTile extends StatelessWidget {
   final String? emoji;
   final bool faceUp;
   final bool matched;
+  final bool compact;
   final VoidCallback onTap;
 
   @override
@@ -280,11 +306,15 @@ class _CardTile extends StatelessWidget {
         ),
         child: Center(
           child: faceUp
-              ? IllustratedObjectView(label: label, emoji: emoji, size: 58)
-              : const Icon(
+              ? IllustratedObjectView(
+                  label: label,
+                  emoji: emoji,
+                  size: compact ? 42 : 58,
+                )
+              : Icon(
                   Icons.question_mark_rounded,
                   color: Colors.white,
-                  size: 34,
+                  size: compact ? 28 : 34,
                 ),
         ),
       ),

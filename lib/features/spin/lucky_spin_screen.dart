@@ -46,15 +46,21 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen>
     _Wedge('50', AppColors.star, RewardBundle(coins: 50)),
   ];
 
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 3600),
-  );
+  late final AnimationController _controller;
   final _random = math.Random();
 
   double _angle = 0;
   bool _spinning = false;
   _Wedge? _won;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3600),
+    );
+  }
 
   @override
   void dispose() {
@@ -119,74 +125,117 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen>
         body: AnimatedBackground(
           theme: WorldTheme.night,
           child: SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      BouncyButton(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
+            child: LayoutBuilder(
+              builder: (context, viewport) {
+                final compact =
+                    viewport.maxWidth < 360 || viewport.maxHeight < 620;
+                final wheelSize = math.min(
+                  compact ? 230.0 : 280.0,
+                  math.max(190.0, viewport.maxWidth - 56),
+                );
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: viewport.maxHeight),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: Row(
+                            children: [
+                              BouncyButton(
+                                onTap: () => Navigator.of(context).maybePop(),
+                                child: Container(
+                                  padding: EdgeInsets.all(compact ? 8 : 10),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_back_rounded,
+                                    color: AppColors.primary,
+                                    size: compact ? 23 : 26,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: compact ? 8 : 12),
+                              Expanded(
+                                child: Text(
+                                  'Lucky Spin',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: (compact
+                                          ? Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .headlineMedium)
+                                      ?.copyWith(color: Colors.white),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              if (child != null)
+                                Flexible(
+                                  child: CurrencyChip.coins(child.wallet.coins),
+                                ),
+                            ],
                           ),
-                          child: const Icon(
-                            Icons.arrow_back_rounded,
-                            color: AppColors.primary,
-                            size: 26,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: compact ? 6 : 14,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _wheel(wheelSize),
+                              SizedBox(height: compact ? 14 : 24),
+                              _wonOrPrompt(context, canSpin, compact: compact),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Lucky Spin',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(color: Colors.white),
-                      ),
-                      const Spacer(),
-                      if (child != null) CurrencyChip.coins(child.wallet.coins),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                _wheel(),
-                const SizedBox(height: 24),
-                _wonOrPrompt(context, canSpin),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: BouncyButton(
-                    onTap: (canSpin && !_spinning) ? _spin : null,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: canSpin
-                              ? [AppColors.accent, AppColors.secondary]
-                              : [Colors.grey, Colors.grey.shade400],
+                        Padding(
+                          padding: EdgeInsets.all(
+                            compact ? AppSpacing.md : AppSpacing.lg,
+                          ),
+                          child: BouncyButton(
+                            onTap: (canSpin && !_spinning) ? _spin : null,
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                vertical: compact ? 15 : 18,
+                              ),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: canSpin
+                                      ? [AppColors.accent, AppColors.secondary]
+                                      : [Colors.grey, Colors.grey.shade400],
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                  AppSpacing.radiusPill,
+                                ),
+                              ),
+                              child: Text(
+                                canSpin ? 'SPIN!' : 'Come back tomorrow! 🌙',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: compact ? 19 : 22,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                        borderRadius:
-                            const BorderRadius.all(AppSpacing.radiusPill),
-                      ),
-                      child: Text(
-                        canSpin ? 'SPIN!' : 'Come back tomorrow! 🌙',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),
@@ -194,10 +243,10 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen>
     );
   }
 
-  Widget _wheel() {
+  Widget _wheel(double size) {
     return SizedBox(
-      width: 280,
-      height: 300,
+      width: size,
+      height: size + 20,
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
@@ -206,40 +255,49 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen>
             child: Transform.rotate(
               angle: _angle,
               child: CustomPaint(
-                size: const Size(280, 280),
+                size: Size(size, size),
                 painter: _WheelPainter(_wedges),
               ),
             ),
           ),
           // Fixed pointer at the top.
-          const Positioned(
+          Positioned(
             top: 0,
-            child: Icon(Icons.arrow_drop_down_rounded,
-                color: Colors.white, size: 56),
+            child: Icon(
+              Icons.arrow_drop_down_rounded,
+              color: Colors.white,
+              size: math.max(42, size * 0.2),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _wonOrPrompt(BuildContext context, bool canSpin) {
+  Widget _wonOrPrompt(
+    BuildContext context,
+    bool canSpin, {
+    required bool compact,
+  }) {
     if (_won != null) {
       final r = _won!.reward;
       final text =
           r.gems > 0 ? 'You won ${r.gems} 💎!' : 'You won ${r.coins} 🪙!';
       return Text(
         text,
+        textAlign: TextAlign.center,
         style: Theme.of(context)
             .textTheme
-            .headlineMedium
+            .headlineSmall
             ?.copyWith(color: Colors.white),
       );
     }
     return Text(
       canSpin ? 'Spin to win a prize!' : 'You already spun today',
+      textAlign: TextAlign.center,
       style: Theme.of(context)
           .textTheme
-          .bodyLarge
+          .bodyMedium
           ?.copyWith(color: Colors.white70),
     );
   }

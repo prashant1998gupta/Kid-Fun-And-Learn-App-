@@ -123,48 +123,64 @@ class _TopBar extends ConsumerWidget {
     final w = child.wallet;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          BouncyButton(
-            onTap: () => context.go(AppRoutes.profilePicker),
-            child: AvatarView(config: child.avatar, size: 56),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Row(
-              children: [
-                CurrencyChip.coins(w.coins),
-                const SizedBox(width: 8),
-                CurrencyChip.gems(w.gems),
-              ],
-            ),
-          ),
-          BouncyButton(
-            onTap: () => _showEnergyPicker(context, ref, child),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                shape: BoxShape.circle,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          final avatarSize = compact ? 48.0 : 56.0;
+          final actionPadding = compact ? 8.0 : 10.0;
+          final actionIconSize = compact ? 23.0 : 26.0;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BouncyButton(
+                onTap: () => context.go(AppRoutes.profilePicker),
+                child: AvatarView(config: child.avatar, size: avatarSize),
               ),
-              child: Text(child.energyMode.emoji,
-                  style: const TextStyle(fontSize: 24)),
-            ),
-          ),
-          const SizedBox(width: 8),
-          BouncyButton(
-            sound: Sfx.tap,
-            onTap: () => context.push(AppRoutes.settings),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                shape: BoxShape.circle,
+              SizedBox(width: compact ? 8 : 12),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    CurrencyChip.coins(w.coins),
+                    CurrencyChip.gems(w.gems),
+                  ],
+                ),
               ),
-              child: const Icon(Icons.settings_rounded, size: 26),
-            ),
-          ),
-        ],
+              SizedBox(width: compact ? 6 : 8),
+              BouncyButton(
+                onTap: () => _showEnergyPicker(context, ref, child),
+                child: Container(
+                  padding: EdgeInsets.all(actionPadding),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    child.energyMode.emoji,
+                    style: TextStyle(fontSize: compact ? 21 : 24),
+                  ),
+                ),
+              ),
+              SizedBox(width: compact ? 6 : 8),
+              BouncyButton(
+                sound: Sfx.tap,
+                onTap: () => context.push(AppRoutes.settings),
+                child: Container(
+                  padding: EdgeInsets.all(actionPadding),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.settings_rounded,
+                    size: actionIconSize,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -178,64 +194,100 @@ class _TopBar extends ConsumerWidget {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('How do you feel today?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                for (final mode in KidEnergyMode.values) ...[
-                  Expanded(
-                    child: BouncyButton(
-                      onTap: () async {
-                        await ref
-                            .read(profilesControllerProvider.notifier)
-                            .setEnergyMode(mode);
-                        AudioService.instance.speak(
-                          '${mode.label} mode. ${mode.description}.',
-                        );
-                        if (sheetContext.mounted) {
-                          Navigator.of(sheetContext).pop();
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: child.energyMode == mode
-                              ? AppColors.primary.withValues(alpha: 0.16)
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                            color: child.energyMode == mode
-                                ? AppColors.primary
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(mode.emoji,
-                                style: const TextStyle(fontSize: 42)),
-                            Text(mode.label,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w900)),
-                          ],
-                        ),
-                      ),
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        top: false,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360 ||
+                MediaQuery.of(context).textScaler.scale(1) > 1.25;
+            return SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                compact ? 14 : 20,
+                4,
+                compact ? 14 : 20,
+                28 + MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'How do you feel today?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: compact ? 20 : 22,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                  if (mode != KidEnergyMode.values.last)
-                    const SizedBox(width: 10),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: compact ? 8 : 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      for (final mode in KidEnergyMode.values)
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: compact ? 88 : 100,
+                            maxWidth: compact ? 96 : 122,
+                          ),
+                          child: BouncyButton(
+                            onTap: () async {
+                              await ref
+                                  .read(profilesControllerProvider.notifier)
+                                  .setEnergyMode(mode);
+                              AudioService.instance.speak(
+                                '${mode.label} mode. ${mode.description}.',
+                              );
+                              if (sheetContext.mounted) {
+                                Navigator.of(sheetContext).pop();
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                vertical: compact ? 12 : 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: child.energyMode == mode
+                                    ? AppColors.primary.withValues(alpha: 0.16)
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(
+                                  color: child.energyMode == mode
+                                      ? AppColors.primary
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    mode.emoji,
+                                    style:
+                                        TextStyle(fontSize: compact ? 34 : 42),
+                                  ),
+                                  Text(
+                                    mode.label,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: compact ? 13 : null,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
-              ],
-            ),
-          ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -257,83 +309,94 @@ class _Greeting extends StatelessWidget {
     final worldTextSoft = isDark ? Colors.white : AppColors.lightTextSoft;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Row(
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          final mascotSize = compact ? 64.0 : 80.0;
+          return Row(
             children: [
-              MascotView(
-                mascot: Mascot.values.firstWhere(
-                  (m) => m.name == child.mascotId,
-                  orElse: () => Mascot.panda,
-                ),
-                size: 80,
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  MascotView(
+                    mascot: Mascot.values.firstWhere(
+                      (m) => m.name == child.mascotId,
+                      orElse: () => Mascot.panda,
+                    ),
+                    size: mascotSize,
+                  ),
+                  if (pet != null)
+                    Positioned(
+                      right: -6,
+                      bottom: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          pet.emoji,
+                          style: TextStyle(fontSize: compact ? 22 : 26),
+                        ),
+                      ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
+                            begin: 0,
+                            end: -4,
+                            duration: 1200.ms,
+                            curve: Curves.easeInOut,
+                          ),
+                    ),
+                ],
               ),
-              if (pet != null)
-                Positioned(
-                  right: -6,
-                  bottom: -2,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 6,
+              SizedBox(width: compact ? 10 : 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).greeting(child.name),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: (compact
+                              ? Theme.of(context).textTheme.headlineSmall
+                              : Theme.of(context).textTheme.headlineMedium)
+                          ?.copyWith(color: worldText),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 2,
+                      children: [
+                        Text(
+                          'Level ${w.level}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(color: worldText),
+                        ),
+                        Text(
+                          '🔥 ${w.streakDays} day streak',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: worldTextSoft),
                         ),
                       ],
                     ),
-                    child:
-                        Text(pet.emoji, style: const TextStyle(fontSize: 26)),
-                  ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
-                        begin: 0,
-                        end: -4,
-                        duration: 1200.ms,
-                        curve: Curves.easeInOut,
-                      ),
-                ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context).greeting(child.name),
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(color: worldText),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      'Level ${w.level}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(color: worldText),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '🔥 ${w.streakDays} day streak',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: worldTextSoft),
-                    ),
+                    const SizedBox(height: 6),
+                    ProgressBarKid(progress: w.levelProgress),
                   ],
                 ),
-                const SizedBox(height: 6),
-                ProgressBarKid(progress: w.levelProgress),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     ).animate().fadeIn().slideX(begin: -0.1, end: 0);
   }
@@ -457,61 +520,82 @@ class _WorldInvitation extends StatelessWidget {
           context.push(AppRoutes.kidWorld);
         },
         // Clean gradient card — no white outline, just a soft shadow.
-        child: Container(
-          height: child.grade.isPreSchool ? 170 : 135,
-          clipBehavior: Clip.antiAlias,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF7ED6DF), Color(0xFFFFD36E)],
-            ),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x22000000),
-                blurRadius: 16,
-                offset: Offset(0, 8),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            final preschool = child.grade.isPreSchool;
+            final petSize = compact ? 58.0 : (preschool ? 82.0 : 68.0);
+            return Container(
+              constraints: BoxConstraints(
+                minHeight: compact ? 142 : (preschool ? 170 : 135),
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Text(pet?.emoji ?? growingPet.emoji,
-                      style: TextStyle(
-                          fontSize: child.grade.isPreSchool ? 82 : 68))
-                  .animate(onPlay: (c) => c.repeat(reverse: true))
-                  .moveY(begin: 0, end: -6, duration: 1100.ms),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Enter My World',
-                      style: TextStyle(
-                        color: AppColors.lightText,
-                        fontSize: child.grade.isPreSchool ? 25 : 21,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      child.companionMemory,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.lightText,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+              clipBehavior: Clip.antiAlias,
+              padding: EdgeInsets.all(compact ? 14 : 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF7ED6DF), Color(0xFFFFD36E)],
                 ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x22000000),
+                    blurRadius: 16,
+                    offset: Offset(0, 8),
+                  ),
+                ],
               ),
-              const Icon(Icons.arrow_forward_rounded,
-                  color: AppColors.lightText, size: 34),
-            ],
-          ),
+              child: Row(
+                children: [
+                  Text(
+                    pet?.emoji ?? growingPet.emoji,
+                    style: TextStyle(fontSize: petSize),
+                  ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(
+                        begin: 0,
+                        end: -6,
+                        duration: 1100.ms,
+                      ),
+                  SizedBox(width: compact ? 10 : 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Enter My World',
+                          maxLines: compact ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.lightText,
+                            fontSize: compact ? 21 : (preschool ? 25 : 21),
+                            fontWeight: FontWeight.w900,
+                            height: 1.05,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          child.companionMemory,
+                          maxLines: compact ? 3 : 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.lightText,
+                            fontSize: compact ? 13 : null,
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: AppColors.lightText,
+                    size: compact ? 28 : 34,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

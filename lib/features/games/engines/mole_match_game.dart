@@ -345,26 +345,37 @@ class _MoleHole extends StatelessWidget {
                       borderRadius: AppSpacing.cardRadius,
                       border: Border.all(color: Colors.white, width: 2),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('🐹', style: TextStyle(fontSize: 38)),
-                        IllustratedObjectView(
-                          label: option!.label,
-                          emoji: option!.emoji,
-                          size: 42,
-                          selected: selected,
-                        ),
-                        if (option!.emoji != null)
-                          Text(
-                            option!.label,
-                            maxLines: 1,
-                            style: TextStyle(
-                              color: foreground,
-                              fontWeight: FontWeight.w800,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('🐹', style: TextStyle(fontSize: 30)),
+                            IllustratedObjectView(
+                              label: option!.label,
+                              emoji: option!.emoji,
+                              size: 34,
+                              selected: selected,
                             ),
-                          ),
-                      ],
+                            if (option!.emoji != null)
+                              SizedBox(
+                                width: 72,
+                                child: Text(
+                                  option!.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: foreground,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

@@ -94,59 +94,83 @@ class _TutorialDialogState extends State<_TutorialDialog>
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final compact = media.size.width < 360 || media.textScaler.scale(1) > 1.2;
+    final emojiSize = compact ? 52.0 : 72.0;
+    final textSize = compact ? 17.0 : 20.0;
+    final buttonTextSize = compact ? 16.0 : 18.0;
+
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(28),
+      insetPadding: EdgeInsets.all(compact ? 16 : 28),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.of(context).pop(),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // The animated tapping finger / gesture hint.
-              AnimatedBuilder(
-                animation: _c,
-                builder: (context, child) {
-                  final t = Curves.easeInOut.transform(_c.value);
-                  return Transform.translate(
-                    offset: Offset(0, -10 * t),
-                    child: Transform.scale(
-                        scale: 1 + 0.12 * (1 - t), child: child),
-                  );
-                },
-                child: Text(widget.emoji, style: const TextStyle(fontSize: 72)),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: media.size.height * 0.84),
+          child: Container(
+            padding: EdgeInsets.fromLTRB(
+              compact ? 18 : 24,
+              compact ? 20 : 28,
+              compact ? 18 : 24,
+              compact ? 16 : 20,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // The animated tapping finger / gesture hint.
+                  AnimatedBuilder(
+                    animation: _c,
+                    builder: (context, child) {
+                      final t = Curves.easeInOut.transform(_c.value);
+                      return Transform.translate(
+                        offset: Offset(0, compact ? -6 * t : -10 * t),
+                        child: Transform.scale(
+                            scale: 1 + 0.12 * (1 - t), child: child),
+                      );
+                    },
+                    child: Text(
+                      widget.emoji,
+                      style: TextStyle(fontSize: emojiSize),
+                    ),
+                  ),
+                  SizedBox(height: compact ? 8 : 10),
+                  Text(
+                    widget.instruction,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: const Color(0xFF2D3436),
+                      fontWeight: FontWeight.w800,
+                      fontSize: textSize,
+                      height: 1.25,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 14 : 18),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 22 : 32,
+                        vertical: compact ? 10 : 12,
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      "Let's Play! 🎉",
+                      style: TextStyle(
+                        fontSize: buttonTextSize,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(
-                widget.instruction,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFF2D3436),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
-                  height: 1.25,
-                ),
-              ),
-              const SizedBox(height: 18),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.success,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  "Let's Play! 🎉",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

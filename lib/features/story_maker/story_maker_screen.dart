@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -169,52 +171,84 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🎉', style: TextStyle(fontSize: 56)),
-            Text('Story complete!',
-                style: Theme.of(sheetContext).textTheme.headlineMedium),
-            const SizedBox(height: 6),
-            const Text('You earned 🪙 15 and a ⭐!',
-                style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 18),
-            BouncyButton(
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                _restart();
-              },
-              child: _pill('Make another! ✨', AppColors.secondary),
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final media = MediaQuery.of(sheetContext);
+        final compact = media.size.width < 360 ||
+            media.size.height < 620 ||
+            media.textScaler.scale(1) > 1.25;
+        return SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              compact ? AppSpacing.md : AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg + media.viewInsets.bottom,
             ),
-            const SizedBox(height: 10),
-            BouncyButton(
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                Navigator.of(context).maybePop();
-              },
-              child: _pill('Done', AppColors.primary),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('🎉', style: TextStyle(fontSize: compact ? 42 : 56)),
+                Text(
+                  'Story complete!',
+                  textAlign: TextAlign.center,
+                  style: compact
+                      ? Theme.of(sheetContext).textTheme.headlineSmall
+                      : Theme.of(sheetContext).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'You earned 🪙 15 and a ⭐!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 18),
+                BouncyButton(
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _restart();
+                  },
+                  child: _pill('Make another! ✨', AppColors.secondary),
+                ),
+                const SizedBox(height: 10),
+                BouncyButton(
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    Navigator.of(context).maybePop();
+                  },
+                  child: _pill('Done', AppColors.primary),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _pill(String label, Color color) => Container(
-        width: 260,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
-        ),
-        child: Text(label,
-            style: const TextStyle(
+  Widget _pill(String label, Color color) => LayoutBuilder(
+        builder: (context, constraints) => Container(
+          width: math.min(260, constraints.maxWidth),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: const BorderRadius.all(AppSpacing.radiusPill),
+          ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
-                fontWeight: FontWeight.w900)),
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
       );
 
   @override
@@ -250,36 +284,62 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
     };
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        children: [
-          BouncyButton(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                  color: Colors.white, shape: BoxShape.circle),
-              child: const Icon(Icons.close_rounded,
-                  color: AppColors.primary, size: 26),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '📖 $title',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(color: Colors.white),
-            ),
-          ),
-          // The story-so-far chips.
-          if (_hero != null)
-            Text(_hero!.emoji, style: const TextStyle(fontSize: 24)),
-          if (_place != null)
-            Text(_place!.emoji, style: const TextStyle(fontSize: 24)),
-          if (_thing != null)
-            Text(_thing!.emoji, style: const TextStyle(fontSize: 24)),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return Row(
+            children: [
+              BouncyButton(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Container(
+                  padding: EdgeInsets.all(compact ? 8 : 10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: AppColors.primary,
+                    size: compact ? 23 : 26,
+                  ),
+                ),
+              ),
+              SizedBox(width: compact ? 8 : 12),
+              Expanded(
+                child: Text(
+                  '📖 $title',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: (compact
+                          ? Theme.of(context).textTheme.titleLarge
+                          : Theme.of(context).textTheme.headlineMedium)
+                      ?.copyWith(color: Colors.white),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Wrap(
+                spacing: 2,
+                children: [
+                  if (_hero != null)
+                    Text(
+                      _hero!.emoji,
+                      style: TextStyle(fontSize: compact ? 20 : 24),
+                    ),
+                  if (_place != null)
+                    Text(
+                      _place!.emoji,
+                      style: TextStyle(fontSize: compact ? 20 : 24),
+                    ),
+                  if (_thing != null)
+                    Text(
+                      _thing!.emoji,
+                      style: TextStyle(fontSize: compact ? 20 : 24),
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -293,14 +353,18 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
     };
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: GridView.count(
-        crossAxisCount: MediaQuery.sizeOf(context).width > 600 ? 4 : 2,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 1.05,
-        children: [
-          for (var i = 0; i < options.length; i++)
-            BouncyButton(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          return GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: compact ? 170 : 210,
+              mainAxisSpacing: AppSpacing.md,
+              crossAxisSpacing: AppSpacing.md,
+              childAspectRatio: compact ? 0.95 : 1.05,
+            ),
+            itemCount: options.length,
+            itemBuilder: (context, i) => BouncyButton(
               borderRadius: AppSpacing.cardRadius,
               onTap: () => _choose(options[i]),
               child: Container(
@@ -319,12 +383,15 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(options[i].emoji,
-                        style: const TextStyle(fontSize: 60)),
-                    const SizedBox(height: 6),
+                        style: TextStyle(fontSize: compact ? 48 : 60)),
+                    SizedBox(height: compact ? 4 : 6),
                     Text(
                       options[i].word,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: compact ? 15 : 18,
                         fontWeight: FontWeight.w800,
                         color: AppColors.lightText,
                       ),
@@ -336,7 +403,8 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
                 .animate()
                 .fadeIn(delay: (50 * i).ms)
                 .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1)),
-        ],
+          );
+        },
       ),
     );
   }
@@ -346,112 +414,125 @@ class _StoryMakerScreenState extends ConsumerState<StoryMakerScreen> {
     final words = sentence.split(' ');
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        children: [
-          // Picture scene combining the child's choices.
-          Expanded(
-            child: Center(
-              child: Container(
-                key: ValueKey(_page),
-                width: 280,
-                height: 200,
-                decoration: BoxDecoration(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact =
+              constraints.maxWidth < 300 || constraints.maxHeight < 430;
+          final sceneWidth = constraints.maxWidth.clamp(220.0, 280.0);
+          final sceneHeight = compact ? 160.0 : 200.0;
+          return Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Container(
+                    key: ValueKey(_page),
+                    width: sceneWidth,
+                    height: sceneHeight,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: AppSpacing.cardRadius,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.12),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Center(child: _scene()),
+                  )
+                      .animate(key: ValueKey('scene$_page'))
+                      .fadeIn(duration: 300.ms)
+                      .scale(
+                        begin: const Offset(0.9, 0.9),
+                        end: const Offset(1, 1),
+                        curve: Curves.easeOutBack,
+                      ),
+                ),
+              ),
+              SizedBox(height: compact ? 8 : 12),
+              Container(
+                padding: compact
+                    ? const EdgeInsets.all(AppSpacing.md)
+                    : AppSpacing.cardPadding,
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: AppSpacing.cardRadius,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
+                ),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    for (final w in words)
+                      BouncyButton(
+                        scaleTo: 0.85,
+                        onTap: () => AudioService.instance
+                            .speak(w.replaceAll(RegExp(r'[^A-Za-z]'), '')),
+                        child: Text(
+                          w,
+                          style: TextStyle(
+                            fontSize: compact ? 20 : 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.lightText,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-                child: Center(child: _scene()),
-              )
-                  .animate(key: ValueKey('scene$_page'))
-                  .fadeIn(duration: 300.ms)
-                  .scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1, 1),
-                    curve: Curves.easeOutBack,
-                  ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // The sentence — every word tappable to hear it on its own.
-          Container(
-            padding: AppSpacing.cardPadding,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: AppSpacing.cardRadius,
-            ),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 6,
-              runSpacing: 4,
-              children: [
-                for (final w in words)
-                  BouncyButton(
-                    scaleTo: 0.85,
-                    onTap: () => AudioService.instance
-                        .speak(w.replaceAll(RegExp(r'[^A-Za-z]'), '')),
-                    child: Text(
-                      w,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.lightText,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              BouncyButton(
-                onTap: _readPage,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: const BoxDecoration(
-                      color: Colors.white, shape: BoxShape.circle),
-                  child: const Icon(Icons.volume_up_rounded,
-                      color: AppColors.primary, size: 30),
-                ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: BouncyButton(
-                  onTap: _nextPage,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                          colors: [AppColors.success, AppColors.mint]),
-                      borderRadius: BorderRadius.all(AppSpacing.radiusPill),
+              SizedBox(height: compact ? 8 : 12),
+              Row(
+                children: [
+                  BouncyButton(
+                    onTap: _readPage,
+                    child: Container(
+                      padding: EdgeInsets.all(compact ? 11 : 14),
+                      decoration: const BoxDecoration(
+                          color: Colors.white, shape: BoxShape.circle),
+                      child: Icon(Icons.volume_up_rounded,
+                          color: AppColors.primary, size: compact ? 26 : 30),
                     ),
-                    child: Text(
-                      _page + 1 < _pages.length ? 'Next page ➜' : 'The End! 🎉',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: BouncyButton(
+                      onTap: _nextPage,
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: compact ? 14 : 16),
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                              colors: [AppColors.success, AppColors.mint]),
+                          borderRadius: BorderRadius.all(AppSpacing.radiusPill),
+                        ),
+                        child: Text(
+                          _page + 1 < _pages.length
+                              ? 'Next page ➜'
+                              : 'The End! 🎉',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: compact ? 18 : 20,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Page ${_page + 1} of ${_pages.length}',
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w700),
               ),
             ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Page ${_page + 1} of ${_pages.length}',
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w700),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
